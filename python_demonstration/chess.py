@@ -2,6 +2,8 @@ class ChessPiece:
     def __init__(self, color, symbol):
         self.color = color
         self.symbol = symbol
+        # keep track if pieces have moved for pawn moves and castling
+        self.has_moved = False
     
     def __str__(self):
         if self.color == "w":
@@ -42,9 +44,11 @@ class ChessGame:
         self.board[end_row][end_col] = self.board[start_row][start_col]
         self.board[start_row][start_col] = None
         
+        # Update the has_moved field for the piece that moved
+        self.board[end_row][end_col].has_moved = True
+
         # Switch the turn to the other player
         self.turn = "b" if self.turn == "w" else "w"
-
     
     def is_legal_move(self, start_row, start_col, end_row, end_col):
         # Get the piece at the start position
@@ -67,9 +71,9 @@ class ChessGame:
             elif self.turn == "w" and end_row - start_row == 1 and start_col == end_col and self.board[end_row][end_col] is None:
                 return True
             # Check if the pawn is moving forward two squares across unoccupied positions when not having moved before
-            elif self.turn == "b" and start_row == 7 and end_row == 5 and start_col == end_col and self.board[5][end_col] is None and self.board[6][end_col] is None:
+            elif self.turn == "b" and start_row == 7 and end_row == 5 and start_col == end_col and self.board[5][end_col] is None and self.board[6][end_col] is None and piece.has_moved == False:
                 return True
-            elif self.turn == "w" and start_row == 2 and end_row == 4 and start_col == end_col and self.board[4][end_col] is None and self.board[3][end_col] is None:
+            elif self.turn == "w" and start_row == 2 and end_row == 4 and start_col == end_col and self.board[4][end_col] is None and self.board[3][end_col] is None and piece.has_moved == False:
                 return True
             # Check if the pawn is capturing an opponent's piece diagonally
             elif self.turn == "b" and start_row - end_row == 1 and abs(start_col - end_col) == 1 and self.board[end_row][end_col] is not None and self.board[end_row][end_col].color != self.turn:
@@ -97,6 +101,9 @@ class ChessGame:
             # Legal bishop moves
             # Check if the bishop is moving diagonally
             if abs(start_row - end_row) == abs(start_col - end_col):
+                # Check that the piece at the end position is not the same color as the bishop
+                if self.board[end_row][end_col] is not None and self.board[end_row][end_col].color == self.board[start_row][start_col].color:
+                    return False
                 for i in range(1, abs(start_row - end_row)):
                     # Check that the bishop stops at the first piece it encounters
                     if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i] != self.board[end_row][end_col]:
@@ -118,49 +125,32 @@ class ChessGame:
                     if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i] != self.board[end_row][end_col]:
                         return False
                 # Check that the rook only captures an enemy piece
-                if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i].color != self.turn:
+                if self.board[end_row][end_col] is not None and self.board[end_row][end_col].color == self.board[start_row][start_col].color:
                     return False
                 else:
                     return True
             # Check if the rook is moving vertically
-            elif start_col == end_col:
+            if start_col == end_col:
                 # Check that the rook stops at the first piece it encounters
                 for i in range(1, abs(start_row - end_row)):
                     if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i] != self.board[end_row][end_col]:
                         return False
                 # Check that the rook only captures an enemy piece
-                if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i].color != self.turn:
+                if self.board[end_row][end_col] is not None and self.board[end_row][end_col].color == self.board[start_row][start_col].color:
                     return False
                 else:
-                    return True         
+                    return True
             else:
                 return False
-    
+
         # Check if the piece is a queen
         if piece.symbol in ["Q", "q"]:
-            # Legal queen moves (bishop and rook moves)
-            # Check if the queen is moving horizontally
-            if start_row == end_row:
-                # Check that the queen stops at the first piece it encounters
-                for i in range(1, abs(start_row - end_row)):
-                    if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i] != self.board[end_row][end_col]:
-                        return False
-                # Check that the queen only captures an enemy piece
-                if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i].color != self.turn:
-                    return False
-                return True
-            # Check if the queen is moving vertically
-            if start_col == end_col:
-                # Check that the queen stops at the first piece it encounters
-                for i in range(1, abs(start_row - end_row)):
-                    if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i] != self.board[end_row][end_col]:
-                        return False
-                # Check that the queen only captures an enemy piece
-                if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i].color != self.turn:
-                    return False
-                return True
+            # Legal queen (bishop) moves
             # Check if the queen is moving diagonally
             if abs(start_row - end_row) == abs(start_col - end_col):
+                # Check that the piece at the end position is not the same color as the queen
+                if self.board[end_row][end_col] is not None and self.board[end_row][end_col].color == self.board[start_row][start_col].color:
+                    return False
                 for i in range(1, abs(start_row - end_row)):
                     # Check that the queen stops at the first piece it encounters
                     if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i] != self.board[end_row][end_col]:
@@ -169,6 +159,30 @@ class ChessGame:
                     if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i].color != self.turn:
                         return False
                 return True
+            
+            # Legal queen (rook) moves
+            # Check if the queen is moving horizontally
+            if start_row == end_row:
+                # Check that the queen stops at the first piece it encounters
+                for i in range(1, abs(start_row - end_row)):
+                    if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i] != self.board[end_row][end_col]:
+                        return False
+                # Check that the queen only captures an enemy piece
+                if self.board[end_row][end_col] is not None and self.board[end_row][end_col].color == self.board[start_row][start_col].color:
+                    return False
+                else:
+                    return True
+            # Check if the queen is moving vertically
+            if start_col == end_col:
+                # Check that the queen stops at the first piece it encounters
+                for i in range(1, abs(start_row - end_row)):
+                    if self.board[start_row + i][start_col + i] is not None and self.board[start_row + i][start_col + i] != self.board[end_row][end_col]:
+                        return False
+                # Check that the queen only captures an enemy piece
+                if self.board[end_row][end_col] is not None and self.board[end_row][end_col].color == self.board[start_row][start_col].color:
+                    return False
+                else:
+                    return True
             else:
                 return False
 
@@ -178,6 +192,8 @@ class ChessGame:
             # Check if the king is moving one square in any direction
             if abs(start_row - end_row) <= 1 and abs(start_col - end_col) <= 1:
                 return True
+            # Allow castling
+            # ...
         
         # If all checks pass, return True
         return True
