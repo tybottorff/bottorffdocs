@@ -23,11 +23,15 @@
 ### Healthy donor vs. melanoma patients
  - all patients previously had anti-CTLA-4 therapy (a different checkpoint blockade treatment analogous to PD-1 blockade)
  - most patients didn't do well with PD-1 blockade (as measured by RECIST criteria guidelines)
- - comparative methods: flow cytometry (see frequencies of CD4, CD8 T cells, memory T cell subsets, co-expression of inhibitory checkpoint receptors like PD-1, CTLA-4, 2B4, TIM-3 with CD4 or CD8), *perhaps high coexpression of PD-1 for example with CD4 and CD8 in T cells indicates likely exhaustion and therefore a good response to PD-1 blockade with reinvigoration of T cells*
- - evidence for prior immune response in melanoma patients (vs. healthy controls): higher CD4+ FOXP3+ T cell frequency, higher Ki67 expression by FOXP3+ cells, Ki67 higher in CD8 T cells in melanoma patients especially in PD-1+ CD8 T cell subset, *higher proliferation (Ki67 is proliferation marker, also marks T cell reinvigoration, seems reasonable that exhausted T cells proliferate slower) and frequency of certain T cells (FOX3P is Treg marker, and Tregs suppress immune responses*)
+ - comparative methods: flow cytometry (see frequencies of CD4, CD8 T cells, memory T cell subsets, co-expression of inhibitory checkpoint receptors like PD-1, CTLA-4, 2B4, TIM-3 with CD4 or CD8), *perhaps high coexpression of PD-1 for example with CD4 and CD8 in T cells indicates likely exhaustion and therefore a good response to PD-1 blockade with reinvigoration of T cells, but later they see that anti PD-1 immune response isn't good predictor of clinical response*
+ - evidence for prior immune response in melanoma patients (vs. healthy controls): higher CD4+ FOXP3+  (*Treg marker*) T cell frequency, higher Ki67 expression by FOXP3+ cells, Ki67 higher in CD8 T cells in melanoma patients especially in PD-1+ CD8 T cell subset, *higher proliferation (Ki67 is proliferation marker, also marks T cell reinvigoration, seems reasonable that exhausted T cells proliferate slower) and frequency of certain T cells (FOX3P is Treg marker, and Tregs suppress immune responses*)
 ### Pharmacodynamic immune response to anti PD-1
- - 
-### 
+ - frequency of Ki67+ CD8 T cells goes up then down with PD-1 blockade treatment (figure 1B: count of cells with Ki67+ over some threshold)
+ - cytotoxic, proliferating Ki67+ CD8 T cell population CD45RA low (*not sure of significance*), CD27 high (*again not sure of significance*), CTLA-4 and PD-1 high (immune checkpoints), 2B4 high (*not sure of significance*), Eomes high and T-bet low which *seems to* indicate a exhausted T cell phenotype
+ - healthy patient Ki67+ (proliferating) population largely Eomes high T-bet high (effector T cell phenotype), *so melanoma patients have more exhausted T cells than healthy patients, makes sense with consistent immune response to melanoma that expresses inhibitory receptors*
+ - increased proliferation from treatment most evident in PD-1+ CD8 T cells (*evidence of immune response to PD-1 blockade*)
+ - 74% of patients had PD-1 immune response, but only 38% had clinical response, *so anti PD-1 immune response is not a good predictor of clinical response*
+### Reinvigorated Texhausted cells detected in peripheral blood
 ## Discussion
  - 
 ## Methods
