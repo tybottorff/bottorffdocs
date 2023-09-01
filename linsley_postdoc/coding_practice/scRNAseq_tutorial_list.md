@@ -1,0 +1,5 @@
+ - https://satijalab.org/seurat/articles/get_started.html
+ - https://github.com/satijalab/seurat/wiki
+ - https://www.singlecellcourse.org/index.html
+ - https://broadinstitute.github.io/2019_scWorkshop/index.html
+ - https://github.com/quadbio/scRNAseq_analysis_vignette/blob/master/Tutorial.md#introduction

@@ -27,11 +27,16 @@
  - evidence for prior immune response in melanoma patients (vs. healthy controls): higher CD4+ FOXP3+  (*Treg marker*) T cell frequency, higher Ki67 expression by FOXP3+ cells, Ki67 higher in CD8 T cells in melanoma patients especially in PD-1+ CD8 T cell subset, *higher proliferation (Ki67 is proliferation marker, also marks T cell reinvigoration, seems reasonable that exhausted T cells proliferate slower) and frequency of certain T cells (FOX3P is Treg marker, and Tregs suppress immune responses*)
 ### Pharmacodynamic immune response to anti PD-1
  - frequency of Ki67+ CD8 T cells goes up then down with PD-1 blockade treatment (figure 1B: count of cells with Ki67+ over some threshold)
- - cytotoxic, proliferating Ki67+ CD8 T cell population CD45RA low (*not sure of significance*), CD27 high (*again not sure of significance*), CTLA-4 and PD-1 high (immune checkpoints), 2B4 high (*not sure of significance*), Eomes high and T-bet low which *seems to* indicate a exhausted T cell phenotype
+ - cytotoxic, proliferating Ki67+ CD8 T cell population CD45RA low (*not sure of significance*), CD27 high (*CD27 low is effector T cell*), CTLA-4 and PD-1 high (immune checkpoints), 2B4 high (*not sure of significance*), Eomes high and T-bet low which *seems to* indicate a exhausted T cell phenotype
  - healthy patient Ki67+ (proliferating) population largely Eomes high T-bet high (effector T cell phenotype), *so melanoma patients have more exhausted T cells than healthy patients, makes sense with consistent immune response to melanoma that expresses inhibitory receptors*
  - increased proliferation from treatment most evident in PD-1+ CD8 T cells (*evidence of immune response to PD-1 blockade*)
  - 74% of patients had PD-1 immune response, but only 38% had clinical response, *so anti PD-1 immune response is not a good predictor of clinical response*
 ### Reinvigorated Texhausted cells detected in peripheral blood
+ - do CD8 PD-1+ CTLA-4+ T cells provide greater precision in tracking effects of PD-1 blockade? they seem to be mostly Eomes high T-bet low and CD45RA low CD27 high, *exhausted phenotype?*
+ - also see increased Ki67 expression in these cells from treatment (50% Ki67+ before treatment --> 75% Ki67+ after treatment), much lower Ki67 expression in PD-1+ CTLA-4- T cells (*so T cells expressing both inhibitory receptors are more reinvigorated from exhaustion?*)
+ - *takeaway seems to be the more inhibitory receptors a T cell expresses, the more the cell responds to anti-PD-1 therapy, i.e. reinvigorate from exhausted state*
+ - methods: mass cytometry (like flow cytometry but use heavy metal ion labeled antibodies instead of fluorochromes to get many more parameters and high dimensionally analyze single cells) and RNAseq
+ - see PD-1 expressed by exhausted T cells, but also by memory (CCR7 high) and effector (CD27 low) T cells
 ## Discussion
  - 
 ## Methods
