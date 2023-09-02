@@ -1,3 +1,10 @@
+# NCI PQ R01 Research Plan
+## Specific aims
+ - central hypothesis: T cell freq auto self marker positive predicts adverse effects from checkpoint inhibitor, sure makes sense more self targeting T cells more adverse effects with checkpoint inhibition 
+ - PD 1 checkpoint acts in tissue where T cell is recruited so like to generator of antigen that activated T cell, signals to inhibit T cell at that site
+ - CTLA4 checkpoint is at APC and T cell, expressed by T cell and it outcompetes coactivating signal, so inhibition earlier in T cell life
+### Aim 1
+ - 
 # T-cell invigoration to tumour burden ratio associated with anti-PD-1 response
 ## Abstract
 ### Background
