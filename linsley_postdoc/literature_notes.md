@@ -54,6 +54,16 @@
  - methods: scRNAseq of peripheral blood T cells before/after ICI, cellular indexing of transcriptomes and epitopes sequencing (CITE-seq, simultaneously quantify cell surface protein and transcriptomic data within single cells using oligonucleotide-labeled antibodies) to stratify CD4 and CD8 T cells by naive and effector phenotypes, define molecular/cellular changes associated with T cell transition from self-tolerant to sensitized effector cells
 ## Results
 ### Dimensionality reduction approach to visualize scRNAseq data of patients with irAEs
+ - able to see some dominant clusters among patients developing irAEs
+ - some clusters show changes in relative percentages of cell populations before/after ICI
+### Gene marker based cluster annotation identifies effector, regulatory, and memory subsets of peripheral T cells
+ - 14/25 clusters express CD3E, 6 of which were dominated by CD8A and 8 by CD4
+ - naive CD8 T cells characterized by CD45RA, CCR7, SELL (CD62L0, LEF1)
+ - central memory CD8 T cells contain CCR7, SELL, CD27 as well as CD44, CXCR3, FAS, CD28
+ - subset of effector CD8 T cells express TBX21, cytotoxic markers like GZMB, KLRD1, PRF1, CD3E
+ - effector memory CD8 T cells display EMOS, GZMK, IFNG
+ - mucosal-associated invariant T cells in all patients
+ - CD8 T helper cells express GATA3
 ## Methods
 ## Discussion
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
