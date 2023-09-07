@@ -1,63 +1,66 @@
-# Research plan
-## Specific aims
- - central hypothesis: T cell freq auto self marker positive predicts adverse effects from checkpoint inhibitor, sure makes sense more self targeting T cells more adverse effects with checkpoint inhibition 
- - PD 1 checkpoint acts in tissue where T cell is recruited so like to generator of antigen that activated T cell, signals to inhibit T cell at that site
- - CTLA4 checkpoint is at APC and T cell, expressed by T cell and it outcompetes coactivating signal, so inhibition earlier in T cell life
- - immune related adverse events (irAE, comes in several grades like grade 2-3 is severe) come from breakdown of self-tolerance from immune checkpoint inhibition (ICI), which is good for activating immune system against cancer, but since it also activates immune system against non-harmful self antigens
- - central method: analyze frequency and phenotype of CD4+ effector, CD8+ effector, CD4+ regulatory T cells in peripheral blood before and after ICI, cytometric immunophenotyping and RNAseq, identify cell and transcript-based companion biomarkers that define autoimmunity risk and/or tumor regression risk
-### Aim 1: how does ICI alter frequency/phenotype of tumor/auto specific antigens in T cells?
- - define T cell signatures of response to therapy
- - are specific signatures associated with the development of irAE or the efficacy of ICI with respect to tumor size and growth?
-### Aim 2: scRNAseq to determine if expanded T cell clones arise with ICI, do T cells have properties predictive of anti-tumor/autoimmune responses?
- - perform study on T cells specific for tumor-/auto-antigens from ICI treated subjects
-### Aim 3: can T cell profiles in autoimmunity be identified within T cell compartment of ICI treated people? want to develop biomarker for irAE development in response to ICI therapy
- - characterize total CD4+ and CD8+ T cell in cancerous people with or without ICI, compare to healthy controls
-### Aim 4: develop peripheral blood biomarker to predict arIE/therapeutic efficacy
- - validate biomarker
-## Significance
- - only 20-50% ICI response rate, some patients show no objective response, some have irAE (like arthritis, dermatitis, neuropathies, endocrinopathies, etc.)
- - irAE may be related to ICI success, perhaps because both mean an immune response
- - gap in knowledge: unknown who will benefit from ICI beforehand, who will get irAE beforehand, although some parameters are correlated (blood cell counts, PD-L1 tumor staining)
- - good biomarker for ICI is tumor cell mismatch repair deficiency (indicated for PD-1/PD-L1 blockade usage), *wonder why its a good biomarker*, as is CD8+ T cell exhaustion
- - there are also some biomarkers for arIE, like IL-17 levels, eosinophil levels
- - focus on T cells because ICI targets T cells and T cells are implicated in irAE (clonal expansions of CD8 T cells seen before irAE, ICI-induced T1D from islet autoantibodies and islet specific CD4 T cell repsonses, rheumatoid arthritis as well)
- - CTLA-4 mechanism: negative regulator of T cells, outcompetes CD28 for binding to B7 ligands on APCs, disrupting T cell co-stimulation
- - PD-1 mechanism: inhibitory receptor on activated T cells, down modulated immune response upon PD-L1 binding
- - ICI targets exhausted CD8+ T cells, anti-CTLA-4 also targets CD4+ ICOS+ T cells (activated CD4+ T cells)
-## Scientific premise
- - T cell responses to tumor and autoantigens are predictive of response to ICI therapy and/or irAE
- - evidence: ICI targets T cells, ICI reverses T cell exhaustion, ICIs induce autoimmune disease
- - similar work has bene done before for peanut allergy (unique set of markers on peanut specific T cells were found that defined a phenotypically and functionally distinct population of Th2 cells that were specific to allergic subjects and importantly responsive to immunotherapy)
-## Innovation
- - flow cytometry
- - use activation-induced expression of cell surface markers in response to tumor and autoantigen peptide pools, allowing evaluation of CD4+ T effector, CD8+ T effector, and CD4+ T regulatory antigen-specific T cells, this allows comparisons of peptide epitopes for different antigens, tumor-/auto-antigens
- - scRNAseq allows insight of T cell specificy (i.e. sequence the TCR)
-## Approach
-### Rigor and reproducibility
- - matched, blinded samples
-### Cohorts
- - BRI has access to cancer, healthy control, T1D, rheumatoid arthritis, and ulcerative colitis samples
-### Cancer patients
- - simplifying assumptions: treat all PD-1 pathway inhibitors together, also treat combination therapy (anti-CTLA-4 and anti-PD-1) together as anti-CTLA-4 monotherapy is rare, also treat all cancer groups together (similar irAE with PD-1 blockade in different cancers)
- - retrospectively see irAE in ~34% of VMMC lung/skin cancer patients, also see better objective responses (tumor shrinkage) with stronger irAE
-### Assessment of antigen specific T cells
- - CD154/CD137 marks antigen speciifc CD4/CD8 T cells, respectively, CD137 also upregulated by CD4 T regulatory cells in response to TCR stimulation
- - leverage these markers to isolate antigen specific CD4+ (CD154+, CD69+, CD4+) or CD8+ (CD154-, CD137+) effector T cells or CD4+ T regulatory cells (CD154-, CD137+, GARP+)
- - senstiive and reproducible assay needing only 10 million PBMCs (peripheral blood mononuclear cells), can isolate antigen specific cells in bulk or as single cells for RNAseq
- - specific assay details: stimulate PBMCs with peptide pools (tumor or autoantigen) in presence of anti-CD40, enrich for CD154+ (magnetic enrichment), re-use unbound fraction (CD154-) to enrich for CD4+ Tregs and CD8+ Teff cells (GARP+ and CD137+, respectively)
-### Aim 1: determine how checkpoint therapy alters the frequency and phenotype(s) of tumor- and auto-antigen-specific T cells in longitudinal cohorts of ICI-treated subjects
-#### Rationale
- - irAE have been associated with favorable clinical responses to ICI, but the relationship is imperfect
- - measuring antigen specific T cell responses (mark immune response) should clarify anti tumor and autoimmune responses
- - irAE may only correlate with ICI clinical response for a subset of patients (both or neither, vs. some patients may have clinical response and no irAE or the opposite)
-#### Cohort selection and clinical outcome measures
- - test 50 patient samples before and after 1-3 months of ICI, 30 million PBMCs/subject
-#### Experimental design
-##### Aim 1.1: characterization of T cells specific for tumor-antigens
-#### Data analysis
-#### Expected outcomes
-#### Potential problems and alternative strategies
-### Aim 2
+# A phenotypically and functionally distinct human TH2 cell subpopulation is associated with allergic disorders
+ - allergen-specific type 2 helper T (TH2) cells critical in initiating/orchestrating allergic/asthmatic inflammatory response pathways
+ - currently lack methodology to identify and differentiate these cells from nonpathogenic TH2 cell types (otherwise would be able to use them as therapeutic targets and biomarkers)
+ - here, they describe a subset of human memory TH2 cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific TH2 cells, denoted as TH2A cells, characterized by coexpression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional TH2 cells
+ - transcriptome analysis reveals distinct pathway in initiation of pathogenic responses to allergen
+ - elimination of these cells is indicative of clinical responses induced by immunotherapy
+# Cellular and molecular waypoints along the path of T cell exhaustion
+# Characterization of Thyroid Disorders in Patients Receiving Immune Checkpoint Inhibition Therapy
+ - thyroid disorders are a common irAE following ICI
+# Correlation between vitiligo occurrence and clinical benefit in advanced melanoma patients treated with nivolumab: A multi-institutional retrospective study
+ - occasionally see vitiligo in melanoma patients
+ - some propose correlation between vitiligo occurence and clinical response in melanoma patients receiving immunotherapy, but most studies have included heterogeneous patient and treatment settings
+ - goal: investigate correlation between vitiligo occurence and clinical benefit of immunotherapy
+ - results: vitiligo occurence correlated with favorable clinical outcome
+# Distinct cellular mechanisms underlie anti-CTLA-4 and anti-PD-1 checkpoint blockade
+ - goal: elucidate mechanism by which ICI (immune checkpoint inhibitors) induce tumor rejection
+ - mass cytometry approach to profile effects of ICI on tumor immune infiltrates in human melanoma and murine tumor models
+ - results: ICI targets subsets of tumor infiltrating T cells
+ - *PD-1 blockade predominantly induces expansion of speciifc tumor infiltrating exhausted-like CD8+ T cell subsets*
+ - *CTLA-4 blockade induces expansion of ICOS+ Th1-like CD4+ effector T cells, also engages specific subsets of exhausted-like CD8+ T cells*
+ - *different ICI target different T cell subsets*
+# Identifying specificity groups in the T cell receptor repertoire
+ - TCR sequences are diverse
+ - here, they define the minimal requirements for TCR antigen specificity through analysis of TCR sequences using a panel of pMHC tetramer sorted cells and structural data
+ - GLIPH algorithm: grouping of lymphocyte interactions by paratope hotspots, clusters TCRs with high probability of sharing specificity owing to conserved motifs and similarity of CDR3 sequences
+# Immune-Related Adverse Events and Their Association With the Effectiveness of PD-1/PD-L1 Inhibitors in Non-Small Cell Lung Cancer: A Real-World Study From China
+ - see more antitumor response in irAE group compared to non-irAE group, irAE associated with progression-free survival but not with overall survival
+# Immune-Related Gene Expression Profiling After PD-1 Blockade in Non–Small Cell Lung Carcinoma, Head and Neck Squamous Cell Carcinoma, and Melanoma
+ - most patients exhibit partial/complete resistance to PD-1 blockade
+ - study patients with various cancers treated with PD-1 blockade
+ - *identify 23 immune-related genes/signatures linked to response and progression-free survival*
+ - *PD1 gene expression along with 12 signatures tracking CD8 and CD4 T-cell activation, natural killer cells, and IFN activation associated significantly with nonprogressive disease and progression free survival*
+# Incidence of Endocrine Dysfunction Following the Use of Different Immune Checkpoint Inhibitor Regimens
+ - high incidence of endocrine dysfunction (hypo/hyper-thyroidism) in patients receiving ICI (immune checkpoint inhibitor) regimens, higher with combination therapy
+# Quantifiable predictive features define epitope-specific T cell receptor repertoires
+ - TCR is heterodimer, mediates pathogen-associated epitope recognition through interactions between peptide and MHC, generated by genomic rearrangement of germline TCR locus (VDJ recombination) to allow potentially 10^15 to 10^61 unique receptors
+ - TCRs from T cells that recognize the same pMHC epitope often share conserved sequence features, perhaps able to predict model epitope specificity
+ - here, they study CD8+ TCRs in mice and humans to study these conserved features as well as features differentiating them
+# Single-cell RNA-seq reveals expanded clones of islet antigen-reactive CD4+ T cells in peripheral blood of subjects with type 1 diabetes
+ - unclear significance of islet antigen reactive T cells in peripheral blood of T1D patients (similar cells in healthy control subjects)
+ - hypothesis: key disease associated cells show evidence of prior antigen exposure, inferred from expanded TCR clonotypes and essential phenotypic properties in their transcriptomes
+ - testing hypothesis: scRNAseq to identify TCR clonotypes and transcript phenotypes, apply analysis to islet antigen reactive CD4+ memory T cells from T1D and healthy control subjects following activation with pooled islet peptides
+ - TCR results: extensive TCR clonotype sharing in antigen activated cells especially from T1D subjects, consistent with in vivo T cell expansion during disease progression, stable clonotypes (detect at repeat visits), see no clonotype sharing between subjects ("private" TCR specificities), IGRP seems to be a trigger for CD4+ T cell expansion (recognized by expanded clones from two T1D subjects)
+ - transcript results: overall transcript profiles from healthy controls and T1D subjects similar, most expanded clone profiles distinctive though
+# Single-cell RNA sequencing reveals distinct T cell populations in immune-related adverse events of checkpoint inhibitors
+## Abstract
+ - different subsets of T cells are associated with irAEs, can use these cells before ICI treatment as biomarkers to predict irAEs
+ - for example, patients with immune-related arthritis have lower levels of CD8 TCM (central memory) cells at baseline, patients with immune-related pneumonitis have more CD4 TH2 (subset of T helper cells that mediate activation/maintenance of antibody-mediated immune response against parasites, bacteria, allergens, toxins) cells at baseline, and patients with immune-related thyroiditis have more  CD4 TH17 (secrete IL-17A cytokine, involved in defense at mucosal/epithelial barriers) cells at baseline
+ - about half of patients develop irAEs from PD-1 blockade
+ - methods: they use the K-nearest neighbor-based network graph-drawing layout to investigate subpopulations of T cells
+## Introduction
+ - prior history of autoimmune disease is one predictor of irAEs
+ - perplexingly, irAEs are often organ specific (i.e. different patients have different affected organs)
+ - methods: scRNAseq of peripheral blood T cells before/after ICI, cellular indexing of transcriptomes and epitopes sequencing (CITE-seq, simultaneously quantify cell surface protein and transcriptomic data within single cells using oligonucleotide-labeled antibodies) to stratify CD4 and CD8 T cells by naive and effector phenotypes, define molecular/cellular changes associated with T cell transition from self-tolerant to sensitized effector cells
+## Results
+### Dimensionality reduction approach to visualize scRNAseq data of patients with irAEs
+## Methods
+## Discussion
+# Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
+ - irAEs are inflammatory side effects from ICIs
+ - ICI-induced inflammatory arthritis has been reported
+ - corticosteroids can treat mild irAEs, TNFα inhibitors reserved for severe cases (prolonged TNFα inhibitor use can negatively impact antitumor effect of ICI)
+ - here, they try instead to use the anti IL6 receptor antibody (FDA approved to treat RA) for ICI-induced arthritis
 # T-cell invigoration to tumour burden ratio associated with anti-PD-1 response
 ## Abstract
 ### Background
@@ -97,7 +100,3 @@
  - *takeaway seems to be the more inhibitory receptors a T cell expresses, the more the cell responds to anti-PD-1 therapy, i.e. reinvigorate from exhausted state*
  - methods: mass cytometry (like flow cytometry but use heavy metal ion labeled antibodies instead of fluorochromes to get many more parameters and high dimensionally analyze single cells) and RNAseq
  - see PD-1 expressed by exhausted T cells, but also by memory (CCR7 high) and effector (CD27 low) T cells
-## Discussion
- - 
-## Methods
- - 
