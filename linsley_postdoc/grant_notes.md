@@ -1,6 +1,6 @@
 # Research plan
 ## Specific aims
- - central hypothesis: T cell freq auto self marker positive predicts adverse effects from checkpoint inhibitor, sure makes sense more self targeting T cells more adverse effects with checkpoint inhibition 
+ - central hypothesis: T cell freq auto self marker positive predicts adverse effects from checkpoint inhibitor, sure makes sense more self targeting T cells more adverse effects with checkpoint inhibition
  - PD 1 checkpoint acts in tissue where T cell is recruited so like to generator of antigen that activated T cell, signals to inhibit T cell at that site
  - CTLA4 checkpoint is at APC and T cell, expressed by T cell and it outcompetes coactivating signal, so inhibition earlier in T cell life
  - immune related adverse events (irAE, comes in several grades like grade 2-3 is severe) come from breakdown of self-tolerance from immune checkpoint inhibition (ICI), which is good for activating immune system against cancer, but since it also activates immune system against non-harmful self antigens
@@ -12,7 +12,7 @@
  - perform study on T cells specific for tumor-/auto-antigens from ICI treated subjects
 ### Aim 3: can T cell profiles in autoimmunity be identified within T cell compartment of ICI treated people? want to develop biomarker for irAE development in response to ICI therapy
  - characterize total CD4+ and CD8+ T cell in cancerous people with or without ICI, compare to healthy controls
-### Aim 4: develop peripheral blood biomarker to predict arIE/therapeutic efficacy
+### Aim 4: develop peripheral blood biomarker to predict irAE/therapeutic efficacy
  - validate biomarker
 ## Significance
  - only 20-50% ICI response rate, some patients show no objective response, some have irAE (like arthritis, dermatitis, neuropathies, endocrinopathies, etc.)
