@@ -22,6 +22,16 @@
  - *PD-1 blockade predominantly induces expansion of speciifc tumor infiltrating exhausted-like CD8+ T cell subsets*
  - *CTLA-4 blockade induces expansion of ICOS+ Th1-like CD4+ effector T cells, also engages specific subsets of exhausted-like CD8+ T cells*
  - *different ICI target different T cell subsets*
+# Divergent clonal differentiation trajectories establish CD8+ memory T cell heterogeneity during acute viral infections in humans
+## Abstract
+ - decrease in human CD8+ T cell clonal diversity from acute to memory phase
+ - clonally biased differentiation trajectories of CD8+ T cells in primary responses
+ - clonally skewed CD8+ memory T cell differentiation in secondary recall responses
+ - gap in field: how do individual T cell clones contribute to heterogeneity (CD8+ T cell response to antigen composed of many T cell clones with unique TCRs forming heterogeneous repertoire of effector and memory cells) throughout immune responses?
+ - here, they track human CD8+ T cell clones expanding in response to yellow fever virus vaccination at single cell level, observe drop in clonal diversity from acute to memory phase, suggesting that clonal selection shapes the circulating memory repertoire
+## Introduction
+ - primary adaptive immune responses lead to clonal expansion of rare, antigen-specific naive CD8+ T cells and generation of long-lived memory cells that guard against subsequent infections
+ - human memory T cell subsets based on CCR7 and CD45RA expression (TSCM, TCM, TEM, T<sub>EMRA<sub>)
 # Divergent clonal differentiation trajectories of T cell exhaustion
  - chronic antigen exposure leads to T cell exhaustion with reduced effector function
  - do all antigen-specific T cell clones follow the same Tex differentiation trajectory?
@@ -80,8 +90,17 @@
  - effector memory CD8 T cells display EMOS, GZMK, IFNG
  - mucosal-associated invariant T cells in all patients
  - CD8 T helper cells express GATA3
-## Methods
+ - wanted to investigate variability in T cells between patients with and without irAEs, perform gene set signature analysis: association of irAE T cells with T cell activation and cytokine secretion genes, so irAE T cells seem to be more associated with effector functions vs. regulatory functions
+### Patients with immune-related arthritis have higher percentages of CD4 TH cells at baseline
+ - enhanced T cell subset transition from naive to effector in patients who develop arthritis serves as evidence of pervasive immune responsiveness
+### Selected subsets of CD4 TH cells are associated with organ-specific irAEs
+ - thyroiditis patients have more CD4 TH cells expressing RORC, IL-21
+### Patients with inflammatory arthritis have lower levels of CD8 TCM cells at baseline
+### Patients with immune-related pneumonitis have distinctive distributions of T cell populations
 ## Discussion
+ - PD-1 PD-L1 interaction promotes TE cell exhaustion, supports conversion of TE cells into suppressive TREG cells
+ - irAEs are frequent in patients treated with ICIs (~90% of patients treated with PD-1 blockade and/or CTLA-4 blockade), severe/life threatening (grades 3/4, respectively) irAEs in fewer but still many patients
+ - at baseline, patients with arthritis had less cells with features of CD8 TCM cells, patients with pneumonitis had more CD4 TH2 cells, patients with thyroiditis had more CD4 TH17 cells, so *different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers*
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
  - ICI-induced inflammatory arthritis has been reported
@@ -100,6 +119,24 @@
 ## Results
 ### Determinants of severe irAEs from pretreatment blood
  - CD4 effector memory T cells at higher levels in pretreatment blood associated with severe irAE
+ - single cell TCR clonotype diversity of activated CD4 T 5+3 (*two clusters I think*) cells elevated in patients with severe irAEs, so TCR richness eclipses loss of diversity resulting from clonal expansion, also see a trend between bulk (not just activated CD4) TCR diversity in pretreatment samples and irAE development although the association is primarily attributable to CD4 T cells with effector memory profile (BCR diversity not associated with irAE as much)
+### Extended analysis of T cell features associated with irAEs
+ - verify scRNAseq findings with bulk RNAseq of additional patient blood samples (again see association between CD4 TEM cell levels and severe irAE development as well as higher TCR clonotype diversity predicting severe irAE development)
+ - a composite model integrating activated CD4 TM cell abundance and bulk TCR diversity outperforms either feature alone in predicting severe irAE development regardless of ICI therapy type, ICI response status, age, sex, melanoma subtype, affected organ
+ - model scores increase as a function of irAE severity, also predicts time to irAE development
+### Peripheral TCR clonal expansion linked to severe irAEs
+ - prior evidence of clonally expanded self/virus-reactive T cells in affected tissue linking self/pathogen-recognizing T cell clones to irAEs (*I wonder why viral antigen recognition would lead to irAEs, good for the viral-infected cells to be attacked, right?*)
+ - nontheless, they hypothesize that pre-treatment TCR clonotypes in peripheral blood might show greater propensity to expand in patients destined to develop severe irAEs after ICI
+ - observe increased TCR clonal expansion and persistence of baseline clones in patients developing severe irAEs (preferential expansion of activated CD4 TEM)
+### Circulating leukocytes in autoimmune disease
+ - does baseline peripheral blood profile of patients with severe irAEs resemble that of patients with autoimmune disease? compare to systemic lupus or IBD patients
+ - circulating activated CD4 TM cells associated with autoimmune disorders
+ - *severe irAEs may represent a subclinical or latent autoimmune state that is unmasked upon ICI treatment*, tracks with patients with autoimmune disease having flare ups after ICI treatment, *this may have implications for the investigation into the correlation between ICI clinical response and irAEs i.e. if you only observe irAEs in those predisposed to autoimmune conditions and if this doesn't relate to ICI clinical response then they won't always correlate*
+## Discussion
+ - identify two baseline features (activated CD4 TM cell abundance and more clonally diverse TCR repertoire in peripheral blood) as determinants of ICI-induced irAEs in melanoma patients
+ - previous studies had linked activated T cells and clonally expanded TCRs to severe irAEs but this study was uniquely looking t pre-treatment T cell characteristics
+ - unanswered question: do circulating activated CD4 TM cells (their abundance here found to correlate with irAE development) exhibit a higher propensity to recognize self-antigens in patients at risk for severe ICI induced irAEs?
+ - limitations: most irAEs occur within first 3 months but some can occur later (which would have been missed here, median time to severe irAE here was ~6 weeks with no irAEs after 3 months)
 # T-cell invigoration to tumour burden ratio associated with anti-PD-1 response
 ## Abstract
 ### Background
@@ -156,4 +193,3 @@
  - most patients have a single peak of PD-1 blockade-induced immune reinvigoration despite on-going treatment
  - responding exhausted T cells in blood contain TCR clonotypes shared with tumor infiltrating T cells
  - ratio of exhausted T cell reinvigoration to tumor burden predicts clinical response
-# Viral persistence alters CD8 T cell immunodominance and tissue distribution and results in distinct stages of functional impairment
