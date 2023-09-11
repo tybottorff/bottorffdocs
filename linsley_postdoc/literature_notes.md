@@ -1,7 +1,7 @@
 # A phenotypically and functionally distinct human T<sub>H2</sub> cell subpopulation is associated with allergic disorders
  - allergen-specific type 2 helper T (T<sub>H2</sub>) cells critical in initiating/orchestrating allergic/asthmatic inflammatory response pathways
  - currently lack methodology to identify and differentiate these cells from nonpathogenic T<sub>H2</sub> cell types (otherwise would be able to use them as therapeutic targets and biomarkers)
- - here, they describe a subset of human memory T<sub>H2</sub> cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific T<sub>H2</sub> cells, denoted as TH2A cells, characterized by coexpression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional T<sub>H2</sub> cells
+ - here, they describe a subset of human memory T<sub>H2</sub> cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific T<sub>H2</sub> cells, denoted as T<sub>H2A</sub> cells, characterized by coexpression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional T<sub>H2</sub> cells
  - transcriptome analysis reveals distinct pathway in initiation of pathogenic responses to allergen
  - elimination of these cells is indicative of clinical responses induced by immunotherapy
 # Cellular and molecular waypoints along the path of T cell exhaustion
@@ -166,16 +166,16 @@
  - evidence for prior immune response in melanoma patients (vs. healthy controls): higher CD4<sup>+</sup> FOXP3<sup>+</sup>  (*Treg marker*) T cell frequency, higher Ki67 expression by FOXP3<sup>+</sup> cells, Ki67 higher in CD8 T cells in melanoma patients especially in PD-1<sup>+</sup> CD8 T cell subset, *higher proliferation (Ki67 is proliferation marker, also marks T cell reinvigoration, seems reasonable that exhausted T cells proliferate slower) and frequency of certain T cells (FOX3P is Treg marker, and Tregs suppress immune responses*)
 ### Pharmacodynamic immune response to anti PD-1
  - frequency of Ki67<sup>+</sup> CD8 T cells goes up then down with PD-1 blockade treatment (figure 1B: count of cells with Ki67<sup>+</sup> over some threshold)
- - cytotoxic, proliferating Ki67<sup>+</sup> CD8 T cell population CD45RA low (*not sure of significance*), CD27 high (*CD27 low is effector T cell*), CTLA-4 and PD-1 high (immune checkpoints), 2B4 high (*not sure of significance*), Eomes high and T-bet low which *seems to* indicate a exhausted T cell phenotype
- - healthy patient Ki67<sup>+</sup> (proliferating) population largely Eomes high T-bet high (effector T cell phenotype), *so melanoma patients have more exhausted T cells than healthy patients, makes sense with consistent immune response to melanoma that expresses inhibitory receptors*
+ - cytotoxic, proliferating Ki67<sup>+</sup> CD8 T cell population CD45RA<sup>low</sup> (*not sure of significance*), CD27<sup>high</sup> (*CD27<sup>low</sup> is effector T cell*), CTLA-4<sup>high</sup> and PD-1<sup>high</sup> (immune checkpoints), 2B4<sup>high</sup> (*not sure of significance*), Eomes<sup>high</sup> and T-bet<sup>low</sup> which *seems to* indicate a exhausted T cell phenotype
+ - healthy patient Ki67<sup>+</sup> (proliferating) population largely Eomes<sup>high</sup> T-bet<sup>high</sup> (effector T cell phenotype), *so melanoma patients have more exhausted T cells than healthy patients, makes sense with consistent immune response to melanoma that expresses inhibitory receptors*
  - increased proliferation from treatment most evident in PD-1<sup>+</sup> CD8 T cells (*evidence of immune response to PD-1 blockade*)
  - 74% of patients had PD-1 immune response, but only 38% had clinical response, *so anti PD-1 immune response is not a good predictor of clinical response*
 ### Reinvigorated Texhausted cells detected in peripheral blood
- - do CD8 PD-1<sup>+</sup> CTLA-4<sup>+</sup> T cells provide greater precision in tracking effects of PD-1 blockade? they seem to be mostly Eomes high T-bet low and CD45RA low CD27 high, *exhausted phenotype?*
+ - do CD8 PD-1<sup>+</sup> CTLA-4<sup>+</sup> T cells provide greater precision in tracking effects of PD-1 blockade? they seem to be mostly Eomes<sup>high</sup> T-bet<sup>low</sup> and CD45RAL<sup>low</sup> CD27<sup>high</sup>, *exhausted phenotype?*
  - also see increased Ki67 expression in these cells from treatment (50% Ki67<sup>+</sup> before treatment --> 75% Ki67<sup>+</sup> after treatment), much lower Ki67 expression in PD-1<sup>+</sup> CTLA-4- T cells (*so T cells expressing both inhibitory receptors are more reinvigorated from exhaustion?*)
  - *takeaway seems to be the more inhibitory receptors a T cell expresses, the more the cell responds to anti-PD-1 therapy, i.e. reinvigorate from exhausted state*
  - methods: mass cytometry (like flow cytometry but use heavy metal ion labeled antibodies instead of fluorochromes to get many more parameters and high dimensionally analyze single cells) and RNAseq
- - see PD-1 expressed by exhausted T cells, but also by memory (CCR7 high) and effector (CD27 low) T cells
+ - see PD-1 expressed by exhausted T cells, but also by memory (CCR7<sup>high</sup>) and effector (CD27<sup>low</sup>) T cells
  - see population of cells expressing exhaustion markers (Eomes, CD39) that increased in frequency and Ki67 expression after PD-1 blockade (reinvigoration), express granzymes (cytotoxic T cell method of killing target cells by inducing apoptosis)
 ### Responding T-cell clones from blood found in tumor
  - the reinvigorated Tex cells in blood are also found in tumor
