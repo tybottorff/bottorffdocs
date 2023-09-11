@@ -7,6 +7,8 @@
 # Cellular and molecular waypoints along the path of T cell exhaustion
 # Characterization of Thyroid Disorders in Patients Receiving Immune Checkpoint Inhibition Therapy
  - thyroid disorders are a common irAE following ICI
+# Clonal exhaustion as a mechanism to protect against severe immunopathology and death from an overwhelming CD8 T cell response
+ - possible evolutionary reason for T cell exhaustion
 # Coregultion of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - coexpression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -19,23 +21,53 @@
  - goal: elucidate mechanism by which ICI (immune checkpoint inhibitors) induce tumor rejection
  - mass cytometry approach to profile effects of ICI on tumor immune infiltrates in human melanoma and murine tumor models
  - results: ICI targets subsets of tumor infiltrating T cells
- - *PD-1 blockade predominantly induces expansion of speciifc tumor infiltrating exhausted-like CD8<sup>+</sup> T cell subsets*
- - *CTLA-4 blockade induces expansion of ICOS<sup>+</sup> Th1-like CD4<sup>+</sup> effector T cells, also engages specific subsets of exhausted-like CD8<sup>+</sup> T cells*
- - *different ICI target different T cell subsets*
+ - **PD-1 blockade predominantly induces expansion of speciifc tumor infiltrating exhausted-like CD8<sup>+</sup> T cell subsets**
+ - **CTLA-4 blockade induces expansion of ICOS<sup>+</sup> Th1-like CD4<sup>+</sup> effector T cells, also engages specific subsets of exhausted-like CD8<sup>+</sup> T cells**
+ - **different ICI target different T cell subsets**
 # Divergent clonal differentiation trajectories establish CD8<sup>+</sup> memory T cell heterogeneity during acute viral infections in humans
 ## Abstract
- - decrease in human CD8<sup>+</sup> T cell clonal diversity from acute to memory phase
+ - decrease in human CD8<sup>+</sup> T cell clonal diversity from acute (days 10-30) to memory phase (days 90-150 for early memory, day 500+ for late memory)
  - clonally biased differentiation trajectories of CD8<sup>+</sup> T cells in primary responses
  - clonally skewed CD8<sup>+</sup> memory T cell differentiation in secondary recall responses
  - gap in field: how do individual T cell clones contribute to heterogeneity (CD8<sup>+</sup> T cell response to antigen composed of many T cell clones with unique TCRs forming heterogeneous repertoire of effector and memory cells) throughout immune responses?
  - here, they track human CD8<sup>+</sup> T cell clones expanding in response to yellow fever virus vaccination at single cell level, observe drop in clonal diversity from acute to memory phase, suggesting that clonal selection shapes the circulating memory repertoire
 ## Introduction
  - primary adaptive immune responses lead to clonal expansion of rare, antigen-specific naive CD8<sup>+</sup> T cells and generation of long-lived memory cells that guard against subsequent infections
- - human memory T cell subsets based on CCR7 and CD45RA expression (T<sub>SCM</sub>, T<sub>CM</sub>, T<sub>EM</sub>, T<sub>EMRA</sub>)
+ - human memory T cell subsets based on CCR7 and CD45RA expression (T<sub>SCM</sub> i.e. stem memory, T<sub>CM</sub> i.e. naive central memory, T<sub>EM</sub> i.e. effector memory, T<sub>EMRA</sub> i.e. effector memory re-expressing CD45RA)
+ - T<sub>SCM</sub> and T<sub>CM</sub> are naive-like, multipotent, re-establish CD8<sup>+</sup> effector repertoire upon reinfection, and express CCR7, CD127, TCF-1, LEF1, CD27 while T<sub>EM</sub> and T<sub>EMRA</sub> are more similar to activated CD8<sup>+</sup> T cells, are primed cytotoxic effectors that circulate non-lymphoid tissue (first line of defense against subsequent infections), and express granzyme A/B, CD94, and CD57
+ - protective roles of these memory T cell subsets is context dependent (i.e. some might be more protective than others against certain infections or tumors)
+ - acute infections generate large effector responses, gradually giving rise to more abundant T<sub>CM</sub> or T<sub>SCM</sub> after resolution of the response
+ - recurring/chronic infections progressively generate larger T<sub>EM</sub> populations (constant reactivation of existing memory cells)
+ - many markers used to characterize CD8<sup>+</sup> T cells (CCR7, CD45RA, CD27) have continuous rather than strict binary expression patterns (continuum of cell states ranging from naive to highly differentiated effector)
+## Results
+### Clonal diversity in circulating YFV-specific CD8<sup>+</sup> T cells drops from acute to memory phase of the response
+### Peripheral clonal expansions during the acute response do not predict clonal contributions to the circulating memory T cell repertoire
+ - the decline in diversity suggests that clonal selection plays a role in shaping the circulating memory repertoire after vaccination
+ - clonal expansion in acute response inversely linked with likelihood of differentiation into long-lived memory T cell clone
+### Diverse memory phenotypes emerge after resolution of the acute phase of the response to YFV vaccination
+ - virus-specific memory CD8<sup>+</sup> T cells exhibit wide range of variable cell states rather than discrete identities
+### Coupling clonality to cellular identity by scRNA-seq identifies unique clonal origins of long-lived T<sub>EMRA</sub> and T<sub>SCM</sub>
+ - track phenotypic evolution of cells from individual T cell clones to understand how CD8<sup>+</sup> T cell clones contribute to different phenotypes emerging during the acute-to-memory transition
+ - clonal fates skewed towards T<sub>SCM</sub> or T<sub>EMRA</sub> phenotype in memory phase
+### Individual CCR7<sup>+</sup> T<sub>SCM</sub>, CD127<sup>+</sup> T<sub>EMRA</sub>, and CD127<sup>-</sup> T<sub>EMRA</sub> memory T cells give rise to distinct effector progeny following secondary reactivation
+ - previously thought that T<sub>EM</sub> and T<sub>EMRA</sub> only generate short bursts of highly cytotoxic effector cells
+ - see higher PD-1 expression (stronger regulation predisposition) in progeny derived from T<sub>EMRA</sub> compared to T<sub>SCM</sub>
+### CD94 and CD62L delineate heterogeneous effector T cell subsets generated in recall responses *in vitro*
+### Diverse effector CD8<sup>+</sup> T cell progeny generated in recall responses to YFV and influenza antigens are composed of distinct T cell clones
 # Divergent clonal differentiation trajectories of T cell exhaustion
  - chronic antigen exposure leads to T cell exhaustion with reduced effector function
- - do all antigen-specific T cell clones follow the same Tex differentiation trajectory?
- - results: high T cell receptor signaling aviditiy correlates with Tex terminal phenotype, low avidity correlates with effector-like Tex KLR fate (so higher signaling response from TCR activation leads to higher exhaustion)
+ - do all antigen-specific T cell clones follow the same T<sub>ex</sub> differentiation trajectory?
+ - results: high T cell receptor signaling aviditiy correlates with T<sub>ex</sub> terminal phenotype, low avidity correlates with effector-like T<sub>ex</sub> KLR fate (so higher signaling response from TCR activation leads to higher exhaustion)
+# Epigenetic regulation of T cell exhaustion
+## Distinct epigenetic programs in T<sub>ex</sub> cells
+ - T cells are directed by multiple signals (TCR-antigen interaction, co-stimulatory molecular interactions, local cytokines)
+ - in acute infections where antigens can be cleared, most effector cells undergo apoptosis (i.e. they are short-lived effector cells or terminal effector i.e. TE cells, T-bet<sup>high</sup>) while a small fraction persist and differentiate into memory cells via memory precursor (MP, T-bet<sup>low</sup>) cells
+ - key effector genes (like *Prf1*, *Gzmb*) demethylated and gain chromatin accessibility upon antigen recognition
+ - after pathogen clearance, memory precursor cells can differentiate into long-lived memory cells by demethylating naive-associated genes (*Bcl2*, *Il7r*), demethylated and open chromatin at both effector and naive genes allowing rapid effector responses upon reencountering pathogens
+ - CD8<sup>+</sup> T cells can become exhausted due to persistent antigen exposure, proliferating less, expressing inhibitory cell receptors (PD-1, CTLA-4, TIM3, LAG3), losing effector function
+# Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
+ - chronic stimulation assay
+ - *in vivo* validation of screen results (perturbation of INO80 and BAF chromatin remodeling complexes improves T cell persistence in tumors)
 # Identifying specificity groups in the T cell receptor repertoire
  - TCR sequences are diverse
  - here, they define the minimal requirements for TCR antigen specificity through analysis of TCR sequences using a panel of pMHC tetramer sorted cells and structural data
@@ -45,8 +77,14 @@
 # Immune-Related Gene Expression Profiling After PD-1 Blockade in Non–Small Cell Lung Carcinoma, Head and Neck Squamous Cell Carcinoma, and Melanoma
  - most patients exhibit partial/complete resistance to PD-1 blockade
  - study patients with various cancers treated with PD-1 blockade
- - *identify 23 immune-related genes/signatures linked to response and progression-free survival*
- - *PD1 gene expression along with 12 signatures tracking CD8 and CD4 T-cell activation, natural killer cells, and IFN activation associated significantly with nonprogressive disease and progression free survival*
+ - **identify 23 immune-related genes/signatures linked to response and progression-free survival**
+ - **PD1 gene expression along with 12 signatures tracking CD8 and CD4 T-cell activation, natural killer cells, and IFN activation associated significantly with nonprogressive disease and progression free survival**
+# Improving CAR-T immunotherapy: overcoming the challenges of T cell exhaustion
+ - **CAR (chimeric antigen receptor) allows modified T cells to mount antigen-specific immune response to cells bearing CAR target antigen independently of MHC**
+ - CAR T cell therapy failure often attributed to antigen escape (selection pressure under CAR T surveillance leads to emergence of antigen-negative tumors), but relapse can occur with antigen-positive tumors (can be hard for CAR T cells to access tumor cells for example due to regulatory T cells in tumor secreting inhibitory cytokines)
+ - both CD4<sup>+</sup> and CD8<sup>+</sup> T cells can become exhausted
+ - T cell inhibitory receptors: PD-1, TIM-3, LAG-3, TIGIT, CTLA-4, but several of these inhibitory receptors are upregulated in T cell activation to modulate co-stimulatory signaling (**so inhibitory receptors alone aren't enough to distinguish between exhausted and activated T cells**)
+ - targeting TGF-β signaling to help prevent exhaustion: TGF-β is highly expressed in tumor microenvironment and suppresses T cells
 # Incidence of Endocrine Dysfunction Following the Use of Different Immune Checkpoint Inhibitor Regimens
  - high incidence of endocrine dysfunction (hypo/hyper-thyroidism) in patients receiving ICI (immune checkpoint inhibitor) regimens, higher with combination therapy
 # Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
@@ -57,16 +95,22 @@
 ## Introduction
  - ICI can work via activation, expansion, and recruitment of CD8<sup>+</sup> T cells from peripheral circulation
  - open questions: are there phenotypic differences between clonally related T cells in different anatomical sites? are progenitor exhausted T cells clonally linked to intratumoral exhausted CD8<sup>+</sup> T cells present in tumor-draining lymph nodes (seems to be the case in mice)? how long do tumor specific T cell clones like exhausted CD8<sup>+</sup> T cells persist after ICI?
+# Mechanisms of T cell exhaustion guiding next generation immunotherapy
+ - 
 # Mechanisms of tumor resistance to immune checkpoint blockade and combination strategies to overcome resistance
 # Quantifiable predictive features define epitope-specific T cell receptor repertoires
  - TCR is heterodimer, mediates pathogen-associated epitope recognition through interactions between peptide and MHC, generated by genomic rearrangement of germline TCR locus (VDJ recombination) to allow potentially 10^15 to 10^61 unique receptors
  - TCRs from T cells that recognize the same pMHC epitope often share conserved sequence features, perhaps able to predict model epitope specificity
  - here, they study CD8<sup>+</sup> TCRs in mice and humans to study these conserved features as well as features differentiating them
+# Risk factors and biomarkers for immune-related adverse events: a practical guide to identifying high-risk patients and rechallenging immune checkpoint inhibitors
+ - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
+ - organ-speciifc irAEs associated with pre-existing organ dysfunction
+ - high pre-treatment soluble CTLA4 associated with irAEs
 # Single-cell RNA-seq reveals expanded clones of islet antigen-reactive CD4<sup>+</sup> T cells in peripheral blood of subjects with type 1 diabetes
  - unclear significance of islet antigen reactive T cells in peripheral blood of T1D patients (similar cells in healthy control subjects)
  - hypothesis: key disease associated cells show evidence of prior antigen exposure, inferred from expanded TCR clonotypes and essential phenotypic properties in their transcriptomes
  - testing hypothesis: scRNAseq to identify TCR clonotypes and transcript phenotypes, apply analysis to islet antigen reactive CD4<sup>+</sup> memory T cells from T1D and healthy control subjects following activation with pooled islet peptides
- - TCR results: extensive TCR clonotype sharing in antigen activated cells especially from T1D subjects, consistent with in vivo T cell expansion during disease progression, stable clonotypes (detect at repeat visits), see no clonotype sharing between subjects ("private" TCR specificities), IGRP seems to be a trigger for CD4<sup>+</sup> T cell expansion (recognized by expanded clones from two T1D subjects)
+ - TCR results: extensive TCR clonotype sharing in antigen activated cells especially from T1D subjects, consistent with *in vivo* T cell expansion during disease progression, stable clonotypes (detect at repeat visits), see no clonotype sharing between subjects ("private" TCR specificities), IGRP seems to be a trigger for CD4<sup>+</sup> T cell expansion (recognized by expanded clones from two T1D subjects)
  - transcript results: overall transcript profiles from healthy controls and T1D subjects similar, most expanded clone profiles distinctive though
 # Single-cell RNA sequencing reveals distinct T cell populations in immune-related adverse events of checkpoint inhibitors
 ## Abstract
@@ -100,7 +144,7 @@
 ## Discussion
  - PD-1 PD-L1 interaction promotes TE cell exhaustion, supports conversion of TE cells into suppressive TREG cells
  - irAEs are frequent in patients treated with ICIs (~90% of patients treated with PD-1 blockade and/or CTLA-4 blockade), severe/life threatening (grades 3/4, respectively) irAEs in fewer but still many patients
- - at baseline, patients with arthritis had less cells with features of CD8 T<sub>CM</sub> cells, patients with pneumonitis had more CD4 T<sub>H2</sub> cells, patients with thyroiditis had more CD4 T<sub>H17</sub> cells, so *different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers*
+ - at baseline, patients with arthritis had less cells with features of CD8 T<sub>CM</sub> cells, patients with pneumonitis had more CD4 T<sub>H2</sub> cells, patients with thyroiditis had more CD4 T<sub>H17</sub> cells, so **different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers**
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
  - ICI-induced inflammatory arthritis has been reported
@@ -119,19 +163,19 @@
 ## Results
 ### Determinants of severe irAEs from pretreatment blood
  - CD4 effector memory T cells at higher levels in pretreatment blood associated with severe irAE
- - single cell TCR clonotype diversity of activated CD4 T 5+3 (*two clusters I think*) cells elevated in patients with severe irAEs, so TCR richness eclipses loss of diversity resulting from clonal expansion, also see a trend between bulk (not just activated CD4) TCR diversity in pretreatment samples and irAE development although the association is primarily attributable to CD4 T cells with effector memory profile (BCR diversity not associated with irAE as much)
+ - single cell TCR clonotype diversity of activated CD4 T 5+3 (**two clusters I think**) cells elevated in patients with severe irAEs, so TCR richness eclipses loss of diversity resulting from clonal expansion, also see a trend between bulk (not just activated CD4) TCR diversity in pretreatment samples and irAE development although the association is primarily attributable to CD4 T cells with effector memory profile (BCR diversity not associated with irAE as much)
 ### Extended analysis of T cell features associated with irAEs
  - verify scRNAseq findings with bulk RNAseq of additional patient blood samples (again see association between CD4 TEM cell levels and severe irAE development as well as higher TCR clonotype diversity predicting severe irAE development)
  - a composite model integrating activated CD4 TM cell abundance and bulk TCR diversity outperforms either feature alone in predicting severe irAE development regardless of ICI therapy type, ICI response status, age, sex, melanoma subtype, affected organ
  - model scores increase as a function of irAE severity, also predicts time to irAE development
 ### Peripheral TCR clonal expansion linked to severe irAEs
- - prior evidence of clonally expanded self/virus-reactive T cells in affected tissue linking self/pathogen-recognizing T cell clones to irAEs (*I wonder why viral antigen recognition would lead to irAEs, good for the viral-infected cells to be attacked, right?*)
+ - prior evidence of clonally expanded self/virus-reactive T cells in affected tissue linking self/pathogen-recognizing T cell clones to irAEs (**I wonder why viral antigen recognition would lead to irAEs, good for the viral-infected cells to be attacked, right?**)
  - nontheless, they hypothesize that pre-treatment TCR clonotypes in peripheral blood might show greater propensity to expand in patients destined to develop severe irAEs after ICI
  - observe increased TCR clonal expansion and persistence of baseline clones in patients developing severe irAEs (preferential expansion of activated CD4 TEM)
 ### Circulating leukocytes in autoimmune disease
  - does baseline peripheral blood profile of patients with severe irAEs resemble that of patients with autoimmune disease? compare to systemic lupus or IBD patients
  - circulating activated CD4 TM cells associated with autoimmune disorders
- - *severe irAEs may represent a subclinical or latent autoimmune state that is unmasked upon ICI treatment*, tracks with patients with autoimmune disease having flare ups after ICI treatment, *this may have implications for the investigation into the correlation between ICI clinical response and irAEs i.e. if you only observe irAEs in those predisposed to autoimmune conditions and if this doesn't relate to ICI clinical response then they won't always correlate*
+ - **severe irAEs may represent a subclinical or latent autoimmune state that is unmasked upon ICI treatment**, tracks with patients with autoimmune disease having flare ups after ICI treatment, **this may have implications for the investigation into the correlation between ICI clinical response and irAEs i.e. if you only observe irAEs in those predisposed to autoimmune conditions and if this doesn't relate to ICI clinical response then they won't always correlate**
 ## Discussion
  - identify two baseline features (activated CD4 TM cell abundance and more clonally diverse TCR repertoire in peripheral blood) as determinants of ICI-induced irAEs in melanoma patients
  - previous studies had linked activated T cells and clonally expanded TCRs to severe irAEs but this study was uniquely looking t pre-treatment T cell characteristics
@@ -141,7 +185,7 @@
 ## Abstract
 ### Background
  - monotherapies based on PD-1 (programmed cell death) blockade (i.e. T cell reinvigoration) have been successful in durably treating some but not most melanoma patients
- - pre-existing T cell infiltration into tumor, presence of PD-L1 in tumors can be used as indicators of clinical responses (*guessing positive and negative prognosis respectively without PD-1 blockade treatment and both positive for PD-1 blockade*), although these indicators are not optimal, *need for better predictors of PD-1 blockade treatment effectiveness*
+ - pre-existing T cell infiltration into tumor, presence of PD-L1 in tumors can be used as indicators of clinical responses (**guessing positive and negative prognosis respectively without PD-1 blockade treatment and both positive for PD-1 blockade**), although these indicators are not optimal, **need for better predictors of PD-1 blockade treatment effectiveness**
 ### Gap in field
  - immune blood profiling based understanding of PD-1 blockade mechanisms
 ### Methods
@@ -151,34 +195,34 @@
  - most patients show immune response to PD-1 blockade (pembrolizumab)
  - clinical failure mostly from imbalance between T cell reinvigoration and tumor burden
  - clinical response correlates with magnitude of T cell reinvigoration (relative to predrug burden)
- - *profile mechanistically relevant subpopulation of circulating T cells calibrated to predrug disease burden, able to identify clinically accessible predictor of PD-1 blockade treatment outcome*
- - *I'm curious how the calibration works above*
+ - **profile mechanistically relevant subpopulation of circulating T cells calibrated to predrug disease burden, able to identify clinically accessible predictor of PD-1 blockade treatment outcome**
+ - **I'm curious how the calibration works above**
 ## Introduction
  - PD-L1 (ligand or PD-1 inhibitory receptor) expression in tumors suppress T cell response --> dysfunctional/exhausted T cells
- - exhausted T cells are less effective and exhibit distinct transcriptional profile compared to effector and memory CD8 T cells (*what I assume from it being said they have distinct differentiation patterns*)
- - *major challenge is knowing who will benefit from PD-1 blockade and who won't before giving the antibody treatment*
- - *goal: use peripheral blood profiling to detect responses to checkpoint (PD-1) blockade, identify relevant cell types... to better predict who will and who won't benefit from PD-1 blockade*
+ - exhausted T cells are less effective and exhibit distinct transcriptional profile compared to effector and memory CD8 T cells (**what I assume from it being said they have distinct differentiation patterns**)
+ - **major challenge is knowing who will benefit from PD-1 blockade and who won't before giving the antibody treatment**
+ - **goal: use peripheral blood profiling to detect responses to checkpoint (PD-1) blockade, identify relevant cell types... to better predict who will and who won't benefit from PD-1 blockade**
 ## Results
 ### Healthy donor vs. melanoma patients
  - all patients previously had anti-CTLA-4 therapy (a different checkpoint blockade treatment analogous to PD-1 blockade)
  - most patients didn't do well with PD-1 blockade (as measured by RECIST criteria guidelines)
- - comparative methods: flow cytometry (see frequencies of CD4, CD8 T cells, memory T cell subsets, co-expression of inhibitory checkpoint receptors like PD-1, CTLA-4, 2B4, TIM-3 with CD4 or CD8), *perhaps high coexpression of PD-1 for example with CD4 and CD8 in T cells indicates likely exhaustion and therefore a good response to PD-1 blockade with reinvigoration of T cells, but later they see that anti PD-1 immune response isn't good predictor of clinical response*
- - evidence for prior immune response in melanoma patients (vs. healthy controls): higher CD4<sup>+</sup> FOXP3<sup>+</sup>  (*Treg marker*) T cell frequency, higher Ki67 expression by FOXP3<sup>+</sup> cells, Ki67 higher in CD8 T cells in melanoma patients especially in PD-1<sup>+</sup> CD8 T cell subset, *higher proliferation (Ki67 is proliferation marker, also marks T cell reinvigoration, seems reasonable that exhausted T cells proliferate slower) and frequency of certain T cells (FOX3P is Treg marker, and Tregs suppress immune responses*)
+ - comparative methods: flow cytometry (see frequencies of CD4, CD8 T cells, memory T cell subsets, co-expression of inhibitory checkpoint receptors like PD-1, CTLA-4, 2B4, TIM-3 with CD4 or CD8), **perhaps high coexpression of PD-1 for example with CD4 and CD8 in T cells indicates likely exhaustion and therefore a good response to PD-1 blockade with reinvigoration of T cells, but later they see that anti PD-1 immune response isn't good predictor of clinical response**
+ - evidence for prior immune response in melanoma patients (vs. healthy controls): higher CD4<sup>+</sup> FOXP3<sup>+</sup>  (**Treg marker**) T cell frequency, higher Ki67 expression by FOXP3<sup>+</sup> cells, Ki67 higher in CD8 T cells in melanoma patients especially in PD-1<sup>+</sup> CD8 T cell subset, **higher proliferation (Ki67 is proliferation marker, also marks T cell reinvigoration, seems reasonable that exhausted T cells proliferate slower) and frequency of certain T cells (FOX3P is Treg marker, and Tregs suppress immune responses**)
 ### Pharmacodynamic immune response to anti PD-1
  - frequency of Ki67<sup>+</sup> CD8 T cells goes up then down with PD-1 blockade treatment (figure 1B: count of cells with Ki67<sup>+</sup> over some threshold)
- - cytotoxic, proliferating Ki67<sup>+</sup> CD8 T cell population CD45RA<sup>low</sup> (*not sure of significance*), CD27<sup>high</sup> (*CD27<sup>low</sup> is effector T cell*), CTLA-4<sup>high</sup> and PD-1<sup>high</sup> (immune checkpoints), 2B4<sup>high</sup> (*not sure of significance*), Eomes<sup>high</sup> and T-bet<sup>low</sup> which *seems to* indicate a exhausted T cell phenotype
- - healthy patient Ki67<sup>+</sup> (proliferating) population largely Eomes<sup>high</sup> T-bet<sup>high</sup> (effector T cell phenotype), *so melanoma patients have more exhausted T cells than healthy patients, makes sense with consistent immune response to melanoma that expresses inhibitory receptors*
- - increased proliferation from treatment most evident in PD-1<sup>+</sup> CD8 T cells (*evidence of immune response to PD-1 blockade*)
- - 74% of patients had PD-1 immune response, but only 38% had clinical response, *so anti PD-1 immune response is not a good predictor of clinical response*
-### Reinvigorated Texhausted cells detected in peripheral blood
- - do CD8 PD-1<sup>+</sup> CTLA-4<sup>+</sup> T cells provide greater precision in tracking effects of PD-1 blockade? they seem to be mostly Eomes<sup>high</sup> T-bet<sup>low</sup> and CD45RAL<sup>low</sup> CD27<sup>high</sup>, *exhausted phenotype?*
- - also see increased Ki67 expression in these cells from treatment (50% Ki67<sup>+</sup> before treatment --> 75% Ki67<sup>+</sup> after treatment), much lower Ki67 expression in PD-1<sup>+</sup> CTLA-4- T cells (*so T cells expressing both inhibitory receptors are more reinvigorated from exhaustion?*)
- - *takeaway seems to be the more inhibitory receptors a T cell expresses, the more the cell responds to anti-PD-1 therapy, i.e. reinvigorate from exhausted state*
+ - cytotoxic, proliferating Ki67<sup>+</sup> CD8 T cell population CD45RA<sup>low</sup> (**not sure of significance**), CD27<sup>high</sup> (**CD27<sup>low</sup> is effector T cell**), CTLA-4<sup>high</sup> and PD-1<sup>high</sup> (immune checkpoints), 2B4<sup>high</sup> (**not sure of significance**), Eomes<sup>high</sup> and T-bet<sup>low</sup> which **seems to** indicate a exhausted T cell phenotype
+ - healthy patient Ki67<sup>+</sup> (proliferating) population largely Eomes<sup>high</sup> T-bet<sup>high</sup> (effector T cell phenotype), **so melanoma patients have more exhausted T cells than healthy patients, makes sense with consistent immune response to melanoma that expresses inhibitory receptors**
+ - increased proliferation from treatment most evident in PD-1<sup>+</sup> CD8 T cells (**evidence of immune response to PD-1 blockade**)
+ - 74% of patients had PD-1 immune response, but only 38% had clinical response, **so anti PD-1 immune response is not a good predictor of clinical response**
+### Reinvigorated T<sub>exhausted</sub> cells detected in peripheral blood
+ - do CD8 PD-1<sup>+</sup> CTLA-4<sup>+</sup> T cells provide greater precision in tracking effects of PD-1 blockade? they seem to be mostly Eomes<sup>high</sup> T-bet<sup>low</sup> and CD45RAL<sup>low</sup> CD27<sup>high</sup>, **exhausted phenotype?**
+ - also see increased Ki67 expression in these cells from treatment (50% Ki67<sup>+</sup> before treatment --> 75% Ki67<sup>+</sup> after treatment), much lower Ki67 expression in PD-1<sup>+</sup> CTLA-4<sup>-</sup> T cells (**so T cells expressing both inhibitory receptors are more reinvigorated from exhaustion?**)
+ - **takeaway seems to be the more inhibitory receptors a T cell expresses, the more the cell responds to anti-PD-1 therapy, i.e. reinvigorate from exhausted state**
  - methods: mass cytometry (like flow cytometry but use heavy metal ion labeled antibodies instead of fluorochromes to get many more parameters and high dimensionally analyze single cells) and RNAseq
  - see PD-1 expressed by exhausted T cells, but also by memory (CCR7<sup>high</sup>) and effector (CD27<sup>low</sup>) T cells
  - see population of cells expressing exhaustion markers (Eomes, CD39) that increased in frequency and Ki67 expression after PD-1 blockade (reinvigoration), express granzymes (cytotoxic T cell method of killing target cells by inducing apoptosis)
 ### Responding T-cell clones from blood found in tumor
- - the reinvigorated Tex cells in blood are also found in tumor
+ - the reinvigorated T<sub>ex</sub> cells in blood are also found in tumor
 ### T-cell reinvigoration correlates with tumor burden
  - antigen burden key determinant of exhaustion severity and reinvigoration by PD-1 blockade, want to test if that is true here in melanoma
  - evidence of pre-existing CD8 T cell response related to tumor burden, augmented by PD-1 blockade
@@ -193,7 +237,3 @@
  - most patients have a single peak of PD-1 blockade-induced immune reinvigoration despite on-going treatment
  - responding exhausted T cells in blood contain TCR clonotypes shared with tumor infiltrating T cells
  - ratio of exhausted T cell reinvigoration to tumor burden predicts clinical response
-
-
- ^test^
- <sup>test</sup>
