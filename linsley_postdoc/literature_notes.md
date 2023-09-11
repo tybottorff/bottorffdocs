@@ -31,7 +31,7 @@
  - here, they track human CD8+ T cell clones expanding in response to yellow fever virus vaccination at single cell level, observe drop in clonal diversity from acute to memory phase, suggesting that clonal selection shapes the circulating memory repertoire
 ## Introduction
  - primary adaptive immune responses lead to clonal expansion of rare, antigen-specific naive CD8+ T cells and generation of long-lived memory cells that guard against subsequent infections
- - human memory T cell subsets based on CCR7 and CD45RA expression (TSCM, TCM, TEM, T<sub>EMRA<sub>)
+ - human memory T cell subsets based on CCR7 and CD45RA expression (TSCM, TCM, TEM, T<sub>EMRA</sub>)
 # Divergent clonal differentiation trajectories of T cell exhaustion
  - chronic antigen exposure leads to T cell exhaustion with reduced effector function
  - do all antigen-specific T cell clones follow the same Tex differentiation trajectory?
