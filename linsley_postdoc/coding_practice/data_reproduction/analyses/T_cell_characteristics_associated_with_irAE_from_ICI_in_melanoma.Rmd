@@ -19,6 +19,7 @@ library(patchwork)
 library(ggplot2)
 
 ```
+
 # Extract contents of the .tar file into the data directory
 
 ```{r}
