@@ -1,6 +1,7 @@
-# Bioinformatics
+# Bioinformatics/biostatistics
  - ROC: receiver operating characteristics, performance measure for automated classification, provides visual and numerical summary of predictor behavior
  - voom algorithm: mean-variance modeling, estimate mean-variance in data, then use this to compute appropriate precision weight for each observation. count data (like RNAseq) always shows mean-variance relationships (increasing variance with increasing count size). convert counts to logCPM values (adding 0.5 to avoid log of 0), normalize matrix of logCPM values, fit linear models, fit trend to square root standard deviations as function of average log count measure, use trend line to predict variance of each logCPM value, inverse variance is precision weight estimate
+ - Poisson distribution: assume equal mean and variance (1st and 2nd moments), which is often not true for count data (RNAseq)
 # Github
  - Can create new repo on git like tbottorff.github.io, then in terminal git init --> git remote add origin link to tbottorff.github.io --> commit as usual --> push to tbottorff.github.io
  - .gitignore: file placed in root directory of a project, tells github which files to ignore (untracked files)
