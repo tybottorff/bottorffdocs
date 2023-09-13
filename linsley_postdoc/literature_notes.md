@@ -20,6 +20,7 @@
  - some propose correlation between vitiligo occurrence and clinical response in melanoma patients receiving immunotherapy, but most studies have included heterogeneous patient and treatment settings
  - goal: investigate correlation between vitiligo occurrence and clinical benefit of immunotherapy
  - results: vitiligo occurrence correlated with favorable clinical outcome
+# Current best practices in single-cell RNA-seq analysis: a tutorial
 # Defining the memory CD8 T cell
  - effector (T<sub>em</sub>, CD62L<sup>low</sup>CCR7<sup>low</sup>) and central (T<sub>cm</sub>, CD62L<sup>high</sup>CCR7<sup>high</sup>) memory T cells
  - CCR7/CD62L expression on T<sub>cm</sub> cells facilitates homing to secondary lymph organs, while T<sub>em</sub> cells are more cytolytic and express integrins and chemokine receptors to localize to inflamed tissue
@@ -79,6 +80,31 @@
 # Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
  - chronic stimulation assay
  - *in vivo* validation of screen results (perturbation of INO80 and BAF chromatin remodeling complexes improves T cell persistence in tumors)
+# Guidelines for bioinformatics of single-cell sequencing data analysis in Alzheimer's disease: review, recommendation, implementation and application
+## Quality control
+ - remove sources of technical variation introduced during generation of scRNA data while maintaining true biological variation
+ - scRNA is noisier than bulk RNA seq (low amount of RNA/cell, stochastic sampling process of sequencing)
+ - many 0 or near-0 counts by "dropout" events
+ - common quality control measures are number of expressed features (non-0 count feature detections) and library size (sum of counts across all features)
+ - exclude cells with very few expressed features or small library size (low RNA-capture efficiency)
+ - also exclude cells with abnormally high numbers of expressed features (doublet/multiplet)
+ - lower and upper bounds can vary based on sequencing depth (deeper depth leads to more reads and more detected features irrespective of cell quality)
+ - another approach is to remove outliers, for instance removing cells with log-library size greater than 3 median absolute deviations or below median log-library size
+ - having a threshold for overall expression content (detected genes) can work to remove doublets, but not all cells contain the same amount of RNA
+ - another approach is to look for cells expressing marker genes of > 1 distinct cell type, but this requires knowledge of the cell types and associated markers
+ - other approaches include generating artificial doublets by mixing observed gene expression profiles from randomly selected droplet pairs, then embed/dimension reduce and classify to find doublets
+ - mitochondrial mapping reads: increased mitochondrial fraction indicates apoptosis, cell stress, and/or loss of cytoplasmic RNA from lysed cells, a threshold of 10% is good for most human tissue although this too can vary (up to 30% is ok for heart muscle cells with their increased energy demand)
+ - ambient RNA (from dead/apoptotic cells) can also contribute to noise: this contribution can be estimated by looking at background in "empty" droplets (i.e. droplets of just this ambient RNA), one can also use negative cell markers
+## Normalization
+ - many biological and technical factors, like sequencing depth, capture efficiency, and cell composition, can all affect observed scRNA read counts
+ - normalization targets variance from sequencing (library preparation, high dropout events, amplification bias caused by gene length, GC content, etc.)
+ - mitigation of batch effect (variance from experimental design and handling, like different sequencing platforms, timing, reagents, laboratories, etc.)
+ - scaling normalization works to correct for sequence depth by dividing feature-level read counts by library size (total read counts within each sample) then multiplying by a constant (like 10,000), then add 1 before log-transforming (to prevent log(0)), but scaling normalization is biased towards highly expressed transcripts
+ - other techniques include trimmed mean of M-values (TMM, calculates scaling factors by trimming away genes with extreme fold changes between samples, tends to overcorrect for scaling factors), upper-quantile method (UQ, uses per-sample upper-quantile, 75-th percentile, to scale counts, could be 0 for many cells with low sequencing depth), and relative log-expression (RLE, scales to pseudo-reference derived from geometric mean of gene counts across cells, doesn't work for genes with 0 counts)
+ - other methods generally fall into cell-based normalization (estimate cell-specific global size factor to normalize all genes in same cell, pool cells to estimate more robust size factors then deconvolve pooled size factors to get cell-specific size factors) and gene-based normalization (parametric modeling of individual genes, **like Pearson residuals method SCTransform**, perform adjustments individually for each group of genes with different sequencing depths or different ranges of abundance levels)
+## Feature selection and dimension reduction
+ - identify few latent variables that explain the most variance in data
+ - 
 # Holistic approach to immune checkpoint inhibitor-related adverse events
  - irAEs usually occur within the first months after ICI treatment but can develop as early as after the first dose or as late as years after ICI treatment
  - glucocorticoids are usually used to manage irAEs, other immunosuppressive agents as well
@@ -110,6 +136,7 @@
 # Induction of T cell exhaustion by JAK1/3 inhibition in the treatment of alopecia areata
  - alopecia areata is an autoimmune disease caused by T cell-mediated destruction of the hair follicle
  - JAK1/3 inhibitors disrupt γc cytokine signaling (important for T cell development, activation, homeostasis), selectively induces T cell exhaustion to help treat this autoimmune disease
+# Inhibitory receptors beyond T cell exhaustion
 # Intratumoral heterogeneity and T cell exhaustion in primary CNS lymphoma
 # Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
 ## Abstract
@@ -300,19 +327,29 @@
  - in T<sub>regs</sub>, co-inhibitory receptors promote suppressive function
  - loss of IL-2 production and reduced proliferation occurs during early T cell exhaustion, late exhaustion characterized by CD8<sup>+</sup> T cells losing the ability to produce IFNγ and TNFα and degranulate
  - co-inhibitory receptors expressed in exhausted T cells
- - IFNγ-producing CD4<sup>+</sup> T cells (Th1) and IL-17-producing CD4<sup>+</sup> T cells (Th17 cells, differentiated by TGFβ and IL-6, expanded/maintained by IL-1/IL-23) implicated in autoimmunity
+ - IFNγ-producing CD4<sup>+</sup> T cells (Th1) and IL-17-producing CD4<sup>+</sup> T cells (Th17 cells, differentiated by TGFβ and IL-6, expanded/maintained by IL-1/IL-23) implicated in autoimmunity, but not all Th17 cells are pathogenic (Th17 cells differentiated by TGF-β1 and IL-6 produce IL-17/10 and don't mediate inflammation, IL-23 differentiated Th17 cells are "pathogenic" and drive inflammation in autoimmunity and are similar to exhausted T cells)
  - **TH1 and TH17 are non-mutually exclusive cell fates: INFγ and IL-17 double positive cells reveal Th17 plasticity to IFNγ<sup>+</sup> Th1-like phenotype**
  - co-inhibitory receptors on T cells dampen T-cell effector function (enhancing tumor progression but also preventing autoimmunity by reducing local/systemic inflammation, maintaining tissue tolerance)
  - IL-17A blocking antibodies used to treat some autoimmune diseases, drugs targeting proinflammatory TNFα also approved to treat some autoimmune diseases, but these aren't efficacious for all patients or all autoimmune diseases (there's a need for treatments affecting common critical points across diverse autoimmune diseases, **for example promoting T cell exhaustion by regulating the expression or function of checkpoint molecules**)
  - deletion of CTLA-4 in adult T cells leads to upregulation of inhibitory molecules (IL-10, LAG-3, PD-1)
  - in addition to the full length form of CTLA-4 (flCTLA-4, the transmembrane receptor), a soluble form exists (sCTLA-4) that lacks the transmembrane domain (exon 3) and is associated with T1D; there's also a splice variant of CTLA-4 that is ligand-independent (liCTLA-4, lacks B7-1/2 binding domain) and inhibits T cell proliferation and cytokine secretion, **not sure why this ligand-independent CTLA-4 inhibits T cells**
- - PD-1 has two ligands: PD-L1 (B7-H1, CD274, broadly expressed across tissue) and PD-L2 (B7-DC, CD273, only expressed on dendritic cells and some myeloid i.e. blood cells)
+ - CTLA-4 expressed on activated CD4<sup>+</sup> and CD8<sup>+</sup> T cells, T<sub>regs</sub> as well in cancer (anti-CTLA-4 treatment restoring exhausted T cell effector functions perhaps mainly due to depletion of T<sub>regs</sub>)
+ - CTLA-4 levels usually anti-correlate with clinical outcome in cancer, but in non-small cell lung cancer high CTLA-4 expression in tumors actually predicts survival, **not sure of the mechanism for this inverted trend here**
+ - PD-1 has two ligands: PD-L1 (B7-H1, CD274, broadly expressed across tissue) and PD-L2 (B7-DC, CD273, only expressed on dendritic cells and some myeloid i.e. blood cells), PD-L1/2 expressed on various tumor cells
  - PD-1 expressed on CD4<sup>+</sup>, CD8<sup>+</sup> T cells, B cells, monocytes, some dendritic cells
- - TIM-3 expressed on CD4<sup>+</sup> and CD8<sup>+</sup> T cells (more so on Th1 than Th17 cells), NK cells, dendritic cells, and monocytes, ligands are galectin-9, phosphatidylserine, CEACAM1
- - TIGIT expressed on activated T cells, some T<sub>regs</sub>, T<sub>fh</sub> cells, and NK cells, ligands are CD155 (PVR) and CD112 (PVRL2) on APCs, T cells, and some non-hematopoietic cells; TIGIT ligands expressed highly on immune and tumor cells in tumors. CD226 binds to same ligands as TIGIT, but is a co-stimulatory receptor (similar to B7:CD28:CTLA4)
- - LAG-3 expressed on activated T cells and some NK cells, binds to MHC-II with higher affinity than CD4, other ligands include LSECtin and FGL1
+ - TIM-3 expressed on CD4<sup>+</sup> and CD8<sup>+</sup> T cells (more so on Th1 than Th17 cells, highly expressed by CD8<sup>+</sup> PD-1<sup>+</sup> T cells which are a dysfunctional subset of tumor-infiltrating lymphocytes in tumors), NK cells, dendritic cells, and monocytes, ligands are galectin-9, phosphatidylserine, CEACAM1
+ - TIM-3 OE on T cells leads to expansion of suppressor cells (old name for T<sub>regs</sub> **I think**), promotes tumor growth
+ - TIGIT expressed on activated T cells, some T<sub>regs</sub>, T<sub>fh</sub> cells, and NK cells, ligands are CD155 (PVR) and CD112 (PVRL2) on APCs, T cells, tumor cells, and some non-hematopoietic cells; TIGIT ligands expressed highly on immune and tumor cells in tumors. CD226 binds to same ligands as TIGIT, but is a co-stimulatory receptor (similar to B7:CD28:CTLA4)
+ - LAG-3 expressed on activated T cells and some NK cells, binds to MHC-II with higher affinity than CD4, other ligands include LSECtin and FGL1 (fibrinogen-like protein 1)
  - T cell infiltration, particularly of CD8<sup>+</sup> T cells, into tumors is associated with better prognosis
  - CD4<sup>+</sup> T cells can engage different differentiation pathways like Th1-type pathway that may have direct anti-tumor roles via secretion of INFγ or TNFα, but most notable effect of CD4<sup>+</sup> T cells is to help expand and differentiate CD8<sup>+</sup> T cells into cytotoxic T lymphocytes (which can then recognize and lyse tumor cells via granzyme B/perforin, FasL, TRAIL with the help of dendritic cells)
  - exhausted CD8<sup>+</sup> T cells can't lyse tumor cells, have impaired effector functions (unable to produce effector cytokines like TNFα, IFNγ, IL-2), express co-inhibitory receptors
+ - **possible sources of irAEs: aggravation of silent pre-existing autoimmune condition, neo-autoimmune or inflammatory disorder due to breakdown of self-tolerance, disruption of immune homeostasis in tissue (not sure exactly what this means), bystander self-tissue damage (on target, off tumor response), undesired reactions to checkpoint blockade (expression of co-inhibitory molecules on non-T cells for instance)**
+ - **similarities between pathogenic, inflammation-driving Th17 (and Th1) cells and exhausted T cells could be exploited to treat cancer without inducing irAEs: PDPN expressed on Th17 cells and negatively regulates Th17 pathogenicity, PDPN also part of co-inhibitory gene module upregulated in cancer; PROCR also expressed in Th17 cells (also negatively regulates pathogenicity via repressing IL-1R) and exhausted T cells (PROCR deficiency inhibits tumor growth)**
+ - another idea to limit irAEs from ICI is to treat the autoimmune side effects, for example with TNF blockade (which can even enhance ICI efficacy in targeting tumor beyond limiting irAEs, **not sure of mechanism here**)
+# Type 1/Type 2 immunity in infectious diseases
+ - Th1 (T helper type 1) cells secrete IL-2, interferon-γ, lymphotoxin-α and stimulate type 1 immunity (intense phagocytic activity), more or less synonymous with cell-mediated immunity but some antibodies are still produced, protective for most infections
+ - Th2 cells secrete IL-4/5/9/10/13 and stimulate type 2 immunity (high antibody titers), more or less synonymous with humoral immunity (Th2 cells suppress phagocytosis), resolves cell-mediated inflammation
+ - systemic stress, immunosuppression cause type 2 response to infection normally controlled by type 1 response
 # γδ T cell exhaustion: Opportunities for intervention
  - γδ T cells (TCRs with γ and δ chains instead of the usual α and β ones) can respond to varied infections/tumor challenges in a non-MHC-restricted manner, involved in immune surveillance (pleiotropic i.e. more than one effector functions)

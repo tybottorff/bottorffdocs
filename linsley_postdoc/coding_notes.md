@@ -1,7 +1,69 @@
 # Bioinformatics/biostatistics
  - ROC: receiver operating characteristics, performance measure for automated classification, provides visual and numerical summary of predictor behavior
  - voom algorithm: mean-variance modeling, estimate mean-variance in data, then use this to compute appropriate precision weight for each observation. count data (like RNAseq) always shows mean-variance relationships (increasing variance with increasing count size). convert counts to logCPM values (adding 0.5 to avoid log of 0), normalize matrix of logCPM values, fit linear models, fit trend to square root standard deviations as function of average log count measure, use trend line to predict variance of each logCPM value, inverse variance is precision weight estimate
- - Poisson distribution: assume equal mean and variance (1st and 2nd moments), which is often not true for count data (RNAseq)
+## Statistics
+ - discrete random variables (like counts) will have associated probability distributions (also called probability mass function): list of possible values of random variable and their associated probabilities (or as a formula rather than a list), defined for a finite or countably infinite set of possible values (usually integers)
+ - cumulative distribution function: probability that random variable is less than or equal to a certain value
+ - continuous random variables: things like time, distance, log of gene expression level, antibody levels (can also model some discrete variables with many possible values as continuous), probability density function (rather than probability mass function as for discrete variables) which is defined for all real numbers in range of random variable, area = probability (area under probability density function between points a and b is same as probability of random variable having value between a and b)
+ - mean = 1st moment, expected value (average value observed if you could observe variable infinite number of times, weighted average of all possible values where weights are probabilities)
+ - variance = 2nd moment, measures spread of data (sum of squares of differences between each value and mean, divided by number of values minus 1), square root of variance is standard deviation (which has same units as original variable)
+ - percentiles are calculated with inverse of cumulative distribution function (i.e. find value of random variable that has a certain probability of random variable being less than or equal to it)
+### Discrete probability distributions
+ - Bernoulli random variable: 2 possible values (0 or 1), usually comes up in success vs. failure (only 2 outcomes), probability of success is p, probability of failure is 1-p
+ - Binomial random variable: similar to Bernoulli random variable but now we have n independent trials (each trial is a Bernoulli random variable), probability of success is within each trial is still p, probability of failure within each trial is still is 1-p, X is the number of successes in n trials (X is a random binomial variable, its probability distribution is the binomial distribution), probability of X = x is (n choose x) * p^x * (1-p)^(n-x) where (n choose x) = n!/(x!(n-x)!) (n choose x) is the number of ways to choose x successes from n trials, mean = np, variance = np*(1-p)
+ - Geometric random variable: similar to binomial random variable except we run trials until we get 1 success (number of trials is discrete random variable), for example something like number of nucleotides until the next T in a DNA sequence after the previous T, mean is 1/p, variance is (1-p)/p^2
+ - Negative binomial random variable: similar to geometric random variable except we run trials until we get r successes (number of trials is discrete random variable), for example comparing two DNA sequences until we get 4 mismatches for example, mean is r/p, variance is r*(1-p)/p^2
+ - Poisson random variable: discrete random variable, counting events over some continuous interval (like time or space intervals), conditions include independence of whether or not event occurs in one subinterval and another as well as chance of event occurring in subinterval only depending on length of subinterval (rather than where subinterval occurs within overall interval), λ is the average number of times we expect an event to occur in an interval, probability of X = x is e^(-λ) * λ^x / x!, mean is λ, variance is λ, good for counts over time or space but RNAseq for example often doesn't follow Poisson distribution (mean and variance are not equal)
+ - Multinomial distribution: like binomial distribution but trials can have > 2 possible outcomes
+### Common continuous distributions
+ - normal distribution: probability density function is 1/(sqrt(2*π)*σ) * e^(-(x-μ)^2/(2*σ^2)), mean = μ, variance = σ^2, symmetric around mean
+ - Γ (gamma) distribution
+ - exponential distribution: special case of gamma distribution, probability density function is λ * e^(-λx), mean = 1/λ, variance = 1/λ^2
+ - β distribution
+ - t-distribution: probability density function is Γ((v+1)/2) / (sqrt(v*π) * Γ(v/2)) * (1 + x^2/v)^(-(v+1)/2), mean = 0, variance = v/(v-2) for v > 2, v is degrees of freedom (number of independent observations in sample), t-distribution approaches normal distribution as v approaches infinity, symmetric around mean (0) as well (like normal distribution)
+ - chi-squared distribution: special case of gamma distribution, probability density function is 1/(2^(v/2) * Γ(v/2)) * x^(v/2-1) * e^(-x/2), mean = v, variance = 2v, v is degrees of freedom (number of independent observations in sample), chi-squared distribution approaches normal distribution as v approaches infinity, skewed right
+ - F distribution
+## Sequence alignment
+ - scoring method often used (for example matching bases +2, mismatch -1, gap -2, or maybe 0 for matches, -1 for mismatch, and -3 for gap), such as the popular dynamic programming Needleman-Wunsch algorithm (global alignment) or Smith-Waterman algorithm (local alignment), these are guaranteed to find the highest scoring alignment but are slow
+ - heuristic algorithms: faster, like BLAST (basic local alignment search tool) and FASTA, based on string matching theory (best alignment likely has at least some small region of perfectly matching residues, so search for these small perfect match regions then focus on these seed regions, extend search outwards from seeds looking for high-scoring local alignment in neighborhood of seed, rank alignments after analyzes all such seeds), this doesn't guarantee finding the best alignment (best alignment could have many close substitutions and gaps that don't match perfectly)
+ - scoring algorithms based on log-likelihood ratio (log-odds), assigned values (like +2 for match) are possible log-odds values that sum to the log-likelihood ratio
+ - Markov chains: describe process that moves from state to state in discrete steps, process here is DNA sequence and steps are bases from 5' to 3', states are the possible bases
+## Dimensional reduction
+### PCA
+ - unsupervised method
+ - find smaller number of dimensions (2) that retain most of useful information in data
+ - linear combination of original variables, possibly an issue to only have linear combinations of variables
+ - PCs are sets of linearly uncorrelated variables
+ - mechanism/steps: calculate matrix that summarizes how variables relate to one another, break matrix down into direction and magnitude (~importance) components
+ - PC matrix has same number of dimensions as original data, but many PCs may not be informative (so we reduce the number of PCs once we see how much variance each PC vector explains)
+ - variance explained by each PC: look at eigenvalues in scree plot (elbow plot, shows eigenvalues on y-axis for each PC on x-axis), with non-ideal scree plots one can just pick PCs with eigenvalues > 1 (Kaiser rule) or select enough PCs to explain a set % of the variance in the data (say 80% for example)
+ - finds new directions (PCs) in data along which there is maximal variation (direction defined as linear combination of data by vector with weights), i.e. PC with maximal variance
+ - correlation matrix: correlations between each pair of variables
+ - eigenvalues represent amount of variance related to component
+ - each PC is an orthogonal vector to the rest
+### tSNE
+ - unsupervised method
+ - T-distributed stochastic neighbor embedding, non-linear scaling
+ - iterative method, repeatedly move data points closer or further away from each other depending on 'similarity'
+ - slow
+### UMAP
+ - unsupervised method
+ - uniform manifold approximation and projection
+ - quicker and can preserve more global structure than tSNE (more like PCA)
+ - preserves centroids of clusters, can plot on graph
+### k-means
+ - clustering technique
+ - choose random coordinates for locations of k-centroids, group data points together by finding nearest centroid (k groups), calculate new center of each centroid by taking mean position of data points in each group, iterate until centroids stop moving significant amounts
+ - downside is you need to choose the number of clusters beforehand (k value)
+ - minimizing the within cluster sum of squares over K clusters, partition data points into K initial clusters (randomly or heuristically), computes cluster means, constructs new partition by associating each point with closest cluster mean (yielding new clusters of which means are calculated), make new partition by associating each point with closest cluster mean again, repeat until convergence (data points no longer change clusters)
+#### Bootstrapping
+ - "cluster stability" is used to determine whether or not clusters are reproducible in a replicate experiment, bootstrapping is a non-parametric method to assess cluster stability by generating replicate datasets *in silico*
+ - one can resample genes to generate a "replicate" dataset (make bootstrap replicate by sampling genes with replacement, applying clustering method to replicate, recording clusters, and repeating), then report the percentage of times two cells that were originally clustered together are still clustered together in the replicate dataset (also report percentage of times that two cells that weren't originally clustered together still aren't clustered together), larger values here being higher cluster stability. there are some problematic assumptions here though (genes aren't always independent nor interchangeable)
+ - one can also resample by cell: reasonable to assume cells were independently drawn from population
+## Sequencing
+ - barcodes help delineate which reads came from which sample/cell, can also help understand how many counts are unique and not just from amplification (PCR)
+ - UMI: unique molecular identifier, complex indices added to libraries before PCR amplification (enables identification of PCR duplicates), a type of barcode
+ - amplification is required but introduces biases (some reads amplified more than others), UMIs help with this as you only count 1 read with a given UMI (even if it was amplified 100 times)
 # Github
  - Can create new repo on git like tbottorff.github.io, then in terminal git init --> git remote add origin link to tbottorff.github.io --> commit as usual --> push to tbottorff.github.io
  - .gitignore: file placed in root directory of a project, tells github which files to ignore (untracked files)
