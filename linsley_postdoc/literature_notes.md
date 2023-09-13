@@ -4,6 +4,12 @@
  - here, they describe a subset of human memory T<sub>H2</sub> cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific T<sub>H2</sub> cells, denoted as T<sub>H2A</sub> cells, characterized by co-expression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional T<sub>H2</sub> cells
  - transcriptome analysis reveals distinct pathway in initiation of pathogenic responses to allergen
  - elimination of these cells is indicative of clinical responses induced by immunotherapy
+# Association of immune-related adverse events with nivolumab efficacy in non-small-cell lung cancer
+ - irAEs observed in 51% of patients (9% grades 3 or 4 i.e. severe irAEs)
+ - irAEs associated with better overall survival
+# Association of vitiligo with tumor response in patients with metastatic melanoma treated with pembrolizumab
+ - 25% of patients developed vitiligo
+ - **objective response associated with higher occurrence of vitiligo**
 # Cardiac myosin-specific autoimmune T cells contribute to immune-checkpoint-inhibitor-associated myocarditis
  - cardiac myosin-specific autoreactive T cells drive pathogenesis of PD-1 inhibitor-induced myocarditis in mice
  - PD-1 expressing cardiac myosin-specific autoimmune T cells are present in heart during naive conditions
@@ -20,6 +26,11 @@
  - some propose correlation between vitiligo occurrence and clinical response in melanoma patients receiving immunotherapy, but most studies have included heterogeneous patient and treatment settings
  - goal: investigate correlation between vitiligo occurrence and clinical benefit of immunotherapy
  - results: vitiligo occurrence correlated with favorable clinical outcome
+# CTLA-4 blockade enhances polyfunctional NY-ESO-1 specific T cell responses in metastatic melanoma patients with clinical benefit
+ - 5/8 of patients with clinical benefit to CTLA-4 blockade had NY-ESO-1 antibody (and CD4<sup>+</sup> and CD8<sup>+</sup> T cells against NY-ESO-1), 0/7 of clinical non-responders had NY-ESO-1 antibody
+ - NY-ESO-1 is a cancer antigen
+ - T cell responses were polyfunctional (IFN-γ, MIP-1β, TNF-α)
+ - all 8 patients with clinical benefit had at least 1 irAE, but 87% of all patients had at least one irAE, so it doesn't seem like there was a huge difference in irAE incidence between those with clinical benefit and those without
 # Current best practices in single-cell RNA-seq analysis: a tutorial
 # Defining the memory CD8 T cell
  - effector (T<sub>em</sub>, CD62L<sup>low</sup>CCR7<sup>low</sup>) and central (T<sub>cm</sub>, CD62L<sup>high</sup>CCR7<sup>high</sup>) memory T cells
@@ -104,7 +115,6 @@
  - other methods generally fall into cell-based normalization (estimate cell-specific global size factor to normalize all genes in same cell, pool cells to estimate more robust size factors then deconvolve pooled size factors to get cell-specific size factors) and gene-based normalization (parametric modeling of individual genes, **like Pearson residuals method SCTransform**, perform adjustments individually for each group of genes with different sequencing depths or different ranges of abundance levels)
 ## Feature selection and dimension reduction
  - identify few latent variables that explain the most variance in data
- - 
 # Holistic approach to immune checkpoint inhibitor-related adverse events
  - irAEs usually occur within the first months after ICI treatment but can develop as early as after the first dose or as late as years after ICI treatment
  - glucocorticoids are usually used to manage irAEs, other immunosuppressive agents as well
@@ -137,6 +147,9 @@
  - alopecia areata is an autoimmune disease caused by T cell-mediated destruction of the hair follicle
  - JAK1/3 inhibitors disrupt γc cytokine signaling (important for T cell development, activation, homeostasis), selectively induces T cell exhaustion to help treat this autoimmune disease
 # Inhibitory receptors beyond T cell exhaustion
+# Integrated NY-ESO-1 antibody and CD8<sup>+</sup> T-cell responses correlate with clinical benefit in advanced melanoma patients treated with ipilimumab
+ - CTLA-4 blockade improves survival in patients with advanced melanoma, also enhances immunity to NY-ESO-1 (cancer-testis antigen expressed in some melanoma patients)
+ - see increase (16% to 22%) in seropositivity for NY-ESO-1 antibody after CTLA-4 blockade, seropositive individuals more likely to experience clinical benefit (seropositive individuals who didn't experience clinical benefit more likely didn't have associated CD8<sup>+</sup> T cells)
 # Intratumoral heterogeneity and T cell exhaustion in primary CNS lymphoma
 # Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
 ## Abstract
@@ -156,6 +169,14 @@
  - most CAR T cell protocols use a heterogeneous starting population of bulk CD4 and CD8 T cells spanning developmental potential range, but more plastic memory T cells (T<sub>cm</sub> i.e. central memory T cells and T<sub>scm</sub> i.e. stem cell memory T cells) possess greater effector/proliferative capacities and better eradicate tumors when used as CAR T cell starting populations
  - patients eligible for CAR T cell therapy usually have relapsed/refractory (treatment-resistant), so their T cells have likely been chronically antigen exposed, as well as exposed to chemotherapy (skews T cells towards more terminally differentiated effector memory i.e. T<sub>em</sub> cells), and this all makes the CAR T therapy less effective (than if it had been used at the beginning)
 # Mechanisms of tumor resistance to immune checkpoint blockade and combination strategies to overcome resistance
+# Mismatch repair deficiency/microsatellite instability-high as a predictor for anti-PD-1/PD-L1 immunotherapy efficacy
+ - microsatellite instability-high follows mismatch repair deficiency
+ - mismatch repair deficiency represents a good prognosis in early colorectal cancer but a poor prognosis in patients with metastasis (**perhaps because it's more easily recognized by immune system but it's a double edged sword as it's also likely more cancerous and dangerous at metastasis stage**)
+# Mismatch repair deficiency predicts response of solid tumors to PD-1 blockade
+ - cancers deficient in mismatch repair (MMR) have high mutation burden, seems to be a good predictor of response to PD-1 blockade
+ - **many mutant neoantigens in mismatch repair-deficient cancers makes them sensitive to immune checkpoint blockade, regardless of cancer's tissue of origin**
+ - show that ICI induces peripheral expansion of tumor-specific T cells and that mismatch repair-deficient tumors harbor functional MANA (mutation-associated neoantigens) specific T cells
+ - TCR-seq works by CDR3 sequencing (most variable region of TCRα and β chains, governs interactions with peptide-MHC complexes)
 # mTOR regulates T cell exhaustion and PD-1-targeted immunotherapy response during chronic viral infection
  - background: PD-1-blockade enhances T cell response by promoting differentiation of stem-like T cells towards TIM3<sup>+</sup> cells
  - results: blocking mTOR during T cell expansion enhances T cell response (stem-like T cells accumulate), but blocking mTOR after exhaustion has progressed causes immunosuppression (decreased TIM3<sup>+</sup> cells, increased viral load)
@@ -166,6 +187,9 @@
  - epigenetic modulating genes related to T cell exhaustion
  - eliminating *Arid1a* (chromatin modifier) allows CD8<sup>+</sup> T cells to retain proliferative and cytotoxic functions *in vivo*
  - **this summary does state that ICI restores some functions of exhausted T cells, so again I'm not sure if ICI can reprogram exhausted T cells or not, likely depends on how terminally committed they are to exhaustion**
+# Nivolumab in resected and unresectable metastatic melanoma: characteristics of immune-related adverse events and association with outcomes
+ - irAEs in 68% of patients (mostly not severe)
+ - **difference in overall survival between those with and without irAEs, irAEs incidence correlate with increase overall survival**
 # NK-cell exhaustion, B-cell exhaustion, and T-cell exhaustion - the differences and similarities
  - exhaustion is not the same as anergy (senescence and suppression)
  - exhaustion: impaired state, progressive loss of functionalities, reduced proliferative capacity, triggered by chronic antigen stimulation (chronic infection, cancer)
@@ -175,6 +199,9 @@
  - NKs are part of the innate immune system but are similar to cytotoxic T cells, they lack antigen specificity and are usually short-lived (< 10 days), so their exhaustion is likely less important
  - there are long-lived, somewhat antigen-specific NKs with memory recall though
  - B cell exhaustion: weaker antibody response (inhibited normal function)
+# PD-1 blockade in tumors with mismatch-repair deficiency
+ - mismatch repair deficiency status predicts clinical benefit of ICI (ICI works better with tumors with mismatch repair deficiency)
+ - **immune infiltrate associated with mismatch repair-deficient carcinomas directed at neoantigens**
 # Quantifiable predictive features define epitope-specific T cell receptor repertoires
  - TCR is heterodimer, mediates pathogen-associated epitope recognition through interactions between peptide and MHC, generated by genomic rearrangement of germline TCR locus (VDJ recombination) to allow potentially 10^15 to 10^61 unique receptors
  - TCRs from T cells that recognize the same pMHC epitope often share conserved sequence features, perhaps able to predict model epitope specificity
