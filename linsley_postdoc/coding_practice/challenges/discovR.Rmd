@@ -1,0 +1,35 @@
+---
+title: "BRI Challenge: Discov-R"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(briDiscovr)
+library(ComplexHeatmap)
+library(tidyverse)
+library(dplyr)
+
+```
+
+# Read in RDS file
+
+```{r}
+
+myExpt <- readRDS("./data/220831_PlanBAfterClustering.RDS")
+
+```
+
+# Get clusters
+
+```{r}
+
+getSubjectClusters(myExpt)
+
+```
