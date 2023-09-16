@@ -33,3 +33,7 @@ myExpt <- readRDS("./data/220831_PlanBAfterClustering.RDS")
 getSubjectClusters(myExpt)
 
 ```
+
+# TODO
+
+1) compare heatmap I made to one made by discovR, add stuff at top

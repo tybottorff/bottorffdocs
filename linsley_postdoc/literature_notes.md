@@ -288,7 +288,7 @@
 # T-cell invigoration to tumour burden ratio associated with anti-PD-1 response
 ## Abstract
 ### Background
- - monotherapies based on PD-1 (programmed cell death) blockade (i.e. T cell reinvigoration) have been successful in durably treating some but not most melanoma patients
+ - monotherapies based on PD-1 (programmed cell death) blockade (i.e. to reinvigorate exhausted tumor-specific T cells) have been successful in durably treating some but not most melanoma patients
  - pre-existing T cell infiltration into tumor, presence of PD-L1 in tumors can be used as indicators of clinical responses (**guessing positive and negative prognosis respectively without PD-1 blockade treatment and both positive for PD-1 blockade**), although these indicators are not optimal, **need for better predictors of PD-1 blockade treatment effectiveness**
 ### Gap in field
  - immune blood profiling based understanding of PD-1 blockade mechanisms
@@ -366,7 +366,7 @@
  - PD-1 expressed on CD4<sup>+</sup>, CD8<sup>+</sup> T cells, B cells, monocytes, some dendritic cells
  - TIM-3 expressed on CD4<sup>+</sup> and CD8<sup>+</sup> T cells (more so on Th1 than Th17 cells, highly expressed by CD8<sup>+</sup> PD-1<sup>+</sup> T cells which are a dysfunctional subset of tumor-infiltrating lymphocytes in tumors), NK cells, dendritic cells, and monocytes, ligands are galectin-9, phosphatidylserine, CEACAM1
  - TIM-3 OE on T cells leads to expansion of suppressor cells (old name for T<sub>regs</sub> **I think**), promotes tumor growth
- - TIGIT expressed on activated T cells, some T<sub>regs</sub>, T<sub>fh</sub> cells, and NK cells, ligands are CD155 (PVR) and CD112 (PVRL2) on APCs, T cells, tumor cells, and some non-hematopoietic cells; TIGIT ligands expressed highly on immune and tumor cells in tumors. CD226 binds to same ligands as TIGIT, but is a co-stimulatory receptor (similar to B7:CD28:CTLA4)
+ - TIGIT expressed on activated T cells, some T<sub>regs</sub>, T<sub>fh</sub> cells, and NK cells, ligands are CD155 (PVR) and CD112 (PVRL2) on APCs, T cells, tumor cells, and some non-hematopoietic cells; CD226 binds to same ligands as TIGIT, but is a co-stimulatory receptor (similar to B7:CD28:CTLA4)
  - LAG-3 expressed on activated T cells and some NK cells, binds to MHC-II with higher affinity than CD4, other ligands include LSECtin and FGL1 (fibrinogen-like protein 1)
  - T cell infiltration, particularly of CD8<sup>+</sup> T cells, into tumors is associated with better prognosis
  - CD4<sup>+</sup> T cells can engage different differentiation pathways like Th1-type pathway that may have direct anti-tumor roles via secretion of INFγ or TNFα, but most notable effect of CD4<sup>+</sup> T cells is to help expand and differentiate CD8<sup>+</sup> T cells into cytotoxic T lymphocytes (which can then recognize and lyse tumor cells via granzyme B/perforin, FasL, TRAIL with the help of dendritic cells)

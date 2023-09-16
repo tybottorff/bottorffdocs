@@ -4,6 +4,8 @@ output: html_document
 date: "2023-09-08"
 ---
 
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+ 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -17,6 +19,8 @@ library(Seurat)
 library(Matrix)
 library(patchwork)
 library(ggplot2)
+library(readr)
+library(dplyr)
 
 ```
 
@@ -31,6 +35,23 @@ output_dir <- "../data"
 
 # Use the system command to extract the files
 system(paste("tar -xf", tar_file, "-C", output_dir))
+
+```
+
+# Test
+
+```{r}
+
+df <- read.csv(gzfile('../data/GSM5694799_YUENZO_TCR.csv.gz'))
+
+# .csv.gz files have barcodes, TCR information
+
+file_path <- "../data/GSE186144-GPL21290_series_matrix.txt.gz"
+
+# Load the data, considering it's a tab-separated .txt.gz file
+df_2 <- read.table(file_path, header = TRUE, sep = "\t", comment.char = "!")
+
+# both matrix.txt.gz files are empty...
 
 ```
 

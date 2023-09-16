@@ -1,4 +1,4 @@
-# Research plan
+# NCI PQ R01
 ## Specific aims
  - central hypothesis: T cell freq auto self marker positive predicts adverse effects from checkpoint inhibitor, sure makes sense more self targeting T cells more adverse effects with checkpoint inhibition
  - PD 1 checkpoint acts in tissue where T cell is recruited so like to generator of antigen that activated T cell, signals to inhibit T cell at that site
@@ -186,3 +186,5 @@ triplicate for each of N = 10 patients
  - expect to determine how biomarker performs on criteria for anti tumor response, irAE, and ideally survival too
 #### Potential problems and alternative strategies
  - may not distinguish between multiple promising candidates, can make an informed choice of one or try multiple
+## Powerpoint summary
+ - 

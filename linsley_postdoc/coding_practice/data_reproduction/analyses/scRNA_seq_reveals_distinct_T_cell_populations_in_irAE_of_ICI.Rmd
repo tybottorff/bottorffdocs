@@ -3,6 +3,8 @@ title: "scRNAseq reveals distinct T cell populations in irAE of ICI"
 output: html_notebook
 ---
 
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9873824/
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -27,7 +29,7 @@ tar_file <- "../data/GSE216329_RAW.tar"
 # Extract the contents of the .tar file
 output_dir <- "../data"
 
-# Use the system command to extract the files
+# Use the system command (runs terminal commands from within R) to extract the files, -C specifies directory
 system(paste("tar -xf", tar_file, "-C", output_dir))
 
 # manually renamed 2 files (.features. and .enes. to .genes.)
@@ -84,6 +86,10 @@ for (sample_name in sample_names) {
 # Merge Seurat objects from all samples
 
 ```{r}
+
+# reduce applies merge cumulatively to elements of list
+# [-1] excludes first element, init = seurat_objects[[1]] specifies first element
+# probably a faster way to merge instead of iteratively, but not sure how to write yet without writing out all elements of seurat_objects in a list
 
 seurat <- Reduce(function(x, y) merge(x, y), seurat_objects[-1], init = seurat_objects[[1]])
 
