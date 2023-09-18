@@ -1,0 +1,98 @@
+---
+title: "T cell characteristics associated with irAE from ICI in melanoma"
+output: html_document
+date: "2023-09-08"
+---
+
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(TAR)
+library(Seurat)
+library(Matrix)
+library(patchwork)
+library(ggplot2)
+library(readr)
+library(dplyr)
+
+```
+
+# Extract contents of the .tar file into the data directory
+
+```{r}
+
+tar_file <- "../data/GSE186144_RAW.tar"
+
+# Extract the contents of the .tar file
+output_dir <- "../data"
+
+# Use the system command to extract the files
+system(paste("tar -xf", tar_file, "-C", output_dir))
+
+```
+
+# Test
+
+```{r}
+
+df <- read.csv(gzfile('../data/GSM5694799_YUENZO_TCR.csv.gz'))
+
+# .csv.gz files have barcodes, TCR information
+
+file_path <- "../data/GSE186144-GPL21290_series_matrix.txt.gz"
+
+# Load the data, considering it's a tab-separated .txt.gz file
+df_2 <- read.table(file_path, header = TRUE, sep = "\t", comment.char = "!")
+
+# both matrix.txt.gz files are empty...
+
+```
+
+# Create a Seurat object for each scRNAseq sample
+
+```{r}
+
+# List of sample names, start small to not bloat workflow
+sample_names <- c(
+
+"GSM5694782", "GSM5694783", "GSM5694784", "GSM5694785"
+#, "GSM5694786", "GSM5694787", "GSM5694788", "GSM5694789",
+#"GSM5694790", "GSM5694791", "GSM5694792", "GSM5694793",
+#"GSM5694794", "GSM5694795", "GSM5694796", "GSM5694797"
+  
+)
+
+# Directory containing data files
+data_dir <- "../data/"
+
+# Create Seurat objects for each sample
+seurat_objects <- list()
+
+for (sample_name in sample_names) {
+  # Construct file paths
+  counts_file <- paste0(data_dir, sample_name, ".matrix.mtx.gz")
+  barcodes_file <- paste0(data_dir, sample_name, ".barcodes.tsv.gz")
+  genes_file <- paste0(data_dir, sample_name, ".genes.tsv.gz")
+  
+  # Read data files
+  counts <- readMM(counts_file)
+  barcodes <- read.table(barcodes_file, stringsAsFactors = FALSE)[, 1]
+  features <- read.csv(genes_file, stringsAsFactors = FALSE, sep = "\t", header = FALSE)
+  rownames(counts) <- make.unique(features[, 2])
+  colnames(counts) <- barcodes
+  
+  # Create Seurat object
+  seurat <- CreateSeuratObject(counts, project = sample_name)
+  
+  # Store Seurat object in the list
+  seurat_objects[[sample_name]] <- seurat
+}
+
+```

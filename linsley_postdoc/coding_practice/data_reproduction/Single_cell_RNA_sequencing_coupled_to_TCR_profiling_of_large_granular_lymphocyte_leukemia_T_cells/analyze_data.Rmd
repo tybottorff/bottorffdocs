@@ -1,0 +1,42 @@
+---
+title: "Single-cell RNA sequencing coupled to TCR profiling of large granular lymphocyte leukemia T cells"
+output: html_notebook
+---
+
+ - data reproduction of https://www.nature.com/articles/s41467-022-29175-x
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(TAR)
+library(Seurat)
+library(Matrix)
+library(patchwork)
+library(ggplot2)
+
+```
+# Extract contents of the .tar file into the data directory
+
+```{r}
+
+tar_file <- "./data/GSE168859_RAW.tar"
+
+# Extract the contents of the .tar file
+output_dir <- "./data"
+
+# Use the system command (runs terminal commands from within R) to extract the files, -C specifies directory
+system(paste("tar -xf", tar_file, "-C", output_dir))
+
+```
+# Test
+
+```{r}
+
+
+
+```

@@ -1,0 +1,337 @@
+---
+title: "scRNAseq reveals distinct T cell populations in irAE of ICI"
+output: html_notebook
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9873824/
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(TAR)
+library(Seurat)
+library(Matrix)
+library(patchwork)
+library(ggplot2)
+
+```
+
+# Extract contents of the .tar file into the data directory
+
+```{r}
+
+tar_file <- "./data/GSE216329_RAW.tar"
+
+# Extract the contents of the .tar file
+output_dir <- "./data"
+
+# Use the system command (runs terminal commands from within R) to extract the files, -C specifies directory
+system(paste("tar -xf", tar_file, "-C", output_dir))
+
+# manually renamed 2 files (.features. and .enes. to .genes.)
+
+```
+# Create a Seurat object for each sample
+
+```{r}
+
+# List of sample names
+sample_names <- c(
+  "GSM6668925_P1_T", "GSM6668926_P1_TN", "GSM6668927_P2_T", "GSM6668928_P2_TN",
+  "GSM6668929_P4_T", "GSM6668930_P4_TN", "GSM6668931_P5_T", "GSM6668932_P5_TN",
+  "GSM6668933_P7_T", "GSM6668934_P7_TN", "GSM6668935_P17_T", "GSM6668936_P17_TN"
+#  ,"GSM6668937_P3_T", "GSM6668938_P3_TN", "GSM6668939_P8_T", "GSM6668940_P8_TN",
+#  "GSM6668941_P9_T", "GSM6668942_P9_TN", "GSM6668943_P10_T", "GSM6668944_P10_TN",
+#  "GSM6668945_P11_T", "GSM6668946_P11_TN", "GSM6668947_P18_T", "GSM6668948_P18_TN",
+#  "GSM6668949_P19_T", "GSM6668950_P19_TN", "GSM6668951_P6_T", "GSM6668952_P6_TN",
+#  "GSM6668953_P12_T", "GSM6668954_P12_TN", "GSM6668955_P13_T", "GSM6668956_P13_TN",
+#  "GSM6668957_P14_T", "GSM6668958_P14_TN", "GSM6668959_P15_T", "GSM6668960_P15_TN",
+#  "GSM6668961_P16_T", "GSM6668962_P16_TN", "GSM6668963_P20_T", "GSM6668964_P20_TN",
+#  "GSM6668965_P21_T", "GSM6668966_P21_TN", "GSM6668967_P22_T", "GSM6668968_P22_TN",
+#  "GSM6668969_P23_T", "GSM6668970_P23_TN", "GSM6668971_P24_T", "GSM6668972_P24_TN"
+)
+
+# Directory containing data files
+data_dir <- "./data/"
+
+# Create Seurat objects for each sample
+seurat_objects <- list()
+
+for (sample_name in sample_names) {
+  # Construct file paths
+  counts_file <- paste0(data_dir, sample_name, ".matrix.mtx.gz")
+  barcodes_file <- paste0(data_dir, sample_name, ".barcodes.tsv.gz")
+  genes_file <- paste0(data_dir, sample_name, ".genes.tsv.gz")
+  
+  # Read data files
+  counts <- readMM(counts_file)
+  barcodes <- read.table(barcodes_file, stringsAsFactors = FALSE)[, 1]
+  features <- read.csv(genes_file, stringsAsFactors = FALSE, sep = "\t", header = FALSE)
+  rownames(counts) <- make.unique(features[, 2])
+  colnames(counts) <- barcodes
+  
+  # Create Seurat object
+  seurat <- CreateSeuratObject(counts, project = sample_name)
+  
+  # Store Seurat object in the list
+  seurat_objects[[sample_name]] <- seurat
+}
+
+```
+
+# Merge Seurat objects from all samples
+
+```{r}
+
+# Merge the first element with a sublist of the rest excluding the first element
+seurat <- merge(seurat_objects[[1]], y = seurat_objects[-1])
+
+```
+# Incorporate metadata
+
+```{r}
+
+# Load the metadata file
+metadata_file <- "./data/GSE216329_series_matrix.txt.gz"
+metadata <- read.delim(gzfile(data_file), stringsAsFactors = FALSE)
+
+# not sure how to get usable information out of this...
+
+```
+
+# Perform quality control
+
+```{r}
+
+# take a look at initial quality, look at samples independently (colors/x-axis)
+
+seurat[["percent.mt"]] <- PercentageFeatureSet(seurat, pattern = "^MT[-\\.]")
+#seurat[["percent.rb"]] <- PercentageFeatureSet(seurat, pattern = "^(RPL|RPS).*")
+#seurat[["percent.hb"]] <- PercentageFeatureSet(seurat, pattern = "HBA1|HBA2|HBB")
+
+#VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.rb", "percent.hb"), ncol = 5, pt.size=0)
+
+# could also do histograms if desired
+
+# Convert Seurat object's metadata to a data frame
+#metadata_df <- as.data.frame(seurat@meta.data)
+
+# Create a histogram with multiple variables as different colors
+#ggplot(data = metadata_df, aes(x = nCount_RNA)) +
+#  geom_histogram(aes(fill = "nCount_RNA"), alpha = 0.5, bins = 30) +
+#  geom_histogram(data = metadata_df, aes(x = nFeature_RNA, fill = "nFeature_RNA"), alpha = 0.5, bins = 30) +
+#  geom_histogram(data = metadata_df, aes(x = percent.mt, fill = "percent.mt"), alpha = 0.5, bins = 30) +
+#  geom_histogram(data = metadata_df, aes(x = percent.mt, fill = "percent.rb"), alpha = 0.5, bins = 30) +
+#  geom_histogram(data = metadata_df, aes(x = percent.mt, fill = "percent.hb"), alpha = 0.5, bins = 30) +
+#  labs(x = "Values", y = "Frequency") +
+#  facet_wrap(~ seurat$orig.ident)
+
+```
+
+```{r}
+
+# number of detected genes and number of detected transcripts are well correlated across cells (p2) while mitochondrial transcript percentage is less correlated (p1)
+
+# Create the plots
+#plot1 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "percent.mt") &
+#  theme(axis.text.x=element_text(angle=45, hjust=1, size=7),
+#        legend.text=element_text(size=7))
+#plot2 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") &
+#  theme(axis.text.x=element_text(angle=45, hjust=1, size=7),
+#        legend.text=element_text(size=7))
+
+#plot1 + plot2
+
+```
+
+```{r}
+
+# filter out cells with too few (not sequenced deep enough) or too many (doublets/multiplets sharing same cell barcode despite being multiple cells) cells
+# gene number and transcript number correlate well, so we can set a cutoff for just one of these, perhaps gene number above 500 (would also do < 5000 but authors didn't do this, and we're just trying to reproduce their results here)
+
+# filter out cells with high mitochondrial transcript percentages (stressed cells)
+# we will also set an upper threshold for mitochondrial transcript percentage (perhaps 20%, I might try 5% instead but authors did 20%)
+
+seurat <- subset(seurat, subset = nFeature_RNA > 500 & percent.mt < 20)
+
+#VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size=0)
+
+# could also do histograms if desired
+# Convert Seurat object's metadata to a data frame
+#metadata_df <- as.data.frame(seurat@meta.data)
+
+# Create a histogram with multiple variables as different colors
+#ggplot(data = metadata_df, aes(x = nCount_RNA)) +
+#  geom_histogram(aes(fill = "nCount_RNA"), alpha = 0.5, bins = 30) +
+#  geom_histogram(data = metadata_df, aes(x = nFeature_RNA, fill = "nFeature_RNA"), alpha = 0.5, bins = 30) +
+#  geom_histogram(data = metadata_df, aes(x = percent.mt, fill = "percent.mt"), alpha = 0.5, bins = 30) +
+#  labs(x = "Values", y = "Frequency") +
+#  facet_wrap(~ seurat$orig.ident)
+
+```
+
+# Normalization
+
+```{r}
+
+# amount of captured RNA varies cell to cell, so direct comparisons aren't ideal
+# normalization aims to make gene expression levels between varied cells comparable
+# normalization works similarly to TPM (transcripts per million reads) concept, normalize feature expression measurements for each cell to total expression, multiply by scale factor (perhaps default 10,000)
+# add 1 pseudocount to every value so genes with 0 transcripts detected in a cell are still present after log transform
+# log-transform expression levels so expression values better fit a normal distribution (log transform good for relative change investigations)
+
+#seurat <- NormalizeData(seurat)
+# SCTransform takes care of this
+
+```
+
+# Feature selection for following heterogeneity analysis
+
+```{r}
+
+# not all genes are equally informative (some genes have low expression, some have similar expression across all cells), so we want to select the most variablly expressed features (genes)
+
+# here, we select the top 3000 most variably expressed genes (2000-5000 usually ok)
+
+#seurat <- FindVariableFeatures(seurat, nfeatures = 3000)
+# SCTransform takes care of this
+
+```
+
+```{r}
+
+# visualize top features
+
+#top_features <- head(VariableFeatures(seurat), 20)
+#plot1 <- VariableFeaturePlot(seurat) &
+#  theme(axis.text.x=element_text(angle=45, hjust=1, size=10),
+#        axis.title.x=element_text(size=10),
+#        axis.title.y=element_text(size=10),
+#        legend.text=element_text(size=8))
+#plot2 <- LabelPoints(plot = plot1, points = top_features, repel = TRUE, size = 2)
+#plot1 + plot2
+
+```
+
+# Data scaling
+
+```{r}
+
+# different genes have different base expression levels and distributions, so they would contribute differently to analysis if no scaling was done (i.e. avoid highly expressed genes dominating analysis)
+
+#seurat <- ScaleData(seurat, vars.to.regress = c("percent.mt"))
+
+# here's a place to add batch effect corrections with the ScaleData args, perhaps regress out sample ID?
+# seurat <- ScaleData(seurat, vars.to.regress = c("nFeature_RNA", "percent.mt"))
+# good to try this later as it may not be necessary and may even be bad (nonlinear variation?)
+# if an unwanted source of variation dominates heterogeneity, try later to regress it out
+
+# SCTransform can take the place of the previous few steps (normalization, feature selection, data scaling) IF there's reason to suspect biases/artifacts from the above normalization
+seurat <- SCTransform(seurat, variable.features.n = 3000, vars.to.regress = c("nFeature_RNA", "percent.mt", "orig.ident"))
+
+```
+
+# Linear dimensionality reduction using principal component analysis (PCA)
+
+```{r}
+
+seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50)
+
+# can use elbow plot to decide how many PCs to use (i.e. up until the elbow bend)
+
+#ElbowPlot(seurat, ndims = ncol(Embeddings(seurat, "pca")))
+
+```
+
+```{r}
+
+# can also see which genes are contributing most to each PC
+
+#PCHeatmap(seurat, dims = 1:20, cells = 500, balanced = TRUE, ncol = 4)
+
+```
+
+```{r}
+
+#DimPlot(seurat, reduction = "pca")
+
+```
+
+# Non-linear dimension reduction for visualization
+
+```{r}
+
+seurat <- RunUMAP(seurat, dims = 1:20)
+
+```
+
+```{r}
+
+plot1 <- UMAPPlot(seurat)
+plot1
+
+```
+
+```{r}
+
+#plot1 <- FeaturePlot(seurat, c("RNF212B", "KRTAP10-2", "MAT2A", "SH3TC2"),
+#                     ncol=2, reduction = "umap")
+
+#plot1
+
+```
+
+# Cluster the cells
+
+```{r}
+
+# feature plots can help explore the data, but we want to identify cell groups in an unbiased manner via clustering
+# bulk RNAseq clustering methods (hierarchical, k-means) would be too slow (scRNAseq data is much larger)
+# instead use graph-based community identification algorithm: k-nearest neighbor network of cells is generated (cells connected to cells with shortest distance based on PC values), Shared Nearest Neighbor (SNN) network
+
+seurat <- FindNeighbors(seurat, dims = 1:20)
+
+# with the network constructed, louvain community identification algorithm is applied to look for communities (cell groups, cells in same group connect, connections between different groups are sparse)
+
+seurat <- FindClusters(seurat, resolution = 1)
+
+# resolution parameter controls whether you get major cell types or subtypes (value ranges 0.1-1 usually, higher value for finer clustering)
+
+```
+
+```{r}
+
+plot1 <- DimPlot(seurat, reduction = "umap", label = TRUE)
+plot1
+
+```
+
+# Use established markers to determine identities of cell clusters
+
+```{r}
+
+# take markers from https://www.cell.com/cms/10.1016/j.xcrm.2022.100868/attachment/c21c9923-ade8-4a28-8518-aa1f7bc0d1e5/mmc1 table S2
+
+```
+
+# Save the resulting Seurat object
+
+```{r}
+
+saveRDS(seurat, file="../data/seurat_obj_all.rds")
+#saveRDS(seurat_dorsal, file="../data/seurat_obj_dorsal.rds")
+
+#seurat <- readRDS("DS1/seurat_obj_all.rds")
+#seurat_dorsal <- readRDS("DS1/seurat_obj_dorsal.rds")
+
+#save(seurat, seurat_dorsal, file="../data/seurat_objs.rdata")
+#load("DS1/seurat_objs.rdata")
+
+```
+
+# Check for batch effects in UMAP, color by variables in metadata (donor, sequencing date... confounders of gene expression, visually check want to see even mixing in each cluster vs. all of one person's/date's samples in one cluster would be bad)
