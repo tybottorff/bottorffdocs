@@ -91,7 +91,7 @@
  - protective roles of these memory T cell subsets is context dependent (i.e. some might be more protective than others against certain infections or tumors)
  - acute infections generate large effector responses, gradually giving rise to more abundant T<sub>CM</sub> or T<sub>SCM</sub> after resolution of the response
  - recurring/chronic infections progressively generate larger T<sub>EM</sub> populations (constant reactivation of existing memory cells)
- - many markers used to characterize CD8<sup>+</sup> T cells (CCR7, CD45RA, CD27) have continuous rather than strict binary expression patterns (continuum of cell states ranging from naive to highly differentiated effector)
+ - many markers used to characterize CD8<sup>+</sup> T cells (CCR7, CD45RA, CD27) have continuous rather than strict binary expression patterns (continuum of cell states ranging from naive i.e. Th0 to highly differentiated effector)
 ## Results
 ### Clonal diversity in circulating YFV-specific CD8<sup>+</sup> T cells drops from acute to memory phase of the response
 ### Peripheral clonal expansions during the acute response do not predict clonal contributions to the circulating memory T cell repertoire
@@ -145,6 +145,22 @@
  - other methods generally fall into cell-based normalization (estimate cell-specific global size factor to normalize all genes in same cell, pool cells to estimate more robust size factors then deconvolve pooled size factors to get cell-specific size factors) and gene-based normalization (parametric modeling of individual genes, **like Pearson residuals method SCTransform**, perform adjustments individually for each group of genes with different sequencing depths or different ranges of abundance levels)
 ## Feature selection and dimension reduction
  - identify few latent variables that explain the most variance in data
+# High-throughput and single-cell T cell receptor sequencing technologies
+## Introduction
+ - diversity (D) gene segment only contributes to TCRβ
+ - VDJ gene segments, also the constant (C) gene segment
+ - recombination of gene segments and non-templated addition or deletion of nucleotides between spliced gene segments (junctions, like CDR1-3 **I think**) generate diverse TCR repertoire
+ - complementarity-determining region 3 (CDR3) is the most diverse, hypervariable
+ - unlikely that an individual will have two T cells with the same TCR sequence, so TCR sequences are used as unique identifiers of T cell clones
+ - naive T cell repertoire is highly diverse, memory T cells much less so
+## Amplification strategies for TCR sequencing
+### Multiplex PCR
+ - use a pool of primers to bind diverse TCR V genes
+ - set of forward primers complementary to all known V genes, set of reverse primers for either J or C regions, depending on if starting with gDNA or cDNA, respectively
+### 5' RACE
+ - reverse transcribe RNA with enzyme with terminal transferase activity to add untemplated C nucleotides to 3' end of cDNA
+ - template switch oligonucleotide (TSO) containing complementary poly(G) stretch anchors to this untemplated region of C nucleotides and allows reverse transcriptase to switch templates and extend cDNA to end of TSO which includes a common adaptor sequence
+ - result is that one pair of primers targeting 5' adaptor and constant region is able to amplify all TCR rearrangements
 # Holistic approach to immune checkpoint inhibitor-related adverse events
  - irAEs usually occur within the first months after ICI treatment but can develop as early as after the first dose or as late as years after ICI treatment
  - glucocorticoids are usually used to manage irAEs, other immunosuppressive agents as well
@@ -206,7 +222,7 @@
  - cancers deficient in mismatch repair (MMR) have high mutation burden, seems to be a good predictor of response to PD-1 blockade
  - **many mutant neoantigens in mismatch repair-deficient cancers makes them sensitive to immune checkpoint blockade, regardless of cancer's tissue of origin**
  - show that ICI induces peripheral expansion of tumor-specific T cells and that mismatch repair-deficient tumors harbor functional MANA (mutation-associated neoantigens) specific T cells
- - TCR-seq works by CDR3 sequencing (most variable region of TCRα and β chains, governs interactions with peptide-MHC complexes)
+ - TCR-seq works by CDR3 sequencing (most variable region of TCRα and β chains, governs interactions with peptide-MHC complexes, junction between V and J or D and J genes)
 # mTOR regulates T cell exhaustion and PD-1-targeted immunotherapy response during chronic viral infection
  - background: PD-1-blockade enhances T cell response by promoting differentiation of stem-like T cells towards TIM3<sup>+</sup> cells
  - results: blocking mTOR during T cell expansion enhances T cell response (stem-like T cells accumulate), but blocking mTOR after exhaustion has progressed causes immunosuppression (decreased TIM3<sup>+</sup> cells, increased viral load)
@@ -240,6 +256,14 @@
  - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
  - organ-specific irAEs associated with pre-existing organ dysfunction
  - high pre-treatment soluble CTLA4 associated with irAEs
+# Simultaneous epitope and transcriptome measurement in single cells
+ - cellular indexing of transcriptomes and epitopes by sequencing (CITE-seq), oligonucleotide-labeled antibodies are used to integrate cellular protein and transcriptome measurements into a single cell readout
+ - DNA oligonucleotide conjugated to antibody can be measured by sequencing as digital readout of protein abundance
+ - conjugate antibodies to oligonucleotides designed to be captured by oligo dT-based RNAseq library preparation, contain barcode sequence to identify the antibody, and allow PCR amplification
+ - adopt streptavidin-biotin interaction to link 5' of oligos to antibodies, include disulfide link to allow oligo to be released from antibody in reducing conditions
+ - incubate antibody-oligo complexes with single-cell suspensions, then wash cells to remove unbound antibodies and perform scRNA-seq (of both cellular mRNAs and antibody-derived oligos that both anneal to polyT-containing microparticles via 3' polyA tails)
+ - unique barcode sequence on oligos attached to microparticles indexes cDNA of mRNAs and antibody-oligos of each cell in RT reaction
+ - amplified antibody-derived tags and cDNA molecules separated by size
 # Single-cell RNA-seq reveals expanded clones of islet antigen-reactive CD4<sup>+</sup> T cells in peripheral blood of subjects with type 1 diabetes
  - unclear significance of islet antigen reactive T cells in peripheral blood of T1D patients (similar cells in healthy control subjects)
  - hypothesis: key disease associated cells show evidence of prior antigen exposure, inferred from expanded TCR clonotypes and essential phenotypic properties in their transcriptomes
@@ -262,7 +286,7 @@
  - some clusters show changes in relative percentages of cell populations before/after ICI
 ### Gene marker based cluster annotation identifies effector, regulatory, and memory subsets of peripheral T cells
  - 14/25 clusters express CD3E, 6 of which were dominated by CD8A and 8 by CD4
- - naive CD8 T cells characterized by CD45RA, CCR7, SELL (CD62L0, LEF1)
+ - naive (i.e. Th0) CD8 T cells characterized by CD45RA, CCR7, SELL (CD62L0, LEF1)
  - central memory CD8 T cells contain CCR7, SELL, CD27 as well as CD44, CXCR3, FAS, CD28
  - subset of effector CD8 T cells express TBX21, cytotoxic markers like GZMB, KLRD1, PRF1, CD3E
  - effector memory CD8 T cells display EMOS, GZMK, IFNG
@@ -270,7 +294,7 @@
  - CD8 T helper cells express GATA3
  - wanted to investigate variability in T cells between patients with and without irAEs, perform gene set signature analysis: association of irAE T cells with T cell activation and cytokine secretion genes, so irAE T cells seem to be more associated with effector functions vs. regulatory functions
 ### Patients with immune-related arthritis have higher percentages of CD4 TH cells at baseline
- - enhanced T cell subset transition from naive to effector in patients who develop arthritis serves as evidence of pervasive immune responsiveness
+ - enhanced T cell subset transition from naive (Th0) to effector in patients who develop arthritis serves as evidence of pervasive immune responsiveness
 ### Selected subsets of CD4 TH cells are associated with organ-specific irAEs
  - thyroiditis patients have more CD4 TH cells expressing RORC, IL-21
 ### Patients with inflammatory arthritis have lower levels of CD8 T<sub>CM</sub> cells at baseline
@@ -371,9 +395,39 @@
  - most patients have a single peak of PD-1 blockade-induced immune reinvigoration despite on-going treatment
  - responding exhausted T cells in blood contain TCR clonotypes shared with tumor infiltrating T cells
  - ratio of exhausted T cell reinvigoration to tumor burden predicts clinical response
+# TCR sequencing and cloning methods for repertoire analysis and isolation of tumor-reactive TCRs
+## Abstract
+ - SEQTR (SEQuencing T cell Receptor): combines *in vitro* transcription and single primer pair TCR amplification, combine with PCR to amplify TCR from bulk population, tumor-specific TCR identification and cloning
+ - TCR RNA expression doesn’t affect clonotype quantification, **meaning that you can't infer clonotype frequencies from RNA levels?**
+## Introduction
+ - TCR repertoire refers to assembly of TCR sequences
+## Other TCRseq methods
+### Multiplex PCR
+ - uses pool of primers that targets all V and J germline genes to amplify entire V(D)J rearrangements, or specifically CDR3 region
+ - can introduce amplification biases due to differential primer efficiency
+### 5' RACE
+ - rapid amplification of cDNA ends
+ - uses a single primer that targets known C-gene region of mRNA transcripts
+ - associated with poor efficiency of template switch that adds 5' adapter in only 20-60% of RNA molecules
+## RNA-based assays allow clonotype quantification
+### DNA-based assays
+ - DNA is more stable and present at fixed copy numbers (easier quantification)
+ - DNA from irrelevant V and J segments not part of rearranged TCR sequence is still present, introducing noise
+ - DNA includes both TCRβ alleles while only one is usually present (allelic exclusion)
+### RNA-based assays
+ - RNA reflects what T cell expresses
+ - large RNA copy number increases sensitivity
+ - RNA is compatible with UMIs to correct amplification and sequencing errors
+ - RNA is thought to bias clonotype quantification because of variations in TCR expression among cells, so they perform scTCR-seq to look at TCR mRNA and clonotype (TCR expressing same TCR at protein level) frequencies in same assay
+### scTCR-seq
+ - tumor infiltrating lymphocytes in melanoma patients
+ - T cells express 10 TCRα and 21 TCRβ (presumably unique) mRNA molecules on average (**just 1 per cell though right, so in each patient on average see 10 and 21 unique TCRα and TCRβ mRNA molecules, respectively, on average?**)
+ - TCR expression varied 2-fold around median in 70% of cells
+ - intra-clonotype TCR expression heterogeneity similar to inter-cell heterogeneity, so TCR expression is not clonotype dependent
+ - different T cell states express TCRs to similar degrees (activated cells' TCR expression slightly lower)
 # The role of metabolic dysfunction in T-cell exhaustion during chronic viral infection
  - dysfunction of T cell metabolism contributes to exhaustion
- - naive and memory T cells rely mostly on OXPHOS and FA oxidation for energy, metabolism reprogrammed upon antigen recognition (generates energy but also fuels intermediates for nucleotide, amino acid, and FA synthesis and mitochondrial function, all important for T cell proliferation, differentiation, function), enhanced glycolysis ("Warburg effect", lactic acid fermentation rather than TCA despite normoxic conditions which is less efficient ATP production wise but faster kinetically, glycolysis also helps create intermediates for biomolecule synthesis) important reprogramming during CD4<sup>+</sup> and CD8<sup>+</sup> T cell activation and functioning
+ - naive (Th0) and memory T cells rely mostly on OXPHOS and FA oxidation for energy, metabolism reprogrammed upon antigen recognition (generates energy but also fuels intermediates for nucleotide, amino acid, and FA synthesis and mitochondrial function, all important for T cell proliferation, differentiation, function), enhanced glycolysis ("Warburg effect", lactic acid fermentation rather than TCA despite normoxic conditions which is less efficient ATP production wise but faster kinetically, glycolysis also helps create intermediates for biomolecule synthesis) important reprogramming during CD4<sup>+</sup> and CD8<sup>+</sup> T cell activation and functioning
  - downregulation of glycolysis, augmented lipolysis and FA oxidation in exhausted T cells
 # The yin and yang of co-inhibitory receptors: towards anti-tumor immunity without autoimmunity
  - co-inhibitory receptors: PD-1 (CD279), CTLA-4 (cytotoxic T lymphocyte-associated antigen-4, CD152, high sequence similarity to co-stimulatory CD28 that it outcompetes for ligands B7-1/2), TIGIT (T cell immunoglobulin and ITIM domain, in CD28 protein family), TIM-3 (T cell immunoglobulin and mucin-domain containing protein-3), LAG-3 (lymphocyte activation gene-3)

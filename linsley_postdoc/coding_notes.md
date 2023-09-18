@@ -1,6 +1,9 @@
 # Bioinformatics/biostatistics
  - ROC: receiver operating characteristics, performance measure for automated classification, provides visual and numerical summary of predictor behavior
  - voom algorithm: mean-variance modeling, estimate mean-variance in data, then use this to compute appropriate precision weight for each observation. count data (like RNAseq) always shows mean-variance relationships (increasing variance with increasing count size). convert counts to logCPM values (adding 0.5 to avoid log of 0), normalize matrix of logCPM values, fit linear models, fit trend to square root standard deviations as function of average log count measure, use trend line to predict variance of each logCPM value, inverse variance is precision weight estimate
+ - hyperparameter: could refer to machine learning (parameter that controls learning process) or Bayesian statistics (parameter of prior distribution)
+ - metadata: information about the data other than the data itself (for example time and data of data creation, data's purpose)
+- mixed models for repeated measures (MMRM): approach to model data with high variability making few/no assumptions about the 
 ## Statistics
  - discrete random variables (like counts) will have associated probability distributions (also called probability mass function): list of possible values of random variable and their associated probabilities (or as a formula rather than a list), defined for a finite or countably infinite set of possible values (usually integers)
  - cumulative distribution function: probability that random variable is less than or equal to a certain value
