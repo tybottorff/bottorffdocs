@@ -51,8 +51,11 @@
  - uniform manifold approximation and projection
  - quicker and can preserve more global structure than tSNE (more like PCA)
  - preserves centroids of clusters, can plot on graph
+## Clustering
+### PhenoGraph algorithm
+ - creates graph ("network") representing phenotypic similarities between cells by calculating Jaccard coefficient (size of intersection between sample sets divided by size of union between sample sets = |A ∩ B| / |A ∪ B| = |A ∩ B| / (|A| + |B| - |A ∩ B|)) between nearest-neighbor sets, then identifies communities using Louvain method (focuses on ad-hoc networks with known community structure, first looks for "small" communities by optimizing modularity in a local way, then aggregates nodes of same community and builds a new network whose nodes are communities, repeat iteratively until maximum of modularity i.e. quality of communities is attained. output gives several partitions where partition after first step is many small size communities and at subsequent steps larger and larger communities are found due to aggregation mechanism, hierarchical decomposition of network) in graph
 ### k-means
- - clustering technique
+ - a dimensional reducing clustering technique
  - choose random coordinates for locations of k-centroids, group data points together by finding nearest centroid (k groups), calculate new center of each centroid by taking mean position of data points in each group, iterate until centroids stop moving significant amounts
  - downside is you need to choose the number of clusters beforehand (k value)
  - minimizing the within cluster sum of squares over K clusters, partition data points into K initial clusters (randomly or heuristically), computes cluster means, constructs new partition by associating each point with closest cluster mean (yielding new clusters of which means are calculated), make new partition by associating each point with closest cluster mean again, repeat until convergence (data points no longer change clusters)

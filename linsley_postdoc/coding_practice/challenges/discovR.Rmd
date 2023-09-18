@@ -1,5 +1,6 @@
 ---
 title: "BRI Challenge: Discov-R"
+author: "Ty Bottorff"
 output: html_notebook
 ---
 
@@ -26,7 +27,15 @@ myExpt <- readRDS("./data/220831_PlanBAfterClustering.RDS")
 
 ```
 
-# Get clusters
+# Confirm clustering
+
+```{r}
+
+print(myExpt)
+
+```
+
+# Assess clustering results
 
 ```{r}
 
@@ -37,3 +46,84 @@ getSubjectClusters(myExpt)
 # TODO
 
 1) compare heatmap I made to one made by discovR, add stuff at top
+
+# Get metaclusters
+
+```{r}
+
+myExpt <- metaclusterDiscovrExperiment(myExpt)
+
+print(myExpt)
+
+```
+
+# Retrieve event counts and fraction of events for each subject/subset assigned to each metacluster
+
+```{r}
+
+getMetaclusterOccupancy(myExpt)
+
+```
+
+# Look at metacluster markers
+
+```{r}
+
+myExpt$metaclusterMarkers
+
+```
+
+# Extract metacluster df to allow us to make heatmaps instead using ComplexHeatmap
+
+```{r}
+
+# extract df of allSubsetAllSubjectZscores from myExpt object
+# subset rows specified by metaclusterMarkers
+zscore_hmap_data <- as.matrix(myExpt$allSubsetAllSubjectZscores[myExpt$metaclusterMarkers,])
+
+# extract row (marker) names from above matrix, set marker column to extracted row names
+# create new df with marker and zscore_hmap_data columns
+heatmap_data_frame <- data.frame(marker = rownames(zscore_hmap_data), zscore_hmap_data)
+
+heatmap_data_frame
+
+```
+
+# Combine metacluster information into long form df
+
+```{r}
+
+long_heatmap_data_frame <- heatmap_data_frame %>%
+  # select something...
+  pivot_longer(cols = -marker, names_to = "cluster", values_to = "zscore_value")
+  # mutate something...
+
+long_heatmap_data_frame
+
+```
+
+# Produce heatmap
+
+```{r}
+
+# Create a matrix with clusters as columns and markers as rows
+heatmap_matrix <- reshape2::dcast(long_heatmap_data_frame, marker ~ cluster, value.var = "zscore_value")
+
+# Set row names to 'marker' and remove the 'marker' column
+rownames(heatmap_matrix) <- heatmap_matrix$marker
+heatmap_matrix <- heatmap_matrix[, -1]
+
+# Create a heatmap
+heatmap_object <- Heatmap(heatmap_matrix,
+                          name = "Z-Score",
+                          column_title = "Subjects",
+                          row_title = "Markers",
+                          cluster_rows = TRUE,  # Cluster rows
+                          cluster_columns = TRUE,  # Cluster columns
+                          show_column_names = FALSE,  # Hide column names
+)
+
+# Draw the heatmap
+draw(heatmap_object)
+
+```
