@@ -1,0 +1,75 @@
+---
+title: "scRNAseq reveals distinct T cell populations in irAE of ICI"
+output: html_notebook
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9873824/
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(iCellR)
+
+```
+
+# Load samples
+
+```{r}
+
+# List of sample names
+sample_names <- c(
+  "GSM6668925_P1_T", "GSM6668926_P1_TN"
+  #,"GSM6668927_P2_T", "GSM6668928_P2_TN", "GSM6668929_P4_T", "GSM6668930_P4_TN", "GSM6668931_P5_T", "GSM6668932_P5_TN",
+  #"GSM6668933_P7_T", "GSM6668934_P7_TN", "GSM6668935_P17_T", "GSM6668936_P17_TN"
+  #"GSM6668937_P3_T", "GSM6668938_P3_TN", "GSM6668939_P8_T", "GSM6668940_P8_TN",
+  #"GSM6668941_P9_T", "GSM6668942_P9_TN", "GSM6668943_P10_T", "GSM6668944_P10_TN",
+  #"GSM6668945_P11_T", "GSM6668946_P11_TN", "GSM6668947_P18_T", "GSM6668948_P18_TN",
+  #"GSM6668949_P19_T", "GSM6668950_P19_TN", "GSM6668952_P6_TN", "GSM6668951_P6_T",
+  #"GSM6668953_P12_T", "GSM6668954_P12_TN", "GSM6668955_P13_T", "GSM6668956_P13_TN",
+  #"GSM6668957_P14_T", "GSM6668958_P14_TN", "GSM6668959_P15_T", "GSM6668960_P15_TN",
+  #"GSM6668961_P16_T", "GSM6668962_P16_TN", "GSM6668963_P20_T", "GSM6668964_P20_TN",
+  #"GSM6668965_P21_T", "GSM6668966_P21_TN", "GSM6668967_P22_T", "GSM6668968_P22_TN",
+  #"GSM6668969_P23_T", "GSM6668970_P23_TN", "GSM6668971_P24_T", "GSM6668972_P24_TN"
+)
+
+# Loop through sample names and load 10x data for each sample
+blood_t_cells_list <- list()  # Create a list to store the data for each sample
+
+for (sample_name in sample_names) {
+  sample_dir <- paste0("./raw_data/", sample_name, "/")
+  blood_t_cells_list[[sample_name]] <- load10x(sample_dir)
+}
+
+
+```
+
+```{r}
+blood_t_cells_list
+```
+
+# Import metadata
+
+```{r}
+
+skip_rows <- 29  # Skip the first 29 rows
+num_rows <- 42   # Read 42 rows (30 to 71)
+
+metadata <- read.table("./raw_data/GSE216329_series_matrix.txt", header = TRUE, sep = "\t", skip = skip_rows, nrows = num_rows)
+
+metadata[11:12, ]
+
+```
+
+# Aggregate iCellR objects from all samples
+
+```{r}
+
+my.data <- data.aggregation(samples = sample_names,
+	condition.names = c("WT","KO","Ctrl","KD"))
+
+```

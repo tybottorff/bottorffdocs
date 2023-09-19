@@ -1,0 +1,192 @@
+---
+title: "scRNAseq reveals distinct T cell populations in irAE of ICI"
+output: html_notebook
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9873824/
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+blood_t_cells_filtered <- readRDS("./saved_data/blood_t_cells_filtered.rds")
+
+```
+
+# Normalize data
+
+```{r}
+
+blood_t_cells_filtered <- NormalizeData(blood_t_cells_filtered)
+
+```
+
+# Select variable features
+
+```{r}
+
+blood_t_cells_filtered <- FindVariableFeatures(blood_t_cells_filtered, nfeatures = 2000)
+
+```
+
+# Identify the 10 most highly variable genes
+
+```{r}
+
+top10 <- head(VariableFeatures(blood_t_cells_filtered), 10)
+
+# plot variable features with and without labels
+plot1 <- VariableFeaturePlot(blood_t_cells_filtered) + 
+  theme(legend.position="top")
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE) + 
+  theme(legend.position="none")
+plot1 + plot2
+
+```
+
+# Scale the data
+
+```{r}
+
+blood_t_cells_filtered <- ScaleData(blood_t_cells_filtered)
+
+```
+
+# Linear dimensionality reduction using principal component analysis (PCA)
+
+```{r}
+
+blood_t_cells_filtered <- RunPCA(blood_t_cells_filtered, features = VariableFeatures(object = blood_t_cells_filtered), npcs = 50)
+
+```
+
+# Visualize contribution to variance from each PC
+
+```{r}
+
+ElbowPlot(blood_t_cells_filtered, ndims = ncol(Embeddings(blood_t_cells_filtered, "pca")))
+
+```
+
+# Visualize many genes contributing to PCs for first two PCs
+
+```{r}
+
+VizDimLoadings(blood_t_cells_filtered, dims = 1, reduction = "pca")
+
+VizDimLoadings(blood_t_cells_filtered, dims = 2, reduction = "pca")
+
+```
+
+# Visualize top genes contributing most to each PC for many PCs
+
+```{r}
+
+PCHeatmap(blood_t_cells_filtered, dims = 1:20, cells = 500, balanced = TRUE, ncol = 4)
+
+```
+
+# Visualize PCA
+
+```{r}
+
+DimPlot(blood_t_cells_filtered, group.by = "orig.ident", reduction = "pca", raster = FALSE)
+
+```
+
+# Cluster the cells
+
+```{r}
+
+blood_t_cells_filtered <- FindNeighbors(blood_t_cells_filtered, dims = 1:20)
+
+blood_t_cells_filtered <- FindClusters(blood_t_cells_filtered, resolution = 0.5)
+
+```
+
+# Non-linear dimension reduction for visualization
+
+```{r}
+
+blood_t_cells_filtered <- RunUMAP(blood_t_cells_filtered, dims = 1:20)
+
+```
+
+DimPlot(pbmc, reduction = "umap", label = TRUE)
+
+# Visualize UMAP with patient samples annotated
+
+```{r}
+
+plot1 <- UMAPPlot(blood_t_cells_filtered, raster = FALSE)
+
+plot1
+
+```
+
+# Visualize UMAP with cell clusters numbered
+
+```{r}
+
+plot1 <- DimPlot(blood_t_cells_filtered, reduction = "umap", label = TRUE, raster = FALSE)
+
+plot1
+
+```
+
+# Use established markers to determine identities of cell clusters
+
+```{r}
+
+# take markers from https://www.cell.com/cms/10.1016/j.xcrm.2022.100868/attachment/c21c9923-ade8-4a28-8518-aa1f7bc0d1e5/mmc1 table S2
+
+```
+
+# Create KNetL plot
+
+```{r}
+
+# use zoom of 500 (as they used)
+
+```
+
+# Incorporate CITE-seq data
+
+```{r}
+
+
+
+```

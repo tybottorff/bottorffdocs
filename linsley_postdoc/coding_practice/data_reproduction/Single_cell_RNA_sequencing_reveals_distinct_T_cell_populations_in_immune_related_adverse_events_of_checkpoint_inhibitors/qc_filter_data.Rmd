@@ -1,0 +1,333 @@
+---
+title: "scRNAseq reveals distinct T cell populations in irAE of ICI"
+output: html_notebook
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9873824/
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(TAR)
+library(Seurat)
+library(Matrix)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Download data
+
+```{r}
+
+# Specify the URL of the .tar file
+url <- "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE216329&format=file"
+
+# Specify the local file path where you want to save the .tar file
+local_file <- "./raw_data/GSE216329.tar"
+
+# Check if the file already exists
+if (!file.exists(local_file)) {
+  # If the file does not exist, download it
+  download.file(url, destfile = local_file, method = "auto")
+  cat("Download complete.\n")
+} else {
+  cat("File already exists. No need to download.\n")
+}
+
+```
+
+# Extract contents of the .tar file into the data directory
+
+```{r}
+
+# Extract the contents of the .tar file
+output_dir <- "./raw_data/"
+
+# Use the system command (runs terminal commands from within R) to extract the files, -C specifies directory
+system(paste("tar -xf", local_file, "-C", output_dir))
+
+# manually renamed 2 files (.features. and .enes. to .genes.)
+
+```
+
+# Create a Seurat object for each sample
+
+```{r}
+
+# List of sample names
+sample_names <- c(
+  "GSM6668925_P1_T", "GSM6668926_P1_TN", "GSM6668927_P2_T", "GSM6668928_P2_TN",
+  "GSM6668929_P4_T", "GSM6668930_P4_TN", "GSM6668931_P5_T", "GSM6668932_P5_TN",
+  "GSM6668933_P7_T", "GSM6668934_P7_TN", "GSM6668935_P17_T", "GSM6668936_P17_TN",
+  "GSM6668937_P3_T", "GSM6668938_P3_TN", "GSM6668939_P8_T", "GSM6668940_P8_TN",
+  "GSM6668941_P9_T", "GSM6668942_P9_TN", "GSM6668943_P10_T", "GSM6668944_P10_TN",
+  "GSM6668945_P11_T", "GSM6668946_P11_TN", "GSM6668947_P18_T", "GSM6668948_P18_TN",
+  "GSM6668949_P19_T", "GSM6668950_P19_TN", "GSM6668952_P6_TN", "GSM6668951_P6_T",
+  "GSM6668953_P12_T", "GSM6668954_P12_TN", "GSM6668955_P13_T", "GSM6668956_P13_TN",
+  "GSM6668957_P14_T", "GSM6668958_P14_TN", "GSM6668959_P15_T", "GSM6668960_P15_TN",
+  "GSM6668961_P16_T", "GSM6668962_P16_TN", "GSM6668963_P20_T", "GSM6668964_P20_TN",
+  "GSM6668965_P21_T", "GSM6668966_P21_TN", "GSM6668967_P22_T", "GSM6668968_P22_TN",
+  "GSM6668969_P23_T", "GSM6668970_P23_TN", "GSM6668971_P24_T", "GSM6668972_P24_TN"
+)
+
+# Create Seurat objects for each sample
+blood_t_cells_objects <- list()
+
+for (sample_name in sample_names) {
+  # Construct file paths
+  counts_file <- paste0(output_dir, sample_name, ".matrix.mtx.gz")
+  barcodes_file <- paste0(output_dir, sample_name, ".barcodes.tsv.gz")
+  genes_file <- paste0(output_dir, sample_name, ".genes.tsv.gz")
+  
+  # Read data files
+  counts <- readMM(counts_file)
+  barcodes <- read.table(barcodes_file, stringsAsFactors = FALSE)[, 1]
+  features <- read.csv(genes_file, stringsAsFactors = FALSE, sep = "\t", header = FALSE)
+  rownames(counts) <- make.unique(features[, 2])
+  colnames(counts) <- barcodes
+  
+  # Create Seurat object
+  blood_t_cells <- CreateSeuratObject(counts, project = sample_name)
+  
+  # Store Seurat object in the list
+  blood_t_cells_objects[[sample_name]] <- blood_t_cells
+}
+
+
+```
+
+# Merge Seurat objects from all samples
+
+```{r}
+
+# Merge the first element with a sublist of the rest excluding the first element
+blood_t_cells <- merge(blood_t_cells_objects[[1]], y = blood_t_cells_objects[-1])
+
+```
+
+# Calculate percent mitochondrial, ribosomal, hemoglobin features
+
+```{r}
+
+blood_t_cells[["percent.mt"]] <- PercentageFeatureSet(blood_t_cells, pattern = "^MT-")
+blood_t_cells[["percent.rb"]] <- PercentageFeatureSet(blood_t_cells, pattern = "^RP[SL]")
+blood_t_cells[["percent.hb"]] <- PercentageFeatureSet(blood_t_cells, pattern = "HB[^(P)]")
+
+```
+
+# Shorten sample names
+
+```{r}
+
+blood_t_cells$orig.ident <- gsub("GSM666\\d+_([A-Za-z0-9]+)_([A-Za-z0-9]+)", "\\1_\\2", blood_t_cells$orig.ident)
+
+```
+
+# View metadata
+
+```{r}
+
+View(blood_t_cells@meta.data)
+
+```
+
+# Count number of cells from all samples
+
+```{r}
+
+length(colnames(blood_t_cells)) # 222678 cells
+
+```
+
+# Count cells per sample
+
+```{r}
+
+cell_capture <- blood_t_cells@meta.data %>%
+  group_by(orig.ident) %>%
+  dplyr::count()
+
+cell_capture %>% arrange(n)
+
+```
+
+# Set author QC metric thresholds
+
+```{r}
+
+qcMetricsThresholds <-
+  c(
+    "nFeature_RNA" = 500,
+    "percent_mito" = 20
+  )
+
+```
+
+# Plot distributions of nFeature_RNA across samples
+
+```{r}
+
+nFeature_RNA_QC <- ggplot(blood_t_cells@meta.data, mapping = aes(x = nFeature_RNA)) +
+  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
+  scale_x_log10() +
+  geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA"],
+             color = "red", linetype = "dashed")
+ggsave(nFeature_RNA_QC, file = "./figures/nFeature_RNA.tiff", device = "tiff")
+
+nFeature_RNA_QC
+
+# bimodal distributions, smaller left modes I believe are mistaken for cells (like lysed cells' RNA escaped and measured in empty droplets really)
+
+```
+
+# Plot distributions of nCount_RNA across samples
+
+```{r}
+
+nCount_RNA_QC <- ggplot(blood_t_cells@meta.data, mapping = aes(x = nCount_RNA)) +
+  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
+  scale_x_log10()
+ggsave(nCount_RNA_QC, file = "./figures/nCount_RNA.tiff", device = "tiff")
+
+nCount_RNA_QC
+
+# messy distributions, smaller left modes I believe are mistaken for cells (like lysed cells' RNA escaped and measured in empty droplets really), didn't plan to set a cutoff later for this (authors didn't mention)
+
+```
+
+# Plot distributions of percent mito across samples
+
+```{r}
+
+percent_mt_QC <- ggplot(blood_t_cells@meta.data, mapping = aes(x = percent.mt + 1/length(colnames(blood_t_cells)))) +
+  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
+  scale_x_log10() +
+  geom_vline(xintercept = qcMetricsThresholds["percent_mito"],
+             color = "red", linetype = "dashed") +
+  xlab("percent.mt (with pseudocount)")
+ggsave(percent_mt_QC, file = "./figures/percent_mt.tiff", device = "tiff")
+
+percent_mt_QC
+
+# 20% is the authors' cutoff, perhaps I should try lower instead? multimodal
+
+```
+# Plot distributions of percent ribo across samples
+
+```{r}
+
+percent_rb_QC <- ggplot(blood_t_cells@meta.data, mapping = aes(x = percent.rb + 1/length(colnames(blood_t_cells)))) +
+  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
+  scale_x_log10() +
+  xlab("percent.rb (with pseudocount)")
+ggsave(percent_rb_QC, file = "./figures/percent_rb.tiff", device = "tiff")
+
+percent_rb_QC
+
+# authors didn't mention cutoff for this
+
+```
+
+# Plot distributions of percent hemoglobin across samples
+
+```{r}
+
+percent_hb_QC <- ggplot(blood_t_cells@meta.data, mapping = aes(x = percent.hb + 1/length(colnames(blood_t_cells)))) +
+  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
+  scale_x_log10() +
+  xlab("percent.hb (with pseudocount)")
+ggsave(percent_hb_QC, file = "./figures/percent_hb.tiff", device = "tiff")
+
+percent_hb_QC
+
+# authors didn't mention cutoff for this
+
+```
+
+# Filter cells based on QC metrics, track how many drop out
+
+```{r}
+
+cellsKeep <-
+  WhichCells(
+    blood_t_cells, expression = nFeature_RNA >= qcMetricsThresholds["nFeature_RNA"]) %>%
+  intersect(
+    WhichCells(
+      blood_t_cells, expression = percent.mt <= qcMetricsThresholds["percent_mito"]))
+cellsDrop <-
+  setdiff(colnames(blood_t_cells), cellsKeep)
+length(cellsDrop) # 60049 cells dropped from analysis
+
+# 59107 cells dropped due to nFeature_RNA threshold
+cellsDropped_nFeature <- sum(
+  blood_t_cells$nFeature_RNA < qcMetricsThresholds["nFeature_RNA"]
+)
+
+# 2392 cells dropped due to percent.mt threshold
+cellsDropped_percentMito <- sum(
+  blood_t_cells$percent.mt > qcMetricsThresholds["percent_mito"]
+)
+
+blood_t_cells_filtered <-
+  subset(blood_t_cells, cells = cellsKeep)
+
+length(colnames(blood_t_cells_filtered)) # 162629 cells left behind in filtered data
+
+```
+
+# Count cells per sample after QC filtering
+
+```{r}
+
+cell_capture <- blood_t_cells_filtered@meta.data %>%
+  group_by(orig.ident) %>%
+  dplyr::count()
+
+cell_capture %>% arrange(n)
+
+```
+# Import more metadata
+
+```{r}
+
+# Specify the rows to skip and the number of rows to read
+skip_rows <- 29  # Skip the first 29 rows
+num_rows <- 42   # Read 42 rows (30 to 71)
+
+df <- read.table("./raw_data/GSE216329_series_matrix.txt", header = TRUE, sep = "\t", skip = skip_rows, nrows = num_rows)
+
+df
+
+```
+
+# Save the resulting QC filtered Seurat object
+
+```{r}
+
+saveRDS(blood_t_cells_filtered, file="./saved_data/blood_t_cells_filtered.rds")
+
+```
