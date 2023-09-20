@@ -224,11 +224,27 @@ opt.pcs.plot(my.obj)
 
 ```
 
-# Create UMAP
+# Create UMAP and KNetL
 
 ```{r}
 
 # UMAP
 my.obj <- run.umap(my.obj, dims = 1:10)
+
+# Because knetl has a very high resolution it's best to use a dim of 20 (this usually works best for most data)
+my.obj <- run.knetl(my.obj, dims = 1:20, zoom = 500)
+
+```
+
+# Visualize PCA, UMAP, KNetL
+
+```{r}
+
+A= cluster.plot(my.obj,plot.type = "pca",interactive = F)
+B= cluster.plot(my.obj,plot.type = "umap",interactive = F)
+C= cluster.plot(my.obj,plot.type = "knetl",interactive = F)
+
+library(gridExtra)
+grid.arrange(A,B,C)
 
 ```
