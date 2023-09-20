@@ -18,37 +18,6 @@ library(tidyr)
 
 ```
 
-# Load samples
-
-```{r}
-
-# List of sample names
-sample_names <- c(
-  "GSM6668925_P1_T", "GSM6668926_P1_TN"
-  #,"GSM6668927_P2_T", "GSM6668928_P2_TN", "GSM6668929_P4_T", "GSM6668930_P4_TN", "GSM6668931_P5_T", "GSM6668932_P5_TN",
-  #"GSM6668933_P7_T", "GSM6668934_P7_TN", "GSM6668935_P17_T", "GSM6668936_P17_TN"
-  #"GSM6668937_P3_T", "GSM6668938_P3_TN", "GSM6668939_P8_T", "GSM6668940_P8_TN",
-  #"GSM6668941_P9_T", "GSM6668942_P9_TN", "GSM6668943_P10_T", "GSM6668944_P10_TN",
-  #"GSM6668945_P11_T", "GSM6668946_P11_TN", "GSM6668947_P18_T", "GSM6668948_P18_TN",
-  #"GSM6668949_P19_T", "GSM6668950_P19_TN", "GSM6668952_P6_TN", "GSM6668951_P6_T",
-  #"GSM6668953_P12_T", "GSM6668954_P12_TN", "GSM6668955_P13_T", "GSM6668956_P13_TN",
-  #"GSM6668957_P14_T", "GSM6668958_P14_TN", "GSM6668959_P15_T", "GSM6668960_P15_TN",
-  #"GSM6668961_P16_T", "GSM6668962_P16_TN", "GSM6668963_P20_T", "GSM6668964_P20_TN",
-  #"GSM6668965_P21_T", "GSM6668966_P21_TN", "GSM6668967_P22_T", "GSM6668968_P22_TN",
-  #"GSM6668969_P23_T", "GSM6668970_P23_TN", "GSM6668971_P24_T", "GSM6668972_P24_TN"
-)
-
-# Loop through sample names and load 10x data for each sample
-my.data <- list()  # Create a list to store the data for each sample
-
-for (sample_name in sample_names) {
-  sample_dir <- paste0("./raw_data/", sample_name, "/")
-  my.data[[sample_name]] <- load10x(sample_dir)
-}
-
-
-```
-
 # Import metadata, extract pertinent information for sample conditions
 
 ```{r}
@@ -89,17 +58,65 @@ print(paired_values)
 
 ```
 
-# Aggregate data from all samples
+# Load samples
+
+```{r}
+
+# List of sample names
+sample_names <- c(
+  "GSM6668925_P1_T", "GSM6668926_P1_TN","GSM6668927_P2_T", "GSM6668928_P2_TN", "GSM6668929_P4_T", "GSM6668930_P4_TN", "GSM6668931_P5_T", "GSM6668932_P5_TN"
+  #,"GSM6668933_P7_T", "GSM6668934_P7_TN", "GSM6668935_P17_T", "GSM6668936_P17_TN"
+  #"GSM6668937_P3_T", "GSM6668938_P3_TN", "GSM6668939_P8_T", "GSM6668940_P8_TN",
+  #"GSM6668941_P9_T", "GSM6668942_P9_TN", "GSM6668943_P10_T", "GSM6668944_P10_TN",
+  #"GSM6668945_P11_T", "GSM6668946_P11_TN", "GSM6668947_P18_T", "GSM6668948_P18_TN",
+  #"GSM6668949_P19_T", "GSM6668950_P19_TN", "GSM6668952_P6_TN", "GSM6668951_P6_T",
+  #"GSM6668953_P12_T", "GSM6668954_P12_TN", "GSM6668955_P13_T", "GSM6668956_P13_TN",
+  #"GSM6668957_P14_T", "GSM6668958_P14_TN", "GSM6668959_P15_T", "GSM6668960_P15_TN",
+  #"GSM6668961_P16_T", "GSM6668962_P16_TN", "GSM6668963_P20_T", "GSM6668964_P20_TN",
+  #"GSM6668965_P21_T", "GSM6668966_P21_TN", "GSM6668967_P22_T", "GSM6668968_P22_TN",
+  #"GSM6668969_P23_T", "GSM6668970_P23_TN", "GSM6668971_P24_T", "GSM6668972_P24_TN"
+)
+
+# Loop through sample names and load 10x data for each sample
+my.data <- list()  # Create a list to store the data for each sample
+
+for (sample_name in sample_names) {
+  sample_dir <- paste0("./raw_data/", sample_name, "/")
+  my.data[[sample_name]] <- load10x(sample_dir)
+}
+
+
+```
+
+# Assign sample names
 
 ```{r}
 
 sample1 <- my.data$GSM6668925_P1_T
 sample2 <- my.data$GSM6668926_P1_TN
+sample3 <- my.data$GSM6668927_P2_T
+sample4 <- my.data$GSM6668928_P2_TN
+sample5 <- my.data$GSM6668929_P4_T
+sample6 <- my.data$GSM6668930_P4_TN
+sample7 <- my.data$GSM6668931_P5_T
+sample8 <- my.data$GSM6668932_P5_TN
 
 # very clunky for now
 
-my.data_aggregate <- data.aggregation(samples = c("sample1","sample2"),
-	condition.names = paired_values[0:2])
+rm(my.data)
+
+```
+
+# Aggregate data
+
+```{r}
+
+my.data_aggregate <- data.aggregation(samples = c("sample1","sample2","sample3","sample4","sample5","sample6","sample7","sample8"),
+	condition.names = paired_values[1:8])
+
+# very clunky for now
+
+rm(sample1,sample2,sample3,sample4,sample5,sample6,sample7,sample8)
 
 ```
 
@@ -110,6 +127,8 @@ my.data_aggregate <- data.aggregation(samples = c("sample1","sample2"),
 my.obj <- make.obj(my.data_aggregate)
 
 my.obj
+
+rm(my.data_aggregate)
 
 ```
 
@@ -151,9 +170,9 @@ stats.plot(my.obj, plot.type = "point.gene.umi", out.name = "gene-umi-plot")
 ```{r}
 
 # 33694 cells present before filtering
-dim(my.obj@main.data)
+#dim(my.obj@main.data)
 
-my.obj <- cell.filter(my.obj,
+my.obj_filtered <- cell.filter(my.obj,
 	min.mito = 0,
 	max.mito = 0.2,
 	min.genes = 500,
@@ -162,7 +181,9 @@ my.obj <- cell.filter(my.obj,
 	max.umis = Inf)
 
 # 11387 cells present after filtering
-dim(my.obj@main.data)
+#dim(my.obj_filtered@main.data)
+
+rm(my.obj)
 
 ```
 
@@ -170,7 +191,7 @@ dim(my.obj@main.data)
 
 ```{r}
 
-my.obj <- norm.data(my.obj, 
+my.obj_filtered <- norm.data(my.obj_filtered, 
      norm.method = "ranked.glsf",
      top.rank = 500) # best for scRNA-Seq
 
@@ -180,9 +201,9 @@ my.obj <- norm.data(my.obj,
 
 ```{r}
 
-my.obj <- gene.stats(my.obj, which.data = "main.data")
+my.obj_filtered <- gene.stats(my.obj_filtered, which.data = "main.data")
 
-head(my.obj@gene.data[order(my.obj@gene.data$numberOfCells, decreasing = T),])
+head(my.obj_filtered@gene.data[order(my.obj_filtered@gene.data$numberOfCells, decreasing = T),])
 
 ```
 
@@ -191,7 +212,7 @@ head(my.obj@gene.data[order(my.obj@gene.data$numberOfCells, decreasing = T),])
 ```{r}
 
 # See model plot 
-make.gene.model(my.obj, my.out.put = "plot",
+make.gene.model(my.obj_filtered, my.out.put = "plot",
 	dispersion.limit = 1.5, 
 	base.mean.rank = 1500, 
 	no.mito.model = T, 
@@ -201,7 +222,7 @@ make.gene.model(my.obj, my.out.put = "plot",
 	
 # Write the gene model data into the object
 
-my.obj <- make.gene.model(my.obj, my.out.put = "data",
+my.obj_filtered <- make.gene.model(my.obj_filtered, my.out.put = "data",
 	dispersion.limit = 1.5, 
 	base.mean.rank = 1500, 
 	no.mito.model = T, 
@@ -209,7 +230,7 @@ my.obj <- make.gene.model(my.obj, my.out.put = "data",
 	interactive = F,
 	out.name = "gene.model")
 
-head(my.obj@gene.model)
+head(my.obj_filtered@gene.model)
 
 ```
 
@@ -218,9 +239,9 @@ head(my.obj@gene.model)
 ```{r}
 
 # run PCA in case no batch alignment is necessary
-my.obj <- run.pca(my.obj, method = "gene.model", gene.list = my.obj@gene.model,data.type = "main")
+my.obj_filtered <- run.pca(my.obj_filtered, method = "gene.model", gene.list = my.obj_filtered@gene.model,data.type = "main")
 
-opt.pcs.plot(my.obj)
+opt.pcs.plot(my.obj_filtered)
 
 ```
 
@@ -229,10 +250,10 @@ opt.pcs.plot(my.obj)
 ```{r}
 
 # UMAP
-my.obj <- run.umap(my.obj, dims = 1:10)
+my.obj_filtered <- run.umap(my.obj_filtered, dims = 1:10)
 
 # Because knetl has a very high resolution it's best to use a dim of 20 (this usually works best for most data)
-my.obj <- run.knetl(my.obj, dims = 1:20, zoom = 500)
+my.obj_filtered <- run.knetl(my.obj_filtered, dims = 1:20, zoom = 500)
 
 ```
 
@@ -240,9 +261,9 @@ my.obj <- run.knetl(my.obj, dims = 1:20, zoom = 500)
 
 ```{r}
 
-A= cluster.plot(my.obj,plot.type = "pca",interactive = F)
-B= cluster.plot(my.obj,plot.type = "umap",interactive = F)
-C= cluster.plot(my.obj,plot.type = "knetl",interactive = F)
+A= cluster.plot(my.obj_filtered,plot.type = "pca",interactive = F)
+B= cluster.plot(my.obj_filtered,plot.type = "umap",interactive = F)
+C= cluster.plot(my.obj_filtered,plot.type = "knetl",interactive = F)
 
 library(gridExtra)
 grid.arrange(A,B,C)
