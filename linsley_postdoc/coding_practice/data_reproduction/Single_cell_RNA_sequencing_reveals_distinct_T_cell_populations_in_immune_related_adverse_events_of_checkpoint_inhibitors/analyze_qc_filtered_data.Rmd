@@ -46,6 +46,56 @@ blood_t_cells_filtered <- readRDS("./saved_data/blood_t_cells_filtered.rds")
 
 ```
 
+# Extract pertinent information from more metadata (irAE status, treatment status), add to current metadata
+
+```{r}
+
+skip_rows <- 29  # Skip the first 29 rows
+num_rows <- 42   # Read 42 rows (30 to 71)
+
+metadata <- read.table("./raw_data/GSE216329_series_matrix.txt", header = TRUE, sep = "\t", skip = skip_rows, nrows = num_rows)
+
+filtered_metadata <- metadata[11:12, ][2:49]
+
+pattern_1 <- "^disease:\\s+"
+
+# Use gsub to replace the values
+gsubbed_filtered_metadata <- data.frame(lapply(filtered_metadata, function(col) {
+  gsub(pattern_1, "", col)
+}))
+
+pattern_2 <- "^condition:\\s+"
+
+df <- data.frame(lapply(gsubbed_filtered_metadata, function(col) {
+  gsub(pattern_2, "", col)
+}))
+
+# Add a new column for row identifiers
+df$row_id <- 1:nrow(df)
+
+# Reshape the data for irAE
+df_irAE <- df %>%
+  pivot_longer(cols = -c(row_id), names_to = "orig.ident", values_to = "irAE") %>%
+  filter(row_id == 1) %>%
+  select(-row_id)
+
+# Reshape the data for treatment_status
+df_treatment <- df %>%
+  pivot_longer(cols = -c(row_id), names_to = "orig.ident", values_to = "treatment_status") %>%
+  filter(row_id == 2) %>%
+  select(-row_id, -orig.ident)
+
+# Combine the two data frames
+reworked_metadata <- cbind(df_irAE, df_treatment)
+
+# Print the final data frame
+print(reworked_metadata)
+
+# Join new metadata (irAE, treatment_status) with current metadata
+blood_t_cells_filtered@meta.data <- left_join(blood_t_cells_filtered@meta.data, reworked_metadata, by = "orig.ident")
+
+```
+
 # Normalize data
 
 ```{r}
