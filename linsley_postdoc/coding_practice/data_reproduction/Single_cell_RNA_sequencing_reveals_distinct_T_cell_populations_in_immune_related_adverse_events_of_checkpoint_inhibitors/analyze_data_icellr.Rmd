@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 
 library(iCellR)
+library(tidyr)
 
 ```
 
@@ -38,21 +39,17 @@ sample_names <- c(
 )
 
 # Loop through sample names and load 10x data for each sample
-blood_t_cells_list <- list()  # Create a list to store the data for each sample
+my.data <- list()  # Create a list to store the data for each sample
 
 for (sample_name in sample_names) {
   sample_dir <- paste0("./raw_data/", sample_name, "/")
-  blood_t_cells_list[[sample_name]] <- load10x(sample_dir)
+  my.data[[sample_name]] <- load10x(sample_dir)
 }
 
 
 ```
 
-```{r}
-blood_t_cells_list
-```
-
-# Import metadata
+# Import metadata, extract pertinent information for sample conditions
 
 ```{r}
 
@@ -61,15 +58,177 @@ num_rows <- 42   # Read 42 rows (30 to 71)
 
 metadata <- read.table("./raw_data/GSE216329_series_matrix.txt", header = TRUE, sep = "\t", skip = skip_rows, nrows = num_rows)
 
-metadata[11:12, ]
+filtered_metadata <- metadata[11:12, ][2:49]
+
+pattern_1 <- "^disease:\\s+"
+
+# Use gsub to replace the values
+gsubbed_filtered_metadata <- data.frame(lapply(filtered_metadata, function(col) {
+  gsub(pattern_1, "", col)
+}))
+
+pattern_2 <- "^condition:\\s+"
+
+reworked_metadata <- data.frame(lapply(gsubbed_filtered_metadata, function(col) {
+  gsub(pattern_2, "", col)
+}))
+
+reworked_metadata
+
+# Initialize an empty list to store the paired values
+paired_values <- list()
+
+# Iterate through the columns
+for (col in 1:ncol(reworked_metadata)) {
+  # Combine values from row 1 and row 2 with "_"
+  paired_values[[col]] <- paste(reworked_metadata[1, col], reworked_metadata[2, col], sep = "_")
+}
+
+# Print the list of paired values
+print(paired_values)
 
 ```
 
-# Aggregate iCellR objects from all samples
+# Aggregate data from all samples
 
 ```{r}
 
-my.data <- data.aggregation(samples = sample_names,
-	condition.names = c("WT","KO","Ctrl","KD"))
+sample1 <- my.data$GSM6668925_P1_T
+sample2 <- my.data$GSM6668926_P1_TN
+
+# very clunky for now
+
+my.data_aggregate <- data.aggregation(samples = c("sample1","sample2"),
+	condition.names = paired_values[0:2])
+
+```
+
+# Convert aggregate data into iCellR object
+
+```{r}
+
+my.obj <- make.obj(my.data_aggregate)
+
+my.obj
+
+```
+
+# Perform QC
+
+```{r}
+
+my.obj <- qc.stats(my.obj)
+
+```
+
+# Visualize QC via violin plots
+
+```{r}
+
+stats.plot(my.obj,
+	plot.type = "three.in.one",
+	out.name = "UMI-plot",
+	interactive = FALSE,
+	cell.color = "slategray3", 
+	cell.size = 1, 
+	cell.transparency = 0.5,
+	box.color = "red",
+	box.line.col = "green")
+
+```
+
+# Visualize QC via scatter plots
+
+```{r}
+
+stats.plot(my.obj, plot.type = "point.mito.umi", out.name = "mito-umi-plot")
+stats.plot(my.obj, plot.type = "point.gene.umi", out.name = "gene-umi-plot")
+
+```
+
+# Filter cells
+
+```{r}
+
+# 33694 cells present before filtering
+dim(my.obj@main.data)
+
+my.obj <- cell.filter(my.obj,
+	min.mito = 0,
+	max.mito = 0.2,
+	min.genes = 500,
+	max.genes = Inf,
+	min.umis = 0,
+	max.umis = Inf)
+
+# 11387 cells present after filtering
+dim(my.obj@main.data)
+
+```
+
+# Normalize data
+
+```{r}
+
+my.obj <- norm.data(my.obj, 
+     norm.method = "ranked.glsf",
+     top.rank = 500) # best for scRNA-Seq
+
+```
+
+# Look at gene stats
+
+```{r}
+
+my.obj <- gene.stats(my.obj, which.data = "main.data")
+
+head(my.obj@gene.data[order(my.obj@gene.data$numberOfCells, decreasing = T),])
+
+```
+
+# Make a gene model for clustering
+
+```{r}
+
+# See model plot 
+make.gene.model(my.obj, my.out.put = "plot",
+	dispersion.limit = 1.5, 
+	base.mean.rank = 1500, 
+	no.mito.model = T, 
+	mark.mito = T, 
+	interactive = F,
+	out.name = "gene.model")
+	
+# Write the gene model data into the object
+
+my.obj <- make.gene.model(my.obj, my.out.put = "data",
+	dispersion.limit = 1.5, 
+	base.mean.rank = 1500, 
+	no.mito.model = T, 
+	mark.mito = T, 
+	interactive = F,
+	out.name = "gene.model")
+
+head(my.obj@gene.model)
+
+```
+
+# Run PCA
+
+```{r}
+
+# run PCA in case no batch alignment is necessary
+my.obj <- run.pca(my.obj, method = "gene.model", gene.list = my.obj@gene.model,data.type = "main")
+
+opt.pcs.plot(my.obj)
+
+```
+
+# Create UMAP
+
+```{r}
+
+# UMAP
+my.obj <- run.umap(my.obj, dims = 1:10)
 
 ```
