@@ -197,6 +197,7 @@
  - CTLA-4 blockade improves survival in patients with advanced melanoma, also enhances immunity to NY-ESO-1 (cancer-testis antigen expressed in some melanoma patients)
  - see increase (16% to 22%) in seropositivity for NY-ESO-1 antibody after CTLA-4 blockade, seropositive individuals more likely to experience clinical benefit (seropositive individuals who didn't experience clinical benefit more likely didn't have associated CD8<sup>+</sup> T cells)
 # Intratumoral heterogeneity and T cell exhaustion in primary CNS lymphoma
+# Kimma: flexible linear mixed effects modeling with kinship covariance for RNA-seq data
 # Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
 ## Abstract
  - scRNAseq + TCR-seq of tumor, normal, and lymph tissue in patients with lung cancer after ICI
@@ -226,6 +227,11 @@
 # mTOR regulates T cell exhaustion and PD-1-targeted immunotherapy response during chronic viral infection
  - background: PD-1-blockade enhances T cell response by promoting differentiation of stem-like T cells towards TIM3<sup>+</sup> cells
  - results: blocking mTOR during T cell expansion enhances T cell response (stem-like T cells accumulate), but blocking mTOR after exhaustion has progressed causes immunosuppression (decreased TIM3<sup>+</sup> cells, increased viral load)
+# Negative binomial additive model for RNA-Seq data analysis
+## Methods for differential expression analysis
+ - DESeq2, edgeR (based on negative binomial regression to model gene counts)
+ - voom (based on empirical Bayes model)
+ - BBSeq, based on β-binomial regression model
 # Network-based machine learning approach to predict immunotherapy response in cancer patients
  - tumor mutation burden improves model
 # New epigenetic regulators of T cell exhaustion
@@ -256,6 +262,7 @@
  - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
  - organ-specific irAEs associated with pre-existing organ dysfunction
  - high pre-treatment soluble CTLA4 associated with irAEs
+# Sequence count data are poorly fit by the negative binomial distribution
 # Simultaneous epitope and transcriptome measurement in single cells
  - cellular indexing of transcriptomes and epitopes by sequencing (CITE-seq), oligonucleotide-labeled antibodies are used to integrate cellular protein and transcriptome measurements into a single cell readout
  - DNA oligonucleotide conjugated to antibody can be measured by sequencing as digital readout of protein abundance
@@ -303,6 +310,7 @@
  - PD-1 PD-L1 interaction promotes TE cell exhaustion, supports conversion of TE cells into suppressive T<sub>reg</sub> cells
  - irAEs are frequent in patients treated with ICIs (~90% of patients treated with PD-1 blockade and/or CTLA-4 blockade), severe/life threatening (grades 3/4, respectively) irAEs in fewer but still many patients
  - at baseline, patients with arthritis had less cells with features of CD8 T<sub>CM</sub> cells, patients with pneumonitis had more CD4 T<sub>H2</sub> cells, patients with thyroiditis had more CD4 T<sub>H17</sub> cells, so **different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers**
+# Single-gene negative binomial regression models for RNA-Seq data with higher-order asymptotic inference
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
  - ICI-induced inflammatory arthritis has been reported

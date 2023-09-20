@@ -3,7 +3,15 @@
  - voom algorithm: mean-variance modeling, estimate mean-variance in data, then use this to compute appropriate precision weight for each observation. count data (like RNAseq) always shows mean-variance relationships (increasing variance with increasing count size). convert counts to logCPM values (adding 0.5 to avoid log of 0), normalize matrix of logCPM values, fit linear models, fit trend to square root standard deviations as function of average log count measure, use trend line to predict variance of each logCPM value, inverse variance is precision weight estimate
  - hyperparameter: could refer to machine learning (parameter that controls learning process) or Bayesian statistics (parameter of prior distribution)
  - metadata: information about the data other than the data itself (for example time and data of data creation, data's purpose)
-- mixed models for repeated measures (MMRM): approach to model data with high variability making few/no assumptions about the 
+- mixed models for repeated measures (MMRM): approach to model data with high variability making few/no assumptions
+## RNA-seq count data
+ - low number of counts (often 0) associated with most genes
+ - long right tail in distribution of counts across genes as there is effecitvely no upper limit for gene expression
+ - large dynamic range
+ - integer counts
+ - **not normally distributed**
+ - **Poisson distribution is not appropriate since mean often != variance because the proportions of mRNAs do not remain constant between biological replicates (variance of counts > mean of counts especially for highly expressed genes i.e. overdispersion phenomenon**, could be appropriate with very high numbers of replicates, using Poisson would underestimate variability and lead to increase in false positive differentially expressed genes
+ - **negative binomial distribution is appropriate, mean < variance as is true for RNA-seq, similar to Poisson distribution but has a clumping/dispersion parameter (negative binomial distribution can be defined as Poisson-γ mixture distribution where rate parameter λ i.e. expected counts associated with uncertainty following γ distribution**
 ## Statistics
  - discrete random variables (like counts) will have associated probability distributions (also called probability mass function): list of possible values of random variable and their associated probabilities (or as a formula rather than a list), defined for a finite or countably infinite set of possible values (usually integers)
  - cumulative distribution function: probability that random variable is less than or equal to a certain value
@@ -11,6 +19,21 @@
  - mean = 1st moment, expected value (average value observed if you could observe variable infinite number of times, weighted average of all possible values where weights are probabilities)
  - variance = 2nd moment, measures spread of data (sum of squares of differences between each value and mean, divided by number of values minus 1), square root of variance is standard deviation (which has same units as original variable)
  - percentiles are calculated with inverse of cumulative distribution function (i.e. find value of random variable that has a certain probability of random variable being less than or equal to it)
+### Regression analysis
+ - spline interpolation: interpolant is a piecewise polynomial called a spline (i.e. rather than fitting a single, high-degree polynomial to all data, spline interpolation fits low-degree polynomials to small subsets of the values)
+#### Linear models
+#### Generalized additive models
+ - nonlinear
+ - relaxed restriction that relationship must be a simple weighted sum (as in linear models), instead assume outcome can be modeled by sum of arbitrary functions of each feature
+ - replace β coefficients from linear regression with flexible function (spline) that allows nonlinear relationships
+ - sum of many splines forms GAM
+#### Validation
+ - R-squared: proportion of variance in outcome explained by model
+ - root mean squared error (RMSE): average error performed by model, lower is better, square root of mean squared error (MSE) which is average squared difference between observed and predicted outcomes
+ - model σ (residual standard error): variant of RMSE adjusted for number of predictors in model
+ - mean absolute error: average absolute difference between observed and predicted outcomes
+ - AIC: penalizes inclusion of additional variables to model, lower is better
+ - BIC: variant of AIC with stronger penalty for additional variables, lower is better
 ### Discrete probability distributions
  - Bernoulli random variable: 2 possible values (0 or 1), usually comes up in success vs. failure (only 2 outcomes), probability of success is p, probability of failure is 1-p
  - Binomial random variable: similar to Bernoulli random variable but now we have n independent trials (each trial is a Bernoulli random variable), probability of success is within each trial is still p, probability of failure within each trial is still is 1-p, X is the number of successes in n trials (X is a random binomial variable, its probability distribution is the binomial distribution), probability of X = x is (n choose x) * p^x * (1-p)^(n-x) where (n choose x) = n!/(x!(n-x)!) (n choose x) is the number of ways to choose x successes from n trials, mean = np, variance = np*(1-p)
