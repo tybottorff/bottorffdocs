@@ -64,12 +64,10 @@ print(paired_values)
 
 # List of sample names
 sample_names <- c(
-  "GSM6668925_P1_T", "GSM6668926_P1_TN","GSM6668927_P2_T", "GSM6668928_P2_TN", "GSM6668929_P4_T", "GSM6668930_P4_TN", "GSM6668931_P5_T", "GSM6668932_P5_TN"
-  #,"GSM6668933_P7_T", "GSM6668934_P7_TN", "GSM6668935_P17_T", "GSM6668936_P17_TN"
-  #"GSM6668937_P3_T", "GSM6668938_P3_TN", "GSM6668939_P8_T", "GSM6668940_P8_TN",
-  #"GSM6668941_P9_T", "GSM6668942_P9_TN", "GSM6668943_P10_T", "GSM6668944_P10_TN",
-  #"GSM6668945_P11_T", "GSM6668946_P11_TN", "GSM6668947_P18_T", "GSM6668948_P18_TN",
-  #"GSM6668949_P19_T", "GSM6668950_P19_TN", "GSM6668952_P6_TN", "GSM6668951_P6_T",
+  "GSM6668925_P1_T", "GSM6668926_P1_TN","GSM6668927_P2_T", "GSM6668928_P2_TN", "GSM6668929_P4_T", "GSM6668930_P4_TN", "GSM6668931_P5_T", "GSM6668932_P5_TN", "GSM6668933_P7_T", "GSM6668934_P7_TN", "GSM6668935_P17_T", "GSM6668936_P17_TN", "GSM6668937_P3_T", "GSM6668938_P3_TN", "GSM6668939_P8_T", "GSM6668940_P8_TN",
+  "GSM6668941_P9_T", "GSM6668942_P9_TN", "GSM6668943_P10_T", "GSM6668944_P10_TN",
+  "GSM6668945_P11_T", "GSM6668946_P11_TN", "GSM6668947_P18_T", "GSM6668948_P18_TN"
+  #,"GSM6668949_P19_T", "GSM6668950_P19_TN", "GSM6668952_P6_TN", "GSM6668951_P6_T",
   #"GSM6668953_P12_T", "GSM6668954_P12_TN", "GSM6668955_P13_T", "GSM6668956_P13_TN",
   #"GSM6668957_P14_T", "GSM6668958_P14_TN", "GSM6668959_P15_T", "GSM6668960_P15_TN",
   #"GSM6668961_P16_T", "GSM6668962_P16_TN", "GSM6668963_P20_T", "GSM6668964_P20_TN",
@@ -100,6 +98,22 @@ sample5 <- my.data$GSM6668929_P4_T
 sample6 <- my.data$GSM6668930_P4_TN
 sample7 <- my.data$GSM6668931_P5_T
 sample8 <- my.data$GSM6668932_P5_TN
+sample9 <- my.data$GSM6668933_P7_T
+sample10 <- my.data$GSM6668934_P7_TN
+sample11 <- my.data$GSM6668935_P17_T
+sample12 <- my.data$GSM6668936_P17_TN
+sample13 <- my.data$GSM6668937_P3_T
+sample14 <- my.data$GSM6668938_P3_TN
+sample15 <- my.data$GSM6668939_P8_T
+sample16 <- my.data$GSM6668940_P8_TN
+sample17 <- my.data$GSM6668941_P9_T
+sample18 <- my.data$GSM6668942_P9_TN
+sample19 <- my.data$GSM6668943_P10_T
+sample20 <- my.data$GSM6668944_P10_TN
+sample21 <- my.data$GSM6668945_P11_T
+sample22 <- my.data$GSM6668946_P11_TN
+sample23 <- my.data$GSM6668947_P18_T
+sample24 <- my.data$GSM6668948_P18_TN
 
 # very clunky for now
 
@@ -111,12 +125,12 @@ rm(my.data)
 
 ```{r}
 
-my.data_aggregate <- data.aggregation(samples = c("sample1","sample2","sample3","sample4","sample5","sample6","sample7","sample8"),
-	condition.names = paired_values[1:8])
+my.data_aggregate <- data.aggregation(samples = c("sample1","sample2","sample3","sample4","sample5","sample6","sample7","sample8","sample9","sample10","sample11","sample12","sample13","sample14","sample15","sample16","sample17","sample18","sample19","sample20","sample21","sample22","sample23","sample24"),
+	condition.names = paired_values[1:24])
 
 # very clunky for now
 
-rm(sample1,sample2,sample3,sample4,sample5,sample6,sample7,sample8)
+rm(sample1,sample2,sample3,sample4,sample5,sample6,sample7,sample8,sample9,sample10,sample11,sample12,sample13,sample14,sample15,sample16,sample17,sample18,sample19,sample20,sample21,sample22,sample23,sample24)
 
 ```
 
