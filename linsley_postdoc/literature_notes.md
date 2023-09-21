@@ -1,3 +1,8 @@
+# Allopeptides and the alloimmune response
+ - allorecognition is recognition of non-self
+ - main targets of recipient immune response against allograft are donor MHC antigens on allogenic tissue
+ - recognition of mismatched MHC antigens leads to allograft rejection
+ - allorecognition can occur directly and/or indirectly: directly refers to recognition of intact donor MHC molecules on donor cells (APC)s, indirectly refers to presentation of processed antigens by recipient APCs to recipient T cells
 # A phenotypically and functionally distinct human T<sub>H2</sub> cell subpopulation is associated with allergic disorders
  - allergen-specific type 2 helper T (T<sub>H2</sub>) cells critical in initiating/orchestrating allergic/asthmatic inflammatory response pathways
  - currently lack methodology to identify and differentiate these cells from nonpathogenic T<sub>H2</sub> cell types (otherwise would be able to use them as therapeutic targets and biomarkers)
@@ -121,6 +126,9 @@
 # Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
  - chronic stimulation assay
  - *in vivo* validation of screen results (perturbation of INO80 and BAF chromatin remodeling complexes improves T cell persistence in tumors)
+# Graft-versus-host disease versus graft-versus-leukemia
+ - graft-versus-host is characterized by robust T-cell activation and proliferation followed by infiltration of host target structures
+ - it's less clear to what degree T-cell activation and proliferation are required for effective graft-versus-leukemia, so perhaps controlling T-cell proliferation can uncouple graft-versus-leukemia from graft-versus host
 # Guidelines for bioinformatics of single-cell sequencing data analysis in Alzheimer's disease: review, recommendation, implementation and application
 ## Quality control
  - remove sources of technical variation introduced during generation of scRNA data while maintaining true biological variation
@@ -206,6 +214,12 @@
 ## Introduction
  - ICI can work via activation, expansion, and recruitment of CD8<sup>+</sup> T cells from peripheral circulation
  - open questions: are there phenotypic differences between clonally related T cells in different anatomical sites? are progenitor exhausted T cells clonally linked to intratumoral exhausted CD8<sup>+</sup> T cells present in tumor-draining lymph nodes (seems to be the case in mice)? how long do tumor specific T cell clones like exhausted CD8<sup>+</sup> T cells persist after ICI?
+# Major histocompatibility complex (MHC) class I and MHC class II proteins: conformational plasticity in antigen presentation
+ - APC presented peptides are generated from proteins produced by cell's own translational machinery or from proteins funneled into endo-lysosomal vesicular system
+ - peptide repertoire presented by MHC proteins largely depends on structural features of binding groove of each particular MHC allelic variant
+ - tapasin (for class I) and HLA-DM (for class II) are peptide editors that contribute to shaping of presented peptidome by favoring binding of high-affinity antigens
+ - some MHC allelic variants are more susceptible to peptide editing than others, not well understood
+ - 
 # Mechanisms of T cell exhaustion guiding next generation immunotherapy
  - resting exhausted T cells in antigen-free environments doesn't reinvigorate them (exhaustion is a committed cell fate)
  - exhausted T cells, unlike functional memory T cells, do not exhibit antigen-independent homeostatic proliferation (self-renewal in presence of homeostatic cytokines IL-7, IL-15); exhausted T cells require antigen exposure for maintenance
@@ -311,6 +325,9 @@
  - irAEs are frequent in patients treated with ICIs (~90% of patients treated with PD-1 blockade and/or CTLA-4 blockade), severe/life threatening (grades 3/4, respectively) irAEs in fewer but still many patients
  - at baseline, patients with arthritis had less cells with features of CD8 T<sub>CM</sub> cells, patients with pneumonitis had more CD4 T<sub>H2</sub> cells, patients with thyroiditis had more CD4 T<sub>H17</sub> cells, so **different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers**
 # Single-gene negative binomial regression models for RNA-Seq data with higher-order asymptotic inference
+# Specificity of T-cell alloreactivity
+ - many alloreactive T cells are much more peptide specific than previously thought, few if any recognize only the MHC molecule
+ - alloreactive T cells are polyspecific, able to recognize multiple distinct peptide-MHC complexes (perhaps why there's a high frequency of allorecognition)
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
  - ICI-induced inflammatory arthritis has been reported
@@ -433,6 +450,11 @@
  - TCR expression varied 2-fold around median in 70% of cells
  - intra-clonotype TCR expression heterogeneity similar to inter-cell heterogeneity, so TCR expression is not clonotype dependent
  - different T cell states express TCRs to similar degrees (activated cells' TCR expression slightly lower)
+# The graft-versus-leukemia effect in AML
+ - allogenic hematopoietic stem cell transplantation (allo-SCT) commonly used in cancer care, most potent anti-leukemic therapy in AML (acute myeloid leukemia) patients
+ - donor T cells (and maybe other immune cells) eliminate residual leukemia cells after radio/chemotherapy = graft-versus-leukemia response
+ - donor alloimmune responses can also be directed against healthy tissue = graft-versus-host disease (GvHD)
+ - graft-versus-leukemia and graft-versus-host often co-occur
 # The role of metabolic dysfunction in T-cell exhaustion during chronic viral infection
  - dysfunction of T cell metabolism contributes to exhaustion
  - naive (Th0) and memory T cells rely mostly on OXPHOS and FA oxidation for energy, metabolism reprogrammed upon antigen recognition (generates energy but also fuels intermediates for nucleotide, amino acid, and FA synthesis and mitochondrial function, all important for T cell proliferation, differentiation, function), enhanced glycolysis ("Warburg effect", lactic acid fermentation rather than TCA despite normoxic conditions which is less efficient ATP production wise but faster kinetically, glycolysis also helps create intermediates for biomolecule synthesis) important reprogramming during CD4<sup>+</sup> and CD8<sup>+</sup> T cell activation and functioning
