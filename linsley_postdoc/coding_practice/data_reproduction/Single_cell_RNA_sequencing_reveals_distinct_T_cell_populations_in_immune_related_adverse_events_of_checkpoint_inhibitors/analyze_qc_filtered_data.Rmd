@@ -18,6 +18,7 @@ library(Matrix)
 library(patchwork)
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 
 ```
 
@@ -172,6 +173,8 @@ PCHeatmap(blood_t_cells_filtered, dims = 1:20, cells = 500, balanced = TRUE, nco
 # Visualize PCA
 
 ```{r}
+
+#View(blood_t_cells_filtered@meta.data)
 
 DimPlot(blood_t_cells_filtered, group.by = "orig.ident", reduction = "pca", raster = FALSE)
 

@@ -310,19 +310,6 @@ cell_capture <- blood_t_cells_filtered@meta.data %>%
 cell_capture %>% arrange(n)
 
 ```
-# Import more metadata
-
-```{r}
-
-# Specify the rows to skip and the number of rows to read
-skip_rows <- 29  # Skip the first 29 rows
-num_rows <- 42   # Read 42 rows (30 to 71)
-
-df <- read.table("./raw_data/GSE216329_series_matrix.txt", header = TRUE, sep = "\t", skip = skip_rows, nrows = num_rows)
-
-df
-
-```
 
 # Save the resulting QC filtered Seurat object
 
