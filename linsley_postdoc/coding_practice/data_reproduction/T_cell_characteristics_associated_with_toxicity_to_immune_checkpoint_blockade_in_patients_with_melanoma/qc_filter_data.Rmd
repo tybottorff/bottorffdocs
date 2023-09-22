@@ -31,6 +31,7 @@ packageVersion("Seurat")
 library(ggplot2)
 library(dplyr)
 library(readr)
+library(readxl)
 
 ```
 
@@ -90,13 +91,15 @@ rownames(batch_b_metadata) <- gsub("-", ".", rownames(batch_b_metadata))
 
 ```{r}
 
-# Load the readxl package
-library(readxl)
+supp_data_1 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1")
 
-# Read the specific sheet into a data frame
-supp_data <- read_excel("./raw_data/supp_tables.xlsx", sheet = "Table S1")
+supp_data_2 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_s3")
 
-supp_data
+supp_data <- inner_join(supp_data_1, supp_data_2, by = "Patient ID")
+
+colnames(supp_data_1)
+
+colnames(supp_data_2)
 
 ```
 
