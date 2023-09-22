@@ -95,11 +95,9 @@ supp_data_1 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_
 
 supp_data_2 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_s3")
 
-supp_data <- inner_join(supp_data_1, supp_data_2, by = "Patient ID")
+supp_data <- inner_join(supp_data_1, supp_data_2, by = c("Patient ID", "Cohort", "Prior ICI treatment", "Site of highest irAE grade"))
 
-colnames(supp_data_1)
-
-colnames(supp_data_2)
+supp_data
 
 ```
 
