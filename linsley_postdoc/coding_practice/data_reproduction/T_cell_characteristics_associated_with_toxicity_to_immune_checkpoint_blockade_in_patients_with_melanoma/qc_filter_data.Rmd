@@ -86,6 +86,20 @@ rownames(batch_b_metadata) <- gsub("-", ".", rownames(batch_b_metadata))
 
 ```
 
+# Import supplementary data
+
+```{r}
+
+# Load the readxl package
+library(readxl)
+
+# Read the specific sheet into a data frame
+supp_data <- read_excel("./raw_data/supp_tables.xlsx", sheet = "Table S1")
+
+supp_data
+
+```
+
 # Create a Seurat object for each scRNAseq sample
 
 ```{r}
