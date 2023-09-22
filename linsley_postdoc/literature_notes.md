@@ -3,6 +3,8 @@
  - main targets of recipient immune response against allograft are donor MHC antigens on allogenic tissue
  - recognition of mismatched MHC antigens leads to allograft rejection
  - allorecognition can occur directly and/or indirectly: directly refers to recognition of intact donor MHC molecules on donor cells (APC)s, indirectly refers to presentation of processed antigens by recipient APCs to recipient T cells
+# An increased population of regulatory T cells improves the pathophysiology of placental ischemia in a rat model of preeclampsia
+ - preeclampsia pathology: suppressed Tregs, autoantibodies to Ang II type I receptor
 # A phenotypically and functionally distinct human T<sub>H2</sub> cell subpopulation is associated with allergic disorders
  - allergen-specific type 2 helper T (T<sub>H2</sub>) cells critical in initiating/orchestrating allergic/asthmatic inflammatory response pathways
  - currently lack methodology to identify and differentiate these cells from nonpathogenic T<sub>H2</sub> cell types (otherwise would be able to use them as therapeutic targets and biomarkers)
@@ -54,18 +56,8 @@
  - high mitochondrial count fraction could also just mean that the cell is very active in cellular respiration though
  - low counts/genes could also just mean quiescent cells
  - high counts/genes could also just mean large cells
-## Data correction (batch correction)
-## Normalization
-## Feature selection
-## Visualization
-## Clustering
-## Marker identification
-## Cluster annotation
-## Trajectory inference
-## Gene dynamics
-## Differential gene expression analysis
-## Compositional analysis
-## Metastable stables
+# Differentiation and homeostasis of effector Treg cells are regulated by inositol polyphosphates modulating Ca<sup>2+</sup> influx
+ - subclass of Tregs express Foxp3, activated Foxp3<sup>+</sup> Tregs differentiate into effector Treg (eTreg) cells to maintain peripheral immune homeostasis and tolerance
 # Defining the memory CD8 T cell
  - effector (T<sub>em</sub>, CD62L<sup>low</sup>CCR7<sup>low</sup>) and central (T<sub>cm</sub>, CD62L<sup>high</sup>CCR7<sup>high</sup>) memory T cells
  - CCR7/CD62L expression on T<sub>cm</sub> cells facilitates homing to secondary lymph organs, while T<sub>em</sub> cells are more cytolytic and express integrins and chemokine receptors to localize to inflamed tissue
@@ -169,6 +161,7 @@
  - reverse transcribe RNA with enzyme with terminal transferase activity to add untemplated C nucleotides to 3' end of cDNA
  - template switch oligonucleotide (TSO) containing complementary poly(G) stretch anchors to this untemplated region of C nucleotides and allows reverse transcriptase to switch templates and extend cDNA to end of TSO which includes a common adaptor sequence
  - result is that one pair of primers targeting 5' adaptor and constant region is able to amplify all TCR rearrangements
+# HLA-DRB alleles are differentially expressed by tumor cells in breast carcinoma
 # Holistic approach to immune checkpoint inhibitor-related adverse events
  - irAEs usually occur within the first months after ICI treatment but can develop as early as after the first dose or as late as years after ICI treatment
  - glucocorticoids are usually used to manage irAEs, other immunosuppressive agents as well
@@ -219,7 +212,11 @@
  - peptide repertoire presented by MHC proteins largely depends on structural features of binding groove of each particular MHC allelic variant
  - tapasin (for class I) and HLA-DM (for class II) are peptide editors that contribute to shaping of presented peptidome by favoring binding of high-affinity antigens
  - some MHC allelic variants are more susceptible to peptide editing than others, not well understood
- - 
+ - peptide-MHC class I complexes are presented on all nucleated cells and are recognized by CD8<sup>+</sup> T cells
+ - pMHCII presentation by APCs (DCs, macrophages, B cells) activates CD4<sup>+</sup> T cells, leading to coordination and regulation of effector cells
+ - MHC binding platform composed of 2 domains from single heavy α-chain (HC) for MHCI and from two chains for MHCII (α-chain and β-chain), 2 domains form β-sheet as base and 2 α-helices on top that have space between them to accommodate a peptide chain
+ - 2 membrane-proximal immunoglobulin domains support peptide-binding unit
+ - MHCI binding groove can accomodate ~8-10 residue peptide, ~13-25 residue peptide for MHCII
 # Mechanisms of T cell exhaustion guiding next generation immunotherapy
  - resting exhausted T cells in antigen-free environments doesn't reinvigorate them (exhaustion is a committed cell fate)
  - exhausted T cells, unlike functional memory T cells, do not exhibit antigen-independent homeostatic proliferation (self-renewal in presence of homeostatic cytokines IL-7, IL-15); exhausted T cells require antigen exposure for maintenance
@@ -230,6 +227,9 @@
  - most CAR T cell protocols use a heterogeneous starting population of bulk CD4 and CD8 T cells spanning developmental potential range, but more plastic memory T cells (T<sub>cm</sub> i.e. central memory T cells and T<sub>scm</sub> i.e. stem cell memory T cells) possess greater effector/proliferative capacities and better eradicate tumors when used as CAR T cell starting populations
  - patients eligible for CAR T cell therapy usually have relapsed/refractory (treatment-resistant), so their T cells have likely been chronically antigen exposed, as well as exposed to chemotherapy (skews T cells towards more terminally differentiated effector memory i.e. T<sub>em</sub> cells), and this all makes the CAR T therapy less effective (than if it had been used at the beginning)
 # Mechanisms of tumor resistance to immune checkpoint blockade and combination strategies to overcome resistance
+# MHC class II (DRB) promoter polymorphism and its role in parasite control among malaria patients
+# MHC class II tetramers
+ - can interrogate CD4 T cells using soluble MHC II tetramers
 # Mismatch repair deficiency/microsatellite instability-high as a predictor for anti-PD-1/PD-L1 immunotherapy efficacy
  - microsatellite instability-high follows mismatch repair deficiency
  - mismatch repair deficiency represents a good prognosis in early colorectal cancer but a poor prognosis in patients with metastasis (**perhaps because it's more easily recognized by immune system but it's a double edged sword as it's also likely more cancerous and dangerous at metastasis stage**)
@@ -420,6 +420,19 @@
  - most patients have a single peak of PD-1 blockade-induced immune reinvigoration despite on-going treatment
  - responding exhausted T cells in blood contain TCR clonotypes shared with tumor infiltrating T cells
  - ratio of exhausted T cell reinvigoration to tumor burden predicts clinical response
+# T cell tolerance: central and peripheral
+## Summary
+ - central tolerance: clonal deletion and diversion (Treg differentiation) control self-reactive T cells in the thymus
+ - peripheral tolerance: anergy (T cells becoming functionally unresponsive) and deletion of self-reactive T cells occurs outside thymus in cases where central tolerance fails to control self-reactivity and self-reactive T cells encounter self-antigens (not all antigens T cells need to be tolerant of are expressed in thymus)
+## T cell differentiation
+ - T lymphocytes arise from circulating bone-marrow-derived progenitors going to thymus
+ - T cell lineage commitment and expansion
+ - TCR gene rearrangement gives rise to γδ or αβ progenitors at CD4 and CD8 double-negative stage
+ - fraction of αβ committed double-negative cells give rise to many CD4 and CD8 double-positive thymocytes
+ - somatic recombination of TCR genes results in broad repertoire of αβ TCRs with random specificities
+ - double-positive thymocytes expressing TCRs that have no/low affinity for self-peptide-MHC complexes die by neglect
+ - double-positive thymocytes expressing TCRs that have intermediate affinity for self-peptide-MHC differentiate to CD4 or CD8 single-positive thymocytes (positive selection) in the cortex, single-positive thymocytes go to the medulla
+ - double-positive thymocytes expressing TCRs that have high affinity for self-peptide-MHC pose a threat to self-tolerance, so they undergo clonal deletion, diversion to Treg lineage, anergy, or receptor editing (secondary gene rearrangements of TCRα loci)
 # TCR sequencing and cloning methods for repertoire analysis and isolation of tumor-reactive TCRs
 ## Abstract
  - SEQTR (SEQuencing T cell Receptor): combines *in vitro* transcription and single primer pair TCR amplification, combine with PCR to amplify TCR from bulk population, tumor-specific TCR identification and cloning
@@ -459,6 +472,12 @@
  - dysfunction of T cell metabolism contributes to exhaustion
  - naive (Th0) and memory T cells rely mostly on OXPHOS and FA oxidation for energy, metabolism reprogrammed upon antigen recognition (generates energy but also fuels intermediates for nucleotide, amino acid, and FA synthesis and mitochondrial function, all important for T cell proliferation, differentiation, function), enhanced glycolysis ("Warburg effect", lactic acid fermentation rather than TCA despite normoxic conditions which is less efficient ATP production wise but faster kinetically, glycolysis also helps create intermediates for biomolecule synthesis) important reprogramming during CD4<sup>+</sup> and CD8<sup>+</sup> T cell activation and functioning
  - downregulation of glycolysis, augmented lipolysis and FA oxidation in exhausted T cells
+# The role of peripheral T-cell deletion in transplantation tolerance
+# The role of type I conventional dendritic cells in cancer immunity
+ - cDC1 = conventional type 1 DC, express BDCA3, CLEC9A/DNGR-1, XCR1
+# The role of type-2 conventional dendritic cells in the regulation of tumor immunity
+ - cDC1s dedicated to activate CD8<sup>+</sup> T cells, cross-present tumor-derived antigens for priming of CD8<sup>+</sup> T cells
+ - cDC2s heterogeneous, present exogenous antigens to CD4<sup>+</sup> T cells for initiation of T helper cell differentiation
 # The yin and yang of co-inhibitory receptors: towards anti-tumor immunity without autoimmunity
  - co-inhibitory receptors: PD-1 (CD279), CTLA-4 (cytotoxic T lymphocyte-associated antigen-4, CD152, high sequence similarity to co-stimulatory CD28 that it outcompetes for ligands B7-1/2), TIGIT (T cell immunoglobulin and ITIM domain, in CD28 protein family), TIM-3 (T cell immunoglobulin and mucin-domain containing protein-3), LAG-3 (lymphocyte activation gene-3)
  - central tolerance in the thymus acts as the first control during T cell development to eliminate autoreactive clones
@@ -488,6 +507,13 @@
  - **possible sources of irAEs: aggravation of silent pre-existing autoimmune condition, neo-autoimmune or inflammatory disorder due to breakdown of self-tolerance, disruption of immune homeostasis in tissue (not sure exactly what this means), bystander self-tissue damage (on target, off tumor response), undesired reactions to checkpoint blockade (expression of co-inhibitory molecules on non-T cells for instance)**
  - **similarities between pathogenic, inflammation-driving Th17 (and Th1) cells and exhausted T cells could be exploited to treat cancer without inducing irAEs: PDPN expressed on Th17 cells and negatively regulates Th17 pathogenicity, PDPN also part of co-inhibitory gene module upregulated in cancer; PROCR also expressed in Th17 cells (also negatively regulates pathogenicity via repressing IL-1R) and exhausted T cells (PROCR deficiency inhibits tumor growth)**
  - another idea to limit irAEs from ICI is to treat the autoimmune side effects, for example with TNF blockade (which can even enhance ICI efficacy in targeting tumor beyond limiting irAEs, **not sure of mechanism here**)
+# Treg heterogeneity, function, and homeostasis
+ - Tregs ensure tolerance to autoantigens, antigens of commensal microflora, limit excess immune responses, induce tolerance to food antigens
+ - IL-10 and TGF-β are primary suppressive cytokines
+ - IL-2 and its receptor CD25 are important for developing and maintaing Tregs
+ - FoxP3 is main Treg transcription factor, associated with high CD25 expression
+ - Tregs defined as CD3<sup>+</sup>CD4<sup>+</sup>CD25<sup>high</sup>FoxP3<sup>+</sup>CD127<sup>low</sup>
+ - Tregs can develop in thymus (tTregs, express FoxP3, high autoaffinity TCR, provide tolerance to autoantigens) or peripherally (pTregs, prevent local inflammation in presence of exogenous antigens) from effector cells
 # Type 1/Type 2 immunity in infectious diseases
  - Th1 (T helper type 1) cells secrete IL-2, interferon-γ, lymphotoxin-α and stimulate type 1 immunity (intense phagocytic activity), more or less synonymous with cell-mediated immunity but some antibodies are still produced, protective for most infections
  - Th2 cells secrete IL-4/5/9/10/13 and stimulate type 2 immunity (high antibody titers), more or less synonymous with humoral immunity (Th2 cells suppress phagocytosis), resolves cell-mediated inflammation
