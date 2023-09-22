@@ -1,0 +1,144 @@
+---
+title: "scRNAseq reveals distinct T cell populations in irAE of ICI"
+output: html_notebook
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9873824/
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Use specific version of Seurat that authors use
+
+```{r}
+
+#remotes::install_version("Seurat", version = "3.1.5")
+
+# Check Seurat version
+
+library(Seurat)
+
+packageVersion("Seurat")
+
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+melanoma_T_cells_filtered <- readRDS("./saved_data/melanoma_T_cells_filtered.rds")
+
+```
+
+# Split data into batches before integrating by finding anchors
+
+```{r}
+
+# split the dataset into a list of two seurat objects (a and b)
+melanoma_T_cells_filtered.list <- SplitObject(melanoma_T_cells_filtered, split.by = "orig.ident")
+
+# normalize and identify variable features for each dataset independently
+melanoma_T_cells_filtered.list <- lapply(X = melanoma_T_cells_filtered.list, FUN = function(x) {
+    x <- NormalizeData(x)
+    x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+})
+
+# select features that are repeatedly variable across datasets for integration
+features <- SelectIntegrationFeatures(object.list = melanoma_T_cells_filtered.list)
+
+```
+
+# Integrate via anchors
+
+```{r}
+
+immune.anchors <- FindIntegrationAnchors(object.list = melanoma_T_cells_filtered.list, anchor.features = features)
+
+# this command creates an 'integrated' data assay
+immune.combined <- IntegrateData(anchorset = immune.anchors)
+
+```
+
+# Specify integration, scale data
+
+```{r}
+
+# specify that we will perform downstream analysis on the corrected data note that the
+# original unmodified data still resides in the 'RNA' assay
+DefaultAssay(immune.combined) <- "integrated"
+
+# scale data
+immune.combined <- ScaleData(immune.combined, verbose = FALSE)
+
+```
+
+# PCA using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined <- RunPCA(immune.combined, npcs = 30, verbose = FALSE)
+
+```
+
+# UMAP using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined <- RunUMAP(immune.combined, reduction = "pca", dims = 1:30)
+
+```
+
+# FindClusters (resolution parameter of 3), should see 37 clusters
+
+```{r}
+
+immune.combined <- FindNeighbors(immune.combined, reduction = "pca", dims = 1:30)
+immune.combined <- FindClusters(immune.combined, resolution = 3)
+
+```
+
+# Visualize UMAP by patient ID
+
+```{r}
+
+DimPlot(immune.combined, reduction = "umap", group.by = "patient.ID", dims = c(2, 1))
+
+```
+
+# Visualize UMAP by cluster
+
+```{r}
+
+DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE, dims = c(2, 1))
+
+```
