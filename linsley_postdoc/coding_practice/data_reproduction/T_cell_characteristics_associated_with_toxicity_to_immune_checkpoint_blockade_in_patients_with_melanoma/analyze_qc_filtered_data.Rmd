@@ -15,10 +15,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #remotes::install_version("Seurat", version = "3.1.5")
 
-# Check Seurat version
-
 library(Seurat)
 
+# Check Seurat version
 packageVersion("Seurat")
 
 ```
@@ -27,7 +26,6 @@ packageVersion("Seurat")
 
 ```{r}
 
-library(Seurat)
 library(patchwork)
 library(ggplot2)
 library(dplyr)
@@ -60,12 +58,12 @@ melanoma_T_cells_filtered <- readRDS("./saved_data/melanoma_T_cells_filtered.rds
 
 ```
 
-# Split data into batches before integrating by finding anchors
+# Split data by sample before integrating by finding anchors
 
 ```{r}
 
-# split the dataset into a list of two seurat objects (a and b)
-melanoma_T_cells_filtered.list <- SplitObject(melanoma_T_cells_filtered, split.by = "orig.ident")
+# split the dataset into a list of 13 seurat objects (for each patient sample)
+melanoma_T_cells_filtered.list <- SplitObject(melanoma_T_cells_filtered, split.by = "patient.ID")
 
 # normalize and identify variable features for each dataset independently
 melanoma_T_cells_filtered.list <- lapply(X = melanoma_T_cells_filtered.list, FUN = function(x) {

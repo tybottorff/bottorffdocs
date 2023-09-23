@@ -16,10 +16,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #remotes::install_version("Seurat", version = "3.1.5")
 
-# Check Seurat version
-
 library(Seurat)
 
+# Check Seurat version
 packageVersion("Seurat")
 
 ```
@@ -52,6 +51,25 @@ theme_set(
 
 ```
 
+# Import supplementary data
+
+```{r}
+
+supp_data_1 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1")
+
+supp_data_2 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_s3") %>%
+  mutate(`Highest irAE grade` = as.character(`Highest irAE grade`)) %>%
+  rename(`ICI Regimen` = `ICI regimen`)
+
+supp_data <- inner_join(supp_data_1, supp_data_2, by = c("Patient ID", "Cohort", "Prior ICI treatment", "Site of highest irAE grade", "Highest irAE grade", "ICI Regimen"))
+
+supp_data <- supp_data %>%
+  rename(`patient.ID` = `Patient ID`)
+
+supp_data
+
+```
+
 # Process metadata
 
 ```{r}
@@ -67,55 +85,32 @@ batch_a_metadata <- batch_a_metadata[-1, ]
 # Set row names from the values in the 'barcode' column
 rownames(batch_a_metadata) <- batch_a_metadata$barcode
 
-# Remove the 'barcode' column from the data frame
-batch_a_metadata <- select(batch_a_metadata, -barcode)
+# Remove the 'barcode' column from the data frame, standardize patient ID naming
+batch_a_metadata <- select(batch_a_metadata, -barcode) %>%
+  rename(`patient.ID` = `patient ID`)
 
 # make rownames from metadata match colnames from count data
 rownames(batch_a_metadata) <- gsub("-", ".", rownames(batch_a_metadata))
 
-batch_b_metadata <- read.table("./raw_data/GSE189125_5prime_scRNAseq_seqbatchB_metadata.txt", sep = "\t")
+# join with supplemental metadata
+merged_batch_a_metadata <- left_join(batch_a_metadata, supp_data, by = "patient.ID") %>%
+  # filter for scRNAseq data
+  filter(`scRNA-seq` == 1)
 
-colnames(batch_b_metadata) <- batch_b_metadata[1, ]
+# regenerate rownames lost in merging
+rownames(merged_batch_a_metadata) <- rownames(batch_a_metadata)
 
-batch_b_metadata <- batch_b_metadata[-1, ]
-
-rownames(batch_b_metadata) <- batch_b_metadata$barcode
-
-batch_b_metadata <- select(batch_b_metadata, -barcode)
-
-rownames(batch_b_metadata) <- gsub("-", ".", rownames(batch_b_metadata))
+batch_a_metadata
 
 ```
 
-# Import supplementary data
+# Create a Seurat object for each scRNAseq batch
 
 ```{r}
 
-supp_data_1 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1")
+batch_a <- CreateSeuratObject(counts = read.table("./raw_data/GSE189125_5prime_scRNAseq_seqbatchA_counts.txt", sep = ""), project = "batch_a", assay = "RNA", meta.data = merged_batch_a_metadata)
 
-supp_data_2 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_s3")
-
-supp_data <- inner_join(supp_data_1, supp_data_2, by = c("Patient ID", "Cohort", "Prior ICI treatment", "Site of highest irAE grade"))
-
-supp_data
-
-```
-
-# Create a Seurat object for each scRNAseq sample
-
-```{r}
-
-batch_a <- CreateSeuratObject(counts = read.table("./raw_data/GSE189125_5prime_scRNAseq_seqbatchA_counts.txt", sep = ""), project = "batch_a", assay = "RNA", meta.data = batch_a_metadata)
-
-batch_b <- CreateSeuratObject(counts = read.table("./raw_data/GSE189125_5prime_scRNAseq_seqbatchB_counts.txt", sep = ""), project = "batch_b", assay = "RNA", meta.data = batch_b_metadata)
-
-```
-
-# Merge batches to perform QC
-
-```{r}
-
-melanoma_T_cells <- merge(batch_a, y = batch_b)
+# batch_b doesn't have any scRNAseq data
 
 ```
 
@@ -123,9 +118,9 @@ melanoma_T_cells <- merge(batch_a, y = batch_b)
 
 ```{r}
 
-melanoma_T_cells[["percent_mito"]] <- PercentageFeatureSet(melanoma_T_cells, pattern = "^MT-")
-melanoma_T_cells[["percent_ribo"]] <- PercentageFeatureSet(melanoma_T_cells, pattern = "^RP[SL]")
-melanoma_T_cells[["percent_hb"]] <- PercentageFeatureSet(melanoma_T_cells, pattern = "HB[^(P)]")
+batch_a[["percent_mito"]] <- PercentageFeatureSet(batch_a, pattern = "^MT-")
+batch_a[["percent_ribo"]] <- PercentageFeatureSet(batch_a, pattern = "^RP[SL]")
+batch_a[["percent_hb"]] <- PercentageFeatureSet(batch_a, pattern = "HB[^(P)]")
 
 ```
 
@@ -133,7 +128,7 @@ melanoma_T_cells[["percent_hb"]] <- PercentageFeatureSet(melanoma_T_cells, patte
 
 ```{r}
 
-View(melanoma_T_cells@meta.data)
+View(batch_a@meta.data)
 
 ```
 
@@ -141,17 +136,15 @@ View(melanoma_T_cells@meta.data)
 
 ```{r}
 
-length(colnames(melanoma_T_cells)) # 30213 cells
+length(colnames(batch_a)) # 24087 cells
 
 ```
 
-# Count cells per each of the 16 samples
-
- - they say n = 13 for scRNAseq, so I'm not sure where I got extra 3 samples
+# Count cells per each of the 13 samples
 
 ```{r}
 
-cell_capture <- melanoma_T_cells@meta.data %>%
+cell_capture <- batch_a@meta.data %>%
   group_by(patient.ID) %>%
   dplyr::count()
 
@@ -159,12 +152,11 @@ cell_capture %>% arrange(n)
 
 ```
 
-# Visualize QC metrics across batches
+# Visualize QC metrics across all patient samples
 
 ```{r}
 
-VlnPlot(melanoma_T_cells, features = c("nFeature_RNA", "nCount_RNA", "percent_mito", "percent_ribo", "percent_hb"), ncol = 5, pt.size=0)
-
+VlnPlot(batch_a, features = c("nFeature_RNA", "nCount_RNA", "percent_mito", "percent_ribo"), ncol = 4, pt.size=0)
 
 ```
 
@@ -175,9 +167,8 @@ VlnPlot(melanoma_T_cells, features = c("nFeature_RNA", "nCount_RNA", "percent_mi
 qcMetricsThresholds <-
   c(
     "nFeature_RNA_min" = 100,
-    "nFeature_RNA_max" = 1500,
-    "percent_mito" = 25,
-    "percent_hb" = 100
+    "nFeature_RNA_max" = 3000,
+    "percent_mito" = 25
   )
 
 # Author statement on methods: "Outlier cells were identified and removed based on the following criteria: (1) >25% mitochondrial content or (2) cells with less than 100 or greater than 1,500–3,000 expressed genes, depending on sample-level distributions"
@@ -190,7 +181,7 @@ qcMetricsThresholds <-
 
 ```{r}
 
-nFeature_RNA_QC <- ggplot(melanoma_T_cells@meta.data, mapping = aes(x = nFeature_RNA)) +
+nFeature_RNA_QC <- ggplot(batch_a@meta.data, mapping = aes(x = nFeature_RNA)) +
   geom_density(mapping = aes(color = patient.ID), size = 0.5) +
   scale_x_log10() +
   geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_min"],
@@ -207,7 +198,7 @@ nFeature_RNA_QC
 
 ```{r}
 
-nCount_RNA_QC <- ggplot(melanoma_T_cells@meta.data, mapping = aes(x = nCount_RNA)) +
+nCount_RNA_QC <- ggplot(batch_a@meta.data, mapping = aes(x = nCount_RNA)) +
   geom_density(mapping = aes(color = patient.ID), size = 0.5) +
   scale_x_log10()
 ggsave(nCount_RNA_QC, file = "./figures/nCount_RNA.tiff", device = "tiff")
@@ -220,7 +211,7 @@ nCount_RNA_QC
 
 ```{r}
 
-percent_mt_QC <- ggplot(melanoma_T_cells@meta.data, mapping = aes(x = percent_mito + 1/length(colnames(melanoma_T_cells)))) +
+percent_mt_QC <- ggplot(batch_a@meta.data, mapping = aes(x = percent_mito + 1/length(colnames(batch_a)))) +
   geom_density(mapping = aes(color = patient.ID), size = 0.5) +
   scale_x_log10() +
   geom_vline(xintercept = qcMetricsThresholds["percent_mito"],
@@ -236,7 +227,7 @@ percent_mt_QC
 
 ```{r}
 
-percent_rb_QC <- ggplot(melanoma_T_cells@meta.data, mapping = aes(x = percent_ribo + 1/length(colnames(melanoma_T_cells)))) +
+percent_rb_QC <- ggplot(batch_a@meta.data, mapping = aes(x = percent_ribo + 1/length(colnames(batch_a)))) +
   geom_density(mapping = aes(color = patient.ID), size = 0.5) +
   scale_x_log10() +
   xlab("percent_ribo (with pseudocount)")
@@ -250,13 +241,10 @@ percent_rb_QC
 
 ```{r}
 
-percent_hb_QC <- ggplot(melanoma_T_cells@meta.data, mapping = aes(x = percent_hb + 1/length(colnames(melanoma_T_cells)))) +
+percent_hb_QC <- ggplot(batch_a@meta.data, mapping = aes(x = percent_hb + 1/length(colnames(batch_a)))) +
   geom_density(mapping = aes(color = patient.ID), size = 0.5) +
   scale_x_log10() +
-  xlab("percent_hb (with pseudocount)") +
-  geom_vline(xintercept = qcMetricsThresholds["percent_hb"],
-             color = "red", linetype = "dashed")
-
+  xlab("percent_hb (with pseudocount)")
 
 ggsave(percent_hb_QC, file = "./figures/percent_hb.tiff", device = "tiff")
 
@@ -272,42 +260,39 @@ percent_hb_QC
 
 cellsKeep <-
   WhichCells(
-    melanoma_T_cells, expression = nFeature_RNA >= qcMetricsThresholds["nFeature_RNA_min"]) %>%
+    batch_a, expression = nFeature_RNA >= qcMetricsThresholds["nFeature_RNA_min"]) %>%
   intersect(
     WhichCells(
-      melanoma_T_cells, expression = nFeature_RNA <= qcMetricsThresholds["nFeature_RNA_max"])) %>%
-  intersect(
-    WhichCells(
-      melanoma_T_cells, expression = percent_hb <= qcMetricsThresholds["percent_hb"])) %>%
+      batch_a, expression = nFeature_RNA <= qcMetricsThresholds["nFeature_RNA_max"])) %>%
     intersect(
     WhichCells(
-      melanoma_T_cells, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
+      batch_a, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
 cellsDrop <-
-  setdiff(colnames(melanoma_T_cells), cellsKeep)
-length(cellsDrop) # 214 cells dropped from analysis
+  setdiff(colnames(batch_a), cellsKeep)
+length(cellsDrop) # 0 cells dropped from analysis
 
 # X cells dropped due to nFeature_RNA threshold
 cellsDropped_nFeature <- sum(
-  melanoma_T_cells$nFeature_RNA < qcMetricsThresholds["nFeature_RNA"]
+  batch_a$nFeature_RNA < qcMetricsThresholds["nFeature_RNA"]
 )
 
 # X cells dropped due to percent_mito threshold
 cellsDropped_percentMito <- sum(
-  melanoma_T_cells$percent_mito > qcMetricsThresholds["percent_mito"]
+  batch_a$percent_mito > qcMetricsThresholds["percent_mito"]
 )
 
-melanoma_T_cells_filtered <-
-  subset(melanoma_T_cells, cells = cellsKeep)
+batch_a_filtered <-
+  subset(batch_a, cells = cellsKeep)
 
-length(colnames(melanoma_T_cells_filtered)) # 29999 cells left behind in filtered data
+length(colnames(batch_a_filtered)) # 24087 cells left behind in filtered data
 
 ```
 
-# Count cells per batch after QC filtering
+# Count cells after QC filtering
 
 ```{r}
 
-cell_capture <- melanoma_T_cells_filtered@meta.data %>%
+cell_capture <- batch_a_filtered@meta.data %>%
   group_by(orig.ident) %>%
   dplyr::count()
 
@@ -319,7 +304,7 @@ cell_capture %>% arrange(n)
 
 ```{r}
 
-cell_capture <- melanoma_T_cells_filtered@meta.data %>%
+cell_capture <- batch_a_filtered@meta.data %>%
   group_by(patient.ID) %>%
   dplyr::count()
 
@@ -331,6 +316,6 @@ cell_capture %>% arrange(n)
 
 ```{r}
 
-saveRDS(melanoma_T_cells_filtered, file="./saved_data/melanoma_T_cells_filtered.rds")
+saveRDS(batch_a_filtered, file="./saved_data/batch_a_filtered.rds")
 
 ```
