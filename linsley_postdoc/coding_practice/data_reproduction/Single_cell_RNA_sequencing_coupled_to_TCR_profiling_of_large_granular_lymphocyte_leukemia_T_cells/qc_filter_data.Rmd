@@ -13,273 +13,30 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+library(TAR)
 library(Seurat)
-library(dplyr)
+library(Matrix)
+library(patchwork)
 library(ggplot2)
 
 ```
-
-# Load samples, create Seurat objets
+# Extract contents of the .tar file into the data directory
 
 ```{r}
 
-# List of sample filenames
-sample_filenames <- c(
-  "GSM5171588_dataCount_S1.csv.gz",
-  "GSM5171589_dataCount_S2.csv.gz",
-  "GSM5171590_dataCount_S3.csv.gz",
-  "GSM5171591_dataCount_S4.csv.gz",
-  "GSM5171592_dataCount_S5.csv.gz",
-  "GSM5171593_dataCount_S6.csv.gz",
-  "GSM5171594_dataCount_S7.csv.gz",
-  "GSM5171595_dataCount_S8.csv.gz",
-  "GSM5171596_dataCount_S9.csv.gz",
-  "GSM5171597_dataCount_S10.csv.gz",
-  "GSM5171598_dataCount_S11.csv.gz",
-  "GSM5171599_dataCount_S12.csv.gz",
-  "GSM5171600_dataCount_S13.csv.gz",
-  "GSM5171601_dataCount_S14.csv.gz",
-  "GSM5171602_dataCount_S15.csv.gz",
-  "GSM5171603_dataCount_S16.csv.gz",
-  "GSM5171604_dataCount_S17.csv.gz",
-  "GSM5171605_dataCount_S18.csv.gz",
-  "GSM5171606_dataCount_S19.csv.gz",
-  "GSM5171607_dataCount_S20.csv.gz",
-  "GSM5171608_dataCount_S21.csv.gz",
-  "GSM5171609_dataCount_S22.csv.gz",
-  "GSM5171610_dataCount_S23.csv.gz",
-  "GSM5171611_dataCount_S24.csv.gz",
-  "GSM5171612_dataCount_S25.csv.gz",
-  "GSM5171613_dataCount_S26.csv.gz",
-  "GSM5171614_dataCount_S27.csv.gz",
-  "GSM5171615_dataCount_S28.csv.gz",
-  "GSM5171616_dataCount_S29.csv.gz",
-  "GSM5171617_dataCount_S30.csv.gz",
-  "GSM5171618_dataCount_S31.csv.gz",
-  "GSM5171619_dataCount_S32.csv.gz"
-)
+tar_file <- "./data/GSE168859_RAW.tar"
 
-# Initialize a list to store Seurat objects
-seurat_objects <- list()
+# Extract the contents of the .tar file
+output_dir <- "./data"
 
-# Iterate through the sample filenames and create Seurat objects
-for (filename in sample_filenames) {
-  # Construct the full path to the CSV file
-  file_path <- file.path("./raw_data", filename)
-  
-  # Load the data from the CSV file
-  count_data <- read.csv(file_path)
-  
-  # Create a Seurat object and add it to the list
-  sample_name <- gsub(".csv.gz", "", filename)  # Extract sample name
-  seurat_object <- CreateSeuratObject(counts = count_data, assay = "RNA", project = sample_name)
-  seurat_object@assays$RNA@counts@Dimnames[[1]] <- count_data[, 1]
-  seurat_object@assays$RNA@data@Dimnames[[1]] <- count_data[, 1]
-  seurat_objects[[sample_name]] <- seurat_object
-}
+# Use the system command (runs terminal commands from within R) to extract the files, -C specifies directory
+system(paste("tar -xf", tar_file, "-C", output_dir))
 
 ```
-
-# Merge Seurat objects
-
-```{r}
-
-# Merge the first element with a sublist of the rest excluding the first element
-leukemia_t_cells <- merge(seurat_objects[[1]], y = seurat_objects[-1])
-
-```
-
-# Calculate percent mitochondrial, ribosomal, hemoglobin features
+# Test
 
 ```{r}
 
-leukemia_t_cells[["percent.mt"]] <- PercentageFeatureSet(leukemia_t_cells, pattern = "^MT-")
-leukemia_t_cells[["percent.rb"]] <- PercentageFeatureSet(leukemia_t_cells, pattern = "^RP[SL]")
-leukemia_t_cells[["percent.hb"]] <- PercentageFeatureSet(leukemia_t_cells, pattern = "HB[^(P)]")
 
-```
-
-# Shorten sample names
-
-```{r}
-
-leukemia_t_cells$orig.ident <- gsub("^.*_S(\\d+)$", "S\\1", leukemia_t_cells$orig.ident)
-
-```
-
-# View metadata
-
-```{r}
-
-View(leukemia_t_cells@meta.data)
-
-```
-
-# Count number of cells from all samples
-
-```{r}
-
-length(colnames(leukemia_t_cells)) # X cells
-
-```
-
-# Count cells per sample
-
-```{r}
-
-cell_capture <- leukemia_t_cells@meta.data %>%
-  group_by(orig.ident) %>%
-  dplyr::count()
-
-cell_capture %>% arrange(n)
-
-```
-
-# Set author QC metric thresholds
-
-```{r}
-
-qcMetricsThresholds <-
-  c(
-    "nCount_RNA_min" = 500,
-    "nCount_RNA_max" = 10000,
-    "percent_mito" = 10
-  )
-
-```
-
-# Plot distributions of nFeature_RNA across samples
-
-```{r}
-
-nFeature_RNA_QC <- ggplot(leukemia_t_cells@meta.data, mapping = aes(x = nFeature_RNA)) +
-  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
-  scale_x_log10()
-ggsave(nFeature_RNA_QC, file = "./figures/nFeature_RNA.tiff", device = "tiff")
-
-nFeature_RNA_QC
-
-# 
-
-```
-
-# Plot distributions of nCount_RNA across samples
-
-```{r}
-
-nCount_RNA_QC <- ggplot(leukemia_t_cells@meta.data, mapping = aes(x = nCount_RNA)) +
-  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
-  scale_x_log10() +
-  geom_vline(xintercept = qcMetricsThresholds["nCount_RNA_min"], color = "red", linetype = "dashed") +
-  geom_vline(xintercept = qcMetricsThresholds["nCount_RNA_max"], color = "red", linetype = "dashed")
-
-ggsave(nCount_RNA_QC, file = "./figures/nCount_RNA.tiff", device = "tiff")
-
-nCount_RNA_QC
-
-# 
-
-```
-
-# Plot distributions of percent mito across samples
-
-```{r}
-
-percent_mt_QC <- ggplot(leukemia_t_cells@meta.data, mapping = aes(x = percent.mt + 1/length(colnames(leukemia_t_cells)))) +
-  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
-  scale_x_log10() +
-  geom_vline(xintercept = qcMetricsThresholds["percent_mito"],
-             color = "red", linetype = "dashed") +
-  xlab("percent.mt (with pseudocount)")
-ggsave(percent_mt_QC, file = "./figures/percent_mt.tiff", device = "tiff")
-
-percent_mt_QC
-
-# 
-
-```
-# Plot distributions of percent ribo across samples
-
-```{r}
-
-percent_rb_QC <- ggplot(leukemia_t_cells@meta.data, mapping = aes(x = percent.rb + 1/length(colnames(leukemia_t_cells)))) +
-  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
-  scale_x_log10() +
-  xlab("percent.rb (with pseudocount)")
-ggsave(percent_rb_QC, file = "./figures/percent_rb.tiff", device = "tiff")
-
-percent_rb_QC
-
-# authors didn't mention cutoff for this
-
-```
-
-# Plot distributions of percent hemoglobin across samples
-
-```{r}
-
-percent_hb_QC <- ggplot(leukemia_t_cells@meta.data, mapping = aes(x = percent.hb + 1/length(colnames(leukemia_t_cells)))) +
-  geom_density(mapping = aes(color = orig.ident), size = 0.5) +
-  scale_x_log10() +
-  xlab("percent.hb (with pseudocount)")
-ggsave(percent_hb_QC, file = "./figures/percent_hb.tiff", device = "tiff")
-
-percent_hb_QC
-
-# authors didn't mention cutoff for this
-
-```
-
-# Filter cells based on QC metrics, track how many drop out
-
-```{r}
-
-cellsKeep <-
-  WhichCells(
-    leukemia_t_cells, expression = nCount_RNA >= qcMetricsThresholds["nCount_RNA_min"]) %>%
-  intersect(
-    WhichCells(
-      leukemia_t_cells, expression = percent.mt <= qcMetricsThresholds["percent_mito"]) %>%
-        intersect(
-    WhichCells(
-      leukemia_t_cells, expression = nCount_RNA <= qcMetricsThresholds["nCount_RNA_max"])))
-cellsDrop <-
-  setdiff(colnames(leukemia_t_cells), cellsKeep)
-length(cellsDrop) # X cells dropped from analysis
-
-# X cells dropped due to nFeature_RNA threshold
-cellsDropped_nFeature <- sum(
-  leukemia_t_cells$nFeature_RNA < qcMetricsThresholds["nFeature_RNA"]
-)
-
-# X cells dropped due to percent.mt threshold
-cellsDropped_percentMito <- sum(
-  leukemia_t_cells$percent.mt > qcMetricsThresholds["percent_mito"]
-)
-
-leukemia_t_cells_filtered <-
-  subset(leukemia_t_cells, cells = cellsKeep)
-
-length(colnames(leukemia_t_cells_filtered)) # X cells left behind in filtered data
-
-```
-
-# Count cells per sample after QC filtering
-
-```{r}
-
-cell_capture <- leukemia_t_cells_filtered@meta.data %>%
-  group_by(orig.ident) %>%
-  dplyr::count()
-
-cell_capture %>% arrange(n)
-
-```
-
-# Save the resulting QC filtered Seurat object
-
-```{r}
-
-saveRDS(leukemia_t_cells_filtered, file="./saved_data/leukemia_t_cells_filtered.rds")
 
 ```
