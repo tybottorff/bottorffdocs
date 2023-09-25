@@ -1,6 +1,6 @@
 ---
 title: "T cell characteristics associated with irAE from ICI in melanoma"
-output: html_notebook
+output: pdf_document
 ---
 
  - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
@@ -42,9 +42,9 @@ theme_set(
 
 ```{r}
 
-supp_data_1 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1")
+supp_data_1 <- read_excel("../raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1")
 
-supp_data_2 <- read_excel("./raw_data/supp_tables.xlsx", sheet = "cleaned_table_s3") %>%
+supp_data_2 <- read_excel("../raw_data/supp_tables.xlsx", sheet = "cleaned_table_s3") %>%
   mutate(`Highest irAE grade` = as.character(`Highest irAE grade`)) %>%
   rename(`ICI Regimen` = `ICI regimen`)
 
@@ -61,7 +61,7 @@ supp_data
 
 ```{r}
 
-batch_a_metadata <- read.table("./raw_data/GSE189125_5prime_scRNAseq_seqbatchA_metadata.txt", sep = "\t")
+batch_a_metadata <- read.table("../raw_data/GSE189125_5prime_scRNAseq_seqbatchA_metadata.txt", sep = "\t")
 
 # rename columns with first row values
 colnames(batch_a_metadata) <- batch_a_metadata[1, ]
@@ -95,7 +95,7 @@ batch_a_metadata
 
 ```{r}
 
-batch_a <- CreateSeuratObject(counts = read.table("./raw_data/GSE189125_5prime_scRNAseq_seqbatchA_counts.txt", sep = ""), project = "batch_a", assay = "RNA", meta.data = merged_batch_a_metadata)
+batch_a <- CreateSeuratObject(counts = read.table("../raw_data/GSE189125_5prime_scRNAseq_seqbatchA_counts.txt", sep = ""), project = "batch_a", assay = "RNA", meta.data = merged_batch_a_metadata)
 
 # batch_b doesn't have any scRNAseq data
 
@@ -108,14 +108,6 @@ batch_a <- CreateSeuratObject(counts = read.table("./raw_data/GSE189125_5prime_s
 batch_a[["percent_mito"]] <- PercentageFeatureSet(batch_a, pattern = "^MT-")
 batch_a[["percent_ribo"]] <- PercentageFeatureSet(batch_a, pattern = "^RP[SL]")
 batch_a[["percent_hb"]] <- PercentageFeatureSet(batch_a, pattern = "HB[^(P)]")
-
-```
-
-# View metadata
-
-```{r}
-
-View(batch_a@meta.data)
 
 ```
 
@@ -147,7 +139,7 @@ vln_plot <- VlnPlot(batch_a, features = c("nFeature_RNA", "nCount_RNA", "percent
 
 vln_plot
 
-ggsave(vln_plot, file = "./figures/vln_plot_qc.svg")
+ggsave(vln_plot, file = "../figures/vln_plot_qc.svg")
 
 ```
 
@@ -179,7 +171,7 @@ nFeature_RNA_QC <- ggplot(batch_a@meta.data, mapping = aes(x = nFeature_RNA)) +
              color = "red", linetype = "dashed") +
   geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_max"],
              color = "red", linetype = "dashed")
-ggsave(nFeature_RNA_QC, file = "./figures/nFeature_RNA.svg")
+ggsave(nFeature_RNA_QC, file = "../figures/nFeature_RNA.svg")
 
 nFeature_RNA_QC
 
@@ -192,7 +184,7 @@ nFeature_RNA_QC
 nCount_RNA_QC <- ggplot(batch_a@meta.data, mapping = aes(x = nCount_RNA)) +
   geom_density(mapping = aes(color = patient.ID), size = 0.5) +
   scale_x_log10()
-ggsave(nCount_RNA_QC, file = "./figures/nCount_RNA.svg")
+ggsave(nCount_RNA_QC, file = "../figures/nCount_RNA.svg")
 
 nCount_RNA_QC
 
@@ -208,7 +200,7 @@ percent_mt_QC <- ggplot(batch_a@meta.data, mapping = aes(x = percent_mito + 1/le
   geom_vline(xintercept = qcMetricsThresholds["percent_mito"],
              color = "red", linetype = "dashed") +
   xlab("percent_mito (with pseudocount)")
-ggsave(percent_mt_QC, file = "./figures/percent_mt.svg")
+ggsave(percent_mt_QC, file = "../figures/percent_mt.svg")
 
 percent_mt_QC
 
@@ -222,7 +214,7 @@ percent_rb_QC <- ggplot(batch_a@meta.data, mapping = aes(x = percent_ribo + 1/le
   geom_density(mapping = aes(color = patient.ID), size = 0.5) +
   scale_x_log10() +
   xlab("percent_ribo (with pseudocount)")
-ggsave(percent_rb_QC, file = "./figures/percent_rb.svg")
+ggsave(percent_rb_QC, file = "../figures/percent_rb.svg")
 
 percent_rb_QC
 
@@ -237,7 +229,7 @@ percent_hb_QC <- ggplot(batch_a@meta.data, mapping = aes(x = percent_hb + 1/leng
   scale_x_log10() +
   xlab("percent_hb (with pseudocount)")
 
-ggsave(percent_hb_QC, file = "./figures/percent_hb.svg")
+ggsave(percent_hb_QC, file = "../figures/percent_hb.svg")
 
 percent_hb_QC
 
@@ -307,6 +299,6 @@ cell_capture %>% arrange(n)
 
 ```{r}
 
-saveRDS(batch_a_filtered, file="./saved_data/batch_a_filtered.rds")
+saveRDS(batch_a_filtered, file="../saved_data/batch_a_filtered.rds")
 
 ```

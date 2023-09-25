@@ -1,6 +1,6 @@
 ---
 title: "T cell characteristics associated with irAE from ICI in melanoma"
-output: html_notebook
+output: pdf_document
 ---
 
  - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
@@ -18,6 +18,7 @@ library(patchwork)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(tidyverse)
 
 ```
 
@@ -42,7 +43,7 @@ theme_set(
 
 ```{r}
 
-melanoma_T_cells_cell_type_clustered <- readRDS("./saved_data/cell_type_clustered.rds")
+melanoma_T_cells_cell_type_clustered <- readRDS("../saved_data/cell_type_clustered.rds")
 
 ```
 
@@ -50,39 +51,54 @@ melanoma_T_cells_cell_type_clustered <- readRDS("./saved_data/cell_type_clustere
 
 ```{r}
 
-test <- read_csv("./raw_data/GSM5694798_YUCARD_TCR.csv.gz")
+#GSM5694801_YUFURL_TCR.csv.gz
+#GSM5694811_YUALOE_TCR.csv.gz
+#GSM5694802_YUGRUS_TCR.csv.gz
+#GSM5694812_YUHONEY_TCR.csv.gz
+#GSM5694803_YUHERN_TCR.csv.gz
+#GSM5694804_YUKEND_TCR.csv.gz
+#GSM5694805_YUPIXEL_TCR.csv.gz
+#GSM5694806_YUROD_TCR.csv.gz
+#GSM5694798_YUCARD_TCR.csv.gz
+#GSM5694808_YUTHEA_TCR.csv.gz
+#GSM5694799_YUENZO_TCR.csv.gz
+#GSM5694800_YUFUB_TCR.csv.gz
+#GSM5694810_YUVARDO_TCR.csv.gz
+#16 TCRs
+#GSM5694809_YUTORY_TCR.csv.gz
+#GSM5694807_YUTAUR_TCR.csv.gz
+#GSM5694813_YUNANCY_TCR.csv.gz
+
+
+#GSM5694821_YUPIXEL_BCR.csv.gz
+#GSM5694822_YUROD_BCR.csv.gz
+#GSM5694823_YUTAUR_BCR.csv.gz
+#GSM5694814_YUCARD_BCR.csv.gz
+#GSM5694824_YUTHEA_BCR.csv.gz
+#GSM5694815_YUENZO_BCR.csv.gz
+#GSM5694825_YUTORY_BCR.csv.gz
+#GSM5694816_YUFUB_BCR.csv.gz
+#GSM5694826_YUVARDO_BCR.csv.gz
+#GSM5694817_YUFURL_BCR.csv.gz
+#GSM5694818_YUGRUS_BCR.csv.gz
+#GSM5694819_YUHERN_BCR.csv.gz
+#GSM5694820_YUKEND_BCR.csv.gz
+
+#13 BCRs
+
+test <- read_csv("../raw_data/GSM5694798_YUCARD_TCR.csv.gz", row_names=FALSE)
+
+rownames(test) <- test[['Barcode']]
 
 test
 
-GSM5694801_YUFURL_TCR.csv.gz
-GSM5694811_YUALOE_TCR.csv.gz
-GSM5694821_YUPIXEL_BCR.csv.gz
-GSM5694802_YUGRUS_TCR.csv.gz
-GSM5694812_YUHONEY_TCR.csv.gz
-GSM5694822_YUROD_BCR.csv.gz
-GSM5694803_YUHERN_TCR.csv.gz
-GSM5694813_YUNANCY_TCR.csv.gz
-GSM5694823_YUTAUR_BCR.csv.gz
-GSM5694804_YUKEND_TCR.csv.gz
-GSM5694814_YUCARD_BCR.csv.gz
-GSM5694824_YUTHEA_BCR.csv.gz
-GSM5694805_YUPIXEL_TCR.csv.gz
-GSM5694815_YUENZO_BCR.csv.gz
-GSM5694825_YUTORY_BCR.csv.gz
-GSM5694806_YUROD_TCR.csv.gz
-GSM5694816_YUFUB_BCR.csv.gz
-GSM5694826_YUVARDO_BCR.csv.gz
-GSM5694807_YUTAUR_TCR.csv.gz
-GSM5694817_YUFURL_BCR.csv.gz
-GSM5694798_YUCARD_TCR.csv.gz
-GSM5694808_YUTHEA_TCR.csv.gz
-GSM5694818_YUGRUS_BCR.csv.gz
-GSM5694799_YUENZO_TCR.csv.gz
-GSM5694809_YUTORY_TCR.csv.gz
-GSM5694819_YUHERN_BCR.csv.gz
-GSM5694800_YUFUB_TCR.csv.gz
-GSM5694810_YUVARDO_TCR.csv.gz
-GSM5694820_YUKEND_BCR.csv.gz
+# set barcodes as rownames.
+#rownames(tcr) <- tcr[,1]
+#tcr[,1] <- NULL
+#colnames(tcr) <- paste(type, colnames(tcr), sep="_")
+# Add to the Seurat object's metadata.
+#clono_seurat <- AddMetaData(object=seurat_obj, metadata=tcr)
+#return(clono_seurat)
 
 ```
 
