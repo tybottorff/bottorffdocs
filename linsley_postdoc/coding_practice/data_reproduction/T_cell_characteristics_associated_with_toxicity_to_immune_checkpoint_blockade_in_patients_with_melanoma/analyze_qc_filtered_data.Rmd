@@ -1,31 +1,19 @@
 ---
-title: "scRNAseq reveals distinct T cell populations in irAE of ICI"
+title: "T cell characteristics associated with irAE from ICI in melanoma"
 output: html_notebook
 ---
 
- - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9873824/
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-# Use specific version of Seurat that authors use
-
-```{r}
-
-#remotes::install_version("Seurat", version = "3.1.5")
-
-library(Seurat)
-
-# Check Seurat version
-packageVersion("Seurat")
-
 ```
 
 # Load necessary libraries
 
 ```{r}
 
+library(Seurat)
 library(patchwork)
 library(ggplot2)
 library(dplyr)
@@ -54,7 +42,7 @@ theme_set(
 
 ```{r}
 
-melanoma_T_cells_filtered <- readRDS("./saved_data/melanoma_T_cells_filtered.rds")
+melanoma_T_cells_filtered <- readRDS("./saved_data/batch_a_filtered.rds")
 
 ```
 
@@ -116,12 +104,14 @@ immune.combined <- RunUMAP(immune.combined, reduction = "pca", dims = 1:30)
 
 ```
 
-# FindClusters (resolution parameter of 3), should see 37 clusters
+# Find clusters
 
 ```{r}
 
 immune.combined <- FindNeighbors(immune.combined, reduction = "pca", dims = 1:30)
 immune.combined <- FindClusters(immune.combined, resolution = 3)
+
+# resolution parameter of 3, see 28 instead of 37 clusters
 
 ```
 
@@ -131,6 +121,8 @@ immune.combined <- FindClusters(immune.combined, resolution = 3)
 
 DimPlot(immune.combined, reduction = "umap", group.by = "patient.ID", dims = c(2, 1))
 
+ggsave("./figures/umap_patient_id.svg")
+
 ```
 
 # Visualize UMAP by cluster
@@ -138,5 +130,271 @@ DimPlot(immune.combined, reduction = "umap", group.by = "patient.ID", dims = c(2
 ```{r}
 
 DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE, dims = c(2, 1))
+
+ggsave("./figures/umap_cluster.svg")
+
+```
+# Find cluster biomarkers
+
+```{r}
+
+# find markers for every cluster compared to all remaining cells, report only the positive ones
+immune.markers <- FindAllMarkers(immune.combined, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+
+```
+
+# Look at relevant cluster biomarkers
+
+```{r}
+
+immune.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "CD14", "FCGR3A", "FCER1A", "MS4A1", "HBB", "PPBP")) %>%
+  arrange(gene)
+
+```
+
+# Plot marker distribution across clusters to identify CD8 T cells
+
+```{r}
+
+# CD3D/CD3Ehi and CD8A/CD8Bhi and NKG7/GNLYlo = CD8 T cells
+
+# 0, 4, 5, 9, 10, 12, 16, 20, 22, 23, 25 high in CD3D
+# 0, 4, 5, 9, 10, 12, 14-16, 20, 22, 23, 25 high in CD3E
+# clusters 9, 10, 16, 23 highest in CD8A
+# 10, 16, 23 highest in CD8B
+
+# 9-11, 14-16 high in NKG7
+# 9-11, 14-16 high in GNLY
+
+immune.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY")) %>%
+  arrange(cluster)
+
+# clusters 16, 23 look good for CD8 T cells
+
+```
+
+# Plot marker distribution across clusters to identify CD4 T cells
+
+```{r}
+
+VlnPlot(immune.combined, features = c("IL7R"), pt.size = 0)
+# CD3D/CD3Ehi non-CD8 T cells with high IL7R expression and low NKG7/GNLY = CD4 T cells
+
+# 0, 4, 5, 9, 10, 12, 16, 20, 22, 23, 25 high in CD3D
+# 0, 4, 5, 9, 10, 12, 14-16, 20, 22, 23, 25 high in CD3E
+
+# clusters 9, 10, 16, 23 highest in CD8A
+# 10, 16, 23 highest in CD8B
+# 9-11, 14-16 high in NKG7
+# 9-11, 14-16 high in GNLY
+
+# clusters 0, 4, 5, 10, 12, 20, 22, 23, 25 high in IL7R
+
+# clusters 0, 4, 5, 20, 22, 25 look good for CD4 T cells
+
+```
+
+# Plot marker distribution across clusters to identify NK cells
+
+```{r}
+
+# NKG7/GNLYhi and CD3D/CD3Elo = NK cells
+
+# 0, 4, 5, 9, 10, 12, 16, 20, 22, 23, 25 high in CD3D
+# 0, 4, 5, 9, 10, 12, 14-16, 20, 22, 23, 25 high in CD3E
+
+# 9-11, 14-16 high in NKG7
+# 9-11, 14-16 high in GNLY
+
+# clusters 11, 14 looks good for NK cells
+
+immune.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "NKG7", "GNLY")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify DCs
+
+```{r}
+
+VlnPlot(immune.combined, features = c("FCER1A"), pt.size = 0)
+# FCER1Ahi = dendritic cells (DCs)
+# cluster 26 is DCs
+
+immune.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("FCER1A")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify B cells
+
+```{r}
+
+VlnPlot(immune.combined, features = c("MS4A1"), pt.size = 0)
+# MS4A1hi = B cells
+
+# 1, 18, 19 for B cell clusters
+
+immune.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("MS4A1")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify monocytes
+
+```{r}
+
+VlnPlot(immune.combined, features = c("FCGR3A"), pt.size = 0)
+# CD14 or FCGR3Ahi = monocytes
+
+# CD14hi = clusters 2, 3, 6, 13, 21, 26, 27
+# FCGR3Ahi = clusters 8 and 17 mostly, also 9 and 11 and 13-15?
+
+# 2, 8, 13, 21, 27 = monocytes
+
+immune.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("FCGR3A", "CD14")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify RBCs and platelets
+
+```{r}
+
+VlnPlot(immune.combined, features = c("HBB"), pt.size = 0)
+# HBBhi = red blood cells
+# looks like clusters 24 and 25 are RBCs (24 may be platelets), also 3, 6, 15, 17?
+
+immune.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("HBB")) %>%
+  arrange(cluster)
+
+VlnPlot(immune.combined, features = c("PPBP"), pt.size = 0)
+# PPBPhi = platelets
+# looks like cluster 24 is platelets/RBCs, also 7?
+
+immune.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("PPBP")) %>%
+  arrange(cluster)
+
+# RBs/platelets = clusters 
+
+```
+
+# Plot marker distribution across clusters to identify T/NKT
+
+```{r}
+
+VlnPlot(immune.combined, features = c("NKG7"), pt.size = 0)
+# T/NKT: high expression of CD3D/E and GNLY/NKG7 that were not annotated as CD8/CD4 T cells
+
+# 0, 4, 5, 9, 10, 12, 16, 20, 22, 23, 25 high in CD3D
+# 0, 4, 5, 9, 10, 12, 14-16, 20, 22, 23, 25 high in CD3E
+
+# 9-11, 14-16 high in NKG7
+# 9-11, 14-16 high in GNLY
+
+# so maybe 9, 10, 16?
+
+```
+
+# Name cell types for clusters
+
+```{r}
+
+new.cluster.ids <- c("CD4 T cell", "B cell", "Monocyte", "RBC/platelet", "CD4 T cell", "CD4 T cell", "RBC/platelet", "RBC/platelet", "Monocyte", "T/NKT", "T/NKT", "NK", "T/NKT", "Monocyte", "NK", "RBC/platelet", "CD8 T cell", "RBC/platelet", "B cell", "B cell", "CD4 T cell", "Monocyte", "CD4 T cell", "CD8 T cell", "RBC/platelet", "RBC/platelet", "DC", "Monocyte")
+
+names(new.cluster.ids) <- levels(immune.combined)
+immune.combined <- RenameIdents(immune.combined, new.cluster.ids)
+
+```
+
+# Plot UMAP with cell clusters
+
+```{r}
+
+DimPlot(immune.combined, reduction = "umap", label = TRUE, pt.size = 0.5)
+ggsave("./figures/umap_cell_type.svg")
+
+# they also have some CD8 assigned T cells clustering inside large CD4 T cell cluster
+
+```
+
+# Compare manual cell type labeling with Seurat reference mapping
+
+```{r}
+
+# pbmc has precompiled cell types and scores I can map onto this data to compare to my manual mappings
+
+```
+
+# Exclude clusters annotated as red blood cells or platelets from further analysis
+
+```{r}
+
+rbc_filtered_immune.combined <- subset(immune.combined, idents = "RBC/platelet", invert = TRUE)
+
+```
+
+# Plot UMAP with cell clusters after excluding RBC/platelet clusters
+
+```{r}
+
+DimPlot(rbc_filtered_immune.combined, reduction = "umap", label = TRUE, pt.size = 0.5)
+ggsave("./figures/rbc_filtered_umap_cell_type.svg")
+
+# they also have some CD8 assigned T cells clustering inside large CD4 T cell cluster
+
+```
+
+# Save cell type clustered Seurat object
+
+```{r}
+
+saveRDS(batch_a_filtered, file="./saved_data/cell_type_clustered.rds")
+
+```
+
+# Assess effective doublet rate
+
+```{r}
+
+# cross-reference cellular barcodes with single-cell BCR (scBCR) and TCR (scTCR) clonotypes
+# determine (1) the percentage of non-T cells anomalously mapped to TCR clonotypes (denoted m) and (2) the frequency (recovery rate) of annotated T cells with a matching scTCR clonotype (denoted f), calculate an effective double rate (m/f) (should get 2.2%)
+# do the same for scBCR clonotypes mapping to non-B cells (should also get 2.2%)
+
+# eliminate all single cells with aberrant expression of TCR or BCR clonotypic sequences
+# repeat PCA, UMAP and FindClusters after eliminating these cells, now should get 32 clusters
+# Two red blood cell clusters, marked by very high HBB expression, should remain, remove them from the analysis
+# do one final round of PCA, UMAP and FindClusters, yielding a final set of 32 clusters (states)
+
+```
+
+# Analyze CD4 T cell subclusters
+
+```{r}
+
+# CD4 T cell state 5, lacks expression of CCR7 and SELL (CD62L), consistent with CD4 TEM, see association with severe iRAE development, so I'll need to find this same subcluster they find (combine with subcluster 3)
+
+# maybe start with DEGs across subtypes of CD4 T cells, should see 2 of them closely match each other (their subclusters 3 and 5)
+
+#rbc_filtered_immune.combined %>%
+#    group_by(cluster) %>%
+#    top_n(n = 10, wt = avg_log2FC) -> top10
+#DoHeatmap(pbmc, features = top10$gene) + NoLegend()
 
 ```
