@@ -4,6 +4,8 @@
  - hyperparameter: could refer to machine learning (parameter that controls learning process) or Bayesian statistics (parameter of prior distribution)
  - metadata: information about the data other than the data itself (for example time and data of data creation, data's purpose)
 - mixed models for repeated measures (MMRM): approach to model data with high variability making few/no assumptions
+## Seurat
+ - data annotations stored at different levels of resolution (L1-L3)
 ## RNA-seq count data
  - low number of counts (often 0) associated with most genes
  - long right tail in distribution of counts across genes as there is effecitvely no upper limit for gene expression

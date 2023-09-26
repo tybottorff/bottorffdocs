@@ -17,6 +17,9 @@
 # Association of vitiligo with tumor response in patients with metastatic melanoma treated with pembrolizumab
  - 25% of patients developed vitiligo
  - **objective response associated with higher occurrence of vitiligo**
+# Canonical correlation analysis for multi-omics: application to cross-cohort analysis
+ - CCA: correlation-based integrative method to extract latent features shared between multiple assays by finding linear combination of features (canonical variables, CVs) within each assay that achieve maximal across-assay correlation
+ - PCA is a special case of CCA as optimization objective is the same if same data used for both assays
 # Cardiac myosin-specific autoimmune T cells contribute to immune-checkpoint-inhibitor-associated myocarditis
  - cardiac myosin-specific autoreactive T cells drive pathogenesis of PD-1 inhibitor-induced myocarditis in mice
  - PD-1 expressing cardiac myosin-specific autoimmune T cells are present in heart during naive conditions
@@ -108,6 +111,9 @@
  - chronic antigen exposure leads to T cell exhaustion with reduced effector function
  - do all antigen-specific T cell clones follow the same T<sub>ex</sub> differentiation trajectory?
  - results: high T cell receptor signaling aviditiy correlates with T<sub>ex</sub> terminal phenotype, low avidity correlates with effector-like T<sub>ex</sub> KLR fate (so higher signaling response from TCR activation leads to higher exhaustion)
+# Effective use of latent semantic indexing and computational linguistics in biological and biomedical applications
+ - LSI = latent semantic indexing, computational linguistics technique, outperforms Boolean text searches and co-occurrence models at information retrieval, dimensional reduction technique used to compare concepts/topics among collection of terms
+ - clustering genes/proteins into GO groups/signaling pathways relies on curation of these groups/pathways, could be supplemented by LSI/LSA (latent semantic analysis)
 # Epigenetic regulation of T cell exhaustion
 ## Distinct epigenetic programs in T<sub>ex</sub> cells
  - T cells are directed by multiple signals (TCR-antigen interaction, co-stimulatory molecular interactions, local cytokines)
@@ -182,6 +188,17 @@
  - study patients with various cancers treated with PD-1 blockade
  - **identify 23 immune-related genes/signatures linked to response and progression-free survival**
  - **PD1 gene expression along with 12 signatures tracking CD8 and CD4 T-cell activation, natural killer cells, and IFN activation associated significantly with non-progressive disease and progression free survival**
+# Immune tolerance in liver disease
+ - incomplete activation of CD8<sup>+</sup> T cells (proliferation but then clonal exhaustion or death of T cells)
+ - poor CD4<sup>+</sup> T cell activation (liver APCs express inhibitory cytokines and co-inhibitory ligands)
+ - myeloid cells mediate immunosuppression (Kupffer cells are myeloid-derived suppressor cells, promote Treg activation along with DCs)
+# Immune tolerance: what is unique about the liver
+ - liver continuously exposed to food and microbial antigens from intestine, barrier towards environmental antigens
+ - liver also exposed to neoantigens from metabolism
+ - risk of immune activation in liver higher than other organs due to these antigen exposures
+ - therefore, liver has acquired mechanisms of immune tolerance to avoid overactive immune response
+ - liver allografts are accepted across MHC mismatches without immunosuppression due to liver immune tolerance
+ - non-liver allografts also rejected less with co-transplantation of liver allograft, **not sure how this induces systemic tolerance but very interesting**
 # Improving CAR-T immunotherapy: overcoming the challenges of T cell exhaustion
  - **CAR (chimeric antigen receptor) allows modified T cells to mount antigen-specific immune response to cells bearing CAR target antigen independently of MHC**
  - CAR T cell therapy failure often attributed to antigen escape (selection pressure under CAR T surveillance leads to emergence of antigen-negative tumors), but relapse can occur with antigen-positive tumors (can be hard for CAR T cells to access tumor cells for example due to regulatory T cells in tumor secreting inhibitory cytokines)
@@ -194,10 +211,16 @@
  - alopecia areata is an autoimmune disease caused by T cell-mediated destruction of the hair follicle
  - JAK1/3 inhibitors disrupt γc cytokine signaling (important for T cell development, activation, homeostasis), selectively induces T cell exhaustion to help treat this autoimmune disease
 # Inhibitory receptors beyond T cell exhaustion
+# Integrated analysis of multimodal single-cell data
+ - weighted nearest neighbor analysis integrates multimodal single cell data in an unsupervised manner by learning relative utility of each data type in each cell
 # Integrated NY-ESO-1 antibody and CD8<sup>+</sup> T-cell responses correlate with clinical benefit in advanced melanoma patients treated with ipilimumab
+ - isotype control: primary antibody that lacks specificity to target but matches class/type of primary antibody used, negative control to see non-specific background signal
  - CTLA-4 blockade improves survival in patients with advanced melanoma, also enhances immunity to NY-ESO-1 (cancer-testis antigen expressed in some melanoma patients)
  - see increase (16% to 22%) in seropositivity for NY-ESO-1 antibody after CTLA-4 blockade, seropositive individuals more likely to experience clinical benefit (seropositive individuals who didn't experience clinical benefit more likely didn't have associated CD8<sup>+</sup> T cells)
 # Intratumoral heterogeneity and T cell exhaustion in primary CNS lymphoma
+# Inverse vaccination, the opposite of Jenner's concept, for therapy of autoimmunity
+ - Jenner invented vaccination in 1796
+ - autoimmunity treatment includes immunosuppression via anti-CD20 monoclonal antibody (B cells marked by CD20), anti-CD52 mAb (WBCs marked by CD52), similarly reduce transplant rejection with mAbs against CD3 (T cells marked by CD3), can also disrupt lymphocyte ingress into tissue via integrin blockade or impeded egress of lymphocytes out of lymph nodes via spingosine phosphate receptor modulation
 # Kimma: flexible linear mixed effects modeling with kinship covariance for RNA-seq data
 # Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
 ## Abstract
@@ -207,6 +230,12 @@
 ## Introduction
  - ICI can work via activation, expansion, and recruitment of CD8<sup>+</sup> T cells from peripheral circulation
  - open questions: are there phenotypic differences between clonally related T cells in different anatomical sites? are progenitor exhausted T cells clonally linked to intratumoral exhausted CD8<sup>+</sup> T cells present in tumor-draining lymph nodes (seems to be the case in mice)? how long do tumor specific T cell clones like exhausted CD8<sup>+</sup> T cells persist after ICI?
+# Liver mediated adaptive immune tolerance
+ - liver is immunologically tolerant, equipped to limit hypersensitivity to food-derived antigens, bacterial products, can easily accept allografts
+ - persistent infection of liver with pathogen usually results in tolerance
+ - immunosuppressive environment of liver makes adaptive immune cells of liver readily tolerogenic, promoting death of effector cells (also anergy, senescence, exhaustion) and "education" of regulatory cells
+ - tolerance mechanisms of liver related to many liver diseases
+ - liver is the largest organ with a rich blood supply (hepatic artery, portal vein), exposed to many microbial products, harmless food-derived antigens via intestines
 # Major histocompatibility complex (MHC) class I and MHC class II proteins: conformational plasticity in antigen presentation
  - APC presented peptides are generated from proteins produced by cell's own translational machinery or from proteins funneled into endo-lysosomal vesicular system
  - peptide repertoire presented by MHC proteins largely depends on structural features of binding groove of each particular MHC allelic variant
