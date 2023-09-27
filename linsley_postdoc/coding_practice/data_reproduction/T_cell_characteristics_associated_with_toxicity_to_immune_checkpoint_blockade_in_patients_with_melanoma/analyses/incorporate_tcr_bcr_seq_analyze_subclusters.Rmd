@@ -47,73 +47,220 @@ melanoma_T_cells_cell_type_clustered <- readRDS("../saved_data/cell_type_cluster
 
 ```
 
-# Read in TCR, BCR data
+# Read in TCR, BCR data, process to add in as metadata to Seurat RNA assay object
 
 ```{r}
 
-#GSM5694801_YUFURL_TCR.csv.gz
-#GSM5694811_YUALOE_TCR.csv.gz
-#GSM5694802_YUGRUS_TCR.csv.gz
-#GSM5694812_YUHONEY_TCR.csv.gz
-#GSM5694803_YUHERN_TCR.csv.gz
-#GSM5694804_YUKEND_TCR.csv.gz
-#GSM5694805_YUPIXEL_TCR.csv.gz
-#GSM5694806_YUROD_TCR.csv.gz
-#GSM5694798_YUCARD_TCR.csv.gz
-#GSM5694808_YUTHEA_TCR.csv.gz
-#GSM5694799_YUENZO_TCR.csv.gz
-#GSM5694800_YUFUB_TCR.csv.gz
-#GSM5694810_YUVARDO_TCR.csv.gz
-#16 TCRs
-#GSM5694809_YUTORY_TCR.csv.gz
-#GSM5694807_YUTAUR_TCR.csv.gz
-#GSM5694813_YUNANCY_TCR.csv.gz
+# List of file names
+file_names <- c(
+  "../raw_data/GSM5694801_YUFURL_TCR.csv.gz",
+  "../raw_data/GSM5694811_YUALOE_TCR.csv.gz",
+  "../raw_data/GSM5694802_YUGRUS_TCR.csv.gz",
+  "../raw_data/GSM5694812_YUHONEY_TCR.csv.gz",
+  "../raw_data/GSM5694803_YUHERN_TCR.csv.gz",
+  "../raw_data/GSM5694804_YUKEND_TCR.csv.gz",
+  "../raw_data/GSM5694805_YUPIXEL_TCR.csv.gz",
+  "../raw_data/GSM5694806_YUROD_TCR.csv.gz",
+  "../raw_data/GSM5694798_YUCARD_TCR.csv.gz",
+  "../raw_data/GSM5694808_YUTHEA_TCR.csv.gz",
+  "../raw_data/GSM5694799_YUENZO_TCR.csv.gz",
+  "../raw_data/GSM5694800_YUFUB_TCR.csv.gz",
+  "../raw_data/GSM5694810_YUVARDO_TCR.csv.gz",
+  "../raw_data/GSM5694809_YUTORY_TCR.csv.gz",
+  "../raw_data/GSM5694807_YUTAUR_TCR.csv.gz",
+  "../raw_data/GSM5694813_YUNANCY_TCR.csv.gz",
+  "../raw_data/GSM5694821_YUPIXEL_BCR.csv.gz",
+  "../raw_data/GSM5694822_YUROD_BCR.csv.gz",
+  "../raw_data/GSM5694823_YUTAUR_BCR.csv.gz",
+  "../raw_data/GSM5694814_YUCARD_BCR.csv.gz",
+  "../raw_data/GSM5694824_YUTHEA_BCR.csv.gz",
+  "../raw_data/GSM5694815_YUENZO_BCR.csv.gz",
+  "../raw_data/GSM5694825_YUTORY_BCR.csv.gz",
+  "../raw_data/GSM5694816_YUFUB_BCR.csv.gz",
+  "../raw_data/GSM5694826_YUVARDO_BCR.csv.gz",
+  "../raw_data/GSM5694817_YUFURL_BCR.csv.gz",
+  "../raw_data/GSM5694818_YUGRUS_BCR.csv.gz",
+  "../raw_data/GSM5694819_YUHERN_BCR.csv.gz",
+  "../raw_data/GSM5694820_YUKEND_BCR.csv.gz"
+)
 
+# List of patient IDs you want to include
+selected_patient_IDs <- c(
+  "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+  "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+  "YUTORY", "YUHERN", "YUROD"
+)
 
-#GSM5694821_YUPIXEL_BCR.csv.gz
-#GSM5694822_YUROD_BCR.csv.gz
-#GSM5694823_YUTAUR_BCR.csv.gz
-#GSM5694814_YUCARD_BCR.csv.gz
-#GSM5694824_YUTHEA_BCR.csv.gz
-#GSM5694815_YUENZO_BCR.csv.gz
-#GSM5694825_YUTORY_BCR.csv.gz
-#GSM5694816_YUFUB_BCR.csv.gz
-#GSM5694826_YUVARDO_BCR.csv.gz
-#GSM5694817_YUFURL_BCR.csv.gz
-#GSM5694818_YUGRUS_BCR.csv.gz
-#GSM5694819_YUHERN_BCR.csv.gz
-#GSM5694820_YUKEND_BCR.csv.gz
+# Filter the list of file names to include only selected patients
+selected_files <- file_names[sapply(file_names, function(file_name) {
+  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+  patient_ID %in% selected_patient_IDs
+})]
 
-#13 BCRs
+# Create a mapping of patient.ID to their respective suffixes
+suffix_mapping <- data.frame(
+  patient.ID = c(
+    "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+    "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+    "YUTORY", "YUHERN", "YUROD"
+  ),
+  suffix = c(
+    ".1_1", ".1_2", ".1_3", ".1_4", ".1_5", ".1_6", ".1_7", ".1_8", ".1_9", ".1_10", ".1_11", ".1_12", ".1_13"
+  )
+)
 
-test <- read_csv("../raw_data/GSM5694798_YUCARD_TCR.csv.gz", row_names=FALSE)
+# Create an empty data frame to store the combined data
+combined_data <- data.frame()
 
-rownames(test) <- test[['Barcode']]
+# Process each file and append it to the combined_data data frame
+for (file_name in selected_files) {
+  # Read the CSV file
+  data <- read_csv(file_name)
+  
+  # Extract patient ID and CR type (TCR or BCR) from the file name
+  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+  
+  # Find the suffix based on patient ID from the mapping
+  suffix <- suffix_mapping$suffix[suffix_mapping$patient.ID == patient_ID]
+  
+  # Add the suffix to the "Barcode" column
+  data$Barcode <- paste(data$Barcode, suffix, sep = "")
+  
+  CR_type <- ifelse(grepl("_TCR", file_name), "TCR", "BCR")
+  
+  # Add patient ID and CR type as new columns
+  data$patient.ID <- patient_ID
+  data$CR.type <- CR_type
+  
+  # Append the data to the combined_data data frame
+  combined_data <- bind_rows(combined_data, data)
+}
 
-test
+# Remove duplicate rows based on the "Barcode" column
+combined_data <- combined_data %>%
+  distinct(Barcode, .keep_all = TRUE)
 
-# set barcodes as rownames.
-#rownames(tcr) <- tcr[,1]
-#tcr[,1] <- NULL
-#colnames(tcr) <- paste(type, colnames(tcr), sep="_")
-# Add to the Seurat object's metadata.
-#clono_seurat <- AddMetaData(object=seurat_obj, metadata=tcr)
-#return(clono_seurat)
+# Set row names based on the "Barcode" column
+rownames(combined_data) <- combined_data$Barcode
+
+combined_data <- combined_data %>% select(-Barcode)
+
+combined_data
 
 ```
 
-# Assess effective doublet rate
+# Add TCR/BCR metadata to Seurat scRNA assay
 
 ```{r}
 
-# cross-reference cellular barcodes with single-cell BCR (scBCR) and TCR (scTCR) clonotypes
-# determine (1) the percentage of non-T cells anomalously mapped to TCR clonotypes (denoted m) and (2) the frequency (recovery rate) of annotated T cells with a matching scTCR clonotype (denoted f), calculate an effective double rate (m/f) (should get 2.2%)
-# do the same for scBCR clonotypes mapping to non-B cells (should also get 2.2%)
+rna_and_tcr_bcr_seurat <- AddMetaData(object = melanoma_T_cells_cell_type_clustered, metadata = combined_data)
 
-# eliminate all single cells with aberrant expression of TCR or BCR clonotypic sequences
-# repeat PCA, UMAP and FindClusters after eliminating these cells, now should get 32 clusters
-# Two red blood cell clusters, marked by very high HBB expression, should remain, remove them from the analysis
-# do one final round of PCA, UMAP and FindClusters, yielding a final set of 32 clusters (states)
+View(rna_and_tcr_bcr_seurat@meta.data$CR.type)
+
+# not every barcode from scRNAseq (24,807 rows) has corresponding TCR/BCR metadata (9,003 barcodes), perhaps partially because I removed duplicate TCR/BCR data barcodes that have same clonotype? 17,440 barcodes if I didn't remove duplicates
+
+```
+
+# Assess aberrant TCR/BCR "expression"
+
+```{r}
+
+# subset Seurat for containing TCR/BCR seq data
+tcr_subset <- rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type %in% c("TCR")]
+
+# create df
+tcr_subset_df <- tibble(cellID = colnames(tcr_subset), clusterID = Idents(tcr_subset))
+
+summary_tcr <- tcr_subset_df %>%
+  group_by(clusterID) %>%
+  summarize(count = n()) %>%
+  arrange(count)
+
+print(summary_tcr)
+
+# non-T cells with "TCRs": 1 monocyte, 28 NKs
+# T cells with TCRs: 428 CD8, 518 T/NKT, 3935 CD4 T cells
+
+bcr_subset <- rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type %in% c("BCR")]
+
+bcr_subset_df <- tibble(cellID = colnames(bcr_subset), clusterID = Idents(bcr_subset))
+
+summary_bcr <- bcr_subset_df %>%
+  group_by(clusterID) %>%
+  summarize(count = n()) %>%
+  arrange(count)
+
+print(summary_bcr)
+
+# non-B cells with "BCRs": 3 DCs, 15 CD4 T cells, 21 monocytes
+# B cells with BCRs: 2706
+
+# I'm inferring from their 2.2% effective doublet rate that my numbers here are a bit off... perhaps due to different Seurat version or manual cell cluster assignments despite cell type clustered UMAP looking pretty similar?
+
+```
+
+# Eliminate cells with aberrant "expression" of TCR/BCR clonotypic sequences
+
+```{r}
+
+# Subset Seurat to remove cells aberrantly expressing TCRs
+no_aberrant_rna_and_tcr_bcr_seurat <- rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type == "TCR" & !(rna_and_tcr_bcr_seurat@active.ident %in% c("CD8 T cell", "CD4 T cell", "T/NKT")), invert = TRUE]
+
+# Subset Seurat to remove cells aberrantly expressing BCRs
+no_aberrant_rna_and_tcr_bcr_seurat <- no_aberrant_rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type == "BCR" & !(rna_and_tcr_bcr_seurat@active.ident %in% c("B cell")), invert = TRUE]
+
+```
+
+# Repeat dimensional reduction (PCA, UMAP) and FindClusters
+
+```{r}
+
+no_aberrant_rna_and_tcr_bcr_seurat <- RunPCA(no_aberrant_rna_and_tcr_bcr_seurat, npcs = 30, verbose = FALSE)
+no_aberrant_rna_and_tcr_bcr_seurat <- RunUMAP(no_aberrant_rna_and_tcr_bcr_seurat, reduction = "pca", dims = 1:30)
+no_aberrant_rna_and_tcr_bcr_seurat <- FindNeighbors(no_aberrant_rna_and_tcr_bcr_seurat, reduction = "pca", dims = 1:30)
+no_aberrant_rna_and_tcr_bcr_seurat <- FindClusters(no_aberrant_rna_and_tcr_bcr_seurat, resolution = 3)
+
+```
+
+# Visualize UMAP by cluster
+
+```{r}
+
+DimPlot(no_aberrant_rna_and_tcr_bcr_seurat, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/umap_cluster_after_tcr_bcr_check.svg")
+
+# see 22 clusters, expect 32 clusters
+
+# this looks too different I think now, so something wonky is going on in the TCR/BCRseq data incorporation I think
+
+```
+
+# Find cluster biomarkers
+
+```{r}
+
+# find markers for every cluster compared to all remaining cells, report only the positive ones
+no_aberrant_rna_and_tcr_bcr_seurat.markers <- FindAllMarkers(no_aberrant_rna_and_tcr_bcr_seurat, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+
+```
+
+# Check for RBCs again
+
+```{r}
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("HBB"), pt.size = 0)
+
+# I don't see any big outliers here for HBB expression, unlike authors who found 2 more RBC clusters?
+
+```
+# Compare sizes of Seurat before/after TCR/BCR subsetting, should only lose ~68 cells!!
+
+```{r}
+
+rna_and_tcr_bcr_seurat
+
+no_aberrant_rna_and_tcr_bcr_seurat
 
 ```
 
