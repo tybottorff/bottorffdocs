@@ -140,7 +140,7 @@ ggsave("../figures/umap_cluster.svg")
 ```{r}
 
 # find markers for every cluster compared to all remaining cells, report only the positive ones
-immune.markers <- FindAllMarkers(immune.combined, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+immune.markers <- FindAllMarkers(immune.combined, only.pos = FALSE, min.pct = 0.1, logfc.threshold = 0.25)
 
 ```
 
@@ -258,7 +258,7 @@ immune.markers %>%
 
 ```{r}
 
-VlnPlot(immune.combined, features = c("FCGR3A"), pt.size = 0)
+VlnPlot(immune.combined, features = c("FCGR3A", "CD14", ""), pt.size = 0)
 # CD14 or FCGR3Ahi = monocytes
 
 # CD14hi = clusters 2, 3, 6, 13, 21, 26, 27
@@ -343,7 +343,7 @@ new.cluster.ids <- c("CD4 T cell",
                      
                      "RBC/platelet",
                      #7
-                     
+
                      "Monocyte",
                      #8
                      
@@ -367,7 +367,7 @@ new.cluster.ids <- c("CD4 T cell",
                      
                      "RBC/platelet",
                      #15
-                     
+
                      "CD8 T cell",
                      #16
                      
@@ -394,7 +394,7 @@ new.cluster.ids <- c("CD4 T cell",
                      
                      "RBC/platelet",
                      #24
-                     
+
                      "RBC/platelet",
                      #25
                      
@@ -426,6 +426,24 @@ ggsave("../figures/umap_cell_type.svg")
 ```{r}
 
 rbc_filtered_immune.combined <- subset(immune.combined, idents = "RBC/platelet", invert = TRUE)
+
+```
+
+# Plot marker distribution across cell type assigned clusters
+
+```{r}
+
+VlnPlot(immune.combined, features = c("IL7R", "GNLY", "NKG7", "CD14"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/IL7R_GNLY_NKG7_CD14_across_cell_types.svg")
+
+VlnPlot(immune.combined, features = c("MS4A1", "FCER1A", "CD8A", "CD8B"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/MS4A1_FCER1A_CD8A_CD8B_across_cell_types.svg")
+
+VlnPlot(immune.combined, features = c("CD3D", "CD3E", "HBB", "PPBP"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/CD3D_CD3E_HBB_PPBP_across_cell_types.svg")
 
 ```
 

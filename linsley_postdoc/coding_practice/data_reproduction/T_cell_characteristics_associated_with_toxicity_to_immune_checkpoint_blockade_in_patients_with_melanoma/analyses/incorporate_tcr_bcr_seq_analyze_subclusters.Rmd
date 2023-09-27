@@ -155,7 +155,7 @@ combined_data
 
 rna_and_tcr_bcr_seurat <- AddMetaData(object = melanoma_T_cells_cell_type_clustered, metadata = combined_data)
 
-View(rna_and_tcr_bcr_seurat@meta.data$CR.type)
+melanoma_T_cells_cell_type_clustered
 
 # not every barcode from scRNAseq (24,807 rows) has corresponding TCR/BCR metadata (9,003 barcodes), perhaps partially because I removed duplicate TCR/BCR data barcodes that have same clonotype? 17,440 barcodes if I didn't remove duplicates
 
@@ -207,11 +207,19 @@ print(summary_bcr)
 no_aberrant_rna_and_tcr_bcr_seurat <- rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type == "TCR" & !(rna_and_tcr_bcr_seurat@active.ident %in% c("CD8 T cell", "CD4 T cell", "T/NKT")), invert = TRUE]
 
 # Subset Seurat to remove cells aberrantly expressing BCRs
-no_aberrant_rna_and_tcr_bcr_seurat <- no_aberrant_rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type == "BCR" & !(rna_and_tcr_bcr_seurat@active.ident %in% c("B cell")), invert = TRUE]
+no_aberrant_rna_and_tcr_bcr_seurat <- no_aberrant_rna_and_tcr_bcr_seurat[, no_aberrant_rna_and_tcr_bcr_seurat@meta.data$CR.type == "BCR" & !(no_aberrant_rna_and_tcr_bcr_seurat@active.ident %in% c("B cell")), invert = TRUE]
 
 ```
 
-# Repeat dimensional reduction (PCA, UMAP) and FindClusters
+# Compare sizes of Seurat before/after TCR/BCR subsetting, confirm we only lose the expected 68 cells
+
+```{r}
+
+length(colnames(rna_and_tcr_bcr_seurat)) - length(colnames(no_aberrant_rna_and_tcr_bcr_seurat))
+
+```
+
+# Repeat dimensional reduction (PCA, UMAP) and FindClusters since filtering out RBCs, platelets, and cells aberrantly "expressing" TCRs/BCRs
 
 ```{r}
 
@@ -228,11 +236,11 @@ no_aberrant_rna_and_tcr_bcr_seurat <- FindClusters(no_aberrant_rna_and_tcr_bcr_s
 
 DimPlot(no_aberrant_rna_and_tcr_bcr_seurat, reduction = "umap", label = TRUE, repel = TRUE)
 
-ggsave("../figures/umap_cluster_after_tcr_bcr_check.svg")
+ggsave("../figures/umap_cluster_after_first_rbc_platelet_filter_and_tcr_bcr_check.svg")
 
 # see 22 clusters, expect 32 clusters
 
-# this looks too different I think now, so something wonky is going on in the TCR/BCRseq data incorporation I think
+# I assume that the change comes from the RBC/platelet filtering, but I assume their figure 3A was created with UMAP after the filtering NOT with just UMAP before filtering and not showing the RBCs/platelets (which is how I can recreate their figure)
 
 ```
 
@@ -245,22 +253,346 @@ no_aberrant_rna_and_tcr_bcr_seurat.markers <- FindAllMarkers(no_aberrant_rna_and
 
 ```
 
-# Check for RBCs again
+# Look at relevant cluster biomarkers
+
+```{r}
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "CD14", "FCGR3A", "FCER1A", "MS4A1", "HBB", "PPBP")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify CD8 T cells
+
+```{r}
+
+# CD3D/CD3Ehi and CD8A/CD8Bhi and NKG7/GNLYlo = CD8 T cells
+
+# high in CD3D: 0, 2, 3, 6, 13-15, 18, 20
+# high in CD3E: 0, 2, 3, 5-6, 13-15, 18, 20
+# high in CD8A: 13-14
+# high in CD8B: 13-14, 18
+
+# high in NKG7: 5, 8, 10, 13-15
+# high in GNLY: 5, 8, 10, 13-15
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("GNLY"), pt.size = 0)
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY")) %>%
+  arrange(cluster)
+
+# 18 only great looking CD8 T cell cluster...?
+
+```
+
+# Plot marker distribution across clusters to identify CD4 T cells
+
+```{r}
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("IL7R"), pt.size = 0)
+# CD3D/CD3Ehi non-CD8 T cells with high IL7R expression and low NKG7/GNLY = CD4 T cells
+
+# high in CD3D: 0, 2, 3, 6, 13-15, 18, 20
+# high in CD3E: 0, 2, 3, 5-6, 13-15, 18, 20
+
+# high in CD8A: 13-14
+# high in CD8B: 13-14, 18
+
+# high in NKG7: 5, 8, 10, 13-15
+# high in GNLY: 5, 8, 10, 13-15
+
+# high in IL7R: 0, 2, 3, 6, 10, 13-15, 18, 20
+
+# 0, 2, 3, 6, 20?
+
+```
+
+# Plot marker distribution across clusters to identify NK cells
+
+```{r}
+
+# NKG7/GNLYhi and CD3D/CD3Elo = NK cells
+
+# high in CD3D: 0, 2, 3, 6, 13-15, 18, 20
+# high in CD3E: 0, 2, 3, 5-6, 13-15, 18, 20
+# high in CD8A: 13-14
+# high in CD8B: 13-14, 18
+
+# high in NKG7: 5, 8, 10, 13-15
+# high in GNLY: 5, 8, 10, 13-15
+
+# 8 and 10?
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("NKG7", "GNLY")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify DCs
+
+```{r}
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("FCER1A"), pt.size = 0)
+# FCER1Ahi = dendritic cells (DCs)
+# 21
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("FCER1A")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify B cells
+
+```{r}
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("MS4A1"), pt.size = 0)
+# MS4A1hi = B cells
+
+# 1, 11, 12, 21 high in MS4A1
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("MS4A1")) %>%
+  arrange(cluster)
+
+# 
+
+```
+
+# Plot marker distribution across clusters to identify monocytes
+
+```{r}
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("CD14"), pt.size = 0)
+# CD14 or FCGR3Ahi = monocytes
+
+# CD14hi = 7, 9, 16, 17, 19, 21-22
+# FCGR3Ahi = 4, 5, 8, 10, 12-16, 19
+
+# 19?
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("FCGR3A", "CD14")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify RBCs and platelets
 
 ```{r}
 
 VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("HBB"), pt.size = 0)
+# HBBhi = red blood cells
+# none really, maybe 5, 8-10, 22
 
-# I don't see any big outliers here for HBB expression, unlike authors who found 2 more RBC clusters?
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("HBB")) %>%
+  arrange(cluster)
+
+# authors found 2 more RBC clusters
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("PPBP"), pt.size = 0)
+# PPBPhi = platelets
+# none really
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("PPBP")) %>%
+  arrange(cluster)
 
 ```
-# Compare sizes of Seurat before/after TCR/BCR subsetting, should only lose ~68 cells!!
+
+# Plot marker distribution across clusters to identify T/NKT
 
 ```{r}
 
-rna_and_tcr_bcr_seurat
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("IL7R"), pt.size = 0)
+# T/NKT: high expression of CD3D/E and GNLY/NKG7 that were not annotated as CD8/CD4 T cells
 
-no_aberrant_rna_and_tcr_bcr_seurat
+# high in CD3D: 0, 2, 3, 6, 13-15, 18, 20
+# high in CD3E: 0, 2, 3, 5-6, 13-15, 18, 20
+
+# high in NKG7: 5, 8, 10, 13-15
+# high in GNLY: 5, 8, 10, 13-15
+
+# 5, 13-15?
+
+```
+
+# Name cell types for clusters
+
+```{r}
+
+#0: CD4 T cell
+#1: B cell
+#2: CD4 T cell
+#3: CD4 T cell
+#4: monocyte
+#5: RBC/platelet or T/NKT or monocyte? ideally T/NKT
+#6: CD4 T cell
+#7: monocyte
+#8: RBC/platelet or NK or monocyte? ideally NK
+#9: RBC/platelet
+#10: RBC/platelet or NK or monocyte? ideally NK
+#11: B cell
+#12: B cell
+#13: T/NKT
+#14: T/NKT
+#15: T/NKT
+#16: RBC/platelet
+#17: RBC/platelet
+#18: CD8 T cell
+#19: monocyte
+#20: CD4 T cell
+#21: DC or B cell or monocyte? ideally DC otherwise no other DC...
+#22: RBC/platelet
+
+new.cluster.ids <- c("CD4 T cell",
+                     #0
+                     
+                     "B cell",
+                     #1
+                     
+                     "CD4 T cell",
+                     #2
+                     
+                     "CD4 T cell",
+                     #3
+                     
+                     "Monocyte",
+                     #4
+                     
+                     "T/NKT",
+                     #5
+                     
+                     "CD4 T cell",
+                     #6
+                     
+                     "Monocyte",
+                     #7
+                     
+                     "NK",
+                     #8
+                     
+                     "RBC/platelet",
+                     #9
+                     
+                     "NK",
+                     #10
+                     
+                     "B cell",
+                     #11
+                     
+                     "B cell",
+                     #12
+                     
+                     "T/NKT",
+                     #13
+                     
+                     "T/NKT",
+                     #14
+                     
+                     "T/NKT",
+                     #15
+                     
+                     "RBC/platelet",
+                     #16
+                     
+                     "RBC/platelet",
+                     #17
+                     
+                     "CD8 T cell",
+                     #18
+                     
+                     "Monocyte",
+                     #19
+                     
+                     "CD4 T cell",
+                     #20
+                     
+                     "DC",
+                     #21
+                     
+                     "RBC/platelet"
+                     #22
+                     )
+
+names(new.cluster.ids) <- levels(no_aberrant_rna_and_tcr_bcr_seurat)
+no_aberrant_rna_and_tcr_bcr_seurat <- RenameIdents(no_aberrant_rna_and_tcr_bcr_seurat, new.cluster.ids)
+
+```
+
+# Plot UMAP with cell type clusters
+
+```{r}
+
+DimPlot(no_aberrant_rna_and_tcr_bcr_seurat, reduction = "umap", label = TRUE, pt.size = 0.5)
+
+ggsave("../figures/umap_cell_type_after_first_rbc_platelet_filter_and_tcr_bcr_check.svg")
+
+# 
+
+```
+
+# Re-filter out RBCs/platelets again
+
+```{r}
+
+rbc_filtered_again_immune.combined <- subset(no_aberrant_rna_and_tcr_bcr_seurat, idents = "RBC/platelet", invert = TRUE)
+
+```
+
+# Plot UMAP with cell clusters after excluding RBC/platelet clusters for the 2nd time
+
+```{r}
+
+DimPlot(rbc_filtered_again_immune.combined, reduction = "umap", label = TRUE, pt.size = 0.1, cols = c('CD4 T cell' = 'red', 'B cell' = 'brown', 'Monocyte' = 'blue', 'T/NKT' = 'darkcyan', 'NK' = 'purple', 'CD8 T cell' = 'green', 'DC' = 'orange'), repel = TRUE, shuffle = TRUE, seed = 992)
+
+ggsave("../figures/rbc_filtered_twice_umap_cell_type.svg")
+
+```
+
+# Repeat dimensional reduction (PCA, UMAP) and FindClusters since filtering out RBCs, platelets for the 2nd time
+
+```{r}
+
+rbc_filtered_again_immune.combined <- RunPCA(rbc_filtered_again_immune.combined, npcs = 30, verbose = FALSE)
+rbc_filtered_again_immune.combined <- RunUMAP(rbc_filtered_again_immune.combined, reduction = "pca", dims = 1:30)
+rbc_filtered_again_immune.combined <- FindNeighbors(rbc_filtered_again_immune.combined, reduction = "pca", dims = 1:30)
+rbc_filtered_again_immune.combined <- FindClusters(rbc_filtered_again_immune.combined, resolution = 3)
+
+```
+
+# Visualize UMAP by cluster
+
+```{r}
+
+DimPlot(rbc_filtered_again_immune.combined, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/umap_cluster_after_second_rbc_platelet_filter_and_tcr_bcr_check.svg")
+
+# see 25 clusters, expect 32 clusters
+
+# 
+
+```
+
+# Find cluster biomarkers
+
+```{r}
+
+# find markers for every cluster compared to all remaining cells, report only the positive ones
+rbc_filtered_again_immune.combined.markers <- FindAllMarkers(rbc_filtered_again_immune.combined, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 
 ```
 

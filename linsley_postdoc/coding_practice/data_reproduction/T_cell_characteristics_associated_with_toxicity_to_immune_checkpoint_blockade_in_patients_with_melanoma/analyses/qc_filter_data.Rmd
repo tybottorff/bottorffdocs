@@ -150,7 +150,16 @@ ggsave(vln_plot, file = "../figures/vln_plot_qc.svg")
 qcMetricsThresholds <-
   c(
     "nFeature_RNA_min" = 100,
-    "nFeature_RNA_max" = 3000,
+    
+    "nFeature_RNA_max_1" = 1500,
+    # YUCARD, YUENZO, YUFUB, YUPIXEL, YUTAUR, YUTHEA, YUVARDO
+    
+    "nFeature_RNA_max_2" = 2000,
+    # YUGRUS
+    
+    "nFeature_RNA_max_3" = 3000,
+    # YUFURL, YUHERN, YUROD, YUTORY
+    
     "percent_mito" = 25
   )
 
@@ -160,18 +169,52 @@ qcMetricsThresholds <-
 
 ```
 
-# Plot distributions of nFeature_RNA across samples
+# Plot distributions of nFeature_RNA across samples with nFeature_RNA_max cutoff of 1500
 
 ```{r}
 
-nFeature_RNA_QC <- ggplot(batch_a@meta.data, mapping = aes(x = nFeature_RNA)) +
+nFeature_RNA_QC <- ggplot(batch_a@meta.data %>% filter(batch_a_metadata$patient.ID %in% c("YUCARD", "YUENZO", "YUFUB", "YUPIXEL", "YUTAUR", "YUTHEA", "YUVARDO","YUKEND")), mapping = aes(x = nFeature_RNA)) +
   geom_density(mapping = aes(color = patient.ID), size = 0.5) +
   scale_x_log10() +
   geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_min"],
              color = "red", linetype = "dashed") +
-  geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_max"],
+  geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_max_1"],
              color = "red", linetype = "dashed")
-ggsave(nFeature_RNA_QC, file = "../figures/nFeature_RNA.svg")
+ggsave(nFeature_RNA_QC, file = "../figures/nFeature_RNA_1.svg")
+
+nFeature_RNA_QC
+
+```
+
+# Plot distributions of nFeature_RNA across samples with nFeature_RNA_max cutoff of 2000
+
+```{r}
+
+nFeature_RNA_QC <- ggplot(batch_a@meta.data %>% filter(batch_a_metadata$patient.ID %in% c("YUGRUS")), mapping = aes(x = nFeature_RNA)) +
+  geom_density(mapping = aes(color = patient.ID), size = 0.5) +
+  scale_x_log10() +
+  geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_min"],
+             color = "red", linetype = "dashed") +
+  geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_max_2"],
+             color = "red", linetype = "dashed")
+ggsave(nFeature_RNA_QC, file = "../figures/nFeature_RNA_2.svg")
+
+nFeature_RNA_QC
+
+```
+
+# Plot distributions of nFeature_RNA across samples with nFeature_RNA_max cutoff of 3000
+
+```{r}
+
+nFeature_RNA_QC <- ggplot(batch_a@meta.data %>% filter(batch_a_metadata$patient.ID %in% c("YUFURL", "YUHERN", "YUROD", "YUTORY")), mapping = aes(x = nFeature_RNA)) +
+  geom_density(mapping = aes(color = patient.ID), size = 0.5) +
+  scale_x_log10() +
+  geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_min"],
+             color = "red", linetype = "dashed") +
+  geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_max_3"],
+             color = "red", linetype = "dashed")
+ggsave(nFeature_RNA_QC, file = "../figures/nFeature_RNA_3.svg")
 
 nFeature_RNA_QC
 
@@ -237,37 +280,149 @@ percent_hb_QC
 
 ```
 
-# Filter cells based on QC metrics, track how many drop out
+# Split Seurat object based on samples to perform sample-specific QC filtering
+
+```{r}
+
+batch_a_1 <- subset(batch_a, subset = patient.ID %in% c("YUCARD", "YUENZO", "YUFUB", "YUPIXEL", "YUTAUR", "YUTHEA", "YUVARDO", "YUKEND"))
+
+length(colnames(batch_a_1))
+
+batch_a_2 <- subset(batch_a, subset = patient.ID %in% c("YUGRUS"))
+
+length(colnames(batch_a_2))
+
+batch_a_3 <- subset(batch_a, subset = patient.ID %in% c("YUFURL", "YUHERN", "YUROD", "YUTORY"))
+
+length(colnames(batch_a_3))
+
+```
+
+# Test a more systematic way of setting sample-specifc nFeature_RNA_max thresholds
+
+```{r}
+
+# < 3 median absolute deviations (MADs) away from the median in any of the variables we use for QC
+
+df <- as_tibble(batch_a_1$nFeature_RNA)
+
+median_value <- median(df$value)
+
+mad_value <- mad(df$value)
+
+print(median_value + 3*mad_value)
+
+# for batch_a_1 and batch_a_2, this median + 3*mad value is < 1500, so I'll just stick with 1500 (smallest author max cutoff)
+
+```
+
+# Filter first group of cells based on sample-specific QC metrics, track how many drop out
 
 ```{r}
 
 cellsKeep <-
   WhichCells(
-    batch_a, expression = nFeature_RNA >= qcMetricsThresholds["nFeature_RNA_min"]) %>%
+    batch_a_1, expression = nFeature_RNA >= qcMetricsThresholds["nFeature_RNA_min"]) %>%
   intersect(
     WhichCells(
-      batch_a, expression = nFeature_RNA <= qcMetricsThresholds["nFeature_RNA_max"])) %>%
-    intersect(
+      batch_a_1, expression = nFeature_RNA <= qcMetricsThresholds["nFeature_RNA_max_1"])) %>%
+  intersect(
     WhichCells(
-      batch_a, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
+      batch_a_1, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
 cellsDrop <-
-  setdiff(colnames(batch_a), cellsKeep)
+  setdiff(colnames(batch_a_1), cellsKeep)
 length(cellsDrop) # 0 cells dropped from analysis
 
 # X cells dropped due to nFeature_RNA threshold
 cellsDropped_nFeature <- sum(
-  batch_a$nFeature_RNA < qcMetricsThresholds["nFeature_RNA"]
+  batch_a_1$nFeature_RNA < qcMetricsThresholds["nFeature_RNA_max_1"]
 )
 
 # X cells dropped due to percent_mito threshold
 cellsDropped_percentMito <- sum(
-  batch_a$percent_mito > qcMetricsThresholds["percent_mito"]
+  batch_a_1$percent_mito > qcMetricsThresholds["percent_mito"]
 )
 
-batch_a_filtered <-
-  subset(batch_a, cells = cellsKeep)
+batch_a_1_filtered <-
+  subset(batch_a_1, cells = cellsKeep)
 
-length(colnames(batch_a_filtered)) # 24087 cells left behind in filtered data
+length(colnames(batch_a_1_filtered)) # 19346 cells left behind in filtered data
+
+```
+
+# Filter second group of cells based on sample-specific QC metrics, track how many drop out
+
+```{r}
+
+cellsKeep <-
+  WhichCells(
+    batch_a_2, expression = nFeature_RNA >= qcMetricsThresholds["nFeature_RNA_min"]) %>%
+  intersect(
+    WhichCells(
+      batch_a_2, expression = nFeature_RNA <= qcMetricsThresholds["nFeature_RNA_max_2"])) %>%
+  intersect(
+    WhichCells(
+      batch_a_2, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
+cellsDrop <-
+  setdiff(colnames(batch_a_2), cellsKeep)
+length(cellsDrop) # 0 cells dropped from analysis
+
+# X cells dropped due to nFeature_RNA threshold
+cellsDropped_nFeature <- sum(
+  batch_a_2$nFeature_RNA < qcMetricsThresholds["nFeature_RNA_max_1"]
+)
+
+# X cells dropped due to percent_mito threshold
+cellsDropped_percentMito <- sum(
+  batch_a_2$percent_mito > qcMetricsThresholds["percent_mito"]
+)
+
+batch_a_2_filtered <-
+  subset(batch_a_2, cells = cellsKeep)
+
+length(colnames(batch_a_2_filtered)) # 1713 cells left behind in filtered data
+
+```
+
+# Filter third group of cells based on sample-specific QC metrics, track how many drop out
+
+```{r}
+
+cellsKeep <-
+  WhichCells(
+    batch_a_3, expression = nFeature_RNA >= qcMetricsThresholds["nFeature_RNA_min"]) %>%
+  intersect(
+    WhichCells(
+      batch_a_3, expression = nFeature_RNA <= qcMetricsThresholds["nFeature_RNA_max_3"])) %>%
+  intersect(
+    WhichCells(
+      batch_a_3, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
+cellsDrop <-
+  setdiff(colnames(batch_a_3), cellsKeep)
+length(cellsDrop) # 0 cells dropped from analysis
+
+# 0 cells dropped due to nFeature_RNA threshold
+cellsDropped_nFeature <- sum(
+  batch_a_3$nFeature_RNA < qcMetricsThresholds["nFeature_RNA_max_1"]
+)
+
+# 0 cells dropped due to percent_mito threshold
+cellsDropped_percentMito <- sum(
+  batch_a_3$percent_mito > qcMetricsThresholds["percent_mito"]
+)
+
+batch_a_3_filtered <-
+  subset(batch_a_3, cells = cellsKeep)
+
+length(colnames(batch_a_3_filtered)) # 3748 cells left behind in filtered data
+
+```
+
+# Rejoin cells
+
+```{r}
+
+batch_a_filtered <- merge(x = batch_a_1_filtered, y = list(batch_a_2_filtered, batch_a_3_filtered))
 
 ```
 
