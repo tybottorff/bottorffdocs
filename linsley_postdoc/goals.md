@@ -1,4 +1,4 @@
-1) Read literature, find publically available data (**scRNAseq + TCRseq**, like 10X) to mine
+1) Read literature, find publicly available data (**scRNAseq + TCRseq**, like 10X) to mine
  - for example papers Peter shared initially in box
  - check around GEO
  - Cellular and molecular waypoints along the path of T cell exhaustion
