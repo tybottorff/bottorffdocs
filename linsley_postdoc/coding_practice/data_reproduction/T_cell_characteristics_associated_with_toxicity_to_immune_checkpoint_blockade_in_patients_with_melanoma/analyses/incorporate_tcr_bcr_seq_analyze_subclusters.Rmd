@@ -178,7 +178,7 @@ summary_tcr <- tcr_subset_df %>%
 
 print(summary_tcr)
 
-# non-T cells with "TCRs": 1 monocyte, 28 NKs
+# non-T cells with "TCRs": 2 monocyte, 28 NKs
 # T cells with TCRs: 428 CD8, 518 T/NKT, 3935 CD4 T cells
 
 bcr_subset <- rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type %in% c("BCR")]

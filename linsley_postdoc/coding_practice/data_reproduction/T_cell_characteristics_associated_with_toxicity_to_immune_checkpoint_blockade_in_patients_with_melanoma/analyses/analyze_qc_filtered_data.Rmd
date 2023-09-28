@@ -9,13 +9,22 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Install necessary packages
+
+```{r}
+
+#remotes::install_github("mojaveazure/seurat-disk")
+
+```
+
 # Load necessary libraries
 
 ```{r}
 
 library(Seurat)
-library(patchwork)
+library(SeuratDisk)
 library(ggplot2)
+library(patchwork)
 library(dplyr)
 library(tidyr)
 
@@ -55,8 +64,7 @@ melanoma_T_cells_filtered.list <- SplitObject(melanoma_T_cells_filtered, split.b
 
 # normalize and identify variable features for each dataset independently
 melanoma_T_cells_filtered.list <- lapply(X = melanoma_T_cells_filtered.list, FUN = function(x) {
-    x <- NormalizeData(x)
-    x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+    x <- SCTransform(x, variable.features.n = 2000)
 })
 
 # select features that are repeatedly variable across datasets for integration
@@ -75,16 +83,13 @@ immune.combined <- IntegrateData(anchorset = immune.anchors)
 
 ```
 
-# Specify integration, scale data
+# Specify integration
 
 ```{r}
 
 # specify that we will perform downstream analysis on the corrected data note that the
 # original unmodified data still resides in the 'RNA' assay
 DefaultAssay(immune.combined) <- "integrated"
-
-# scale data
-immune.combined <- ScaleData(immune.combined, verbose = FALSE)
 
 ```
 
@@ -132,6 +137,15 @@ ggsave("../figures/umap_patient_id.svg")
 DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE)
 
 ggsave("../figures/umap_cluster.svg")
+
+```
+
+# Load Seurat reference map to help label cell types
+
+```{r}
+
+# pbmc has precompiled cell types and scores I can map onto this data to compare to my manual mappings
+reference <- LoadH5Seurat("../data/pbmc_multimodal.h5seurat")
 
 ```
 
@@ -258,13 +272,13 @@ immune.markers %>%
 
 ```{r}
 
-VlnPlot(immune.combined, features = c("FCGR3A", "CD14", ""), pt.size = 0)
+VlnPlot(immune.combined, features = c("FCGR3A", "CD14"), pt.size = 0)
 # CD14 or FCGR3Ahi = monocytes
 
 # CD14hi = clusters 2, 3, 6, 13, 21, 26, 27
 # FCGR3Ahi = clusters 8 and 17 mostly, also 9 and 11 and 13-15?
 
-# 2, 8, 13, 21, 27 = monocytes
+# 2, 3, 6, 8, 13, 17, 21, 27 = monocytes
 
 immune.markers %>%
   group_by(cluster) %>%
@@ -295,7 +309,7 @@ immune.markers %>%
   filter(gene %in% c("PPBP")) %>%
   arrange(cluster)
 
-# RBs/platelets = clusters 3, 6, 7, 15, 17, 24, 25
+# RBs/platelets = clusters 15, 17, 24, 25
 
 ```
 
@@ -329,7 +343,7 @@ new.cluster.ids <- c("CD4 T cell",
                      "Monocyte",
                      #2
                      
-                     "RBC/platelet",
+                     "Monocyte",
                      #3
                      
                      "CD4 T cell",
@@ -338,7 +352,7 @@ new.cluster.ids <- c("CD4 T cell",
                      "CD4 T cell",
                      #5
                      
-                     "RBC/platelet",
+                     "Monocyte",
                      #6
                      
                      "RBC/platelet",
@@ -371,7 +385,7 @@ new.cluster.ids <- c("CD4 T cell",
                      "CD8 T cell",
                      #16
                      
-                     "RBC/platelet",
+                     "Monocyte",
                      #17
                      
                      "B cell",
@@ -456,16 +470,6 @@ DimPlot(rbc_filtered_immune.combined, reduction = "umap", label = TRUE, pt.size 
 ggsave("../figures/rbc_filtered_umap_cell_type.svg")
 
 # they also have some CD8 assigned T cells clustering inside large CD4 T cell cluster
-
-```
-
-# TODO: compare manual cell type labeling with Seurat reference mapping
-
-```{r}
-
-# pbmc has precompiled cell types and scores I can map onto this data to compare to my manual mappings
-# https://satijalab.org/seurat/articles/multimodal_reference_mapping.html
-
 ```
 
 # Save cell type clustered Seurat object
