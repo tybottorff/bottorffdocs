@@ -140,15 +140,6 @@ ggsave("../figures/umap_cluster.svg")
 
 ```
 
-# Load Seurat reference map to help label cell types
-
-```{r}
-
-# pbmc has precompiled cell types and scores I can map onto this data to compare to my manual mappings
-reference <- LoadH5Seurat("../data/pbmc_multimodal.h5seurat")
-
-```
-
 # Find cluster biomarkers
 
 ```{r}
@@ -164,7 +155,8 @@ immune.markers <- FindAllMarkers(immune.combined, only.pos = FALSE, min.pct = 0.
 
 immune.markers %>%
   group_by(cluster) %>%
-  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "CD14", "FCGR3A", "FCER1A", "MS4A1", "HBB", "PPBP")) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "CD14", "FCGR3A", "FCER1A", "MS4A1", "HBB", "PPBP", "CD36")) %>%
+  #filter(gene %in% c("CD235A", "CD41", "CD42A", "CD42B", "CD61", "CD36", "GPIIB", "GPIIIA")) %>%
   arrange(gene)
 
 ```
@@ -278,7 +270,7 @@ VlnPlot(immune.combined, features = c("FCGR3A", "CD14"), pt.size = 0)
 # CD14hi = clusters 2, 3, 6, 13, 21, 26, 27
 # FCGR3Ahi = clusters 8 and 17 mostly, also 9 and 11 and 13-15?
 
-# 2, 3, 6, 8, 13, 17, 21, 27 = monocytes
+# 2, 3, 6, 8, 13, 15, 17, 21, 27 = monocytes
 
 immune.markers %>%
   group_by(cluster) %>%
@@ -291,7 +283,7 @@ immune.markers %>%
 
 ```{r}
 
-VlnPlot(immune.combined, features = c("HBB"), pt.size = 0)
+VlnPlot(immune.combined, features = c("HBB", "CD36"), pt.size = 0)
 # HBBhi = red blood cells
 # looks like clusters 24 and 25 are RBCs (24 may be platelets), also 3, 6, 15, 17?
 
@@ -309,7 +301,8 @@ immune.markers %>%
   filter(gene %in% c("PPBP")) %>%
   arrange(cluster)
 
-# RBs/platelets = clusters 15, 17, 24, 25
+# RBs/platelets = clusters 24, 25
+# let's try just 24-25, reroute 15 & 17
 
 ```
 
@@ -326,7 +319,7 @@ VlnPlot(immune.combined, features = c("IL7R"), pt.size = 0)
 # 9-11, 14-16 high in NKG7
 # 9-11, 14-16 high in GNLY
 
-# 9, 10
+# 9, 10, 15
 
 ```
 
@@ -379,7 +372,7 @@ new.cluster.ids <- c("CD4 T cell",
                      "NK",
                      #14
                      
-                     "RBC/platelet",
+                     "T/NKT",
                      #15
 
                      "CD8 T cell",
@@ -470,6 +463,56 @@ DimPlot(rbc_filtered_immune.combined, reduction = "umap", label = TRUE, pt.size 
 ggsave("../figures/rbc_filtered_umap_cell_type.svg")
 
 # they also have some CD8 assigned T cells clustering inside large CD4 T cell cluster
+```
+
+# Load Seurat reference map to help label cell types
+
+```{r}
+
+reference <- LoadH5Seurat("../raw_data/pbmc_multimodal.h5seurat")
+
+```
+
+# Find mapping anchors
+
+```{r}
+
+anchors <- Seurat::FindTransferAnchors(
+  reference = reference,
+  query = immune.combined,
+  normalization.method = "SCT",
+  reference.reduction = "spca",
+  dims = 1:50
+)
+
+```
+
+# Map cell types
+
+```{r}
+
+immune.combined <- MapQuery(
+  anchorset = anchors,
+  query = immune.combined,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "spca", 
+  reduction.model = "wnn.umap"
+)
+
+```
+
+# Visualize mapping results
+
+```{r}
+
+DimPlot(immune.combined, reduction = "ref.umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+# can do l2 for a finer grain look at sub-cell types
+
 ```
 
 # Save cell type clustered Seurat object
