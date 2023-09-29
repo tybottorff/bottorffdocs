@@ -1,3 +1,6 @@
+# Activation of human T cells by major histocompatability complex class II expressing neutrophils: proliferation in the presence of superantigen, but not tetanus toxoid
+ - polymorphonuclear neutrophils (PMNs) function for acute phagocytic clearance of foreign pathogens, release inflammatory mediators, assumed to not express but can express MHC class II molecules after stimulation by interferon gamma
+ - superantigen refers to antigen binding to MHC class II with high affinity outside antigen binding groove in absence of antigen processing, trigger proliferation of T cells expressing TcR-VB gene products (stimulate T cells in TCR Vbeta-specific manner)
 # Allopeptides and the alloimmune response
  - allorecognition is recognition of non-self
  - main targets of recipient immune response against allograft are donor MHC antigens on allogenic tissue
@@ -17,6 +20,9 @@
 # Association of vitiligo with tumor response in patients with metastatic melanoma treated with pembrolizumab
  - 25% of patients developed vitiligo
  - **objective response associated with higher occurrence of vitiligo**
+# B cell-specific MHC class II deletion reveals multiple nonredundant roles for B cell antigen presentation in murine lupus
+ - B cells have both Ab-dependent and Ab-independent functions in systemic autoimmunity
+ - Ab-independent functions could include roles in lymphoid development, cytokine secretion, Ag presentation
 # Canonical correlation analysis for multi-omics: application to cross-cohort analysis
  - CCA: correlation-based integrative method to extract latent features shared between multiple assays by finding linear combination of features (canonical variables, CVs) within each assay that achieve maximal across-assay correlation
  - PCA is a special case of CCA as optimization objective is the same if same data used for both assays
@@ -121,6 +127,9 @@
  - key effector genes (like *Prf1*, *Gzmb*) demethylated and gain chromatin accessibility upon antigen recognition
  - after pathogen clearance, memory precursor cells can differentiate into long-lived memory cells by demethylating naive-associated genes (*Bcl2*, *Il7r*), demethylated and open chromatin at both effector and naive genes allowing rapid effector responses upon reencountering pathogens
  - CD8<sup>+</sup> T cells can become exhausted due to persistent antigen exposure, proliferating less, expressing inhibitory cell receptors (PD-1, CTLA-4, TIM3, LAG3), losing effector function
+# Expression of MHC class II in T cells is associated with increased HIV-1 expression
+ - CD4 primary HIV-1 infection receptor, expressed on T cells, monocytes, macrophages, DCs
+ - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
 # Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
  - chronic stimulation assay
  - *in vivo* validation of screen results (perturbation of INO80 and BAF chromatin remodeling complexes improves T cell persistence in tumors)
@@ -167,6 +176,10 @@
  - reverse transcribe RNA with enzyme with terminal transferase activity to add untemplated C nucleotides to 3' end of cDNA
  - template switch oligonucleotide (TSO) containing complementary poly(G) stretch anchors to this untemplated region of C nucleotides and allows reverse transcriptase to switch templates and extend cDNA to end of TSO which includes a common adaptor sequence
  - result is that one pair of primers targeting 5' adaptor and constant region is able to amplify all TCR rearrangements
+# *HLA-DQA1* and *HLA-DQB1* in Celiac disease predisposition: practical implications of the HLA molecular typing
+ - HLA class I and II genes code for cell surface glycoproteins important for antigen presentation and self-recognition by immune cells
+ - HLA class I heterodimers consist of alpha-heavy chain (encoded by *HLA-A/B/C*) and small beta-microglobulin
+ - HLA class II heterodimers (alpha and beta chains) specified by genes in HLA-D region (*DPA/B1*, *DQA/B1*, *DRB1/A*)
 # HLA-DRB alleles are differentially expressed by tumor cells in breast carcinoma
 # Holistic approach to immune checkpoint inhibitor-related adverse events
  - irAEs usually occur within the first months after ICI treatment but can develop as early as after the first dose or as late as years after ICI treatment
@@ -211,6 +224,10 @@
  - alopecia areata is an autoimmune disease caused by T cell-mediated destruction of the hair follicle
  - JAK1/3 inhibitors disrupt γc cytokine signaling (important for T cell development, activation, homeostasis), selectively induces T cell exhaustion to help treat this autoimmune disease
 # Inhibitory receptors beyond T cell exhaustion
+# Innate lymphoid cells (ILCs): cytokine hubs regulating immunity and tissue homeostasis
+ - ILCs enriched at mucosal barriers, activated by stress signals and epithelial/myeloid-derived cytokines, respond by secreting effector cytokines to maintain survival and mucosal integrity
+ - ILCs do not possess rearranged antigen-specific cell receptors (TCR/BCR) but they mirror T helper cell diversity regarding cytokine secretion and transcription factors regulating differentiation
+ - ILCs express cytokine receptor gamma chain with IL-7 receptor(R)alpha (CD127)
 # Integrated analysis of multimodal single-cell data
  - weighted nearest neighbor analysis integrates multimodal single cell data in an unsupervised manner by learning relative utility of each data type in each cell
 # Integrated NY-ESO-1 antibody and CD8<sup>+</sup> T-cell responses correlate with clinical benefit in advanced melanoma patients treated with ipilimumab
@@ -259,6 +276,19 @@
 # MHC class II (DRB) promoter polymorphism and its role in parasite control among malaria patients
 # MHC class II tetramers
  - can interrogate CD4 T cells using soluble MHC II tetramers
+### Tetramer assay/stain
+ - use tetrameric MHCs to detect and quantify T cells specific for given antigen within sample
+ - tetramer = 4 MHCs that present a specific peptide
+ - use to find T cells with receptors that match that peptide
+ - tetramers labeled with fluorophore, tetramer-bound T cells analyzed by flow cytometry
+ - use tetramers as monomers don't have high enough affinity (MHC tetramer can bind more than 1 receptor on target T cell, increasing binding strength)
+#### CD8<sup>+</sup> T cells
+ - CD8 coreceptors bind MHC class I molecules
+ - most cells express MHC class I, process intracellular antigens and present them
+ - class I MHC made of polymorphic alpha heavy chain and invariant light beta 2 microglobulin
+#### CD4<sup>+</sup> T cells
+ - CD4 coreceptors bind class II MHC molecules
+ - class II MHC molecules expressed by APCs like DCs, macrophages
 # Mismatch repair deficiency/microsatellite instability-high as a predictor for anti-PD-1/PD-L1 immunotherapy efficacy
  - microsatellite instability-high follows mismatch repair deficiency
  - mismatch repair deficiency represents a good prognosis in early colorectal cancer but a poor prognosis in patients with metastasis (**perhaps because it's more easily recognized by immune system but it's a double edged sword as it's also likely more cancerous and dangerous at metastasis stage**)
@@ -420,6 +450,7 @@
  - most patients didn't do well with PD-1 blockade (as measured by RECIST criteria guidelines)
  - comparative methods: flow cytometry (see frequencies of CD4, CD8 T cells, memory T cell subsets, co-expression of inhibitory checkpoint receptors like PD-1, CTLA-4, 2B4, TIM-3 with CD4 or CD8), **perhaps high co-expression of PD-1 for example with CD4 and CD8 in T cells indicates likely exhaustion and therefore a good response to PD-1 blockade with reinvigoration of T cells, but later they see that anti PD-1 immune response isn't good predictor of clinical response**
  - evidence for prior immune response in melanoma patients (vs. healthy controls): higher CD4<sup>+</sup> FOXP3<sup>+</sup>  (**T<sub>reg</sub> marker**) T cell frequency, higher Ki67 expression by FOXP3<sup>+</sup> cells, Ki67 higher in CD8 T cells in melanoma patients especially in PD-1<sup>+</sup> CD8 T cell subset, **higher proliferation (Ki67 is proliferation marker, also marks T cell reinvigoration, seems reasonable that exhausted T cells proliferate slower) and frequency of certain T cells (FOX3P is T<sub>reg</sub> marker, and T<sub>regs</sub> suppress immune responses**)
+ - can also track proliferation with CFSE (fluorescence halves as cells divide, non-fluorescent until it enters cells and is hydrolyzed by enzymes and retained by cells)
 ### Pharmacodynamic immune response to anti PD-1
  - frequency of Ki67<sup>+</sup> CD8 T cells goes up then down with PD-1 blockade treatment (figure 1B: count of cells with Ki67<sup>+</sup> over some threshold)
  - cytotoxic, proliferating Ki67<sup>+</sup> CD8 T cell population CD45RA<sup>low</sup> (**not sure of significance**), CD27<sup>high</sup> (**CD27<sup>low</sup> is effector T cell**), CTLA-4<sup>high</sup> and PD-1<sup>high</sup> (immune checkpoints), 2B4<sup>high</sup> (**not sure of significance**), Eomes<sup>high</sup> and T-bet<sup>low</sup> which **seems to** indicate a exhausted T cell phenotype
@@ -497,6 +528,11 @@
  - donor T cells (and maybe other immune cells) eliminate residual leukemia cells after radio/chemotherapy = graft-versus-leukemia response
  - donor alloimmune responses can also be directed against healthy tissue = graft-versus-host disease (GvHD)
  - graft-versus-leukemia and graft-versus-host often co-occur
+# The IL-33/ST2 pathway: therapeutic target and novel biomrker
+ - IL-33 is in IL-1 family of cytokines
+ - ST2 (IL-33 receptor) is present in multiple isoforms including membrane-bound ST2L and soluble sST2 (may be decoy for IL-33)
+ - ST2 participates in activation of antigen-primed Th2 cells
+ - ST2 implicated in inflammatory conditions
 # The role of metabolic dysfunction in T-cell exhaustion during chronic viral infection
  - dysfunction of T cell metabolism contributes to exhaustion
  - naive (Th0) and memory T cells rely mostly on OXPHOS and FA oxidation for energy, metabolism reprogrammed upon antigen recognition (generates energy but also fuels intermediates for nucleotide, amino acid, and FA synthesis and mitochondrial function, all important for T cell proliferation, differentiation, function), enhanced glycolysis ("Warburg effect", lactic acid fermentation rather than TCA despite normoxic conditions which is less efficient ATP production wise but faster kinetically, glycolysis also helps create intermediates for biomolecule synthesis) important reprogramming during CD4<sup>+</sup> and CD8<sup>+</sup> T cell activation and functioning
