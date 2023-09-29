@@ -1,0 +1,329 @@
+---
+title: "T cell characteristics associated with irAE from ICI in melanoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+clustered_immune <- readRDS("../saved_data/pre_renamed_clustered.rds")
+
+```
+
+# Name numbered cell types for clusters
+
+```{r}
+
+new.cluster.ids <- c("Monocyte 1",
+                     #0
+                     
+                     "B cell 1",
+                     #1
+                     
+                     "Monocyte 2",
+                     #2
+                     
+                     "CD4 T cell 1",
+                     #3
+                     
+                     "Monocyte 3",
+                     #4
+                     
+                     "CD4 T cell 2",
+                     #5
+                     
+                     "CD4 T cell 3",
+                     #6
+                     
+                     "Monocyte 4",
+                     #7
+                     
+                     "T/NKT 1",
+                     #8
+                     
+                     "CD4 T cell 4",
+                     #9
+                     
+                     "NK 1",
+                     #10
+                     
+                     "Monocyte 5",
+                     #11
+                     
+                     "CD4 T cell 5",
+                     #12
+                     
+                     "NK 2",
+                     #13
+                     
+                     "CD8 T cell 1",
+                     #14
+                     
+                     "NK 3",
+                     #15
+                     
+                     "Monocyte 6",
+                     #16
+                     
+                     "B cell 2",
+                     #17
+                     
+                     "B cell 3",
+                     #18
+                     
+                     "T/NKT 2",
+                     #19
+                     
+                     "CD4 T cell 6",
+                     #20
+                     
+                     "CD8 T cell 2",
+                     #21
+                     
+                     "Monocyte 7",
+                     #22
+                     
+                     "CD4 T cell 7",
+                     #23
+                     
+                     "CD8 T cell 3",
+                     #24
+                     
+                     "DC",
+                     #25
+                     
+                     "Monocyte 8",
+                     #26
+                     
+                     "Monocyte 9"
+                     #27
+                     )
+
+names(new.cluster.ids) <- levels(clustered_immune)
+clustered_immune <- RenameIdents(clustered_immune, new.cluster.ids)
+
+```
+
+# Find CD4 T subclusters of interest, looks like 5 and 7 (their 5 and 3)
+
+```{r}
+
+DimPlot(clustered_immune, reduction = "umap", label = TRUE, pt.size = 0.1, cols = c('B cell 1' = 'brown', 'B cell 2' = 'brown', 'B cell 3' = 'brown', 'Monocyte 1' = 'blue', 'Monocyte 2' = 'blue', 'Monocyte 3' = 'blue', 'Monocyte 4' = 'blue', 'Monocyte 5' = 'blue', 'Monocyte 6' = 'blue', 'Monocyte 7' = 'blue', 'Monocyte 8' = 'blue', 'Monocyte 9' = 'blue', 'T/NKT 1' = 'darkcyan', 'T/NKT 2' = 'darkcyan', 'NK 1' = 'purple', 'NK 2' = 'purple', 'NK 3' = 'purple', 'CD8 T cell 1' = 'green', 'CD8 T cell 2' = 'green', 'CD8 T cell 3' = 'green', 'DC' = 'orange', 'CD4 T cell 1' = 'red', 'CD4 T cell 2' = 'red', 'CD4 T cell 3' = 'red', 'CD4 T cell 4' = 'red', 'CD4 T cell 5' = 'black', 'CD4 T cell 6' = 'red', 'CD4 T cell 7' = 'black'), repel = TRUE, shuffle = TRUE, seed = 992)
+
+```
+
+# Compare cell state abundances and irAE status
+
+```{r}
+
+cell_states <- unique(Idents(clustered_immune))
+
+# remove cell clusters with 0 cells in either irAE or non_irAE group
+cell_states <- cell_states[!(cell_states %in% c("Monocyte 9", "Monocyte 8"))]
+
+df <- data.frame(cell_type_number = character(),
+                 perc=character(),
+                 status=character())
+
+for (state in cell_states) {
+  subset_data <- subset(clustered_immune, idents = state)
+  subset_perc = length(colnames(subset_data)) / length(colnames(clustered_immune))
+  irAE_perc <- length(colnames((subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 1)))) / length(colnames(subset_data))
+  non_irAE_perc <- length(colnames(subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 0))) / length(colnames(subset_data))
+  perc = subset_perc*irAE_perc
+  df[nrow(df) + 1,] = c(state, perc, "irAE")
+  perc = subset_perc*non_irAE_perc
+  df[nrow(df) + 1,] = c(state, perc, "no irAE")
+  
+  }
+
+```
+
+# Look at test df
+
+```{r}
+
+df <- df %>%
+  mutate(perc = as.numeric(perc))
+
+p <- ggplot(df, aes(x=cell_type_number, y=perc, color=status)) +
+  geom_bar(stat="identity") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+p
+
+# Erin's advice: they got each point in the test by comparing the percent of cells in that population between groups (level of severity groups), then they plotted the -log10 p value of this on the plot in relation to the correlation of that population with the CD4 T EM cells measured by CYTOF
+# start by just plotting the percent of cells in each cluster by severity group and running the wilcoxon to test for differences between groups
+
+# Ty Q: not sure how this makes multiple P values (as I understand it, test of 2 list gives 1 P value)
+
+# then you can separately calculate the spearman correlation between the percent of cells in that population that correlate with CD4 Tem cells by CYTOF
+
+# Cell state abundances (scRNA-seq) versus future irAE status. Quantified by a two-sided, unpaired Wilcoxon rank-sum test and expressed as −log10 P values. For associations with no severe irAE, −log10 P values were multiplied by −1
+
+#wilcoxon_results <- list()
+
+#cell_states <- unique(Idents(clustered_immune))
+
+# remove cell clusters with 0 cells in either irAE or non_irAE group
+#cell_states <- cell_states[!(cell_states %in% c("Monocyte 9", "Monocyte 8"))]
+
+#for (state in cell_states) {
+#  subset_data <- subset(clustered_immune, idents = state)
+
+  # I don't think this is the right variable to use here, they say abundances but I need a distribution to compare for Wilcoxon test, not just a single count of number of cells per cluster
+#  irAE_group <- subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 1)$nCount_RNA
+#  non_irAE_group <- subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 0)$nCount_RNA
+#  wilcoxon_test_result <- wilcox.test(irAE_group, non_irAE_group)
+#  wilcoxon_results[[state]] <- -log(wilcoxon_test_result$p.value)
+#}
+
+```
+
+# Analyze CD4 T cell subclusters 5 and 7 vs. rest of subclusters
+
+```{r}
+
+# To identify the differentially expressed genes (DEGs) in Fig. 3c, we applied Seurat FindMarkers with default parameters to the CD4 T 5+3 population versus other CD4 T cell states.
+
+#de.markers <- FindMarkers(clustered_immune, ident.1 = c("CD4 T cell 5", "CD4 T cell 7"), ident.2 = NULL, only.pos = TRUE)
+
+# Heatmap of DEGs (Padj < 0.05) between CD4 T cell states 5 and 3 and other CD4 T cell states. Within each state, the columns represent the mean expression from individual patients converted to z-scores
+
+#de.markers_list <- rownames(de.markers %>% filter(p_val_adj < 0.05))
+
+paper_de.markers_list <- c("S100A4", "IL32", "CCL5", "HLA-DRA", "IL7R", "TNFRSF4", "SELL", "TCF7", "CCR7")
+
+#CD4_subset <- subset(clustered_immune, idents = c("CD4 T cell 1", "CD4 T cell 2", "CD4 T cell 3", "CD4 T cell 4", "CD4 T cell 5", "CD4 T cell 6", "CD4 T cell 7"))
+
+# change order of clusters to put 5 and 7 in front (subclusters of interest)
+my_levels <- c("CD4 T cell 5", "CD4 T cell 7", "CD4 T cell 1", "CD4 T cell 2", "CD4 T cell 3", "CD4 T cell 4", "CD4 T cell 6")
+levels(CD4_subset) <- my_levels
+
+DoHeatmap(CD4_subset, features = paper_de.markers_list)
+
+# need to split rows by patient.ID (to get the rows pixels effect they have)
+
+# they see that their CD4 T cell state 5, lacks expression of CCR7 and SELL (CD62L), consistent with CD4 TEM, see association with severe iRAE development
+
+```
+
+# Seurat reference mapping
+
+```{r}
+
+# reference-guided annotation framework within Seurat v.4.0.1 (Azimuth) to project our scRNA-seq dataset onto a PBMC atlas of 161,764 cells spanning 6 major lineages and 27 finer-grained subsets defined with scRNA-seq and codetection of over 220 protein markers44
+
+# preprocessed the query dataset following the quality control steps described above, yielding 24,807 cells. normalized the query dataset by SCTransform, applied FindTransferAnchors to the query and reference datasets using a precomputed supervised PCA transformation with 50 dimensions, then applied MapQuery to map the cell type labels and UMAP structure from the reference to the query dataset.
+
+# results in extended data figure 2a
+
+```
+
+# Load Seurat reference map to help label cell types
+
+```{r}
+
+reference <- LoadH5Seurat("../raw_data/pbmc_multimodal.h5seurat")
+
+```
+
+# Find mapping anchors
+
+```{r}
+
+anchors <- Seurat::FindTransferAnchors(
+  reference = reference,
+  query = immune.combined,
+  normalization.method = "SCT",
+  reference.reduction = "spca",
+  dims = 1:50
+)
+
+```
+
+# Map cell types
+
+```{r}
+
+immune.combined <- MapQuery(
+  anchorset = anchors,
+  query = immune.combined,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "spca", 
+  reduction.model = "wnn.umap"
+)
+
+```
+
+# Visualize mapping results
+
+```{r}
+
+DimPlot(immune.combined, reduction = "ref.umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+# can do l2 for a finer grain look at sub-cell types
+
+```
+
+# Look at association between subcell states and irAE
+
+```{r}
+
+# Among the 27 cell states identified by Azimuth (Extended Data Fig. 2a), CD4 TEM was most strongly associated with severe irAE development and most correlated with CD4 TEM cells enumerated by CyTOF (Extended Data Fig. 2c). Among two other CD4 TEM-like subsets identified by Azimuth (CD4 CTL, CD4 proliferating), CD4 proliferating showed the highest expression of HLA-DX and lowest expression of SELL (Extended Data Fig. 2d), which is consistent with an activated CD4 TEM phenotype. Additionally, when examining Azimuth-imputed protein expression from antibody-derived tag data, only CD4 TEM and CD4 proliferating states showed hallmarks of TEM cells (CD45ROhiCD45RAloCD27lo; Extended Data Fig. 2e). Indeed, a population combining CD4 TEM and CD4 proliferating was most associated with severe irAE development (Extended Data Fig. 2c). Hypergeometric testing was applied to assess overlap in cellular barcodes between the combined CD4 TEM + CD4 proliferating population (Azimuth) and states defined by de novo clustering. CD4 T 5 + 3 emerged as the top hit (Benjamini–Hochberg-adjusted P = 2.5 × 10−7). Despite strong overlap between unsupervised and supervised approaches, CD4 T 5 + 3 was more associated with severe irAE development and CyTOF than populations labeled by reference-guided annotation (Extended Data Fig. 2f).
+
+```
+
+# Analyze TCR diversity
+
+```{r}
+
+# Given that activated TM cells arise from clonal expansion75,76, the former are expected to have lower TCR diversity than their naive counterparts77, provided that (1) cells from both populations are equally sampled (that is, their counts are equivalent) or (2) variation in total T cell counts is normalized out (Extended Data Fig. 4a). However, by disregarding variation in total T cell frequency, such sampling ignores richness—the number of unique species (clonotypes) within a population and a key factor underlying immune repertoire diversity. As such, we primarily used Shannon entropy45,46 to characterize immune repertoire diversity in this work, an information theoretic metric that combines evenness and richness in a single measure (Extended Data Fig. 4a).
+
+# For each evaluable patient sample in the single-cell discovery cohort (Figs. 1 and 2a and Supplementary Tables 2 and 3), the TCR clonotype repertoire was randomly sampled (without replacement) to equalize the number of evaluable PBMC cells across patients while addressing technical variation in TCR recovery. To maximize the pool of TCR clones available for sampling, patients with <100 TCR clones were excluded (n = 4; YUTAUR, YUTORY, YUHERN and YUTHEA). We then calculated Shannon entropy (R package vegan v.2.5-6 (ref. 78)) relative to total PBMCs for each T cell subset and averaged the resulting values across 100 iterations of this procedure for the remaining 9 patients (Fig. 3e and Extended Data Fig. 4b,d–f). Shannon entropy was analyzed as described above for scBCR clonotypes across IGK, IGL and IGH chains in the same nine patients (Extended Data Fig. 4g).
+
+# For bulk cohorts 1 and 2, after adapter sequence trimming using Skewer v.0.2.2 (ref. 79), TCR clonotypes were assembled and quantitated with MiXCR v.3.0.125 using the following command: mixcr align -p rna-seq -s hsa -O allowPartialAlignments=true data_R1.fastq.gz data_R2.fastq.gz alignments.vdjca (Supplementary Table 8). For each patient sample, TCR clonotype diversity was measured in aggregate for TCR-α and TCR-β chains using Shannon entropy (R package vegan v.2.5-6 (ref. 78)) and compared between patients based on irAE severity (Fig. 4b,c, Extended Data Fig. 6a,c and Supplementary Table 9). We additionally applied the Gini–Simpson index45, which was calculated using the R package immunarch v.0.6.5 (https://doi.org/10.5281/zenodo.3367200), to evaluate bulk TCR diversity according to irAE severity (Extended Data Fig. 6b,d and Supplementary Table 9). Of note, TCR richness is a key component for calculating both Shannon entropy and the Gini–Simpson index.
+
+# Figure 3e: Pretreatment TCR clonotype diversity within each T cell state, total T cells, CD8 T cells, CD4 T cells and activated versus resting CD4 T 5 + 3 cells (defined as in d), grouped by future irAE status. TCR diversity was calculated for all patients with at least 100 TCR clones (n = 9; Methods). States are ordered by the AUC between TCR diversity and severe irAE status.
+
+```

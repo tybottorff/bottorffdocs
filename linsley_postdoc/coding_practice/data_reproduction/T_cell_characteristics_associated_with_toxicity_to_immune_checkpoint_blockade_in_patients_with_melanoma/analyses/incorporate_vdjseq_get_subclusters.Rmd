@@ -421,6 +421,16 @@ VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("CD3E"), pt.size = 0)
 
 ```
 
+# Invert UMAP, save data before renaming clusters
+
+```{r}
+
+no_aberrant_rna_and_tcr_bcr_seurat@reductions$umap@cell.embeddings <- -no_aberrant_rna_and_tcr_bcr_seurat@reductions$umap@cell.embeddings
+
+saveRDS(no_aberrant_rna_and_tcr_bcr_seurat, file="../saved_data/pre_renamed_clustered.rds")
+
+```
+
 # Name cell types for clusters
 
 ```{r}
@@ -569,20 +579,5 @@ ggsave("../figures/MS4A1_FCER1A_CD8A_CD8B_across_cell_types.svg")
 VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("CD3D", "CD3E", "HBB", "PPBP"), pt.size = 0, ncol = 2)
 
 ggsave("../figures/CD3D_CD3E_HBB_PPBP_across_cell_types.svg")
-
-```
-
-# Analyze CD4 T cell subclusters
-
-```{r}
-
-# CD4 T cell state 5, lacks expression of CCR7 and SELL (CD62L), consistent with CD4 TEM, see association with severe iRAE development, so I'll need to find this same subcluster they find (combine with subcluster 3)
-
-# maybe start with DEGs across subtypes of CD4 T cells, should see 2 of them closely match each other (their subclusters 3 and 5)
-
-#rbc_filtered_immune.combined %>%
-#    group_by(cluster) %>%
-#    top_n(n = 10, wt = avg_log2FC) -> top10
-#DoHeatmap(pbmc, features = top10$gene) + NoLegend()
 
 ```

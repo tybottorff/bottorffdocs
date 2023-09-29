@@ -465,56 +465,6 @@ ggsave("../figures/rbc_filtered_umap_cell_type.svg")
 # they also have some CD8 assigned T cells clustering inside large CD4 T cell cluster
 ```
 
-# Load Seurat reference map to help label cell types
-
-```{r}
-
-reference <- LoadH5Seurat("../raw_data/pbmc_multimodal.h5seurat")
-
-```
-
-# Find mapping anchors
-
-```{r}
-
-anchors <- Seurat::FindTransferAnchors(
-  reference = reference,
-  query = immune.combined,
-  normalization.method = "SCT",
-  reference.reduction = "spca",
-  dims = 1:50
-)
-
-```
-
-# Map cell types
-
-```{r}
-
-immune.combined <- MapQuery(
-  anchorset = anchors,
-  query = immune.combined,
-  reference = reference,
-  refdata = list(
-    celltype.l1 = "celltype.l1",
-    celltype.l2 = "celltype.l2",
-    predicted_ADT = "ADT"
-  ),
-  reference.reduction = "spca", 
-  reduction.model = "wnn.umap"
-)
-
-```
-
-# Visualize mapping results
-
-```{r}
-
-DimPlot(immune.combined, reduction = "ref.umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
-# can do l2 for a finer grain look at sub-cell types
-
-```
-
 # Save cell type clustered Seurat object
 
 ```{r}
