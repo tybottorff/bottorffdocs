@@ -310,6 +310,10 @@ DimPlot(immune.combined, reduction = "ref.umap", group.by = "predicted.celltype.
 
 ```{r}
 
+# not sure if they used web version here (https://app.azimuth.hubmapconsortium.org/app/human-pbmc) but I can and then download script? just need to write object and then upload it (.rds is fine, just need to mount R servers to mac for easy upload otherwise transfer over ssh from server to local mac?)
+
+# just use their script. hard to upload file (sshfs/mount), but html not R, just run analyses locally before being able to mount
+
 # Among the 27 cell states identified by Azimuth (Extended Data Fig. 2a), CD4 TEM was most strongly associated with severe irAE development and most correlated with CD4 TEM cells enumerated by CyTOF (Extended Data Fig. 2c). Among two other CD4 TEM-like subsets identified by Azimuth (CD4 CTL, CD4 proliferating), CD4 proliferating showed the highest expression of HLA-DX and lowest expression of SELL (Extended Data Fig. 2d), which is consistent with an activated CD4 TEM phenotype. Additionally, when examining Azimuth-imputed protein expression from antibody-derived tag data, only CD4 TEM and CD4 proliferating states showed hallmarks of TEM cells (CD45ROhiCD45RAloCD27lo; Extended Data Fig. 2e). Indeed, a population combining CD4 TEM and CD4 proliferating was most associated with severe irAE development (Extended Data Fig. 2c). Hypergeometric testing was applied to assess overlap in cellular barcodes between the combined CD4 TEM + CD4 proliferating population (Azimuth) and states defined by de novo clustering. CD4 T 5 + 3 emerged as the top hit (Benjamini–Hochberg-adjusted P = 2.5 × 10−7). Despite strong overlap between unsupervised and supervised approaches, CD4 T 5 + 3 was more associated with severe irAE development and CyTOF than populations labeled by reference-guided annotation (Extended Data Fig. 2f).
 
 ```
@@ -318,12 +322,17 @@ DimPlot(immune.combined, reduction = "ref.umap", group.by = "predicted.celltype.
 
 ```{r}
 
-# Given that activated TM cells arise from clonal expansion75,76, the former are expected to have lower TCR diversity than their naive counterparts77, provided that (1) cells from both populations are equally sampled (that is, their counts are equivalent) or (2) variation in total T cell counts is normalized out (Extended Data Fig. 4a). However, by disregarding variation in total T cell frequency, such sampling ignores richness—the number of unique species (clonotypes) within a population and a key factor underlying immune repertoire diversity. As such, we primarily used Shannon entropy45,46 to characterize immune repertoire diversity in this work, an information theoretic metric that combines evenness and richness in a single measure (Extended Data Fig. 4a).
+# activated TM cells arise from clonal expansion, expected less TCR diversity than naive counterparts (assuming cells from both populations equally sampled or variation in counts normalized out)
 
-# For each evaluable patient sample in the single-cell discovery cohort (Figs. 1 and 2a and Supplementary Tables 2 and 3), the TCR clonotype repertoire was randomly sampled (without replacement) to equalize the number of evaluable PBMC cells across patients while addressing technical variation in TCR recovery. To maximize the pool of TCR clones available for sampling, patients with <100 TCR clones were excluded (n = 4; YUTAUR, YUTORY, YUHERN and YUTHEA). We then calculated Shannon entropy (R package vegan v.2.5-6 (ref. 78)) relative to total PBMCs for each T cell subset and averaged the resulting values across 100 iterations of this procedure for the remaining 9 patients (Fig. 3e and Extended Data Fig. 4b,d–f). Shannon entropy was analyzed as described above for scBCR clonotypes across IGK, IGL and IGH chains in the same nine patients (Extended Data Fig. 4g).
+# use Shannon entropy to characterize immune repertoire diversity (info metric that combines evenness and richness)
+# https://search.r-project.org/CRAN/refmans/DescTools/html/Entropy.html
 
-# For bulk cohorts 1 and 2, after adapter sequence trimming using Skewer v.0.2.2 (ref. 79), TCR clonotypes were assembled and quantitated with MiXCR v.3.0.125 using the following command: mixcr align -p rna-seq -s hsa -O allowPartialAlignments=true data_R1.fastq.gz data_R2.fastq.gz alignments.vdjca (Supplementary Table 8). For each patient sample, TCR clonotype diversity was measured in aggregate for TCR-α and TCR-β chains using Shannon entropy (R package vegan v.2.5-6 (ref. 78)) and compared between patients based on irAE severity (Fig. 4b,c, Extended Data Fig. 6a,c and Supplementary Table 9). We additionally applied the Gini–Simpson index45, which was calculated using the R package immunarch v.0.6.5 (https://doi.org/10.5281/zenodo.3367200), to evaluate bulk TCR diversity according to irAE severity (Extended Data Fig. 6b,d and Supplementary Table 9). Of note, TCR richness is a key component for calculating both Shannon entropy and the Gini–Simpson index.
+# randomly sample TCR clonotype reportoire without replacement to equalize number of PBMC cells across patients while addressing technical variation in TCR recovery
 
-# Figure 3e: Pretreatment TCR clonotype diversity within each T cell state, total T cells, CD8 T cells, CD4 T cells and activated versus resting CD4 T 5 + 3 cells (defined as in d), grouped by future irAE status. TCR diversity was calculated for all patients with at least 100 TCR clones (n = 9; Methods). States are ordered by the AUC between TCR diversity and severe irAE status.
+# exclude patients with < 100 TCR clones (YUTAUR, YUTORY, YUHERN, YUTHEA)
+
+# calculate Shannon entropy (with R package version 2.5-6) relative to total PBMCs for each T cell subset, average values across 100 iterations of procedure for remaining 9 patients
+
+# Figure 3e: Pretreatment TCR clonotype diversity within each T cell state, total T cells, CD8 T cells, CD4 T cells and activated versus resting CD4 T 5 + 3 cells (defined as in d), grouped by future irAE status. States are ordered by the AUC between TCR diversity and severe irAE status.
 
 ```
