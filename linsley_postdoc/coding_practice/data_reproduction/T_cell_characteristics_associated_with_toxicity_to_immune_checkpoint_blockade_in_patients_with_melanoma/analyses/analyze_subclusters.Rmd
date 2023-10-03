@@ -19,6 +19,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(tidyverse)
+library(forcats)
 
 ```
 
@@ -153,12 +154,48 @@ DimPlot(clustered_immune, reduction = "umap", label = TRUE, pt.size = 0.1, cols 
 
 ```{r}
 
-cell_states <- unique(Idents(clustered_immune))
+#cell_states <- unique(Idents(clustered_immune))
 
+# some NA patient names not sure why
+#patient_names <- unique(clustered_immune$patient.ID)[2:14]
+
+#irae_patient_ids <- c("YUTAUR", "YUTORY", "YUVARD", "YUCARD", "YUFURL", "YUPIXEL")
+
+#non_irae_patient_ids <- c("YUENZO", "YUFUB", "YUGRUS", "YUHERN", "YUKEND", "YUROD", "YUTHEA")
+
+#metadata_df <- as_tibble(clustered_immune@meta.data)
+
+#metadata_df$cluster_name <- Idents(clustered_immune)
+
+#abundances_df <- data.frame(cell_type_number = character(),
+#                 status=character(),
+#                 patient_ID=character(),
+#                 count=integer())
+
+#for (ID in irae_patient_ids) {
+#  for (name in cell_states) {
+#    #print(length(which(metadata_df$patient.ID == ID & metadata_df$cluster_name == name)))
+#    abundances_df[nrow(abundances_df) + 1,] = c(name, "irAE", ID, length(which(metadata_df$patient.ID == ID & metadata_df$cluster_name == name)))
+#  }
+#}
+
+#for (ID in non_irae_patient_ids) {
+#  for (name in cell_states) {
+#    #print(length(which(metadata_df$patient.ID == ID & metadata_df$cluster_name == name)))
+#    abundances_df[nrow(abundances_df) + 1,] = c(name, "no_irAE", ID, length(which(metadata_df$patient.ID == ID & metadata_df$cluster_name == name)))
+#  }
+#}
+
+#abundances_df
+
+```
+
+
+```{r}
 # remove cell clusters with 0 cells in either irAE or non_irAE group
 cell_states <- cell_states[!(cell_states %in% c("Monocyte 9", "Monocyte 8"))]
 
-df <- data.frame(cell_type_number = character(),
+states_and_irae <- data.frame(cell_type_number = character(),
                  perc=character(),
                  status=character())
 
@@ -168,51 +205,67 @@ for (state in cell_states) {
   irAE_perc <- length(colnames((subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 1)))) / length(colnames(subset_data))
   non_irAE_perc <- length(colnames(subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 0))) / length(colnames(subset_data))
   perc = subset_perc*irAE_perc
-  df[nrow(df) + 1,] = c(state, perc, "irAE")
+  states_and_irae[nrow(states_and_irae) + 1,] = c(state, perc, "irAE")
   perc = subset_perc*non_irAE_perc
-  df[nrow(df) + 1,] = c(state, perc, "no irAE")
-  
+  states_and_irae[nrow(states_and_irae) + 1,] = c(state, perc, "no irAE")
   }
+
+states_and_irae <- states_and_irae %>%
+  mutate(perc = as.numeric(perc))
+
+#p <- ggplot(states_and_irae, aes(x=cell_type_number, y=perc, color=status)) +
+#  geom_bar(stat="identity") +
+#  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+#p
 
 ```
 
-# Look at test df
+# Perform Wilcox test on state abundances vs. irAE status
 
 ```{r}
 
-df <- df %>%
-  mutate(perc = as.numeric(perc))
+for (row in 1:nrow(states_and_irae)) {
+  if (states_and_irae[row, "status"] == "irAE") {
+    cell_type <- states_and_irae[row, "cell_type_number"]
+    test_perc <- states_and_irae[row, "perc"]
+    subset <- states_and_irae %>% filter(status == "irAE")
+    other_perc <- subset[-(row)]$perc
+    states_and_irae[row, "wilcox_result"] <- -log(wilcox.test(test_perc, other_perc)$p.value)
+  } else {
+      cell_type <- states_and_irae[row, "cell_type_number"]
+      test_perc <- states_and_irae[row, "perc"]
+      subset <- states_and_irae %>% filter(status == "no irAE")
+      other_perc <- subset[-(row)]$perc
+      states_and_irae[row, "wilcox_result"] <- log(wilcox.test(test_perc, other_perc)$p.value)
+  }
+}
 
-p <- ggplot(df, aes(x=cell_type_number, y=perc, color=status)) +
-  geom_bar(stat="identity") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-p
+#wilcox_results$cell_type_number = with(wilcox_results, reorder(cell_type_number, score, median))
+# reordering not working yet
+#wilcox_results$cell_type_number <- reorder(wilcox_results$cell_type_number, wilcox_results$score)
 
-# Erin's advice: they got each point in the test by comparing the percent of cells in that population between groups (level of severity groups), then they plotted the -log10 p value of this on the plot in relation to the correlation of that population with the CD4 T EM cells measured by CYTOF
-# start by just plotting the percent of cells in each cluster by severity group and running the wilcoxon to test for differences between groups
+states_and_irae
 
-# Ty Q: not sure how this makes multiple P values (as I understand it, test of 2 list gives 1 P value)
+states_and_irae %>%
+  ggplot(aes(x=wilcox_result, y = cell_type_number)) +
+    geom_point() +
+    xlab("Abundance versus severe irAE
+    (scRNA-seq, -log(P))
+         No severe irAE to the left
+         Severe irAE to the right")
 
+```
+
+# Incorporate CyTOF data
+
+```{r}
+
+
+
+#unique(clustered_immune$Effector.memory.CD4.T.cells..CyTOF.)
+# CD4 TEM cell frequencies (CyTOF)
+# Spearman correlation with CD4 TEM cells (CyTOF)
 # then you can separately calculate the spearman correlation between the percent of cells in that population that correlate with CD4 Tem cells by CYTOF
-
-# Cell state abundances (scRNA-seq) versus future irAE status. Quantified by a two-sided, unpaired Wilcoxon rank-sum test and expressed as −log10 P values. For associations with no severe irAE, −log10 P values were multiplied by −1
-
-#wilcoxon_results <- list()
-
-#cell_states <- unique(Idents(clustered_immune))
-
-# remove cell clusters with 0 cells in either irAE or non_irAE group
-#cell_states <- cell_states[!(cell_states %in% c("Monocyte 9", "Monocyte 8"))]
-
-#for (state in cell_states) {
-#  subset_data <- subset(clustered_immune, idents = state)
-
-  # I don't think this is the right variable to use here, they say abundances but I need a distribution to compare for Wilcoxon test, not just a single count of number of cells per cluster
-#  irAE_group <- subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 1)$nCount_RNA
-#  non_irAE_group <- subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 0)$nCount_RNA
-#  wilcoxon_test_result <- wilcox.test(irAE_group, non_irAE_group)
-#  wilcoxon_results[[state]] <- -log(wilcoxon_test_result$p.value)
-#}
 
 ```
 
@@ -244,7 +297,7 @@ DoHeatmap(CD4_subset, features = paper_de.markers_list)
 
 ```
 
-# Seurat reference mapping
+# Look at association between subcell states and irAE
 
 ```{r}
 
@@ -253,62 +306,6 @@ DoHeatmap(CD4_subset, features = paper_de.markers_list)
 # preprocessed the query dataset following the quality control steps described above, yielding 24,807 cells. normalized the query dataset by SCTransform, applied FindTransferAnchors to the query and reference datasets using a precomputed supervised PCA transformation with 50 dimensions, then applied MapQuery to map the cell type labels and UMAP structure from the reference to the query dataset.
 
 # results in extended data figure 2a
-
-```
-
-# Load Seurat reference map to help label cell types
-
-```{r}
-
-reference <- LoadH5Seurat("../raw_data/pbmc_multimodal.h5seurat")
-
-```
-
-# Find mapping anchors
-
-```{r}
-
-anchors <- Seurat::FindTransferAnchors(
-  reference = reference,
-  query = immune.combined,
-  normalization.method = "SCT",
-  reference.reduction = "spca",
-  dims = 1:50
-)
-
-```
-
-# Map cell types
-
-```{r}
-
-immune.combined <- MapQuery(
-  anchorset = anchors,
-  query = immune.combined,
-  reference = reference,
-  refdata = list(
-    celltype.l1 = "celltype.l1",
-    celltype.l2 = "celltype.l2",
-    predicted_ADT = "ADT"
-  ),
-  reference.reduction = "spca", 
-  reduction.model = "wnn.umap"
-)
-
-```
-
-# Visualize mapping results
-
-```{r}
-
-DimPlot(immune.combined, reduction = "ref.umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
-# can do l2 for a finer grain look at sub-cell types
-
-```
-
-# Look at association between subcell states and irAE
-
-```{r}
 
 # not sure if they used web version here (https://app.azimuth.hubmapconsortium.org/app/human-pbmc) but I can and then download script? just need to write object and then upload it (.rds is fine, just need to mount R servers to mac for easy upload otherwise transfer over ssh from server to local mac?)
 

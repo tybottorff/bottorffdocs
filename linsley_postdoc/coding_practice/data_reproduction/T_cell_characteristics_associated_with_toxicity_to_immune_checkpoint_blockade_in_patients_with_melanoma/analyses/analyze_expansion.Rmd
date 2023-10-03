@@ -1,0 +1,151 @@
+---
+title: "T cell characteristics associated with irAE from ICI in melanoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(forcats)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+# List of file names
+file_names <- c(
+  "../raw_data/ImmunoSEQ/WUMENLO_pre.tsv",
+  "../raw_data/ImmunoSEQ/WUMENLO_on.tsv",
+  "../raw_data/ImmunoSEQ/YUAMIGO_on.tsv",
+  "../raw_data/ImmunoSEQ/YUCADA_on.tsv",
+  "../raw_data/ImmunoSEQ/YUFROZE_on.tsv",
+  "../raw_data/ImmunoSEQ/YUHONEY_on.tsv",
+  "../raw_data/ImmunoSEQ/YUNANCY_on.tsv",
+  "../raw_data/ImmunoSEQ/YUPOGER_on.tsv",
+  "../raw_data/ImmunoSEQ/YUTACI_on.tsv",
+  "../raw_data/ImmunoSEQ/YUAMIGO_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUCADA_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUFROZE_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUHONEY_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUNANCY_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUPOGER_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUTACI_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUALOE_on.tsv",
+  "../raw_data/ImmunoSEQ/YUBROMO_on.tsv",
+  "../raw_data/ImmunoSEQ/YUDEBIT_on.tsv",
+  "../raw_data/ImmunoSEQ/YUHERN_on.tsv",
+  "../raw_data/ImmunoSEQ/YULAMB_on.tsv",
+  "../raw_data/ImmunoSEQ/YUPESO_on.tsv",
+  "../raw_data/ImmunoSEQ/YUQIP_on.tsv",
+  "../raw_data/ImmunoSEQ/YUALOE_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUBROMO_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUDEBIT_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUHERN_pre.tsv",
+  "../raw_data/ImmunoSEQ/YULAMB_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUPESO_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUQIP_pre.tsv"
+)
+
+# Create an empty data frame to store the combined data
+combined_immunoseq_data <- data.frame()
+
+# Process each file and append it to the combined_data data frame
+for (file_name in file_names) {
+  # Read the TSV file
+  data <- read_tsv(file_name)
+  
+  extracted_ici_status <- gsub(".*/[^/]+_(on|pre)\\.tsv$", "\\1", file_name)
+  extracted_patient_id <- gsub(".*/([^/]+)_(pre|on)\\.tsv$", "\\1", file_name)
+  
+  data$ici_status <- extracted_ici_status
+  data$patient_id <- extracted_patient_id
+  
+  # Append the data to the combined_data data frame
+  combined_immunoseq_data <- bind_rows(combined_immunoseq_data, data)
+}
+
+```
+
+# Count repeats of CDR3 amino acid sequence
+
+```{r}
+
+combined_immunoseq_data <- combined_immunoseq_data %>%
+  select(cdr3_amino_acid, patient_id, ici_status) %>%
+  filter(!(is.na(cdr3_amino_acid))) %>%
+  group_by(cdr3_amino_acid) %>%
+  mutate(cdr3_amino_acid_count = n()) %>%
+  ungroup()
+
+combined_immunoseq_data
+
+```
+
+# Calculate TCR diversity
+
+```{r}
+
+combined_immunoseq_data <- combined_immunoseq_data %>%
+  group_by(patient_id, ici_status, cdr3_amino_acid_count) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = -sum((cdr3_amino_acid_count / sum(cdr3_amino_acid_count)) * log(cdr3_amino_acid_count / sum(cdr3_amino_acid_count)))) %>%
+  # Calculate the maximum possible Shannon diversity index (H_max)
+  mutate(h_max = log(length(cdr3_amino_acid_count))) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / h_max)
+
+#unique(combined_immunoseq_data$
+
+unique(combined_immunoseq_data$pielou_evenness)
+
+```
+
+# Main relevant results to recapitulate/explore past
+
+1) Peripheral TCR clonal expansion linked to severe irAEs
+ - they hypothesize that pre-treatment TCR clonotypes in peripheral blood might show greater propensity to expand in patients destined to develop severe irAEs after ICI
+ - observe increased TCR clonal expansion and persistence of baseline clones in patients developing severe irAEs (preferential expansion of activated CD4 TEM)
+
+# Methods
+
+Analysis of T cell clonal dynamics from bulk PBMCs
+Bulk TCR-ß chain profiling was performed on paired pretreatment and early on-treatment PBMCs from 15 patients treated with combination ICIs (Supplementary Tables 1 and 18). No patients had on-treatment peripheral blood collected after the onset of severe irAE. Genomic DNA was extracted using the DNeasy Blood & Tissue Kit (QIAGEN) and submitted for survey-resolution immunoSEQ (Adaptive Biotechnologies). Data from productive TCR-ß chain rearrangements were exported using the immunoSEQ Analyzer online tool and evaluated for TCR-ß repertoire richness and diversity using Pielou’s evenness45, with increased 1 – evenness associated with increased clonality. The Pielou’s evenness results from immunoSEQ profiling were compared with bulk RNA-seq (MiXCR), which revealed concordance (Extended Data Fig. 9a). We also verified that all pretreatment and on-treatment samples were properly paired by cross-comparison of TCR-ß CDR3 sequences. Clonal expansion was inferred by analyzing the difference in clonality, defined as 1 – Pielou’s evenness in each sample, between paired on- and pretreatment time points (Fig. 5b and Extended Data Fig. 9b). More specifically, to calculate the change in clonality from baseline, pretreatment clonality was subtracted from on-treatment clonality in a paired fashion, thereby normalizing all pretreatment samples to zero (Fig. 5b, left). The data from Fig. 5b were also analyzed without normalizing on-treatment samples to paired pretreatment samples in Extended Data Fig. 9b.
+
+To assess freedom from severe irAE, the degree of clonal expansion, denoted δ, was evenly divided into tertiles using the R package dplyr v.1.0.7 (Fig. 5d and Extended Data Fig. 9h). This yielded the following groups: no clonal expansion, δ < 0, n = 5; intermediate, 0 < δ < 0.009, n = 5; and high clonal expansion, δ > 0.009, n = 5. We applied these thresholds to the full immunoSEQ cohort (n = 15; Fig. 5d) and to patients with blood samples obtained on ICI treatment day 1 and <1 month later (n = 7; Extended Data Fig. 9h). Additionally, when represented in rank space, the degree of clonal expansion was significantly associated with time-to-severe irAE development in Cox regression models and was independent of the time between blood draws, the number of productive TCR clones detected and the age and sex of each patient (Supplementary Table 19).
+
+Analysis of persistent T cell clones
+Paired pretreatment peripheral blood scRNA-seq and scTCR-seq were performed for three patients (Fig. 5b) who experienced severe irAEs with variable levels of clonal expansion: YUALOE, YUNANCY and YUHONEY (Fig. 5c, Extended Data Fig. 9d–g and Supplementary Table 18). Of note, samples from these three patients were not previously profiled by scRNA-seq or scV(D)J-seq in the single-cell discovery cohort. Sequencing libraries were generated and processed for quality control identically to those described in the single-cell discovery cohort. Mapping was performed with Cell Ranger v.5.0.1.
+
+To analyze persistent clones—which we defined as productive TCR-ß CDR3 nucleotide sequences shared between paired pretreatment and on-treatment blood samples—we interrogated the immunoSEQ data for shared clonotypes with at least 2 templates in 1 blood draw (pretreatment or on-treatment) and at least 1 template in the other blood draw (60% of all shared clones, on average). This allowed us to preferentially focus on persistent clones that either expanded or contracted. The resulting sequences were cross-referenced with the TCR-ß CDR3 nucleotide sequences from the pretreatment scTCR-seq libraries, which were further cross-referenced with scRNA-seq data and filtered for cells annotated as T cells by Azimuth (applied as described above) (Extended Data Fig. 9d). In total, 1,504 single-cell transcriptomes with paired immunoSEQ clonotype data were identified. Significant Spearman correlations between pretreatment single-cell and immunoSEQ TCR clonotype frequencies were observed for each patient (ρ > 0.59; P < 0.0002), underscoring the integrity of our data. Importantly, to maximize stringency and avoid classification artifacts, when annotating CD4 and CD8 T cell-derived clonotypes, we only considered TCR clonotypes with uniform expression of positive lineage markers (CD4 > 0 and CD8A/B = 0 for CD4 T cells; CD8A or CD8B > 0 and CD4 = 0 for CD8 T cells). In all, 69% of all cross-referenced clonotypes could be unambiguously labeled by this approach (Extended Data Fig. 9e). For the plot shown in Fig. 5c, we calculated the mean log2 fold change between CD4 T 5 and 3 versus the remaining CD4 T cell clusters in the single-cell discovery cohort (Extended Data Fig. 1b) and then selected the top 20 genes for subsequent analysis. Enrichment of this gene set was determined using single-sample GSEA (R package escape v.1.0.1 (ref. 80)), which we applied to T cells labeled by Azimuth or labeled as described above for persistent CD4/CD8 T cells. For the analysis shown in Extended Data Fig. 9f,g, productive frequencies of persistent T cell clones measured by immunoSEQ were grouped into CD4 and CD8 T cells, with differences in productive frequencies displayed on a per-clonotype basis (Extended Data Fig. 9g) or in aggregate (Extended Data Fig. 9f) and compared to bulk clonal expansion from baseline (Fig. 5b).

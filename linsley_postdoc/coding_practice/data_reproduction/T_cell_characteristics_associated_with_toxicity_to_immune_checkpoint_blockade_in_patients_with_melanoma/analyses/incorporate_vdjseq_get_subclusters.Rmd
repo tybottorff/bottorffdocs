@@ -145,8 +145,10 @@ rownames(combined_data) <- combined_data$Barcode
 
 combined_data <- combined_data %>% select(-Barcode)
 
-combined_data
+```
 
+```{r}
+combined_data
 ```
 
 # Add TCR/BCR metadata to Seurat scRNA assay
@@ -155,7 +157,9 @@ combined_data
 
 rna_and_tcr_bcr_seurat <- AddMetaData(object = melanoma_T_cells_cell_type_clustered, metadata = combined_data)
 
-melanoma_T_cells_cell_type_clustered
+# restore patient IDs
+rna_and_tcr_bcr_seurat$patient.ID <- melanoma_T_cells_cell_type_clustered$patient.ID
+rna_and_tcr_bcr_seurat@meta.data$patient.ID <- melanoma_T_cells_cell_type_clustered@meta.data$patient.ID
 
 # not every barcode from scRNAseq (24,807 rows) has corresponding TCR/BCR metadata (9,003 barcodes), perhaps partially because I removed duplicate TCR/BCR data barcodes that have same clonotype? 17,440 barcodes if I didn't remove duplicates
 
