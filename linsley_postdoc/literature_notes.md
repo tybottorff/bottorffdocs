@@ -1,6 +1,8 @@
 # Activation of human T cells by major histocompatability complex class II expressing neutrophils: proliferation in the presence of superantigen, but not tetanus toxoid
  - polymorphonuclear neutrophils (PMNs) function for acute phagocytic clearance of foreign pathogens, release inflammatory mediators, assumed to not express but can express MHC class II molecules after stimulation by interferon gamma
  - superantigen refers to antigen binding to MHC class II with high affinity outside antigen binding groove in absence of antigen processing, trigger proliferation of T cells expressing TcR-VB gene products (stimulate T cells in TCR Vbeta-specific manner)
+# Advances in immune checkpoint inhibitor combination strategies for microsatellite stable colorectal cancer
+ - microsatellite stable (MSS) colorectal tumors are immune-cold
 # Allopeptides and the alloimmune response
  - allorecognition is recognition of non-self
  - main targets of recipient immune response against allograft are donor MHC antigens on allogenic tissue
@@ -8,6 +10,15 @@
  - allorecognition can occur directly and/or indirectly: directly refers to recognition of intact donor MHC molecules on donor cells (APC)s, indirectly refers to presentation of processed antigens by recipient APCs to recipient T cells
 # An increased population of regulatory T cells improves the pathophysiology of placental ischemia in a rat model of preeclampsia
  - preeclampsia pathology: suppressed Tregs, autoantibodies to Ang II type I receptor
+# Antigen presentation in the thymus for positive selection and central tolerance induction
+## Key points
+ - interactions with self-peptide-MHC complexes on thymic epithelial cells crucial for thmocyte survival (positive selection) and CD4 vs. CD8 lineage commitment but can also result in negative selection (apoptosis)
+ - migratory DCs carry peripheral self antigens into thymus, extend scope of intrathymically presented self antigens
+## Main
+ - selection paradox: recognition of self is essential for thymocyte survival and lineage commitment but may also induce negative selection
+ - **affinity model: only TCR-pMHC interactions with intermediate affinity allow positive selection and CD4 or CD8 lineage commitment (no or too low affinity leads to apoptosis due to neglect which is about 80-90% of lost thymocytes during selection and very high affinity contacts lead to apoptosis by negative selection i.e. clonal deletion)**
+ - deviation of autoreactive thymocytes into Treg cells (CD25<sup>+</sup>) not explained by affinity model
+ - 
 # A phenotypically and functionally distinct human T<sub>H2</sub> cell subpopulation is associated with allergic disorders
  - allergen-specific type 2 helper T (T<sub>H2</sub>) cells critical in initiating/orchestrating allergic/asthmatic inflammatory response pathways
  - currently lack methodology to identify and differentiate these cells from nonpathogenic T<sub>H2</sub> cell types (otherwise would be able to use them as therapeutic targets and biomarkers)
@@ -30,8 +41,16 @@
  - cardiac myosin-specific autoreactive T cells drive pathogenesis of PD-1 inhibitor-induced myocarditis in mice
  - PD-1 expressing cardiac myosin-specific autoimmune T cells are present in heart during naive conditions
 # Cellular and molecular waypoints along the path of T cell exhaustion
+# Characterization of antibody repertoires in patients with HPV-related HNSCC undergoing definitive radiation with immunotherapy
+ - HNSCC: head and neck squamous cell carcinoma
+ - in patients with p16-positive HNSCC, see many antigens against which antibodies were formed during radiation therapy and ICI shared between patients
 # Characterization of Thyroid Disorders in Patients Receiving Immune Checkpoint Inhibition Therapy
  - thyroid disorders are a common irAE following ICI
+# Chimeric CTLA-4-CD28-CD3z T cells potentiate antitumor activity against CD80/CD86-positive B cell malignancies
+ - overcome inhibitive microenvironment of tumor by making chimeric CTLA-4 (extracellular and transmembrane domains) CD28/CD3z (cytoplasmic domains) protein, so off signal becomes on signal
+ - CTLA-4 upregulated after T cell activation, to prevent too much activation?
+ - CD80/86 are CTLA-4 ligands
+ - CAR T cells (chimeric antigen receptor T cells): extracellular ligand recognition domain (single chain variable fragment, ScFv) fused to signaling domain of CD3z, intracellular costimulatory molecule (CD28, 4-1BB, ICOS, CD40, or CD27)
 # Clonal exhaustion as a mechanism to protect against severe immunopathology and death from an overwhelming CD8 T cell response
  - possible evolutionary reason for T cell exhaustion
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
@@ -121,6 +140,16 @@
 # Effective use of latent semantic indexing and computational linguistics in biological and biomedical applications
  - LSI = latent semantic indexing, computational linguistics technique, outperforms Boolean text searches and co-occurrence models at information retrieval, dimensional reduction technique used to compare concepts/topics among collection of terms
  - clustering genes/proteins into GO groups/signaling pathways relies on curation of these groups/pathways, could be supplemented by LSI/LSA (latent semantic analysis)
+# Epigenetic regulation of monoallelic rearrangement (allelic exclusion) of antigen receptor genes
+## Summary
+ - ~10% of genes are expressed monoallelically (any given cell expressed only paternal or maternal allele but not both)
+ - **antigen receptor genes in B and T cells are examples of genes expressed in monoallelic manner (allelic exclusion), during lymphocyte development only 1 allele of each antigen receptor undergoes V(D)J recombination at a time (rearrangement of second allele prevented once productive rearrangement of first allele senses)**
+## Introduction
+ - diploid genome benefits include more robust gene expression patterns, less susceptibility to mutations and environment
+ - allelic exclusion benefits: greater cell diversity
+ - monoallelic expression can be random (RME, like X inactivation) and non-random (imprinted genes)
+ - **allelic exclusion for B and T cells can help prevent autoimmunity (expression of additional functional rearranged subunits from a second allele could lead to multiple specificities for a T or B cell)**
+ - **TCRalpha locus uniquely has rearrangements from both alleles**
 # Epigenetic regulation of T cell exhaustion
 ## Distinct epigenetic programs in T<sub>ex</sub> cells
  - T cells are directed by multiple signals (TCR-antigen interaction, co-stimulatory molecular interactions, local cytokines)
@@ -131,6 +160,15 @@
 # Expression of MHC class II in T cells is associated with increased HIV-1 expression
  - CD4 primary HIV-1 infection receptor, expressed on T cells, monocytes, macrophages, DCs
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
+# Genetic variation in MHC proteins is associated with T cell receptor expression biases
+## Abstract
+ - controversy over if germline-encoded TCR-MHC contacts promote TCR-MHC specificity, do differences exist in TCR V gene compatibilities with different MHC alleles?
+ - result: *trans* associations between genetic variation and TCR V gene usage in humans
+## Introduction
+ - HLA genes highly polymorphic, variants associated with many traits, like most autoimmune diseases
+ - perhaps different disease risk conferred by particular MHC alleles is due to differences in presented peptides or differences in stabilities of MHC molecules
+ - **1-5% of T cells have gamma (*TRG*) and delta (*TRD*) chains instead of alpha (*TRA*) and beta (*TRB*) ones, only beta and delta chains also have diversity (D) genes recombined in VDJ recombination (alpha nad gamma just have VJ recombination)**
+ - **during V(D)J recombination, joints between segments are partially digested and nucleotides are randomly added to form highly variable and non-germline-encoded complementarity-determining regions 3 (CDR3) loop that recognizes peptides, CDR1/2 loops of TCR form contacts with MHC and are encoded by V genes**
 # Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
  - chronic stimulation assay
  - *in vivo* validation of screen results (perturbation of INO80 and BAF chromatin remodeling complexes improves T cell persistence in tumors)
@@ -337,6 +375,11 @@
  - CD8<sup>+</sup>CD38<sup>+</sup>T cell associated with irAEs
 # Peripheral CD8<sup>+</sup>CD28<sup>+</sup> T lymphocytes predict the efficacy and safety of PD-1/PD-L1 inhibitors in cancer patients
  - CD8<sup>+</sup>CD28<sup>+</sup> T cell level associated with ICI efficacy but also irAE development
+# Potentiating local and abscopal antitumor efficacy through radiation with FAP-CD40 DARPin and anti-PD1 therapy
+ - ~70% of patients develop resistance to ICI
+ - CD40: costimulatory molecule that drives DCs and TAMs (tumor associated macrophages) to prime T cells
+ - FAP: fibroblast activation protein, upregulated in tumor in response to radiation (which can be taken advantage of for drug delivery to TME via FAP-CD40 DARPin)
+ - FAP-CD40 DARPin: uses FAP and CD40 binding domains to cross-link and activate CD40 specifically in tumor
 # Quantifiable predictive features define epitope-specific T cell receptor repertoires
  - TCR is heterodimer, mediates pathogen-associated epitope recognition through interactions between peptide and MHC, generated by genomic rearrangement of germline TCR locus (VDJ recombination) to allow potentially 10^15 to 10^61 unique receptors
  - TCRs from T cells that recognize the same pMHC epitope often share conserved sequence features, perhaps able to predict model epitope specificity
@@ -490,6 +533,18 @@
  - most patients have a single peak of PD-1 blockade-induced immune reinvigoration despite on-going treatment
  - responding exhausted T cells in blood contain TCR clonotypes shared with tumor infiltrating T cells
  - ratio of exhausted T cell reinvigoration to tumor burden predicts clinical response
+# T-cell repertoire analysis and metrics of diversity and clonality
+ - **TCR alpha beta heterodimer disulfide linked, each chain has constant and variable domain, 3 CDRs per chain so CDR1-3 alpha and beta**
+ - **CDR3 product of junctional diversity, most variable**
+ - **TCR-pMHC binding rather low-affinity, degenerate (many TCRs recognize same peptide and many peptides recognized by same TCR)**
+ - **CDR1-2 contact MHC and CDR3 contacts peptide is the general rule, but CDR1 alpha also contacts peptide and CDR3 beta doesn't contact peptide too much**
+## Diversity meaures
+ - richness refers to number of unique TCR sequences, evenness refers to distribution spectrum of these TCR sequences (relative abundances)
+ - diversity relates to level of uncertainty that TCR sequence sorted from reportoire would belong to a certain T cell clone (unique TCR sequence)
+ - Shannon entropy: order (alpha) of 1, 0 means monoclonal, max (log of number of unique sequences) means evenely distributed TCR sequences, encounters higher variation upon addition of low frequency clones than Gini-Simpson index
+ - Gini-Simpson index: order (alpha) of 2, 0 means monoclonal, 1 means polyclonal with equivalent representation of all clones, barely affected by increasing number of unique TCRs in repertoire (unlike Shannon entropy)
+ - Pielou's index (evenness measure): clonal evenness refers to clonal diversity, 1 - Pielou's index is often used and here 0 means maximally diverse and 1 means monoclonal
+ - Gini coefficient: inequality measure, distinct from Gini-Simpson index, 0 means maximal diversity, high value means monoclonal
 # T cell tolerance: central and peripheral
 ## Summary
  - central tolerance: clonal deletion and diversion (Treg differentiation) control self-reactive T cells in the thymus
@@ -533,6 +588,58 @@
  - TCR expression varied 2-fold around median in 70% of cells
  - intra-clonotype TCR expression heterogeneity similar to inter-cell heterogeneity, so TCR expression is not clonotype dependent
  - different T cell states express TCRs to similar degrees (activated cells' TCR expression slightly lower)
+# TCR-sequencing in cancer and autoimmunity: barcodes and beyond
+## Summary
+ - since T cells have unique TCRs (stably maintained through cell divisions), TCR barcodes T cell through migration, differentiation, proliferation
+ - limitations: unable to infer antigen specificity from TCR sequence
+## Glossary
+ - **clonal replacement: recruitment of less dysfunctional peripheral T cell clonotypes to tumor that were not detectable in tumor prior to PD-1 blockade, i.e. from tumor draining lymph node, more important in ICI than previously thought**
+ - **clonal revival: replenishment of highly dysfunctional T cell clones in tumor with new, less dysfunctional T cells (perhaps from periphery, local expansion within tumor) that can be novel clonotypes (i.e. clonal replacement) or clonotypes pre-existing in tumor**
+ - **clone (set of T cells that are clonal progeny due to shared clonotype and host) vs. clonotype (paired alpha and beta TCR nucleotide sequence of a T cell)**
+ - **MHC haplotype: combination of MHC alleles found in a single individual**
+ - neoadjuvant: treatment (surgery, radiation) given before definitive, curative treatment
+ - neoantigens: antigens from somatic mutations in tumors
+ - **private (unique to a single individual) vs. public (found in multiple individuals) TCR sequences**
+ - TCR fingerprint: family of peptides recognized by single TCR
+## Single cell TCR seq: bringing high-throughput single-cell precision to T cell immunology
+ - naive T cells trafic through spleen, lymph nodes, blood in search of APCs to initiate T cell activation
+ - T cell activation requires antigen-specific signal via TCR interacting with peptide bound to MHC (pMHC) on APC and co-stimulatory signal delivered by CD28 co-stimulatory receptor on T cell binding to B7 ligands on APC
+ - inflammatory signals promote full T cell effector differentition, leading to extensive prolifertion, transcriptional and epigenetic reprogramming, and production of effector molecules (i.e. secretion of inflammatory cytokines, cytotoxicity)
+ - **affinity of TCR for pMHC can affect propensity to become effector or memory T cell**
+ - **naive T cells are very plastic, one clone can lead to diverse cell states**
+ - can use *in vivo* deuterium labeling to mark proliferating cells, for example to show that CD8<sup>+</sup> T cell memory cells derive from CD8<sup>+</sup> T cells that extensively divided during first 2 weeks of infection and have a doubling time of > 450 days
+ - **challenges of scTCRseq and scRNAseq: ambiguous antigen specificities, polyspecific nature of TCR binding to pMHC, presence of both antigen-specific T cells and bystander T cells in tissues of interest, statistical inference issues related to sample size**
+ - polyspecific nature of TCR-pMHC binding: TCRs able to recognize multiple pMHCs, very difficult to predict binding
+ - **just because a T cell is antigen specific doesn't mean it is functional (secreting effector cytokines, killing cells), just because a T cell is a bystander (non-antigen specific, i.e. in tumors T cells not binding tumor-associated antigens, perhaps a virus-specific T cell in a cancer associated with viral infection like HPV or hepatitis B, bystander infiltration here good for prognosis) doesn't mean it doesn't contribute to an immune response**
+## Methods for tracking T cells of interest
+ - virtually all naive T cells have different TCR sequences
+ - combinations of V, D, J segments in humans allows 10<sup>14</sup> to 10<sup>19</sup> possible TCR sequences, though the observed number is around 10<sup>8</sup> likely due to T cell developmental constraints (failure to undergo positive selection, negative selection)
+ - **T cell activation can induce ~15-20 divisions, expanding number of antigen-specific T cells ~50,000 fold (likely upper limit of clonal expansion)**, clonal expansion in autoimmunity and cancer likely lower due to suboptimal T cell activtion (low-affinity antigens, low inflammation)
+ - T cells of a single clonotype are rare in peripheral blood
+### Antigen-directed methods for detecting T cells of interest
+ - antigen-directed methods: identification based on T cell's ability to bind/recognize specific antigens (like tetramer assay in which soluble pMHC molecules are complexed to streptavidin core labeled with fluorescent marker or DNA barcode)
+ - **limitations of tetramer assay: antigen must be known, limited to number of known antigens trackable at one time (low throughput), tetramers often inefficient at detecting TCRs with low affinity for pMHC (perhaps significant for cancer, autoimmunity), tetramers can only be used in individuals with MHC haplotypes for which there are tetramers available**
+ - can also use antigen stimulation *in vitro* and then sort activated T cells (by activation marker or expansion level), but can't really phenotype these cells before stimulation
+ - Tconv refers to conventional, non-Treg T cell
+### TCR-directed methods for detecting T cells of interest
+ - **TCR sequence generated through V(D)J recombination during T cell development in thymus, random recombination of *V*, *D*, *J* segments for beta chain and alpha chain (just *V* and *J* for alpha though) of each TCR**
+ - bulk TCR seq often collects 10<sup>5</sup> to 10<sup>6</sup> TCRs per sample, scTCRseq often lower (100-1000 TCRs/sample), skewed distribution of clones (long tail of unexpanded clones that represent minimal fraction of true repertoire)
+### Using the TCR as a barcode in cancer
+ - limitation: some baseline level of clonal expansion may be needed for TCR sequence to be useful due to detection limits for identifying rare/unexpanded populations by scTCRseq
+ - barcode method may have more utility in immunologically 'hot' tumors (high mutational burden, high CD8<sup>+</sup> T cell infiltration, high inflammation)
+### Using the TCR as a barcode in autoimmunity
+ - antigen persists for some autoimmune diseases (RA, MS) but decreases over time for others (T1D insulin-producing beta cells, so pathogenic T cell population likely contracts with loss of APCs)
+## Using TCR analyses to inform on mechanisms of antitumor immunity following PD-1 immunotherapy
+ - pancreatic cancer, prostate cancer, glioblastoma don't respond well to PD-1 blockade
+### Anatomical site of action of PD-1 inhibitors: tumor vs lymph node
+ - are antitumor immune responses of PD-1 inhibition driven by reinvigorated CD8<sup>+</sup> T cell within tumor bed or by newly recruited tumor specific T cells (i.e. from tumor draining lymph node)? **perhaps more the latter than previously thought**
+ - can use S1P agonist FTY720 to block T cell migration to study effect of recruited T cells from tumor draining lymph nodes
+## Beyond a barcode: how does the TCR sequence impact T cell fate?
+ - TCR hydrophobicity, electrostatic charges allows good prediction of if T cell is TIL or from adjacent normal tissue
+## Conclusions
+ - advanced melanoma, non small cell lung cancer are immunologically hot
+ - repertoire of antigens driving responses for cancer, autoimmunity, irAEs largely unknown, major challenge
+ - many autoimmune diseases feature risk polymorphisms in *HLA* genes that constrain TCR repertoire during thymic selection
 # The altertions in peripheral lymphocyte subsets predict the efficacy and prognosis of immune checkpoint inhibitors in hepatocellular carcinoma
  - CD3<sup>+</sup>CD8<sup>+</sup> T cell percentage increases after ICI, B cell percentage decreases
 # The graft-versus-leukemia effect in AML
