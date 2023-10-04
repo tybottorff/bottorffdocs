@@ -20,6 +20,8 @@ library(dplyr)
 library(tidyr)
 library(tidyverse)
 library(forcats)
+library(vegan)
+library(readxl)
 
 ```
 
@@ -40,7 +42,7 @@ theme_set(
 
 ```
 
-# Read in data
+# Read in ImmunoSEQ data
 
 ```{r}
 
@@ -98,37 +100,280 @@ for (file_name in file_names) {
 
 ```
 
-# Count repeats of CDR3 amino acid sequence
+# Read in metadata, clean, join with diversity scores
 
 ```{r}
 
-combined_immunoseq_data <- combined_immunoseq_data %>%
-  select(cdr3_amino_acid, patient_id, ici_status) %>%
-  filter(!(is.na(cdr3_amino_acid))) %>%
-  group_by(cdr3_amino_acid) %>%
-  mutate(cdr3_amino_acid_count = n()) %>%
-  ungroup()
+irae_statuses <- read_excel("../raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1")
 
-combined_immunoseq_data
+irae_statuses <- irae_statuses %>%
+  select(`Patient ID`, `Highest irAE grade`) %>%
+  rename(patient_id = `Patient ID`, severe_irae = `Highest irAE grade`) %>%
+  mutate(severe_irae = if_else(severe_irae %in% c(3, 4), "Yes", "No"))
 
 ```
 
-# Calculate TCR diversity
+# Count repeats of various TCR measures, calculate diversity scores, join with metadata
 
 ```{r}
 
-combined_immunoseq_data <- combined_immunoseq_data %>%
-  group_by(patient_id, ici_status, cdr3_amino_acid_count) %>%
+rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(rearrangement))) %>%
+  group_by(rearrangement, patient_id, ici_status) %>%
+  mutate(rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
   # Calculate Shannon diversity index (H)
-  mutate(shannon = -sum((cdr3_amino_acid_count / sum(cdr3_amino_acid_count)) * log(cdr3_amino_acid_count / sum(cdr3_amino_acid_count)))) %>%
-  # Calculate the maximum possible Shannon diversity index (H_max)
-  mutate(h_max = log(length(cdr3_amino_acid_count))) %>%
+  mutate(shannon = diversity(rearrangement_count)) %>%
   # Calculate Pielou's evenness index (J)
-  mutate(pielou_evenness = shannon / h_max)
+  mutate(pielou_evenness = shannon / log(specnumber(rearrangement_count))) %>%
+  mutate(rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(rearrangement_score_delta = rearrangement_score[ici_status == "on"] - rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
 
-#unique(combined_immunoseq_data$
+amino_acid_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(amino_acid))) %>%
+  group_by(amino_acid, patient_id, ici_status) %>%
+  mutate(amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(amino_acid_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(amino_acid_count))) %>%
+  mutate(amino_acid_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(amino_acid_score_delta = amino_acid_score[ici_status == "on"] - amino_acid_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
 
-unique(combined_immunoseq_data$pielou_evenness)
+rearrangement_trunc_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(rearrangement_trunc))) %>%
+  group_by(rearrangement_trunc, patient_id, ici_status) %>%
+  mutate(rearrangement_trunc_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(rearrangement_trunc_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(rearrangement_trunc_count))) %>%
+  mutate(rearrangement_trunc_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(rearrangement_trunc_score_delta = rearrangement_trunc_score[ici_status == "on"] - rearrangement_trunc_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+extended_rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(extended_rearrangement))) %>%
+  group_by(extended_rearrangement, patient_id, ici_status) %>%
+  mutate(extended_rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(extended_rearrangement_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(extended_rearrangement_count))) %>%
+  mutate(extended_rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(extended_rearrangement_score_delta = extended_rearrangement_score[ici_status == "on"] - extended_rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr1_rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr1_rearrangement))) %>%
+  group_by(cdr1_rearrangement, patient_id, ici_status) %>%
+  mutate(cdr1_rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr1_rearrangement_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr1_rearrangement_count))) %>%
+  mutate(cdr1_rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr1_rearrangement_score_delta = cdr1_rearrangement_score[ici_status == "on"] - cdr1_rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr1_amino_acid_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr1_amino_acid))) %>%
+  group_by(cdr1_amino_acid, patient_id, ici_status) %>%
+  mutate(cdr1_amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr1_amino_acid_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr1_amino_acid_count))) %>%
+  mutate(cdr1_amino_acid_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr1_amino_acid_score_delta = cdr1_amino_acid_score[ici_status == "on"] - cdr1_amino_acid_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr2_rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr2_rearrangement))) %>%
+  group_by(cdr2_rearrangement, patient_id, ici_status) %>%
+  mutate(cdr2_rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr2_rearrangement_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr2_rearrangement_count))) %>%
+  mutate(cdr2_rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr2_rearrangement_score_delta = cdr2_rearrangement_score[ici_status == "on"] - cdr2_rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr2_amino_acid_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr2_amino_acid))) %>%
+  group_by(cdr2_amino_acid, patient_id, ici_status) %>%
+  mutate(cdr2_amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr2_amino_acid_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr2_amino_acid_count))) %>%
+  mutate(cdr2_amino_acid_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr2_amino_acid_score_delta = cdr2_amino_acid_score[ici_status == "on"] - cdr2_amino_acid_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr3_rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr3_rearrangement))) %>%
+  group_by(cdr3_rearrangement, patient_id, ici_status) %>%
+  mutate(cdr3_rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr3_rearrangement_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr3_rearrangement_count))) %>%
+  mutate(cdr3_rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr3_rearrangement_score_delta = cdr3_rearrangement_score[ici_status == "on"] - cdr3_rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr3_amino_acid_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr3_amino_acid))) %>%
+  group_by(cdr3_amino_acid, patient_id, ici_status) %>%
+  mutate(cdr3_amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr3_amino_acid_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr3_amino_acid_count))) %>%
+  mutate(cdr3_amino_acid_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr3_amino_acid_score_delta = cdr3_amino_acid_score[ici_status == "on"] - cdr3_amino_acid_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+```
+
+# Plot TCR diversity score changes upon treatment by future irAE status
+
+```{r}
+
+ggplot(rearrangement_diversity_df, aes(x = severe_irae, y = rearrangement_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "Rearrangement")
+
+ggplot(amino_acid_diversity_df, aes(x = severe_irae, y = amino_acid_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "Amino acid")
+
+ggplot(rearrangement_trunc_diversity_df, aes(x = severe_irae, y = rearrangement_trunc_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "Truncated rearrangement")
+
+ggplot(extended_rearrangement_diversity_df, aes(x = severe_irae, y = extended_rearrangement_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "Extended rearrangement")
+
+ggplot(cdr1_rearrangement_diversity_df, aes(x = severe_irae, y = cdr1_rearrangement_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "CDR1 rearrangement")
+
+ggplot(cdr1_amino_acid_diversity_df, aes(x = severe_irae, y = cdr1_amino_acid_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "CDR1 amino acid")
+
+ggplot(cdr2_rearrangement_diversity_df, aes(x = severe_irae, y = cdr2_rearrangement_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "CDR2 rearrangement")
+
+ggplot(cdr2_amino_acid_diversity_df, aes(x = severe_irae, y = cdr2_amino_acid_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "CDR2 amino acid")
+
+ggplot(cdr3_rearrangement_diversity_df, aes(x = severe_irae, y = cdr3_rearrangement_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "CDR3 rearrangement")
+
+ggplot(cdr3_amino_acid_diversity_df, aes(x = severe_irae, y = cdr3_amino_acid_score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point() +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") +
+  labs(title = "CDR3 amino acid")
+
+# the complement of clonal evenness (1-Pielou’s index) is often used to get a clonality score of 0 representing a maximally diverse population with even frequencies and values close to 1, a repertoire driven by clonal dominance. 
 
 ```
 
