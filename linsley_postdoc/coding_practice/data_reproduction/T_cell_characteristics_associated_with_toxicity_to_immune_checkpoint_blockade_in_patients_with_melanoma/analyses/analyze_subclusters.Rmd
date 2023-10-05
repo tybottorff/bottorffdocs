@@ -148,9 +148,11 @@ clustered_immune <- RenameIdents(clustered_immune, new.cluster.ids)
 
 DimPlot(clustered_immune, reduction = "umap", label = TRUE, pt.size = 0.1, cols = c('B cell 1' = 'brown', 'B cell 2' = 'brown', 'B cell 3' = 'brown', 'Monocyte 1' = 'blue', 'Monocyte 2' = 'blue', 'Monocyte 3' = 'blue', 'Monocyte 4' = 'blue', 'Monocyte 5' = 'blue', 'Monocyte 6' = 'blue', 'Monocyte 7' = 'blue', 'Monocyte 8' = 'blue', 'Monocyte 9' = 'blue', 'T/NKT 1' = 'darkcyan', 'T/NKT 2' = 'darkcyan', 'NK 1' = 'purple', 'NK 2' = 'purple', 'NK 3' = 'purple', 'CD8 T cell 1' = 'green', 'CD8 T cell 2' = 'green', 'CD8 T cell 3' = 'green', 'DC' = 'orange', 'CD4 T cell 1' = 'red', 'CD4 T cell 2' = 'red', 'CD4 T cell 3' = 'red', 'CD4 T cell 4' = 'red', 'CD4 T cell 5' = 'black', 'CD4 T cell 6' = 'red', 'CD4 T cell 7' = 'black'), repel = TRUE, shuffle = TRUE, seed = 992)
 
+ggsave("../figures/umap_look_for_specific_cd4_subclusters.svg")
+
 ```
 
-# Compare cell state abundances and irAE status
+# Try to compare cell state abundances and irAE status
 
 ```{r}
 
@@ -190,6 +192,7 @@ DimPlot(clustered_immune, reduction = "umap", label = TRUE, pt.size = 0.1, cols 
 
 ```
 
+# Continue investigation
 
 ```{r}
 # remove cell clusters with 0 cells in either irAE or non_irAE group
@@ -260,8 +263,6 @@ states_and_irae %>%
 
 ```{r}
 
-
-
 #unique(clustered_immune$Effector.memory.CD4.T.cells..CyTOF.)
 # CD4 TEM cell frequencies (CyTOF)
 # Spearman correlation with CD4 TEM cells (CyTOF)
@@ -273,17 +274,13 @@ states_and_irae %>%
 
 ```{r}
 
-# To identify the differentially expressed genes (DEGs) in Fig. 3c, we applied Seurat FindMarkers with default parameters to the CD4 T 5+3 population versus other CD4 T cell states.
-
 #de.markers <- FindMarkers(clustered_immune, ident.1 = c("CD4 T cell 5", "CD4 T cell 7"), ident.2 = NULL, only.pos = TRUE)
-
-# Heatmap of DEGs (Padj < 0.05) between CD4 T cell states 5 and 3 and other CD4 T cell states. Within each state, the columns represent the mean expression from individual patients converted to z-scores
 
 #de.markers_list <- rownames(de.markers %>% filter(p_val_adj < 0.05))
 
 paper_de.markers_list <- c("S100A4", "IL32", "CCL5", "HLA-DRA", "IL7R", "TNFRSF4", "SELL", "TCF7", "CCR7")
 
-#CD4_subset <- subset(clustered_immune, idents = c("CD4 T cell 1", "CD4 T cell 2", "CD4 T cell 3", "CD4 T cell 4", "CD4 T cell 5", "CD4 T cell 6", "CD4 T cell 7"))
+CD4_subset <- subset(clustered_immune, idents = c("CD4 T cell 1", "CD4 T cell 2", "CD4 T cell 3", "CD4 T cell 4", "CD4 T cell 5", "CD4 T cell 6", "CD4 T cell 7"))
 
 # change order of clusters to put 5 and 7 in front (subclusters of interest)
 my_levels <- c("CD4 T cell 5", "CD4 T cell 7", "CD4 T cell 1", "CD4 T cell 2", "CD4 T cell 3", "CD4 T cell 4", "CD4 T cell 6")
@@ -291,9 +288,9 @@ levels(CD4_subset) <- my_levels
 
 DoHeatmap(CD4_subset, features = paper_de.markers_list)
 
-# need to split rows by patient.ID (to get the rows pixels effect they have)
+ggsave("../figures/cd4_subcluster_heatmap.svg")
 
-# they see that their CD4 T cell state 5, lacks expression of CCR7 and SELL (CD62L), consistent with CD4 TEM, see association with severe iRAE development
+# need to split rows by patient.ID (to get the rows pixels effect they have)
 
 ```
 
@@ -312,24 +309,5 @@ DoHeatmap(CD4_subset, features = paper_de.markers_list)
 # just use their script. hard to upload file (sshfs/mount), but html not R, just run analyses locally before being able to mount
 
 # Among the 27 cell states identified by Azimuth (Extended Data Fig. 2a), CD4 TEM was most strongly associated with severe irAE development and most correlated with CD4 TEM cells enumerated by CyTOF (Extended Data Fig. 2c). Among two other CD4 TEM-like subsets identified by Azimuth (CD4 CTL, CD4 proliferating), CD4 proliferating showed the highest expression of HLA-DX and lowest expression of SELL (Extended Data Fig. 2d), which is consistent with an activated CD4 TEM phenotype. Additionally, when examining Azimuth-imputed protein expression from antibody-derived tag data, only CD4 TEM and CD4 proliferating states showed hallmarks of TEM cells (CD45ROhiCD45RAloCD27lo; Extended Data Fig. 2e). Indeed, a population combining CD4 TEM and CD4 proliferating was most associated with severe irAE development (Extended Data Fig. 2c). Hypergeometric testing was applied to assess overlap in cellular barcodes between the combined CD4 TEM + CD4 proliferating population (Azimuth) and states defined by de novo clustering. CD4 T 5 + 3 emerged as the top hit (Benjamini–Hochberg-adjusted P = 2.5 × 10−7). Despite strong overlap between unsupervised and supervised approaches, CD4 T 5 + 3 was more associated with severe irAE development and CyTOF than populations labeled by reference-guided annotation (Extended Data Fig. 2f).
-
-```
-
-# Analyze TCR diversity
-
-```{r}
-
-# activated TM cells arise from clonal expansion, expected less TCR diversity than naive counterparts (assuming cells from both populations equally sampled or variation in counts normalized out)
-
-# use Shannon entropy to characterize immune repertoire diversity (info metric that combines evenness and richness)
-# https://search.r-project.org/CRAN/refmans/DescTools/html/Entropy.html
-
-# randomly sample TCR clonotype reportoire without replacement to equalize number of PBMC cells across patients while addressing technical variation in TCR recovery
-
-# exclude patients with < 100 TCR clones (YUTAUR, YUTORY, YUHERN, YUTHEA)
-
-# calculate Shannon entropy (with R package version 2.5-6) relative to total PBMCs for each T cell subset, average values across 100 iterations of procedure for remaining 9 patients
-
-# Figure 3e: Pretreatment TCR clonotype diversity within each T cell state, total T cells, CD8 T cells, CD4 T cells and activated versus resting CD4 T 5 + 3 cells (defined as in d), grouped by future irAE status. States are ordered by the AUC between TCR diversity and severe irAE status.
 
 ```

@@ -42,7 +42,7 @@ theme_set(
 
 ```
 
-# Read in ImmunoSEQ data
+# Read in bulk ImmunoSEQ data
 
 ```{r}
 
@@ -289,108 +289,234 @@ cdr3_amino_acid_diversity_df <- combined_immunoseq_data %>%
 
 ```
 
+# Join dfs to plot all at once
+
+```{r}
+
+joined_diversity_df <- rearrangement_diversity_df %>%
+  full_join(amino_acid_diversity_df) %>%
+  full_join(rearrangement_trunc_diversity_df) %>%
+  full_join(extended_rearrangement_diversity_df) %>%
+  full_join(cdr1_rearrangement_diversity_df) %>%
+  full_join(cdr1_amino_acid_diversity_df) %>%
+  full_join(cdr2_rearrangement_diversity_df) %>%
+  full_join(cdr3_amino_acid_diversity_df) %>%
+  full_join(cdr3_rearrangement_diversity_df) %>%
+  full_join(cdr3_amino_acid_diversity_df) %>%
+  pivot_longer(cols = -c(patient_id, severe_irae), 
+               names_to = "variable",
+               values_to = "score_delta") %>%
+  mutate(origin = sub("_score_delta", "", variable)) %>%
+  select(-variable)
+
+joined_diversity_df
+
+```
+
 # Plot TCR diversity score changes upon treatment by future irAE status
 
 ```{r}
 
-ggplot(rearrangement_diversity_df, aes(x = severe_irae, y = rearrangement_score_delta, fill = severe_irae)) +
-  geom_boxplot() +
-  geom_point() +
-  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
-  scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "Rearrangement")
+# Create a custom label function
+custom_label_function <- function(variable, value) {
+  # Define custom labels based on the values of 'origin'
+  custom_labels <- c(
+    extended_rearrangement = "Extended\n rearrangement",
+    rearrangement_trunc = "Truncated\nrearrangement",
+    amino_acid = "Amino\nacid",
+    cdr1_amino_acid = "CDR1\namino acid",
+    cdr1_rearrangement = "CDR1\nrearrangement",
+    cdr2_amino_acid = "CDR2\namino acid",
+    cdr2_rearrangement = "CDR2\nrearrangement",
+    cdr3_amino_acid = "CDR3\namino acid",
+    cdr3_rearrangement = "CDR3\nrearrangement")
+  
+  # Return the custom labels
+  return(custom_labels[value])
+}
 
-ggplot(amino_acid_diversity_df, aes(x = severe_irae, y = amino_acid_score_delta, fill = severe_irae)) +
+ggplot(joined_diversity_df, aes(x = severe_irae, y = score_delta, fill = severe_irae)) +
   geom_boxplot() +
-  geom_point() +
+  geom_point(size = 1) +
+  facet_wrap(~origin, scales = "free_y", labeller = labeller(origin = custom_label_function)) +
   labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
   scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "Amino acid")
+  theme(legend.position = "none",
+        strip.text = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.ticks.y = element_line(size = 0.5))
 
-ggplot(rearrangement_trunc_diversity_df, aes(x = severe_irae, y = rearrangement_trunc_score_delta, fill = severe_irae)) +
-  geom_boxplot() +
-  geom_point() +
-  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
-  scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "Truncated rearrangement")
-
-ggplot(extended_rearrangement_diversity_df, aes(x = severe_irae, y = extended_rearrangement_score_delta, fill = severe_irae)) +
-  geom_boxplot() +
-  geom_point() +
-  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
-  scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "Extended rearrangement")
-
-ggplot(cdr1_rearrangement_diversity_df, aes(x = severe_irae, y = cdr1_rearrangement_score_delta, fill = severe_irae)) +
-  geom_boxplot() +
-  geom_point() +
-  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
-  scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "CDR1 rearrangement")
-
-ggplot(cdr1_amino_acid_diversity_df, aes(x = severe_irae, y = cdr1_amino_acid_score_delta, fill = severe_irae)) +
-  geom_boxplot() +
-  geom_point() +
-  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
-  scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "CDR1 amino acid")
-
-ggplot(cdr2_rearrangement_diversity_df, aes(x = severe_irae, y = cdr2_rearrangement_score_delta, fill = severe_irae)) +
-  geom_boxplot() +
-  geom_point() +
-  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
-  scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "CDR2 rearrangement")
-
-ggplot(cdr2_amino_acid_diversity_df, aes(x = severe_irae, y = cdr2_amino_acid_score_delta, fill = severe_irae)) +
-  geom_boxplot() +
-  geom_point() +
-  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
-  scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "CDR2 amino acid")
-
-ggplot(cdr3_rearrangement_diversity_df, aes(x = severe_irae, y = cdr3_rearrangement_score_delta, fill = severe_irae)) +
-  geom_boxplot() +
-  geom_point() +
-  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
-  scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "CDR3 rearrangement")
-
-ggplot(cdr3_amino_acid_diversity_df, aes(x = severe_irae, y = cdr3_amino_acid_score_delta, fill = severe_irae)) +
-  geom_boxplot() +
-  geom_point() +
-  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
-  scale_fill_manual(values = c("blue", "red")) +
-  theme(legend.position = "none") +
-  labs(title = "CDR3 amino acid")
+ggsave("../figures/complement_of_clonal_evenness.svg")
 
 # the complement of clonal evenness (1-Pielou’s index) is often used to get a clonality score of 0 representing a maximally diverse population with even frequencies and values close to 1, a repertoire driven by clonal dominance. 
 
 ```
 
-# Main relevant results to recapitulate/explore past
+# Read in Seurat object with scV(D)Jseq metadata to analyze clonality among CD4 T cell subclusters, name clusters
 
-1) Peripheral TCR clonal expansion linked to severe irAEs
- - they hypothesize that pre-treatment TCR clonotypes in peripheral blood might show greater propensity to expand in patients destined to develop severe irAEs after ICI
- - observe increased TCR clonal expansion and persistence of baseline clones in patients developing severe irAEs (preferential expansion of activated CD4 TEM)
+```{r}
 
-# Methods
+seurat_obj <- readRDS("../saved_data/pre_renamed_clustered.rds")
 
-Analysis of T cell clonal dynamics from bulk PBMCs
-Bulk TCR-ß chain profiling was performed on paired pretreatment and early on-treatment PBMCs from 15 patients treated with combination ICIs (Supplementary Tables 1 and 18). No patients had on-treatment peripheral blood collected after the onset of severe irAE. Genomic DNA was extracted using the DNeasy Blood & Tissue Kit (QIAGEN) and submitted for survey-resolution immunoSEQ (Adaptive Biotechnologies). Data from productive TCR-ß chain rearrangements were exported using the immunoSEQ Analyzer online tool and evaluated for TCR-ß repertoire richness and diversity using Pielou’s evenness45, with increased 1 – evenness associated with increased clonality. The Pielou’s evenness results from immunoSEQ profiling were compared with bulk RNA-seq (MiXCR), which revealed concordance (Extended Data Fig. 9a). We also verified that all pretreatment and on-treatment samples were properly paired by cross-comparison of TCR-ß CDR3 sequences. Clonal expansion was inferred by analyzing the difference in clonality, defined as 1 – Pielou’s evenness in each sample, between paired on- and pretreatment time points (Fig. 5b and Extended Data Fig. 9b). More specifically, to calculate the change in clonality from baseline, pretreatment clonality was subtracted from on-treatment clonality in a paired fashion, thereby normalizing all pretreatment samples to zero (Fig. 5b, left). The data from Fig. 5b were also analyzed without normalizing on-treatment samples to paired pretreatment samples in Extended Data Fig. 9b.
+new.cluster.ids <- c("Monocyte 1",
+                     #0
+                     
+                     "B cell 1",
+                     #1
+                     
+                     "Monocyte 2",
+                     #2
+                     
+                     "CD4 T cell 1",
+                     #3
+                     
+                     "Monocyte 3",
+                     #4
+                     
+                     "CD4 T cell 2",
+                     #5
+                     
+                     "CD4 T cell 3",
+                     #6
+                     
+                     "Monocyte 4",
+                     #7
+                     
+                     "T/NKT 1",
+                     #8
+                     
+                     "CD4 T cell 4",
+                     #9
+                     
+                     "NK 1",
+                     #10
+                     
+                     "Monocyte 5",
+                     #11
+                     
+                     "CD4 T cell 5",
+                     #12
+                     
+                     "NK 2",
+                     #13
+                     
+                     "CD8 T cell 1",
+                     #14
+                     
+                     "NK 3",
+                     #15
+                     
+                     "Monocyte 6",
+                     #16
+                     
+                     "B cell 2",
+                     #17
+                     
+                     "B cell 3",
+                     #18
+                     
+                     "T/NKT 2",
+                     #19
+                     
+                     "CD4 T cell 6",
+                     #20
+                     
+                     "CD8 T cell 2",
+                     #21
+                     
+                     "Monocyte 7",
+                     #22
+                     
+                     "CD4 T cell 7",
+                     #23
+                     
+                     "CD8 T cell 3",
+                     #24
+                     
+                     "DC",
+                     #25
+                     
+                     "Monocyte 8",
+                     #26
+                     
+                     "Monocyte 9"
+                     #27
+                     )
 
-To assess freedom from severe irAE, the degree of clonal expansion, denoted δ, was evenly divided into tertiles using the R package dplyr v.1.0.7 (Fig. 5d and Extended Data Fig. 9h). This yielded the following groups: no clonal expansion, δ < 0, n = 5; intermediate, 0 < δ < 0.009, n = 5; and high clonal expansion, δ > 0.009, n = 5. We applied these thresholds to the full immunoSEQ cohort (n = 15; Fig. 5d) and to patients with blood samples obtained on ICI treatment day 1 and <1 month later (n = 7; Extended Data Fig. 9h). Additionally, when represented in rank space, the degree of clonal expansion was significantly associated with time-to-severe irAE development in Cox regression models and was independent of the time between blood draws, the number of productive TCR clones detected and the age and sex of each patient (Supplementary Table 19).
+names(new.cluster.ids) <- levels(seurat_obj)
+seurat_obj <- RenameIdents(seurat_obj, new.cluster.ids)
 
-Analysis of persistent T cell clones
-Paired pretreatment peripheral blood scRNA-seq and scTCR-seq were performed for three patients (Fig. 5b) who experienced severe irAEs with variable levels of clonal expansion: YUALOE, YUNANCY and YUHONEY (Fig. 5c, Extended Data Fig. 9d–g and Supplementary Table 18). Of note, samples from these three patients were not previously profiled by scRNA-seq or scV(D)J-seq in the single-cell discovery cohort. Sequencing libraries were generated and processed for quality control identically to those described in the single-cell discovery cohort. Mapping was performed with Cell Ranger v.5.0.1.
+```
 
-To analyze persistent clones—which we defined as productive TCR-ß CDR3 nucleotide sequences shared between paired pretreatment and on-treatment blood samples—we interrogated the immunoSEQ data for shared clonotypes with at least 2 templates in 1 blood draw (pretreatment or on-treatment) and at least 1 template in the other blood draw (60% of all shared clones, on average). This allowed us to preferentially focus on persistent clones that either expanded or contracted. The resulting sequences were cross-referenced with the TCR-ß CDR3 nucleotide sequences from the pretreatment scTCR-seq libraries, which were further cross-referenced with scRNA-seq data and filtered for cells annotated as T cells by Azimuth (applied as described above) (Extended Data Fig. 9d). In total, 1,504 single-cell transcriptomes with paired immunoSEQ clonotype data were identified. Significant Spearman correlations between pretreatment single-cell and immunoSEQ TCR clonotype frequencies were observed for each patient (ρ > 0.59; P < 0.0002), underscoring the integrity of our data. Importantly, to maximize stringency and avoid classification artifacts, when annotating CD4 and CD8 T cell-derived clonotypes, we only considered TCR clonotypes with uniform expression of positive lineage markers (CD4 > 0 and CD8A/B = 0 for CD4 T cells; CD8A or CD8B > 0 and CD4 = 0 for CD8 T cells). In all, 69% of all cross-referenced clonotypes could be unambiguously labeled by this approach (Extended Data Fig. 9e). For the plot shown in Fig. 5c, we calculated the mean log2 fold change between CD4 T 5 and 3 versus the remaining CD4 T cell clusters in the single-cell discovery cohort (Extended Data Fig. 1b) and then selected the top 20 genes for subsequent analysis. Enrichment of this gene set was determined using single-sample GSEA (R package escape v.1.0.1 (ref. 80)), which we applied to T cells labeled by Azimuth or labeled as described above for persistent CD4/CD8 T cells. For the analysis shown in Extended Data Fig. 9f,g, productive frequencies of persistent T cell clones measured by immunoSEQ were grouped into CD4 and CD8 T cells, with differences in productive frequencies displayed on a per-clonotype basis (Extended Data Fig. 9g) or in aggregate (Extended Data Fig. 9f) and compared to bulk clonal expansion from baseline (Fig. 5b).
+# Calculate clonality scores across CD4 T cell subclusters
+
+```{r}
+
+clonality_subcluster_df <- as_tibble(seurat_obj@meta.data)
+
+clonality_subcluster_df$subcluster <- Idents(seurat_obj)
+
+# create a joined subcluster 5 + 7, bring back into df
+five_and_seven_subcluster_df <- clonality_subcluster_df %>%
+  filter(subcluster %in% c("CD4 T cell 5", "CD4 T cell 7")) %>%
+  mutate(subcluster = "CD4 T cell 5 + 7")
+
+clonality_subcluster_df <- clonality_subcluster_df %>%
+  full_join(five_and_seven_subcluster_df) %>%
+  select(subcluster, CDR3.AA.Sequence, CDR3.NT.Sequence, CR.type) %>%
+  filter(grepl("CD4", subcluster),
+         !(is.na(CDR3.NT.Sequence)),
+         CR.type == "TCR") %>%
+  group_by(subcluster, CDR3.NT.Sequence) %>%
+  mutate(cdr3_nt_count = n()) %>%
+  ungroup() %>%
+  group_by(subcluster, CDR3.AA.Sequence) %>%
+  mutate(cdr3_aa_count = n()) %>%
+  ungroup() %>%
+  group_by(subcluster) %>%
+  # Calculate Shannon diversity indeces (H)
+  mutate(shannon_nt = diversity(cdr3_nt_count)) %>%
+  mutate(shannon_aa = diversity(cdr3_nt_count)) %>%
+  # Calculate Pielou's evenness indeces (J)
+  mutate(pielou_evenness_nt = shannon_nt / log(specnumber(cdr3_nt_count))) %>%
+  mutate(pielou_evenness_aa = shannon_aa / log(specnumber(cdr3_aa_count))) %>%
+  mutate(complement_score_nt = 1 - pielou_evenness_nt) %>%
+  mutate(complement_score_aa = 1 - pielou_evenness_aa) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(subcluster, shannon_nt, shannon_aa, complement_score_nt, complement_score_aa) %>%
+  pivot_longer(
+    cols = starts_with("shannon"),
+    names_to = "origin_1",
+    values_to = "shannon_score"
+  ) %>%
+  pivot_longer(
+    cols = starts_with("complement"),
+    names_to = "origin_2",
+    values_to = "complement_score"
+  ) %>%
+  mutate(across(c(origin_1, origin_2), ~gsub(".*_(nt|aa)$", "\\1", .))) %>%
+  filter(origin_1 == origin_2) %>%
+  select(-origin_2) %>%
+  rename(origin = origin_1)
+
+clonality_subcluster_df
+
+```
+
+# Plot clonality scores across CD4 T cell subclusters
+
+```{r}
+
+clonality_subcluster_df %>%
+  filter(origin == "nt") %>%
+  ggplot(aes(x = complement_score, y = shannon_score, color = subcluster)) +
+  geom_point() +
+  labs(x = "Clonality (1 - Pielou's evenness)", y = "Diversity (Shannon entropy)") +
+  geom_text(aes(label = subcluster), vjust = -0.5)
+
+  ggsave("../figures/shannon_vs_complement_by_cd4_subcluster.svg")
+
+```
+
+# Look at bulk vs. remove clusters 5/7 vs. only clusters 5/7 CD4s for TCR diversity by irAE status (severe yes or no) for ext fig 4d-e and more specific irAE grade and different ICI (combo, anti-PD1, etc.) for ext figure 6
