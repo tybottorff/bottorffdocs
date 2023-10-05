@@ -18,7 +18,6 @@
  - selection paradox: recognition of self is essential for thymocyte survival and lineage commitment but may also induce negative selection
  - **affinity model: only TCR-pMHC interactions with intermediate affinity allow positive selection and CD4 or CD8 lineage commitment (no or too low affinity leads to apoptosis due to neglect which is about 80-90% of lost thymocytes during selection and very high affinity contacts lead to apoptosis by negative selection i.e. clonal deletion)**
  - deviation of autoreactive thymocytes into Treg cells (CD25<sup>+</sup>) not explained by affinity model
- - 
 # A phenotypically and functionally distinct human T<sub>H2</sub> cell subpopulation is associated with allergic disorders
  - allergen-specific type 2 helper T (T<sub>H2</sub>) cells critical in initiating/orchestrating allergic/asthmatic inflammatory response pathways
  - currently lack methodology to identify and differentiate these cells from nonpathogenic T<sub>H2</sub> cell types (otherwise would be able to use them as therapeutic targets and biomarkers)
@@ -448,9 +447,9 @@
 # T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma
 ## Abstract
  - irAEs in 10-60% of patients with melanoma treated with ICI
- - does a common baseline immunological state precede irAE?
+ - **does a common baseline immunological state precede irAE?**
  - methods: mass cytometry, scRNAseq, single cell V(D)J sequencing, bulk RNAseq, bulk TCR sequencing to study peripheral blood from melanoma patients treated with PD-1 blockade (+/- CTLA-4 blockade)
- - activated CD4 memory T abundance and TCR diversity associated with irAE
+ - **activated CD4 effector memory T abundance and TCR diversity associated with irAE**
 ## Introduction
  - SNP in microRNA-146a (regulates innate immunity, inflammation, antiviral pathway) linked with irAE
  - pre-existing autoantibodies, autoreactive tissue-resident T cells, and T cells with specificity for viral antigens (from chronic viral infections) also implicated in irAE
@@ -464,7 +463,7 @@
  - a composite model integrating activated CD4 TM cell abundance and bulk TCR diversity outperforms either feature alone in predicting severe irAE development regardless of ICI therapy type, ICI response status, age, sex, melanoma subtype, affected organ
  - model scores increase as a function of irAE severity, also predicts time to irAE development
 ### Peripheral TCR clonal expansion linked to severe irAEs
- - prior evidence of clonally expanded self/virus-reactive T cells in affected tissue linking self/pathogen-recognizing T cell clones to irAEs (**I wonder why viral antigen recognition would lead to irAEs, good for the viral-infected cells to be attacked, right?**)
+ - prior evidence of clonally expanded self/virus-reactive T cells in affected tissue linking self/pathogen-recognizing T cell clones to irAEs (**I wonder why viral antigen recognition would lead to irAEs, good for the viral-infected cells to be attacked, right? but perhaps its an inappropriately strong immune response**)
  - nonetheless, they hypothesize that pre-treatment TCR clonotypes in peripheral blood might show greater propensity to expand in patients destined to develop severe irAEs after ICI
  - observe increased TCR clonal expansion and persistence of baseline clones in patients developing severe irAEs (preferential expansion of activated CD4 TEM)
 ### Circulating leukocytes in autoimmune disease
@@ -473,9 +472,10 @@
  - **severe irAEs may represent a subclinical or latent autoimmune state that is unmasked upon ICI treatment**, tracks with patients with autoimmune disease having flare ups after ICI treatment, **this may have implications for the investigation into the correlation between ICI clinical response and irAEs i.e. if you only observe irAEs in those predisposed to autoimmune conditions and if this doesn't relate to ICI clinical response then they won't always correlate**
 ## Discussion
  - identify two baseline features (activated CD4 TM cell abundance and more clonally diverse TCR repertoire in peripheral blood) as determinants of ICI-induced irAEs in melanoma patients
+ - also find elevated activated CD4 TM cells in autoimmune disease patients, so perhaps a common immunological mechanism between irAEs and autoimmunity
  - previous studies had linked activated T cells and clonally expanded TCRs to severe irAEs but this study was uniquely looking at pre-treatment T cell characteristics
  - unanswered question: do circulating activated CD4 TM cells (their abundance here found to correlate with irAE development) exhibit a higher propensity to recognize self-antigens in patients at risk for severe ICI induced irAEs?
- - limitations: most irAEs occur within first 3 months but some can occur later (which would have been missed here, median time to severe irAE here was ~6 weeks with no irAEs after 3 months)
+ - limitations: retrospective, different ICIs studied at same time here (each with different irAE risks), most irAEs occur within first 3 months but some can occur later (which would have been missed here, median time to severe irAE here was ~6 weeks with no irAEs after 3 months)
 # T-cell invigoration to tumour burden ratio associated with anti-PD-1 response
 ## Abstract
 ### Background
