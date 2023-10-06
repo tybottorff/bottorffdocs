@@ -541,7 +541,7 @@ expansion_df <- expansion_df %>%
   group_by(patient.ID, CDR3.NT.Sequence) %>%
   mutate(cdr3_nt_count = n()) %>%
   mutate(expansion_group = if_else(
-        is.na(CR.type), "no TCR info",
+        is.na(CR.type), "no TCR/BCR info",
         ifelse(cdr3_nt_count <= 1, "single",
         ifelse(cdr3_nt_count <= 5, "small",
           ifelse(cdr3_nt_count <= 20, "medium",
@@ -557,45 +557,12 @@ seurat_obj@meta.data$expansion_group <- expansion_df$expansion_group
 
 ```{r}
 
+# Reorder factor levels so that "no TCR group" is plotted first
+seurat_obj@meta.data$expansion_group <- factor(seurat_obj@meta.data$expansion_group, levels = c("no TCR/BCR info", "single", "small", "medium", "large", "hyperexpanded"))
+
 DimPlot(seurat_obj, reduction = "umap", group.by = "expansion_group", shuffle = TRUE, seed = 992)
 
 ggsave("../figures/umap_expansion_group.svg")
-
-```
-
-# Look at one patient with immunoSEQ and scRNAseq data to look at expansion before and after ICI
-
-```{r}
-
-pre_and_post_expansion_df <- combined_immunoseq_data %>%
-  # only 1 patient has both scRNAseq and immunoSEQ (pre and post ICI data)
-  filter(patient_id == "YUHERN") %>%
-  select(patient_id, ici_status, cdr3_amino_acid) %>%
-  group_by(patient_id, ici_status, cdr3_amino_acid) %>%
-  mutate(cdr3_aa_count = n()) %>%
-  mutate(expansion_group_ici = if_else(
-        is.na(cdr3_amino_acid), "no TCR info",
-        ifelse(cdr3_aa_count <= 1, "single",
-        ifelse(cdr3_aa_count <= 5, "small",
-          ifelse(cdr3_aa_count <= 20, "medium",
-            ifelse(cdr3_aa_count <= 100, "large",
-              "hyperexpanded")))))) %>%
-  ungroup()
-
-# I'm NOT INCORPORATING THIS CORRECTLY!! NOT SURE IMMEDIATELY HOW TO DO!
-
-#seurat_obj@meta.data$expansion_group_ici <- pre_and_post_expansion_df$expansion_group_ici
-#seurat_obj@meta.data$expansion_group_ici <- pre_and_post_expansion_df$expansion_group_ici
-
-```
-
-# Look at expansion before ICI in single patient
-
-```{r}
-
-#DimPlot(seurat_obj, reduction = "umap", group.by = "expansion_group_ici", shuffle = TRUE, seed = 992)
-
-#ggsave("../figures/umap_expansion_group_pre_ici.svg")
 
 ```
 
