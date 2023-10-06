@@ -84,7 +84,7 @@ file_names <- c(
   "../raw_data/GSM5694820_YUKEND_BCR.csv.gz"
 )
 
-# List of patient IDs you want to include
+# List of patient IDs we want to include
 selected_patient_IDs <- c(
   "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
   "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
@@ -145,10 +145,6 @@ rownames(combined_data) <- combined_data$Barcode
 
 combined_data <- combined_data %>% select(-Barcode)
 
-```
-
-```{r}
-combined_data
 ```
 
 # Add TCR/BCR metadata to Seurat scRNA assay

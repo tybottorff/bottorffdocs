@@ -463,17 +463,17 @@ five_and_seven_subcluster_df <- clonality_subcluster_df %>%
 
 clonality_subcluster_df <- clonality_subcluster_df %>%
   full_join(five_and_seven_subcluster_df) %>%
-  select(subcluster, CDR3.AA.Sequence, CDR3.NT.Sequence, CR.type) %>%
+  select(patient.ID, subcluster, CDR3.AA.Sequence, CDR3.NT.Sequence, CR.type) %>%
   filter(grepl("CD4", subcluster),
          !(is.na(CDR3.NT.Sequence)),
          CR.type == "TCR") %>%
-  group_by(subcluster, CDR3.NT.Sequence) %>%
+  group_by(subcluster, patient.ID, CDR3.NT.Sequence) %>%
   mutate(cdr3_nt_count = n()) %>%
   ungroup() %>%
-  group_by(subcluster, CDR3.AA.Sequence) %>%
+  group_by(subcluster, patient.ID, CDR3.AA.Sequence) %>%
   mutate(cdr3_aa_count = n()) %>%
   ungroup() %>%
-  group_by(subcluster) %>%
+  group_by(subcluster, patient.ID) %>%
   # Calculate Shannon diversity indeces (H)
   mutate(shannon_nt = diversity(cdr3_nt_count)) %>%
   mutate(shannon_aa = diversity(cdr3_nt_count)) %>%
@@ -484,7 +484,7 @@ clonality_subcluster_df <- clonality_subcluster_df %>%
   mutate(complement_score_aa = 1 - pielou_evenness_aa) %>%
   slice(1) %>%
   ungroup() %>%
-  select(subcluster, shannon_nt, shannon_aa, complement_score_nt, complement_score_aa) %>%
+  select(subcluster, patient.ID, shannon_nt, shannon_aa, complement_score_nt, complement_score_aa) %>%
   pivot_longer(
     cols = starts_with("shannon"),
     names_to = "origin_1",
@@ -498,24 +498,104 @@ clonality_subcluster_df <- clonality_subcluster_df %>%
   mutate(across(c(origin_1, origin_2), ~gsub(".*_(nt|aa)$", "\\1", .))) %>%
   filter(origin_1 == origin_2) %>%
   select(-origin_2) %>%
-  rename(origin = origin_1)
+  rename(origin = origin_1) %>%
+  # calculate means across patients
+  group_by(subcluster) %>%
+  # nt and aa have same scores
+  filter(origin == "nt",
+  # some Shannon scores of 0 throw NaN for Pielou
+         shannon_score > 0) %>%
+  mutate(mean_shannon = mean(shannon_score),
+         mean_complement = mean(complement_score)) %>%
+  ungroup()
 
 clonality_subcluster_df
 
 ```
 
-# Plot clonality scores across CD4 T cell subclusters
+# Plot mean (across patients) clonality scores across CD4 T cell subclusters
 
 ```{r}
 
 clonality_subcluster_df %>%
   filter(origin == "nt") %>%
-  ggplot(aes(x = complement_score, y = shannon_score, color = subcluster)) +
+  ggplot(aes(x = mean_complement, y = mean_shannon, color = subcluster)) +
   geom_point() +
   labs(x = "Clonality (1 - Pielou's evenness)", y = "Diversity (Shannon entropy)") +
   geom_text(aes(label = subcluster), vjust = -0.5)
 
   ggsave("../figures/shannon_vs_complement_by_cd4_subcluster.svg")
+
+```
+
+# Create clonal expansion count buckets for UMAP overlay
+
+```{r}
+
+expansion_df <- as_tibble(seurat_obj@meta.data)
+
+expansion_df$subcluster <- Idents(seurat_obj)
+
+expansion_df <- expansion_df %>%
+  select(patient.ID, subcluster, CDR3.AA.Sequence, CDR3.NT.Sequence, CR.type) %>%
+  group_by(patient.ID, CDR3.NT.Sequence) %>%
+  mutate(cdr3_nt_count = n()) %>%
+  mutate(expansion_group = if_else(
+        is.na(CR.type), "no TCR info",
+        ifelse(cdr3_nt_count <= 1, "single",
+        ifelse(cdr3_nt_count <= 5, "small",
+          ifelse(cdr3_nt_count <= 20, "medium",
+            ifelse(cdr3_nt_count <= 100, "large",
+              "hyperexpanded")))))) %>%
+  ungroup()
+
+seurat_obj@meta.data$expansion_group <- expansion_df$expansion_group
+  
+```
+
+# Plot UMAP with color of expansion count (bucketed)
+
+```{r}
+
+DimPlot(seurat_obj, reduction = "umap", group.by = "expansion_group", shuffle = TRUE, seed = 992)
+
+ggsave("../figures/umap_expansion_group.svg")
+
+```
+
+# Look at one patient with immunoSEQ and scRNAseq data to look at expansion before and after ICI
+
+```{r}
+
+pre_and_post_expansion_df <- combined_immunoseq_data %>%
+  # only 1 patient has both scRNAseq and immunoSEQ (pre and post ICI data)
+  filter(patient_id == "YUHERN") %>%
+  select(patient_id, ici_status, cdr3_amino_acid) %>%
+  group_by(patient_id, ici_status, cdr3_amino_acid) %>%
+  mutate(cdr3_aa_count = n()) %>%
+  mutate(expansion_group_ici = if_else(
+        is.na(cdr3_amino_acid), "no TCR info",
+        ifelse(cdr3_aa_count <= 1, "single",
+        ifelse(cdr3_aa_count <= 5, "small",
+          ifelse(cdr3_aa_count <= 20, "medium",
+            ifelse(cdr3_aa_count <= 100, "large",
+              "hyperexpanded")))))) %>%
+  ungroup()
+
+# I'm NOT INCORPORATING THIS CORRECTLY!! NOT SURE IMMEDIATELY HOW TO DO!
+
+#seurat_obj@meta.data$expansion_group_ici <- pre_and_post_expansion_df$expansion_group_ici
+#seurat_obj@meta.data$expansion_group_ici <- pre_and_post_expansion_df$expansion_group_ici
+
+```
+
+# Look at expansion before ICI in single patient
+
+```{r}
+
+#DimPlot(seurat_obj, reduction = "umap", group.by = "expansion_group_ici", shuffle = TRUE, seed = 992)
+
+#ggsave("../figures/umap_expansion_group_pre_ici.svg")
 
 ```
 
