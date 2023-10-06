@@ -15,21 +15,43 @@
  - interactions with self-peptide-MHC complexes on thymic epithelial cells crucial for thmocyte survival (positive selection) and CD4 vs. CD8 lineage commitment but can also result in negative selection (apoptosis)
  - migratory DCs carry peripheral self antigens into thymus, extend scope of intrathymically presented self antigens
 ## Main
+### Positive selection and CD4 or CD8 lineage committment
+ - in cortex of thymus
  - selection paradox: recognition of self is essential for thymocyte survival and lineage commitment but may also induce negative selection
  - **affinity model: only TCR-pMHC interactions with intermediate affinity allow positive selection and CD4 or CD8 lineage commitment (no or too low affinity leads to apoptosis due to neglect which is about 80-90% of lost thymocytes during selection and very high affinity contacts lead to apoptosis by negative selection i.e. clonal deletion)**
  - deviation of autoreactive thymocytes into Treg cells (CD25<sup>+</sup>) not explained by affinity model
+ - cathepsins (lysosomal proteases) and thymus-specific serine protease alter MHC ligand repertoire presented to T cells during development, helps positive selection
+### Antigen presentation in the medulla
+ - transcriptional noise (low level transcription of any gene) may expose developing thymocytes to antigenic diversity of peripheral tissue (tissue-restricted antigens) without those peripheral antigens needing to be transited to thymus, not just inherent leaky gene expression but rather promiscuous gene expression and a distinct property of medullary thymic epithelial cells (1-3% of these cells express a particular tissue-restricted antigen but the cells get replace weekly changing topology of antigen expression in medulla)
 # A phenotypically and functionally distinct human T<sub>H2</sub> cell subpopulation is associated with allergic disorders
  - allergen-specific type 2 helper T (T<sub>H2</sub>) cells critical in initiating/orchestrating allergic/asthmatic inflammatory response pathways
  - currently lack methodology to identify and differentiate these cells from nonpathogenic T<sub>H2</sub> cell types (otherwise would be able to use them as therapeutic targets and biomarkers)
  - here, they describe a subset of human memory T<sub>H2</sub> cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific T<sub>H2</sub> cells, denoted as T<sub>H2A</sub> cells, characterized by co-expression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional T<sub>H2</sub> cells
  - transcriptome analysis reveals distinct pathway in initiation of pathogenic responses to allergen
  - elimination of these cells is indicative of clinical responses induced by immunotherapy
+# Association of checkpoint inhibitor-induced toxic effects with shared cancer and tissue antigens in non-small cell lung cancer
+ - irAEs more common in patients with complete/partial remission than in those with progressive/stable disease, **autoimmune adverse effects are associated with response to therapy**
+ - **identify 9 T cell antigens shared between tumor and skin (including desmocollin 3, keratin 6, mapsin, LL37, keratin 14), different from crossreactivity hypothesis seems to just be exact same antigen shared between tumor and self**, these antigens stimulate T cells *in vitro* (significant for CD8<sup>+</sup> IFN-gamma<sup>+</sup> but not CD4<sup>+</sup> IFN-gamma<sup>+</sup> T cells)
+ - **seems like most similar self tissue to tumor has highest chance of irAE, skin second most similar to NSCLC after lung and had second highest proportion of irAEs**
+ - **see dense infiltration of T cells in sites of irAEs**
+ - **same T cell clonotypes infiltrated both lung tumor and autoimmune skin lesions**
+ - **not all tumor sharbor potent neoantigens, effective immunotherapy favors neoantigens**
 # Association of immune-related adverse events with nivolumab efficacy in non-small-cell lung cancer
  - irAEs observed in 51% of patients (9% grades 3 or 4 i.e. severe irAEs)
  - irAEs associated with better overall survival
 # Association of vitiligo with tumor response in patients with metastatic melanoma treated with pembrolizumab
  - 25% of patients developed vitiligo
  - **objective response associated with higher occurrence of vitiligo**
+# Autoreactive napsin A-specific T cells are enriched in lung tumors and inflammatory lung lesions during immune checkpoint blockade
+## Summary
+ - DITAS: discovery of tumor-associated self-antigens to find peptides that induce both antitumor and irAE responses, analyze shared antigens between NSCLC and lung tissue, determine which HLA peptides bind to, predicting CD8<sup>+</sup> T cell epitopes of peptides
+## Abstract
+ - DITAS computes transcriptional similarity between lung tumors and healthy lung tissue, identify 10 lung tissue-specific genes highly expressed in lung tumors
+ - napsin A: self antigen that elicited strong CD8<sup>+</sup> T cell responses, ICB responders have higher napsin A-specific CD8<sup>+</sup> T cell frequencies than non-responders
+ - HLA class I ligands from napsin A present in human lung tumors and non-tumor lung tissue
+ - napsin A-specific T cell clonotypes enriched in lung tumors and ICB-induced inflammatory lung lesions, able to kill HLA-matched NSCLC cells *ex vivo* and express proinflammatory cytokines and cytotoxic markers
+## Introduction
+ - **vitiligo being more common in patients with melanoma treated with ICB is evidence for shared antigens (GP100, MART-1, tyrosinase) underlying irAEs and clinical response**
 # B cell-specific MHC class II deletion reveals multiple nonredundant roles for B cell antigen presentation in murine lupus
  - B cells have both Ab-dependent and Ab-independent functions in systemic autoimmunity
  - Ab-independent functions could include roles in lymphoid development, cytokine secretion, Ag presentation
@@ -242,6 +264,26 @@
  - study patients with various cancers treated with PD-1 blockade
  - **identify 23 immune-related genes/signatures linked to response and progression-free survival**
  - **PD1 gene expression along with 12 signatures tracking CD8 and CD4 T-cell activation, natural killer cells, and IFN activation associated significantly with non-progressive disease and progression free survival**
+# Immune signatures predict development of autoimmune toxicity in patients with cancer treated with immune checkpoint inhibitors
+## Highlights
+ - systemic immune signatures shortly after ICI start linked to irAEs
+ - ICI treated patients with irAEs associated with expansion of Ki-67<sup>+</sup> T cell subsets
+ - ICI treated patients with irAEs associated with IFN-gamma and IFN-gamma-related proteins CXCL9-11 increases
+## Summary
+ - early increase in CXCL9/CXCL10/CXCL11 and interferon-γ (IFN-γ) 1 to 2 weeks after the start of therapy are likely indicators of heightened risk of developing irAEs
+ - an early expansion of Ki-67<sup>+</sup> regulatory T cells and Ki-67<sup>+</sup> CD8<sup>+</sup> T cells is also likely to be associated with increased risk of irAEs
+## Results
+### The presence of ICI-induced irAEs correlated with improved patient survival
+ - irAEs more frequent in treatment responders in both melanoma and NSCLC
+### Canonical blood leukocyte frequencies pre-ICI therapy were similar between patients with the same type of cancer, independent of irAE development
+### Patients with cancer treated with ICIs developing irAEs showed an early expansion of proliferating T cell subsets
+### Patients with expanding CD8<sup>+</sup> CD38<sup>+</sup> Ki-67<sup>+</sup> T cells were more likely to develop irAEs early in their treatment
+### Patients with developing irAEs showed an early increase in the expansion of proteins associated with the IFN-gamma signaling pathway
+### A potential biomarker profile to predict the development of ICI-irAEs in patients with cancer
+ - early treatment expansion of IFN-gamma-driven cytokines and of Ki-67<sup>+</sup> T cell subsets provide good prediction model for irAE development (also increase in serum CXCL10), expansion of Ki-67<sup>+</sup> Tregs specifically for melanoma irAEs, CD8<sup>+</sup> Ki-67<sup>+</sup> CD38<sup>+</sup> T cell expansion specifically for NSCLC irAEs
+ - IL-10 increase in early treatment associated with reduced irAE risk
+## Discussion
+ - **they also raise/cite the idea of antigen mimicry between tumor and self antigens, I think this is basically the same idea as the crossreactivity Peter mentioned perhaps underlying irAEs in 10/5/23 meeting (i.e. T cells crossreactive to tumor and self underlie irAEs)**
 # Immune tolerance in liver disease
  - incomplete activation of CD8<sup>+</sup> T cells (proliferation but then clonal exhaustion or death of T cells)
  - poor CD4<sup>+</sup> T cell activation (liver APCs express inhibitory cytokines and co-inhibitory ligands)
@@ -691,6 +733,23 @@
  - **possible sources of irAEs: aggravation of silent pre-existing autoimmune condition, neo-autoimmune or inflammatory disorder due to breakdown of self-tolerance, disruption of immune homeostasis in tissue (not sure exactly what this means), bystander self-tissue damage (on target, off tumor response), undesired reactions to checkpoint blockade (expression of co-inhibitory molecules on non-T cells for instance)**
  - **similarities between pathogenic, inflammation-driving Th17 (and Th1) cells and exhausted T cells could be exploited to treat cancer without inducing irAEs: PDPN expressed on Th17 cells and negatively regulates Th17 pathogenicity, PDPN also part of co-inhibitory gene module upregulated in cancer; PROCR also expressed in Th17 cells (also negatively regulates pathogenicity via repressing IL-1R) and exhausted T cells (PROCR deficiency inhibits tumor growth)**
  - another idea to limit irAEs from ICI is to treat the autoimmune side effects, for example with TNF blockade (which can even enhance ICI efficacy in targeting tumor beyond limiting irAEs, **not sure of mechanism here**)
+# Toxicity-specific peripheral blood T and B cell dynamics in anti-PD-1 and combined immune checkpoint inhibition
+## Abstract
+ - flow cytometry
+ - irAEs after ICI characterized by enhanced proliferation of Th1-associated (mainly CD4<sup>+</sup>) CD27<sup>-</sup> effector memory T cells, also Th17-associated immune responses and germinal center activation (CXCL13 and IL-21 increases)
+ - see no changes in CD21<sup>low</sup>, memory, class-switched, or newly activated B cell subsets
+ - PD-1<sup>+</sup>LAG-3<sup>+</sup> CD8<sup>+</sup> T cells show enhanced cytotoxic capacity in patients with irAEs after ICI
+ - irAEs from PD-1 associated with enhanced Th1-associated responses (increased serum CXCL9/10)
+ - **growing body of evidence that irAEs are driven by newly activated CD4<sup>+</sup> helper T cells**
+## Introduction
+ - irAEs should be considered separate from autoimmune disease, more acute onset and possibility of complete reversibility with adequate therapy
+ - biomarkers of irAE development: higher baseline blood lymphocyte count, proliferation of activated CD4<sup>+</sup> and CD8<sup>+</sup> T cell subsets (particularly effector memory CD4<sup>+</sup> T cells), baseline Th17 dominance, early increase in CD21<sup>low</sup> B cells
+ - role for T cell autoreactivity in irAE development (CD4<sup>+</sup> T cell clonal expansion preceeding irAEs and epitope sharing between tumor and irAE-affected tissue)
+## Results
+### CD27<sup>-</sup> CD4<sub>EM</sub> T cell proliferation is strongly associated with irAEs in combined ICI
+### Th1- and Th17-associated immune responses primarily delineate irAEs after combined ICI, while anti-PD-1 TOX features only a modest Th1-associated response
+## Discussion
+ - helper T cells may provide help to autoantibody-producing B cells
 # Treg heterogeneity, function, and homeostasis
  - Tregs ensure tolerance to autoantigens, antigens of commensal microflora, limit excess immune responses, induce tolerance to food antigens
  - IL-10 and TGF-β are primary suppressive cytokines
