@@ -13,4 +13,5 @@
  - TCRs of expanding cells: are they longer/shorter, more or less germline-like? won't know antigen specificity but can checkout sequence? something special about TCRs of expanding T cells that can predict irAE outcome?
  - big question: do we see expanded cells regardless of antigen specificity? what happens to expanded cells after treatment? do they persist? keep expanding? move to a specific tissue? are these expanded cells related to irAEs?
  - hypothesis: we will find polyclonal expansion in databases we are mining of ICI treated patients
+ - novel hypothesis: irAEs come from crossreactive TCRs (react to tumor and self), similar to idea of crossreactive TCRs reacting to multiple tumor epitopes, are they broadly crossreactive or just tumor epitopes for non-BRI data paper he mentioned?
  - use Erin's code
