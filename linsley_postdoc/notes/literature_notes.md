@@ -75,6 +75,14 @@
 # B cell-specific MHC class II deletion reveals multiple nonredundant roles for B cell antigen presentation in murine lupus
  - B cells have both Ab-dependent and Ab-independent functions in systemic autoimmunity
  - Ab-independent functions could include roles in lymphoid development, cytokine secretion, Ag presentation
+# Biomarkers of checkpoint inhibitor induced immune-related adverse events - a comprehensive review
+ - blood-based, immunogenetic and microbial biomarkers predicting irAEs prior to and during ICI therapy
+ - no single biomarker has proven to be sufficiently predictive for irAE development
+ - **CTLA-4 expression on Tregs can lead to trans-endocytosis of CD80/86 ligands (B7-1/2) on APCs, leaving APCs without costimulatory factors**
+ - the higher frequency of autoantibody-related irAEs such as thyroid disorders in PD-1 treated patients could be a result of the modulation of humoral immunity by PD-1-inhibitors or of its effects on self-tolerance. 
+ - **baseline markers: peripheral blood lymphocyte counts > 2,000, lower % PD-1 expression on T cells, lower % Tregs, lower IL-6/8 levels, higher IL-17 levels, autoantibodies, some HLA alleles, among other things all associated with more irAEs**
+ - **on treatment markers: increased leukocyte count, clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality, increased IL-6 levels, among other things all associated with more irAEs**
+ - **takehome for me: on treatment markers including clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality all very interestingly associated with more irAEs**
 # Canonical correlation analysis for multi-omics: application to cross-cohort analysis
  - CCA: correlation-based integrative method to extract latent features shared between multiple assays by finding linear combination of features (canonical variables, CVs) within each assay that achieve maximal across-assay correlation
  - PCA is a special case of CCA as optimization objective is the same if same data used for both assays
@@ -94,6 +102,24 @@
  - CAR T cells (chimeric antigen receptor T cells): extracellular ligand recognition domain (single chain variable fragment, ScFv) fused to signaling domain of CD3z, intracellular costimulatory molecule (CD28, 4-1BB, ICOS, CD40, or CD27)
 # Clonal exhaustion as a mechanism to protect against severe immunopathology and death from an overwhelming CD8 T cell response
  - possible evolutionary reason for T cell exhaustion
+# Clonal expansion of CD8 T cells in the systemic circulation precedes development of ipilimumab-induced toxicities
+## Significance
+ - CD8 T cell clonal expansion within systemic circulation potential correlative biomarker of irAEs in prostate cancer patients receiving ICI
+## Abstract
+ - 27 metastatic prostate cancer patients
+ - sequencing of TCR beta chains revealed clonal expansion of CD8 T cells in blood samples collected before irAE onset
+ - expansion of > 55 CD8 T cell clones preceeded severe irAE onset
+## Introduction
+ - **hypothesis: clonal expansion of T cells in the systemic circulation, which are likely to be reactive against self-antigens, may correlate with irAEs (since clonal expansion of T cells in tumor tissues, which are likely tumor reactive, may predict for clinical benefit with immune checkpoint therapy)**
+## Results
+### Evaluation for biomarkers that may correlate with clinical outcomes
+ - increased ICOS<sup>+</sup> CD4 T cells biomarker of ICI
+ - clinically benefitting patients more likely to have higher levels of CD3 T cells expressing CTLA-4 in pre-treatment blood
+ - also see better clinical response from patients with increased baseline CTLA-4<sup>+</sup> CD3 T cell to PD-1<sup>+</sup> CD3 T cell ratio, perhaps due to here using CTLA-4 blockade?
+ - pre-/on-treatment T cell clonality didn't correlate with clinical outcomes but **CD8 T cell clonal expansion was greater in patients developing severe irAEs**
+### Circulating CD8 T cell clonal expansion precedes the development of grade 2-3
+## Discussion
+ - previous literature has suggested increased T cell clonality in tumor microenvironment correlates with clinical response to PD-1 blockade
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - co-expression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -130,6 +156,9 @@
  - CCR7/CD62L expression on T<sub>cm</sub> cells facilitates homing to secondary lymph organs, while T<sub>em</sub> cells are more cytolytic and express integrins and chemokine receptors to localize to inflamed tissue
  - tissue resident memory (T<sub>rm</sub>) T cells: permanent residents in tissue (rather than circulating like T<sub>em</sub> cells), integrins CD103/CD49a help enter tissue, CD69 helps with tissue retention
 # Deletion of *SNX9* alleviates CD8 T cell exhaustion for effective cellular cancer immunotherapy
+# Deletion of the inhibitory co-receptor CTLA-4 enhances and invigorates chimeric antigen receptor T cells
+ - deletion of *CTLA4* permits unopposed CD28 signaling in CAR T cells
+ - PD-1 deficiency nullifies CD28 signaling enabled by *CTLA4* deletion in CAR T cells
 # Dendritic cells as shepherds of T cell immunity in cancer
 # Depletion of exhausted alloreactive T cells enables targeting of stem-like memory T cells to generate tumor-specific immunity
  - alloreactivity refers to ability of T cells to recognize peptide-allogenic-MHC complexes not encountered during thymic development (HLA/MHC-mismatch recognition, manifestation of transplant rejection and graft-versus-host disease)
@@ -144,6 +173,10 @@
  - **PD-1 blockade predominantly induces expansion of specific tumor infiltrating exhausted-like CD8<sup>+</sup> T cell subsets**
  - **CTLA-4 blockade induces expansion of ICOS<sup>+</sup> Th1-like CD4<sup>+</sup> effector T cells, also engages specific subsets of exhausted-like CD8<sup>+</sup> T cells**
  - **different ICI target different T cell subsets**
+# Distinct mechanisms of mismatch repair deficiency delineate two modes of response to PD-1 immunotherpy in endometrial carcinoma
+ - mismatch repair-deficient cancers have varied responses to immune checkpoint blockade
+ - patients with mutational mismatch repair-deficient endometrial cancers (higher mutational burden) here had higher response rates, longer survival rates than those with epigenetic mismatch repair-deficient tumors, but mutational burden not correlated with ICB response within each category
+ - longitudinal scRNAseq: CD8<sup>+</sup> effector T cells correlated with regression of mutational mismatch repair-deficient tumors, activated CD16<sup>+</sup> NK cells associated with ICB-responsive epigenetic mismatch repair-deficient tumors
 # Divergent clonal differentiation trajectories establish CD8<sup>+</sup> memory T cell heterogeneity during acute viral infections in humans
 ## Abstract
  - decrease in human CD8<sup>+</sup> T cell clonal diversity from acute (days 10-30) to memory phase (days 90-150 for early memory, day 500+ for late memory)
@@ -178,6 +211,22 @@
  - chronic antigen exposure leads to T cell exhaustion with reduced effector function
  - do all antigen-specific T cell clones follow the same T<sub>ex</sub> differentiation trajectory?
  - results: high T cell receptor signaling aviditiy correlates with T<sub>ex</sub> terminal phenotype, low avidity correlates with effector-like T<sub>ex</sub> KLR fate (so higher signaling response from TCR activation leads to higher exhaustion)
+# Dynamic single-cell mapping unveils Epstein-Barr virus-imprinted T-cell exhaustion and on-treatment response
+## Abstract
+ - Epstein-Barr virus associated gastric cancer exhibits an inflammed-immune phenotype, increased T and B cell infiltration
+ - immunotherapy triggers clonal revival and reinvigoration of effector T cells
+ - antigen-specific ISG-15<sup>+</sup> CD8<sup>+</sup> T cell population enriched in Epstein-Barr virus associated gastric cancer patients (transitory exhausted state)
+ - baseline intratumoral ISG-15<sup>+</sup> CD8<sup>+</sup> T cells predict immunotherapy responsiveness
+ - re-emerged clonotypes of pre-existing ISG-15<sup>+</sup> CD8<sup>+</sup> T cells found after treatment, gives rise to CXCL13-expressing effector population in responsive tumors
+ - LAG-3 retention may render ISG-15<sup>+</sup> CD8<sup>+</sup> T cells into terminal exhaustion state in non-responsive tumors
+ - anti-LAG-3 therapy could reduce tumor burden in refractory patients
+## Introduction
+ - PD-1 blockade only effective for ~10% of gastric cancer patients
+ - Epstein-Barr virus associated gastric cancer is distinct, higher PD-1 blockade effectiveness (~25%)
+ - Epstein-Barr virus can trigger T cell responses against abnormal antigens, perhaps leads to PD-1 blockade hypersensitivity as well
+## Results
+### Patient cohorts and study design
+ - 6 male patients with gastric cancer, 3 with Epstein-Barr virus and 3 without, pre and post treatment so 12 samples
 # Effective use of latent semantic indexing and computational linguistics in biological and biomedical applications
  - LSI = latent semantic indexing, computational linguistics technique, outperforms Boolean text searches and co-occurrence models at information retrieval, dimensional reduction technique used to compare concepts/topics among collection of terms
  - clustering genes/proteins into GO groups/signaling pathways relies on curation of these groups/pathways, could be supplemented by LSI/LSA (latent semantic analysis)
@@ -315,6 +364,28 @@
  - therefore, liver has acquired mechanisms of immune tolerance to avoid overactive immune response
  - liver allografts are accepted across MHC mismatches without immunosuppression due to liver immune tolerance
  - non-liver allografts also rejected less with co-transplantation of liver allograft, **not sure how this induces systemic tolerance but very interesting**
+# Immune toxicities elicited by CTLA-4 blockade in cancer patients are associated with early diversification of the T cell repertoire
+## Abstract
+ - CTLA-4 blockade leads to proliferation of circulating T cells, also clonal expansion of tissue-reactive T cells?
+ - **CTLA-4 blockade induced greater diversification of T cell repertoire (more clonotypes including newly detected clones, declined clonality) in irAE patients compared to no irAE patients**
+ - initial broadening in repertoire occured within 2 weeks of treatment preceeding irAE onset
+ - irAE patients had more diverse CD4<sup>+</sup> and CD8<sup>+</sup> T cells but no differences in Tregs
+## Introduction
+ - **prior work: CTLA-4 blockade promotes remodeling of T cell repertoire (gain and loss of clonotypes but an overall net bias towards gains leading to increased repertoire diversity)**
+ - **survival not correlated with generation of new clones but rather with maintenance of pre-existing, high frequency (> 1 in 1,000) clonotypes**
+ - **takehome: T cell diversification deleterious via promotion of autoreactivity**
+ - **mechanistic model: CTLA-4 blockade induces autoreactivity by mobilizing newly detectable clones, irAE-mediating clones may be enriched within population of activated T cells, distinct from other tissue-specific immunopathologies driven by oligoclonal response to specific antigens like celiac**
+## Discussion
+ - **with how early TCR diversification is here compared to how late irAEs can develop, TCR repertoire changes can't be the only factor in irAE development**
+# Improved survival with T cell clonotype stability after anti-CTLA-4 treatment in cancer patients
+# Abstract
+ - **CTLA-4 blockade results in both expansion and loss of T cell clonotypes, global turnover of T cell repertoire**
+ - improved survival associated with maintenance of high-frequency clones at baseline
+ - stably maintained clonotypes included T cells with high avidity TCRs, like virus-reactive T cells
+## Discussion
+ - 2 models of effects of CTLA-4 blockade on Teffs: (i) the threshold model whereby CTLA-4 blockade would allow low-avidity T cells to expand and diversity to increase, (ii) the attenuation model whereby CTLA-4 blockade would promote the preferential expansion of high-avidity T cells and narrowing of the repertoire
+ - results not really cleanly supporting either model
+ - **diverse repertoires are important in limiting the magnitude of immune escape but may also promote self-reactive clones and induce host inflammation**
 # Improving CAR-T immunotherapy: overcoming the challenges of T cell exhaustion
  - **CAR (chimeric antigen receptor) allows modified T cells to mount antigen-specific immune response to cells bearing CAR target antigen independently of MHC**
  - CAR T cell therapy failure often attributed to antigen escape (selection pressure under CAR T surveillance leads to emergence of antigen-negative tumors), but relapse can occur with antigen-positive tumors (can be hard for CAR T cells to access tumor cells for example due to regulatory T cells in tumor secreting inhibitory cytokines)
@@ -362,6 +433,19 @@
 ## Introduction
  - ICI can work via activation, expansion, and recruitment of CD8<sup>+</sup> T cells from peripheral circulation
  - open questions: are there phenotypic differences between clonally related T cells in different anatomical sites? are progenitor exhausted T cells clonally linked to intratumoral exhausted CD8<sup>+</sup> T cells present in tumor-draining lymph nodes (seems to be the case in mice)? how long do tumor specific T cell clones like exhausted CD8<sup>+</sup> T cells persist after ICI?
+## Results
+### Clinical and pathological characteristics of lung cancer resections after ICB
+### Multi-regional scRNA/TCR-seq of the T cell response to NSCLC
+ - scRNA/TCR-seq on sorted CD3<sup>+</sup> T cells
+ - see minimal TCR overlap between 3 patients
+ - CD8<sup>+</sup> T cell clusters contain larger clones than CD4<sup>+</sup> T cell clusters
+ - TCR repertoire most diverse in lymph node regions, greater clonal enrichment in tumor regions
+### Exhausted CD8<sup>+</sup> T cells, regulatory CD4<sup>+</sup> T cells, and follicular helper CD4<sup>+</sup> T cells are enriched in tumor regions with viable cancer cells
+ - are certain specific T cell phenotypes enriched in regions containing viable tumor cells?
+ - see lymph nodes enriched for naive and TCF1 CD8 T cells, adjacent normal regions enriched for effector CD8 T cells
+ - exhausted CD8<sup>+</sup> T cell clusters enriched in tumor regions
+ - enriched naive, Treg, and follicular helper CD4<sup>+</sup> T cells in lymph nodes, effector CD4 T cells enriched n adjacent normal regions, CD4 Tregs and follicular helper T cells enriched in tumor
+### Transcriptional signatures of progressive CD8<sup>+</sup> T cell exhaustion across organs
 # Liver mediated adaptive immune tolerance
  - liver is immunologically tolerant, equipped to limit hypersensitivity to food-derived antigens, bacterial products, can easily accept allografts
  - persistent infection of liver with pathogen usually results in tolerance
@@ -465,6 +549,11 @@
  - NKs are part of the innate immune system but are similar to cytotoxic T cells, they lack antigen specificity and are usually short-lived (< 10 days), so their exhaustion is likely less important
  - there are long-lived, somewhat antigen-specific NKs with memory recall though
  - B cell exhaustion: weaker antibody response (inhibited normal function)
+# PD-1 blockade induces responses by inhibiting adaptive immune resistance
+ - adaptive immune resistance: upregulation of PD-L1 on cancer tissues, interaction with PD-1 on antigen-specific CD8 T cells
+ - here, show that pre-existing CD8 T cells on tumor margin associated with expression of PD-1/PD-L1 and may predict response to therapy
+ - responding patients showed proliferation of intratumoral CD8<sup>+</sup> T cells
+ - pre-treatment samples from responders show higher numbers of CD8, PD-1, PD-L1 expressing cells at invasive tumor margin and inside tumors, more **clonal TCR repertoire**
 # PD-1 blockade in tumors with mismatch-repair deficiency
  - mismatch repair deficiency status predicts clinical benefit of ICI (ICI works better with tumors with mismatch repair deficiency)
  - **immune infiltrate associated with mismatch repair-deficient carcinomas directed at neoantigens**
@@ -483,6 +572,20 @@
  - TCR is heterodimer, mediates pathogen-associated epitope recognition through interactions between peptide and MHC, generated by genomic rearrangement of germline TCR locus (VDJ recombination) to allow potentially 10^15 to 10^61 unique receptors
  - TCRs from T cells that recognize the same pMHC epitope often share conserved sequence features, perhaps able to predict model epitope specificity
  - here, they study CD8<sup>+</sup> TCRs in mice and humans to study these conserved features as well as features differentiating them
+# Regulatory T cells suppress CD4<sup>+</sup> effector T cell activation by controlling protein synthesis
+## Abstract
+ - Tregs suppress CD4 effector T cells
+ - Tregs suppress activation-induced global protein synthesis in CD4 effector T cells before cell division
+ - mRNAs encoding for protein synthesis machinery regulated at translational level in activated CD4 effector T cells by Tregs
+ - Tregs suppress global protein synthesis of CD4 effector T cells by inhibiting mRNAs of translation machinery at level of mTORC1-mediated translational control via immunosuppressive cytokines IL-10 and TGF beta
+ - RNA helicase eIF4A inhibitor rocaglamide A can alleviate inflammatory CD4 effector T cell activation by Treg depletion *in vivo*
+## Introduction
+ - FOXP3 mutations can drive autoimmunity, linked to loss of functional Tregs
+ - Tregs can suppress CD4 effector T cells directly or through modulation of APCs (mostly DCs)
+ - proposed suppression mechanisms: suppressive cytokine release (TGF beta, IL-10, IL-35), inhibitory receptor expression (CTLA-4, PD-1, TIGIT)
+ - upon activation, resting T cells undergo rapid reprogramming in preparation of cell division, includes increased translation
+## Results
+### Tregs control the protein synthetic capacity of activated CD4 Teffs
 # Risk factors and biomarkers for immune-related adverse events: a practical guide to identifying high-risk patients and re-challenging immune checkpoint inhibitors
  - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
  - organ-specific irAEs associated with pre-existing organ dysfunction
@@ -544,6 +647,8 @@
  - ICI-induced inflammatory arthritis has been reported
  - corticosteroids can treat mild irAEs, TNFα inhibitors reserved for severe cases (prolonged TNFα inhibitor use can negatively impact antitumor effect of ICI)
  - here, they try instead to use the anti IL6 receptor antibody (FDA approved to treat RA) for ICI-induced arthritis
+# Targeting PI3K alpha increases the efficacy of anti-PD-1 antibody in cervical cancer
+ - *PIK3CA* mutation results in increase PD-L1 levels, repression of CD8<sup>+</sup> T cell differentiation in cervical cancer
 # T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma
 ## Abstract
  - irAEs in 10-60% of patients with melanoma treated with ICI
@@ -742,6 +847,9 @@
  - many autoimmune diseases feature risk polymorphisms in *HLA* genes that constrain TCR repertoire during thymic selection
 # The altertions in peripheral lymphocyte subsets predict the efficacy and prognosis of immune checkpoint inhibitors in hepatocellular carcinoma
  - CD3<sup>+</sup>CD8<sup>+</sup> T cell percentage increases after ICI, B cell percentage decreases
+# The cancer-immunity cycle: indication, genotype, and immunotype
+ - cancer immunity cycle: release of cancer cell antigens (cancer cell death) --> cancer antigen presentation (DCs/APCs) --> priming/activation of T cells by APCS --> trafficking of T cells to tumors --> infiltration of T cells into tumors (past stromal barrier) --> recognition of cancer cells by T cells --> killing of cancer cells --> release of more cancer cell antigens (restart cycle)
+ - 
 # The graft-versus-leukemia effect in AML
  - allogenic hematopoietic stem cell transplantation (allo-SCT) commonly used in cancer care, most potent anti-leukemic therapy in AML (acute myeloid leukemia) patients
  - donor T cells (and maybe other immune cells) eliminate residual leukemia cells after radio/chemotherapy = graft-versus-leukemia response
