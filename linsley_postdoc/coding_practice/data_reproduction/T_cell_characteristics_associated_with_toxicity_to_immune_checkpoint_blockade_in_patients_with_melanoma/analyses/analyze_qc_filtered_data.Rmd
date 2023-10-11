@@ -70,16 +70,22 @@ melanoma_T_cells_filtered.list <- lapply(X = melanoma_T_cells_filtered.list, FUN
 # select features that are repeatedly variable across datasets for integration
 features <- SelectIntegrationFeatures(object.list = melanoma_T_cells_filtered.list)
 
+# prep step
+melanoma_T_cells_filtered.list <- PrepSCTIntegration(
+  melanoma_T_cells_filtered.list,
+  anchor.features = features
+)
+
 ```
 
 # Integrate via anchors
 
 ```{r}
 
-immune.anchors <- FindIntegrationAnchors(object.list = melanoma_T_cells_filtered.list, anchor.features = features)
+immune.anchors <- FindIntegrationAnchors(object.list = melanoma_T_cells_filtered.list, normalization.method = "SCT", anchor.features = features)
 
 # this command creates an 'integrated' data assay
-immune.combined <- IntegrateData(anchorset = immune.anchors)
+immune.combined <- IntegrateData(anchorset = immune.anchors, normalization.method = "SCT")
 
 ```
 
@@ -116,7 +122,7 @@ immune.combined <- RunUMAP(immune.combined, reduction = "pca", dims = 1:30)
 immune.combined <- FindNeighbors(immune.combined, reduction = "pca", dims = 1:30)
 immune.combined <- FindClusters(immune.combined, resolution = 3)
 
-# resolution parameter of 3, see 28 instead of 37 clusters
+# resolution parameter of 3
 
 ```
 
@@ -144,8 +150,8 @@ ggsave("../figures/umap_cluster.svg")
 
 ```{r}
 
-# find markers for every cluster compared to all remaining cells, report only the positive ones
-immune.markers <- FindAllMarkers(immune.combined, only.pos = FALSE, min.pct = 0.1, logfc.threshold = 0.25)
+# find markers for every cluster compared to all remaining cells
+immune.markers <- FindAllMarkers(immune.combined)
 
 ```
 
@@ -156,7 +162,6 @@ immune.markers <- FindAllMarkers(immune.combined, only.pos = FALSE, min.pct = 0.
 immune.markers %>%
   group_by(cluster) %>%
   filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "CD14", "FCGR3A", "FCER1A", "MS4A1", "HBB", "PPBP", "CD36")) %>%
-  #filter(gene %in% c("CD235A", "CD41", "CD42A", "CD42B", "CD61", "CD36", "GPIIB", "GPIIIA")) %>%
   arrange(gene)
 
 ```
@@ -167,23 +172,20 @@ immune.markers %>%
 
 # CD3D/CD3Ehi and CD8A/CD8Bhi and NKG7/GNLYlo = CD8 T cells
 
-# 0, 4, 5, 9, 10, 12, 16, 20, 22, 23, 25 high in CD3D
-# 0, 4, 5, 9, 10, 12, 14-16, 20, 22, 23, 25 high in CD3E
-# clusters 9, 10, 16, 23 highest in CD8A
-# 10, 16, 23 highest in CD8B
+#3D: 0, 3, 5, 11-12, 14-15, 17, 20-21
+#3E: 0, 3, 5, 11-12, 14-15, 17, 19-21
+#8B: 0, 3, 5, 11-12, 14-15, 17, 20-21
+#NKG7: 3, 10, 14, 16, 17, 19
+#GNLY: 3, 10, 14, 16, 17, 19
 
-# 9-11, 14-16 high in NKG7
-# 9-11, 14-16 high in GNLY
+# potentials: 15
 
-VlnPlot(immune.combined, features = c("CD8B"), pt.size = 0)
+VlnPlot(immune.combined, features = c("GNLY"), pt.size = 0)
 
 immune.markers %>%
   group_by(cluster) %>%
   filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY")) %>%
   arrange(cluster)
-
-# clusters 16, 23
-# 16 is kind of iffy to me (high in NKG7 and GNLY AND CD8A/B but authors had this cluster as CD8 T cell)
 
 ```
 
@@ -191,20 +193,18 @@ immune.markers %>%
 
 ```{r}
 
-VlnPlot(immune.combined, features = c("IL7R"), pt.size = 0)
+VlnPlot(immune.combined, features = c("IL7R", "CD8B"), pt.size = 0)
 # CD3D/CD3Ehi non-CD8 T cells with high IL7R expression and low NKG7/GNLY = CD4 T cells
 
-# 0, 4, 5, 9, 10, 12, 16, 20, 22, 23, 25 high in CD3D
-# 0, 4, 5, 9, 10, 12, 14-16, 20, 22, 23, 25 high in CD3E
+#3D: 0, 3, 5, 11-12, 14-15, 17, 20-21
+#3E: 0, 3, 5, 11-12, 14-15, 17, 19-21
+#8B: 0, 3, 5, 11-12, 14-15, 17, 20-21
+#NKG7: 3, 10, 14, 16, 17, 19
+#GNLY: 3, 10, 14, 16, 17, 19
 
-# clusters 9, 10, 16, 23 highest in CD8A
-# 10, 16, 23 highest in CD8B
-# 9-11, 14-16 high in NKG7
-# 9-11, 14-16 high in GNLY
+#IL7R: 0, 5, 11-12, 14-15, 17, 20-21
 
-# clusters 0, 4, 5, 10, 12, 20, 22, 23, 25 high in IL7R
-
-# clusters 0, 4, 5, 12, 20, 22 for CD4 T cells
+# potentials: 0, 5, 11-12, 20-21
 
 ```
 
@@ -214,13 +214,13 @@ VlnPlot(immune.combined, features = c("IL7R"), pt.size = 0)
 
 # NKG7/GNLYhi and CD3D/CD3Elo = NK cells
 
-# 0, 4, 5, 9, 10, 12, 16, 20, 22, 23, 25 high in CD3D
-# 0, 4, 5, 9, 10, 12, 14-16, 20, 22, 23, 25 high in CD3E
+#3D: 0, 3, 5, 11-12, 14-15, 17, 20-21
+#3E: 0, 3, 5, 11-12, 14-15, 17, 19-21
+#8B: 0, 3, 5, 11-12, 14-15, 17, 20-21
+#NKG7: 3, 10, 14, 16, 17, 19
+#GNLY: 3, 10, 14, 16, 17, 19
 
-# 9-11, 14-16 high in NKG7
-# 9-11, 14-16 high in GNLY
-
-# clusters 11, 14 for NK cells
+# potentials: 10, 16
 
 immune.markers %>%
   group_by(cluster) %>%
@@ -233,14 +233,13 @@ immune.markers %>%
 
 ```{r}
 
-VlnPlot(immune.combined, features = c("FCER1A"), pt.size = 0)
+#VlnPlot(immune.combined, features = c("FCER1A"), pt.size = 0)
 # FCER1Ahi = dendritic cells (DCs)
-# cluster 26 is DCs
 
-immune.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("FCER1A")) %>%
-  arrange(cluster)
+#immune.markers %>%
+#  group_by(cluster) %>%
+#  filter(gene %in% c("FCER1A")) %>%
+#  arrange(cluster)
 
 ```
 
@@ -251,7 +250,7 @@ immune.markers %>%
 VlnPlot(immune.combined, features = c("MS4A1"), pt.size = 0)
 # MS4A1hi = B cells
 
-# 1, 18, 19 for B cell clusters
+# potentials: 2, 8, 13, 23, 24
 
 immune.markers %>%
   group_by(cluster) %>%
@@ -267,10 +266,10 @@ immune.markers %>%
 VlnPlot(immune.combined, features = c("FCGR3A", "CD14"), pt.size = 0)
 # CD14 or FCGR3Ahi = monocytes
 
-# CD14hi = clusters 2, 3, 6, 13, 21, 26, 27
-# FCGR3Ahi = clusters 8 and 17 mostly, also 9 and 11 and 13-15?
+# CD14hi = 4, 6-7, 9, 18, 23
+# FCGR3Ahi = 1
 
-# 2, 3, 6, 8, 13, 15, 17, 21, 27 = monocytes
+# potentials: 1, 4, 6-7, 9, 18, 23
 
 immune.markers %>%
   group_by(cluster) %>%
@@ -283,26 +282,21 @@ immune.markers %>%
 
 ```{r}
 
-VlnPlot(immune.combined, features = c("HBB", "CD36"), pt.size = 0)
+#VlnPlot(immune.combined, features = c("HBB"), pt.size = 0)
 # HBBhi = red blood cells
-# looks like clusters 24 and 25 are RBCs (24 may be platelets), also 3, 6, 15, 17?
 
-immune.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("HBB")) %>%
-  arrange(cluster)
+#immune.markers %>%
+#  group_by(cluster) %>%
+#  filter(gene %in% c("HBB")) %>%
+#  arrange(cluster)
 
-VlnPlot(immune.combined, features = c("PPBP"), pt.size = 0)
+#VlnPlot(immune.combined, features = c("PPBP"), pt.size = 0)
 # PPBPhi = platelets
-# looks like cluster 24 is platelets/RBCs, also 7?
 
-immune.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("PPBP")) %>%
-  arrange(cluster)
-
-# RBs/platelets = clusters 24, 25
-# let's try just 24-25, reroute 15 & 17
+#immune.markers %>%
+#  group_by(cluster) %>%
+#  filter(gene %in% c("PPBP")) %>%
+#  arrange(cluster)
 
 ```
 
@@ -310,16 +304,16 @@ immune.markers %>%
 
 ```{r}
 
-VlnPlot(immune.combined, features = c("IL7R"), pt.size = 0)
+#VlnPlot(immune.combined, features = c("IL7R"), pt.size = 0)
 # T/NKT: high expression of CD3D/E and GNLY/NKG7 that were not annotated as CD8/CD4 T cells
 
-# 0, 4, 5, 9, 10, 12, 16, 20, 22, 23, 25 high in CD3D
-# 0, 4, 5, 9, 10, 12, 14-16, 20, 22, 23, 25 high in CD3E
+#3D: 0, 3, 5, 11-12, 14-15, 17, 20-21
+#3E: 0, 3, 5, 11-12, 14-15, 17, 19-21
+#8B: 0, 3, 5, 11-12, 14-15, 17, 20-21
+#NKG7: 3, 10, 14, 16, 17, 19
+#GNLY: 3, 10, 14, 16, 17, 19
 
-# 9-11, 14-16 high in NKG7
-# 9-11, 14-16 high in GNLY
-
-# 9, 10, 15
+# potentials: 3, 14, 17, 19
 
 ```
 
@@ -330,16 +324,16 @@ VlnPlot(immune.combined, features = c("IL7R"), pt.size = 0)
 new.cluster.ids <- c("CD4 T cell",
                      #0
                      
-                     "B cell",
+                     "Monocyte",
                      #1
                      
-                     "Monocyte",
+                     "B cell",
                      #2
                      
-                     "Monocyte",
+                     "T/NKT",
                      #3
                      
-                     "CD4 T cell",
+                     "Monocyte",
                      #4
                      
                      "CD4 T cell",
@@ -348,68 +342,59 @@ new.cluster.ids <- c("CD4 T cell",
                      "Monocyte",
                      #6
                      
-                     "RBC/platelet",
+                     "Monocyte",
                      #7
 
-                     "Monocyte",
+                     "B cell",
                      #8
                      
-                     "T/NKT",
+                     "Monocyte",
                      #9
                      
-                     "T/NKT",
+                     "NK",
                      #10
                      
-                     "NK",
+                     "CD4 T cell",
                      #11
                      
                      "CD4 T cell",
                      #12
                      
-                     "Monocyte",
+                     "B cell",
                      #13
                      
-                     "NK",
+                     "T/NKT",
                      #14
                      
-                     "T/NKT",
+                     "CD8 T cell",
                      #15
 
-                     "CD8 T cell",
+                     "NK",
                      #16
                      
-                     "Monocyte",
+                     "T/NKT",
                      #17
                      
-                     "B cell",
+                     "Monocyte",
                      #18
                      
-                     "B cell",
+                     "T/NKT",
                      #19
                      
                      "CD4 T cell",
                      #20
                      
-                     "Monocyte",
+                     "CD4 T cell",
                      #21
                      
-                     "CD4 T cell",
+                     "DC",
                      #22
                      
-                     "CD8 T cell",
+                     "B cell",
                      #23
                      
-                     "RBC/platelet",
+                     "B cell"
                      #24
-
-                     "RBC/platelet",
-                     #25
-                     
-                     "DC",
-                     #26
-                     
-                     "Monocyte"
-                     #27
                      )
 
 names(new.cluster.ids) <- levels(immune.combined)
@@ -425,14 +410,6 @@ DimPlot(immune.combined, reduction = "umap", label = TRUE, pt.size = 0.5)
 ggsave("../figures/umap_cell_type.svg")
 
 # they also have some CD8 assigned T cells clustering inside large CD4 T cell cluster
-
-```
-
-# Exclude clusters annotated as red blood cells or platelets from further analysis
-
-```{r}
-
-rbc_filtered_immune.combined <- subset(immune.combined, idents = "RBC/platelet", invert = TRUE)
 
 ```
 
@@ -454,21 +431,10 @@ ggsave("../figures/CD3D_CD3E_HBB_PPBP_across_cell_types.svg")
 
 ```
 
-# Plot UMAP with cell clusters after excluding RBC/platelet clusters
-
-```{r}
-
-DimPlot(rbc_filtered_immune.combined, reduction = "umap", label = TRUE, pt.size = 0.1, cols = c('CD4 T cell' = 'red', 'B cell' = 'brown', 'Monocyte' = 'blue', 'T/NKT' = 'darkcyan', 'NK' = 'purple', 'CD8 T cell' = 'green', 'DC' = 'orange'), repel = TRUE, shuffle = TRUE, seed = 992)
-
-ggsave("../figures/rbc_filtered_umap_cell_type.svg")
-
-# they also have some CD8 assigned T cells clustering inside large CD4 T cell cluster
-```
-
 # Save cell type clustered Seurat object
 
 ```{r}
 
-saveRDS(rbc_filtered_immune.combined, file="../saved_data/cell_type_clustered.rds")
+saveRDS(immune.combined, file="../saved_data/cell_type_clustered.rds")
 
 ```
