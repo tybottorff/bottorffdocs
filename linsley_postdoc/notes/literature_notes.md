@@ -1,6 +1,6 @@
 # Activation of human T cells by major histocompatability complex class II expressing neutrophils: proliferation in the presence of superantigen, but not tetanus toxoid
- - polymorphonuclear neutrophils (PMNs) function for acute phagocytic clearance of foreign pathogens, release inflammatory mediators, assumed to not express but can express MHC class II molecules after stimulation by interferon gamma
- - superantigen refers to antigen binding to MHC class II with high affinity outside antigen binding groove in absence of antigen processing, trigger proliferation of T cells expressing TcR-VB gene products (stimulate T cells in TCR Vbeta-specific manner)
+ - polymorphonuclear neutrophils (PMNs) function for acute phagocytic clearance of foreign pathogens, release inflammatory mediators, assumed to not express but can express MHC class II molecules after stimulation by interferon γ
+ - superantigen refers to antigen binding to MHC class II with high affinity outside antigen binding groove in absence of antigen processing, trigger proliferation of T cells expressing TcR-VB gene products (stimulate T cells in TCR Vβ-specific manner)
 # Advances in immune checkpoint inhibitor combination strategies for microsatellite stable colorectal cancer
  - microsatellite stable (MSS) colorectal tumors are immune-cold
 # Allopeptides and the alloimmune response
@@ -31,7 +31,7 @@
  - elimination of these cells is indicative of clinical responses induced by immunotherapy
 # Association of checkpoint inhibitor-induced toxic effects with shared cancer and tissue antigens in non-small cell lung cancer
  - irAEs more common in patients with complete/partial remission than in those with progressive/stable disease, **autoimmune adverse effects are associated with response to therapy**
- - **identify 9 T cell antigens shared between tumor and skin (including desmocollin 3, keratin 6, mapsin, LL37, keratin 14), different from crossreactivity hypothesis seems to just be exact same antigen shared between tumor and self**, these antigens stimulate T cells *in vitro* (significant for CD8<sup>+</sup> IFN-gamma<sup>+</sup> but not CD4<sup>+</sup> IFN-gamma<sup>+</sup> T cells)
+ - **identify 9 T cell antigens shared between tumor and skin (including desmocollin 3, keratin 6, mapsin, LL37, keratin 14), different from crossreactivity hypothesis seems to just be exact same antigen shared between tumor and self**, these antigens stimulate T cells *in vitro* (significant for CD8<sup>+</sup> IFN-γ<sup>+</sup> but not CD4<sup>+</sup> IFN-γ<sup>+</sup> T cells)
  - **seems like most similar self tissue to tumor has highest chance of irAE, skin second most similar to NSCLC after lung and had second highest proportion of irAEs**
  - **see dense infiltration of T cells in sites of irAEs**
  - **same T cell clonotypes infiltrated both lung tumor and autoimmune skin lesions**
@@ -63,15 +63,19 @@
 ## Discussion
  - T cells thought to be major mediators of irAEs (activity enhanced by ICB)
  - theories for breached regulation of T cell activity during ICB: **neoantigen (T cells targeting cancer neoantigens cross-react with WT version of protein in healthy tissue)** and tissue-associated antigen (antigens shared between tumor and healthy tissue) theories
-# Autoreactive T cell receptors with shared germline-like alpha chains in type 1 diabetes
- - identify class of TCRs that share TCR alpha chains between individuals ("public" chains, scRNAseq)
+# Autoreactive T cell receptors with shared germline-like α chains in type 1 diabetes
+ - identify class of TCRs that share TCR α chains between individuals ("public" chains, scRNAseq)
  - use multiplexed CD154 enrichment to isolate IAR T cells from peripheral blood
- - identify paired TCR alpha beta sequences from 2,767 cells, more than 1/4 share TCR junctions between 2 or more cells ("expanded"), and ~62% of expanded TCRs show specificity for islet antigen epitopes
- - public TCR sharing TCR alpha junctions most prominent in new-onset T1D
+ - identify paired TCRαβ sequences from 2,767 cells, more than 1/4 share TCR junctions between 2 or more cells ("expanded"), and ~62% of expanded TCRs show specificity for islet antigen epitopes
+ - public TCR sharing TCRα junctions most prominent in new-onset T1D
  - public TCR sequences more germline-like than expanded, unique, "private" TCRs and had shorter junction sequences (fewer random nucleotide insertions)
- - public TCR alpha junctions most often paired with mismatched TCR beta junctions in TCRs, a subset of these TCRs cross-reactive towards distinct islet antigen peptides
- - takehome: population of IAR T cells with diverse specificities determined by TCRs with restricted TCR alpha junctions and germline-constrained antigen recognition properties
- - "innate-like" TCRs differ from immunodominant TCR beta chains in autoimmunity
+ - public TCRα junctions most often paired with mismatched TCRβ junctions in TCRs, a subset of these TCRs cross-reactive towards distinct islet antigen peptides
+ - takehome: population of IAR T cells with diverse specificities determined by TCRs with restricted TCRα junctions and germline-constrained antigen recognition properties
+ - "innate-like" TCRs differ from immunodominant TCRβ chains in autoimmunity
+# AXL receptor tyrosine kinase inhibition improves the anti-tumor effects of CD8<sup>+</sup> T cells by inducing CD103<sup>+</sup> dendritic cell-mediated T cell priming
+ - AXL inhibited clonal expansion of tumor-specific CD8<sup>+</sup> T cells
+# B cells as biomarkers: predicting immune checkpoint therapy adverse events
+ - association between early therapy-induced changes in circulating B cells (decreased B cells, increased plasmablasts and CD21<sup>low</sup>PD-1<sup>+</sup> memory B cells) and an increased risk of high-grade irAEs in patients treated with ICB
 # B cell-specific MHC class II deletion reveals multiple nonredundant roles for B cell antigen presentation in murine lupus
  - B cells have both Ab-dependent and Ab-independent functions in systemic autoimmunity
  - Ab-independent functions could include roles in lymphoid development, cytokine secretion, Ag presentation
@@ -89,6 +93,28 @@
 # Cardiac myosin-specific autoimmune T cells contribute to immune-checkpoint-inhibitor-associated myocarditis
  - cardiac myosin-specific autoreactive T cells drive pathogenesis of PD-1 inhibitor-induced myocarditis in mice
  - PD-1 expressing cardiac myosin-specific autoimmune T cells are present in heart during naive conditions
+# CD8<sup>+</sup> T cells in the cancer-immunity cycle
+## Introduction
+ - 3 signal model for effective T cell priming and differentiation: 1) TCR signaling by antigens presented by MHCs, 2) co-stimulation, 3) cytokines, all 3 signals necessary to effectively prime naive T cells and differentiate them into effector T cells, perhaps a fourth signal being nutrients/metabolites fueling T cell metabolism
+## CD8<sup>+</sup> T cell differentiation states
+ - with optimal signals (vaccinations, acutely resolving infections), naive CD8<sup>+</sup> T cells differentiate into effector T cells (T<sub>eff</sub> cells) or memory precursors, then into long-lived memory T cells once the antigen is cleared
+ - memory T cell population is heterogeneous: stem cell memory (Tscm), central memory (Tcm), effector memory (Tem), effector memory re-expressing CD45RA (Temra), tissue resident memory (Trm)
+ - persistent stimulation (especially via TCR) leads to exhaustion (epigenetically coordinated by transcription factor TOX)
+ - exhausted T cells characterized by high co-expression of multiple inhibitory receptors (PD-1, CD39, LAG-3) and reduced proportion of effector cytokines (IFN-γ, TNF, IL-2)
+ - exhausted T cells are not non-functional but rather have altered effector function (adapted to withstand chronic antigen stimulation), maintain moderate control while avoiding excessive immunopathology
+ - **inflection point of irreversible exhaustion seems to be 2-3 weeks of chronic antigen stimulation, major epigenetic and transcriptional changes**
+## Signals
+### Signal 1: TCR signaling and antigens
+ - tumor-associated antigens (differentiation, overexpressed, cancer germ line or testis antigens, ERV-derived antigens), T cells targeting these may express TCRs with low affinity (autoreactive)
+ - tumor-specific antigens (~foreign antigens, neoantigens or viral proteins in the cases of oncogenic viruses), T cells specific to tumor-specific antigens aren't subject to central tolerance
+ - most neoantigens are patient specific, requiring individualized treatment (perhaps mRNA vaccines?)
+ - immune editing: on-target T cell responses can lead to the elimination of tumor subpopulations expressing immunogenic antigens, resulting in eventual tumor escape as resistant tumor subpopulations are selected for
+### Signal 2: Co-stimulation and co-inhibition
+ - co-stimulation from CD80/86 ligands on APC (upregulated in infections) received via CD28 receptor on T cell, leading to full activation of the T cell (survival, metabolism, cytokine production)
+ - other co-stimulatory molecules: CD40L, OX40, 4-1BB, **ICOS**, CD27, involved in priming/later stages of T cell differentiation
+ - following activation, T cells increase CTLA-4 expression (outcompetes CD28 for CD80/86 and regulates extent and duration of T cell activation to prevent excessive immunopathology), other negative signals include PD-1, LAG-3, 2B4, TIGIT, TIM-3
+### Signal 3: Cytokines
+ - IL-12, type I IFN, also IL-1/6/10/18/27/33 and TGFβ, among others
 # Cellular and molecular waypoints along the path of T cell exhaustion
 # Characterization of antibody repertoires in patients with HPV-related HNSCC undergoing definitive radiation with immunotherapy
  - HNSCC: head and neck squamous cell carcinoma
@@ -107,7 +133,7 @@
  - CD8 T cell clonal expansion within systemic circulation potential correlative biomarker of irAEs in prostate cancer patients receiving ICI
 ## Abstract
  - 27 metastatic prostate cancer patients
- - sequencing of TCR beta chains revealed clonal expansion of CD8 T cells in blood samples collected before irAE onset
+ - sequencing of TCRβ chains revealed clonal expansion of CD8 T cells in blood samples collected before irAE onset
  - expansion of > 55 CD8 T cell clones preceeded severe irAE onset
 ## Introduction
  - **hypothesis: clonal expansion of T cells in the systemic circulation, which are likely to be reactive against self-antigens, may correlate with irAEs (since clonal expansion of T cells in tumor tissues, which are likely tumor reactive, may predict for clinical benefit with immune checkpoint therapy)**
@@ -239,7 +265,7 @@
  - allelic exclusion benefits: greater cell diversity
  - monoallelic expression can be random (RME, like X inactivation) and non-random (imprinted genes)
  - **allelic exclusion for B and T cells can help prevent autoimmunity (expression of additional functional rearranged subunits from a second allele could lead to multiple specificities for a T or B cell)**
- - **TCRalpha locus uniquely has rearrangements from both alleles**
+ - **TCRα locus uniquely has rearrangements from both alleles**
 # Epigenetic regulation of T cell exhaustion
 ## Distinct epigenetic programs in T<sub>ex</sub> cells
  - T cells are directed by multiple signals (TCR-antigen interaction, co-stimulatory molecular interactions, local cytokines)
@@ -257,7 +283,7 @@
 ## Introduction
  - HLA genes highly polymorphic, variants associated with many traits, like most autoimmune diseases
  - perhaps different disease risk conferred by particular MHC alleles is due to differences in presented peptides or differences in stabilities of MHC molecules
- - **1-5% of T cells have gamma (*TRG*) and delta (*TRD*) chains instead of alpha (*TRA*) and beta (*TRB*) ones, only beta and delta chains also have diversity (D) genes recombined in VDJ recombination (alpha nad gamma just have VJ recombination)**
+ - **1-5% of T cells have γ (*TRG*) and δ (*TRD*) chains instead of α (*TRA*) and β (*TRB*) ones, only β and δ chains also have diversity (D) genes recombined in VDJ recombination (α and γ just have VJ recombination)**
  - **during V(D)J recombination, joints between segments are partially digested and nucleotides are randomly added to form highly variable and non-germline-encoded complementarity-determining regions 3 (CDR3) loop that recognizes peptides, CDR1/2 loops of TCR form contacts with MHC and are encoded by V genes**
 # Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
  - chronic stimulation assay
@@ -307,8 +333,8 @@
  - result is that one pair of primers targeting 5' adaptor and constant region is able to amplify all TCR rearrangements
 # *HLA-DQA1* and *HLA-DQB1* in Celiac disease predisposition: practical implications of the HLA molecular typing
  - HLA class I and II genes code for cell surface glycoproteins important for antigen presentation and self-recognition by immune cells
- - HLA class I heterodimers consist of alpha-heavy chain (encoded by *HLA-A/B/C*) and small beta-microglobulin
- - HLA class II heterodimers (alpha and beta chains) specified by genes in HLA-D region (*DPA/B1*, *DQA/B1*, *DRB1/A*)
+ - HLA class I heterodimers consist of α-heavy chain (encoded by *HLA-A/B/C*) and small β-microglobulin
+ - HLA class II heterodimers (α and β chains) specified by genes in HLA-D region (*DPA/B1*, *DQA/B1*, *DRB1/A*)
 # HLA-DRB alleles are differentially expressed by tumor cells in breast carcinoma
 # Holistic approach to immune checkpoint inhibitor-related adverse events
  - irAEs usually occur within the first months after ICI treatment but can develop as early as after the first dose or as late as years after ICI treatment
@@ -337,7 +363,7 @@
 ## Highlights
  - systemic immune signatures shortly after ICI start linked to irAEs
  - ICI treated patients with irAEs associated with expansion of Ki-67<sup>+</sup> T cell subsets
- - ICI treated patients with irAEs associated with IFN-gamma and IFN-gamma-related proteins CXCL9-11 increases
+ - ICI treated patients with irAEs associated with IFN-γ and IFN-γ-related proteins CXCL9-11 increases
 ## Summary
  - early increase in CXCL9/CXCL10/CXCL11 and interferon-γ (IFN-γ) 1 to 2 weeks after the start of therapy are likely indicators of heightened risk of developing irAEs
  - an early expansion of Ki-67<sup>+</sup> regulatory T cells and Ki-67<sup>+</sup> CD8<sup>+</sup> T cells is also likely to be associated with increased risk of irAEs
@@ -347,9 +373,9 @@
 ### Canonical blood leukocyte frequencies pre-ICI therapy were similar between patients with the same type of cancer, independent of irAE development
 ### Patients with cancer treated with ICIs developing irAEs showed an early expansion of proliferating T cell subsets
 ### Patients with expanding CD8<sup>+</sup> CD38<sup>+</sup> Ki-67<sup>+</sup> T cells were more likely to develop irAEs early in their treatment
-### Patients with developing irAEs showed an early increase in the expansion of proteins associated with the IFN-gamma signaling pathway
+### Patients with developing irAEs showed an early increase in the expansion of proteins associated with the IFN-γ signaling pathway
 ### A potential biomarker profile to predict the development of ICI-irAEs in patients with cancer
- - early treatment expansion of IFN-gamma-driven cytokines and of Ki-67<sup>+</sup> T cell subsets provide good prediction model for irAE development (also increase in serum CXCL10), expansion of Ki-67<sup>+</sup> Tregs specifically for melanoma irAEs, CD8<sup>+</sup> Ki-67<sup>+</sup> CD38<sup>+</sup> T cell expansion specifically for NSCLC irAEs
+ - early treatment expansion of IFN-γ-driven cytokines and of Ki-67<sup>+</sup> T cell subsets provide good prediction model for irAE development (also increase in serum CXCL10), expansion of Ki-67<sup>+</sup> Tregs specifically for melanoma irAEs, CD8<sup>+</sup> Ki-67<sup>+</sup> CD38<sup>+</sup> T cell expansion specifically for NSCLC irAEs
  - IL-10 increase in early treatment associated with reduced irAE risk
 ## Discussion
  - **they also raise/cite the idea of antigen mimicry between tumor and self antigens, I think this is basically the same idea as the crossreactivity Peter mentioned perhaps underlying irAEs in 10/5/23 meeting (i.e. T cells crossreactive to tumor and self underlie irAEs)**
@@ -413,7 +439,7 @@
 # Innate lymphoid cells (ILCs): cytokine hubs regulating immunity and tissue homeostasis
  - ILCs enriched at mucosal barriers, activated by stress signals and epithelial/myeloid-derived cytokines, respond by secreting effector cytokines to maintain survival and mucosal integrity
  - ILCs do not possess rearranged antigen-specific cell receptors (TCR/BCR) but they mirror T helper cell diversity regarding cytokine secretion and transcription factors regulating differentiation
- - ILCs express cytokine receptor gamma chain with IL-7 receptor(R)alpha (CD127)
+ - ILCs express cytokine receptor γ chain with IL-7 receptor(R)α (CD127)
 # Integrated analysis of multimodal single-cell data
  - weighted nearest neighbor analysis integrates multimodal single cell data in an unsupervised manner by learning relative utility of each data type in each cell
 # Integrated NY-ESO-1 antibody and CD8<sup>+</sup> T-cell responses correlate with clinical benefit in advanced melanoma patients treated with ipilimumab
@@ -481,13 +507,12 @@
  - CTLA-4/PD-1 signaling converge on Akt (regulates metabolism, apoptosis, proliferation); PD-1 signaling antagonizes PI3K directly while CTLA-4's effects occur via PP2A phosphatase
  - **Anti-CTLA-4 and anti-PD-1/PD-L1 antibodies called "immune enhancers" and "immune normalizers" (normalizing T cell immunity in tumor microenvironment), respectively, consistent with PD-1 blockade having less irAEs**
 ### Mechanisms of T cell reactivity in irAEs
- - CTLA-4 blockade can lead to higher TCR V-beta CDR3 diversity in patients with irAEs, doesn't seem to matter though for clinical response, **which may suggest distinct autoreactive and anti-tumor populations**
+ - CTLA-4 blockade can lead to higher TCR V-β CDR3 diversity in patients with irAEs, doesn't seem to matter though for clinical response, **which may suggest distinct autoreactive and anti-tumor populations**
  - **irAEs may arise from mobilization of large numbers of T cells, some of which are autoreactive**
  - lag time between early changes in T cell populations upon ICI and development of irAEs later, perhaps **pathogenic T cells gradually emerge from larger number of clonotypes that occur after ICI**
 ### Mechanisms of B cell reactivity in irAEs
  - advanced melanoma patients receiving combination ICI had decreased circulating B cell counts, increased CXCL13 (germinal center activation marker) plasma levels, increased B cell clonality (in terms of immunoglobulin gene expression), and increased plasmablasts after treatment, and early changes in B cells correlated with higher rates of severe irAEs
- - subset of CD21<sup>low</sup> memory B cells particularly affected by combination ICI with restricted PD-1 expression and increased IFN-gamma signaling after treatment
- - 
+ - subset of CD21<sup>low</sup> memory B cells particularly affected by combination ICI with restricted PD-1 expression and increased IFN-γ signaling after treatment
 # Mechanisms of T cell exhaustion guiding next generation immunotherapy
  - resting exhausted T cells in antigen-free environments doesn't reinvigorate them (exhaustion is a committed cell fate)
  - exhausted T cells, unlike functional memory T cells, do not exhibit antigen-independent homeostatic proliferation (self-renewal in presence of homeostatic cytokines IL-7, IL-15); exhausted T cells require antigen exposure for maintenance
@@ -510,10 +535,16 @@
 #### CD8<sup>+</sup> T cells
  - CD8 coreceptors bind MHC class I molecules
  - most cells express MHC class I, process intracellular antigens and present them
- - class I MHC made of polymorphic alpha heavy chain and invariant light beta 2 microglobulin
+ - class I MHC made of polymorphic α heavy chain and invariant light β 2 microglobulin
 #### CD4<sup>+</sup> T cells
  - CD4 coreceptors bind class II MHC molecules
  - class II MHC molecules expressed by APCs like DCs, macrophages
+# Mismatch repair deficiency is not sufficient to elicit tumor immunogenicity
+## Abstract
+ - DNA mismatch repair deficiency is associated with high tumor mutational burden and ICB sensitivity, but most mismatch repair deficient tumors are not responsive to ICB
+ - intratumor mutational heterogeneity impedes T cell infiltration and ICB response
+## Main
+ - intratumor mutational heterogeneity refers to the fraction of mutations that are subclonal (only present in a minority of tumor cells), **so i.e. with a very mutationally heterogeneous tumor maybe there's a good immune response against a portion of the tumor but there's many other subclones that are not recognized by the immune system, i.e. subclones could be deleted with minimal impact on tumor fitness**
 # Mismatch repair deficiency/microsatellite instability-high as a predictor for anti-PD-1/PD-L1 immunotherapy efficacy
  - microsatellite instability-high follows mismatch repair deficiency
  - mismatch repair deficiency represents a good prognosis in early colorectal cancer but a poor prognosis in patients with metastasis (**perhaps because it's more easily recognized by immune system but it's a double edged sword as it's also likely more cancerous and dangerous at metastasis stage**)
@@ -577,12 +608,12 @@
  - Tregs suppress CD4 effector T cells
  - Tregs suppress activation-induced global protein synthesis in CD4 effector T cells before cell division
  - mRNAs encoding for protein synthesis machinery regulated at translational level in activated CD4 effector T cells by Tregs
- - Tregs suppress global protein synthesis of CD4 effector T cells by inhibiting mRNAs of translation machinery at level of mTORC1-mediated translational control via immunosuppressive cytokines IL-10 and TGF beta
+ - Tregs suppress global protein synthesis of CD4 effector T cells by inhibiting mRNAs of translation machinery at level of mTORC1-mediated translational control via immunosuppressive cytokines IL-10 and TGFβ
  - RNA helicase eIF4A inhibitor rocaglamide A can alleviate inflammatory CD4 effector T cell activation by Treg depletion *in vivo*
 ## Introduction
  - FOXP3 mutations can drive autoimmunity, linked to loss of functional Tregs
  - Tregs can suppress CD4 effector T cells directly or through modulation of APCs (mostly DCs)
- - proposed suppression mechanisms: suppressive cytokine release (TGF beta, IL-10, IL-35), inhibitory receptor expression (CTLA-4, PD-1, TIGIT)
+ - proposed suppression mechanisms: suppressive cytokine release (TGFβ, IL-10, IL-35), inhibitory receptor expression (CTLA-4, PD-1, TIGIT)
  - upon activation, resting T cells undergo rapid reprogramming in preparation of cell division, includes increased translation
 ## Results
 ### Tregs control the protein synthetic capacity of activated CD4 Teffs
@@ -639,6 +670,8 @@
  - irAEs are frequent in patients treated with ICIs (~90% of patients treated with PD-1 blockade and/or CTLA-4 blockade), severe/life threatening (grades 3/4, respectively) irAEs in fewer but still many patients
  - at baseline, patients with arthritis had less cells with features of CD8 T<sub>CM</sub> cells, patients with pneumonitis had more CD4 T<sub>H2</sub> cells, patients with thyroiditis had more CD4 T<sub>H17</sub> cells, so **different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers**
 # Single-gene negative binomial regression models for RNA-Seq data with higher-order asymptotic inference
+# SLC7A7 is a prognostic biomarker correlated with immune infiltrates in non-small cell lung cancer
+ - SLC7A7 expression associated with poor overall survival in lung cancer patients, positively correlated with immune cell infiltration
 # Specificity of T-cell alloreactivity
  - many alloreactive T cells are much more peptide specific than previously thought, few if any recognize only the MHC molecule
  - alloreactive T cells are polyspecific, able to recognize multiple distinct peptide-MHC complexes (perhaps why there's a high frequency of allorecognition)
@@ -647,7 +680,13 @@
  - ICI-induced inflammatory arthritis has been reported
  - corticosteroids can treat mild irAEs, TNFα inhibitors reserved for severe cases (prolonged TNFα inhibitor use can negatively impact antitumor effect of ICI)
  - here, they try instead to use the anti IL6 receptor antibody (FDA approved to treat RA) for ICI-induced arthritis
-# Targeting PI3K alpha increases the efficacy of anti-PD-1 antibody in cervical cancer
+# Targeting of multiple tumor-associated antigens by individual T cell receptors during successful cancer immunotherapy
+## Highlights
+ - individual T cells can recognize multiple, different tumor-associated antigens
+ - identification of new epitopes recognized by these "orphan" T cells
+## Summary
+ - in the context of tumor-infiltrating lymphocyte therapy
+# Targeting PI3Kα increases the efficacy of anti-PD-1 antibody in cervical cancer
  - *PIK3CA* mutation results in increase PD-L1 levels, repression of CD8<sup>+</sup> T cell differentiation in cervical cancer
 # T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma
 ## Abstract
@@ -739,15 +778,15 @@
  - responding exhausted T cells in blood contain TCR clonotypes shared with tumor infiltrating T cells
  - ratio of exhausted T cell reinvigoration to tumor burden predicts clinical response
 # T-cell repertoire analysis and metrics of diversity and clonality
- - **TCR alpha beta heterodimer disulfide linked, each chain has constant and variable domain, 3 CDRs per chain so CDR1-3 alpha and beta**
+ - **TCRαβ heterodimer disulfide linked, each chain has constant and variable domain, 3 CDRs per chain so CDR1-3 α and β**
  - **CDR3 product of junctional diversity, most variable**
  - **TCR-pMHC binding rather low-affinity, degenerate (many TCRs recognize same peptide and many peptides recognized by same TCR)**
- - **CDR1-2 contact MHC and CDR3 contacts peptide is the general rule, but CDR1 alpha also contacts peptide and CDR3 beta doesn't contact peptide too much**
+ - **CDR1-2 contact MHC and CDR3 contacts peptide is the general rule, but CDR1α also contacts peptide and CDR3β doesn't contact peptide too much**
 ## Diversity meaures
  - richness refers to number of unique TCR sequences, evenness refers to distribution spectrum of these TCR sequences (relative abundances)
  - diversity relates to level of uncertainty that TCR sequence sorted from reportoire would belong to a certain T cell clone (unique TCR sequence)
- - Shannon entropy: order (alpha) of 1, 0 means monoclonal, max (log of number of unique sequences) means evenely distributed TCR sequences, encounters higher variation upon addition of low frequency clones than Gini-Simpson index
- - Gini-Simpson index: order (alpha) of 2, 0 means monoclonal, 1 means polyclonal with equivalent representation of all clones, barely affected by increasing number of unique TCRs in repertoire (unlike Shannon entropy)
+ - Shannon entropy: order (α) of 1, 0 means monoclonal, max (log of number of unique sequences) means evenely distributed TCR sequences, encounters higher variation upon addition of low frequency clones than Gini-Simpson index
+ - Gini-Simpson index: order (α) of 2, 0 means monoclonal, 1 means polyclonal with equivalent representation of all clones, barely affected by increasing number of unique TCRs in repertoire (unlike Shannon entropy)
  - Pielou's index (evenness measure): clonal evenness refers to clonal diversity, 1 - Pielou's index is often used and here 0 means maximally diverse and 1 means monoclonal
  - Gini coefficient: inequality measure, distinct from Gini-Simpson index, 0 means maximal diversity, high value means monoclonal
 # T cell tolerance: central and peripheral
@@ -800,7 +839,7 @@
 ## Glossary
  - **clonal replacement: recruitment of less dysfunctional peripheral T cell clonotypes to tumor that were not detectable in tumor prior to PD-1 blockade, i.e. from tumor draining lymph node, more important in ICI than previously thought**
  - **clonal revival: replenishment of highly dysfunctional T cell clones in tumor with new, less dysfunctional T cells (perhaps from periphery, local expansion within tumor) that can be novel clonotypes (i.e. clonal replacement) or clonotypes pre-existing in tumor**
- - **clone (set of T cells that are clonal progeny due to shared clonotype and host) vs. clonotype (paired alpha and beta TCR nucleotide sequence of a T cell)**
+ - **clone (set of T cells that are clonal progeny due to shared clonotype and host) vs. clonotype (paired α and β TCR nucleotide sequence of a T cell)**
  - **MHC haplotype: combination of MHC alleles found in a single individual**
  - neoadjuvant: treatment (surgery, radiation) given before definitive, curative treatment
  - neoantigens: antigens from somatic mutations in tumors
@@ -827,13 +866,13 @@
  - can also use antigen stimulation *in vitro* and then sort activated T cells (by activation marker or expansion level), but can't really phenotype these cells before stimulation
  - Tconv refers to conventional, non-Treg T cell
 ### TCR-directed methods for detecting T cells of interest
- - **TCR sequence generated through V(D)J recombination during T cell development in thymus, random recombination of *V*, *D*, *J* segments for beta chain and alpha chain (just *V* and *J* for alpha though) of each TCR**
+ - **TCR sequence generated through V(D)J recombination during T cell development in thymus, random recombination of *V*, *D*, *J* segments for β chain and α chain (just *V* and *J* for α though) of each TCR**
  - bulk TCR seq often collects 10<sup>5</sup> to 10<sup>6</sup> TCRs per sample, scTCRseq often lower (100-1000 TCRs/sample), skewed distribution of clones (long tail of unexpanded clones that represent minimal fraction of true repertoire)
 ### Using the TCR as a barcode in cancer
  - limitation: some baseline level of clonal expansion may be needed for TCR sequence to be useful due to detection limits for identifying rare/unexpanded populations by scTCRseq
  - barcode method may have more utility in immunologically 'hot' tumors (high mutational burden, high CD8<sup>+</sup> T cell infiltration, high inflammation)
 ### Using the TCR as a barcode in autoimmunity
- - antigen persists for some autoimmune diseases (RA, MS) but decreases over time for others (T1D insulin-producing beta cells, so pathogenic T cell population likely contracts with loss of APCs)
+ - antigen persists for some autoimmune diseases (RA, MS) but decreases over time for others (T1D insulin-producing β cells, so pathogenic T cell population likely contracts with loss of APCs)
 ## Using TCR analyses to inform on mechanisms of antitumor immunity following PD-1 immunotherapy
  - pancreatic cancer, prostate cancer, glioblastoma don't respond well to PD-1 blockade
 ### Anatomical site of action of PD-1 inhibitors: tumor vs lymph node
@@ -848,8 +887,24 @@
 # The altertions in peripheral lymphocyte subsets predict the efficacy and prognosis of immune checkpoint inhibitors in hepatocellular carcinoma
  - CD3<sup>+</sup>CD8<sup>+</sup> T cell percentage increases after ICI, B cell percentage decreases
 # The cancer-immunity cycle: indication, genotype, and immunotype
- - cancer immunity cycle: release of cancer cell antigens (cancer cell death) --> cancer antigen presentation (DCs/APCs) --> priming/activation of T cells by APCS --> trafficking of T cells to tumors --> infiltration of T cells into tumors (past stromal barrier) --> recognition of cancer cells by T cells --> killing of cancer cells --> release of more cancer cell antigens (restart cycle)
- - 
+## cancer immunity cycle
+ - release of cancer cell antigens (cancer cell death)
+ - cancer antigen presentation (DCs/APCs)
+ - priming/activation of T cells by APCS
+ - trafficking of T cells to tumors
+ - infiltration of T cells into tumors (past stromal barrier)
+ - recognition of cancer cells by T cells
+ - killing of cancer cells
+ - release of more cancer cell antigens (restart cycle)
+## immunotypes
+ - immunotypes: immunological phenotypes of cancers
+ - inflammed (abundant immune infiltrates, untreated melanoma generally)
+ - excluded (infiltrates limited to stroma as opposed to parenchyma, untreated colon cancer generally)
+ - desert (no infiltrates, untreated prostate cancer generally)
+## T cell exhaustion
+ - exhausted T cells accumulate when amount of antigen exceeds ability for clearance by antigen-specific T cells
+ - characterized by increased expression of coinhibitory receptors (PD-1, LAG-3, TIM-3, TIGIT), these receptors also mark T cell activation
+ - blocking coinhibitory receptors (i.e. ICB) can reinvigorate exhausted T cells but exhaustion is a difficult to reverse, altered epigenetic state
 # The graft-versus-leukemia effect in AML
  - allogenic hematopoietic stem cell transplantation (allo-SCT) commonly used in cancer care, most potent anti-leukemic therapy in AML (acute myeloid leukemia) patients
  - donor T cells (and maybe other immune cells) eliminate residual leukemia cells after radio/chemotherapy = graft-versus-leukemia response
@@ -927,5 +982,10 @@
  - Th1 (T helper type 1) cells secrete IL-2, interferon-γ, lymphotoxin-α and stimulate type 1 immunity (intense phagocytic activity), more or less synonymous with cell-mediated immunity but some antibodies are still produced, protective for most infections
  - Th2 cells secrete IL-4/5/9/10/13 and stimulate type 2 immunity (high antibody titers), more or less synonymous with humoral immunity (Th2 cells suppress phagocytosis), resolves cell-mediated inflammation
  - systemic stress, immunosuppression cause type 2 response to infection normally controlled by type 1 response
+# Uncoupling therapeutic efficacy from immune-related adverse events in immune checkpoint blockade
+## Improving immunotherapeutic strategies to reduce irAEs
+### Broadening checkpoint blockade antibody strategies
+ - perhaps try dual immunodulatory antibodies (bispecific or antibody-based alternative structures), for example targeting PD-1/PD-L1 in combination with LAG-3/TIM-3 (perhaps promotes retention in tumor microenvironment over healthy tissue)
+ - perhaps modify anti-CTLA-4 antibodies to permit expression of CTLA-4 on Tregs (CTLA-4 required for Treg inhibitory function)
 # γδ T cell exhaustion: Opportunities for intervention
  - γδ T cells (TCRs with γ and δ chains instead of the usual α and β ones) can respond to varied infections/tumor challenges in a non-MHC-restricted manner, involved in immune surveillance (pleiotropic i.e. more than one effector functions)
