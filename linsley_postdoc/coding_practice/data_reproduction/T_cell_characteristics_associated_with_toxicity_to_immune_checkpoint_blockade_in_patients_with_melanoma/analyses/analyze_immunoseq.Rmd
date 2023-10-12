@@ -113,6 +113,17 @@ irae_statuses <- irae_statuses %>%
 
 ```
 
+# Join irAE development with immunoseq data
+
+```{r}
+
+combined_immunoseq_data <- combined_immunoseq_data %>%
+  left_join(irae_statuses, by = "patient_id")
+
+combined_immunoseq_data
+
+```
+
 # Count repeats of various TCR measures, calculate diversity scores, join with metadata
 
 ```{r}
@@ -363,8 +374,6 @@ fasta_fastq_prep <- combined_immunoseq_data %>%
   mutate(suffix = row_number()) %>%
   ungroup()
 
-#head(fasta_fastq_prep)
-
 # Function to convert a data frame to FASTA format
 df_to_fasta <- function(df, output_file) {
   # Open/create the output file for writing
@@ -386,5 +395,301 @@ df_to_fasta <- function(df, output_file) {
 
 # Call the function to convert the data frame to FASTA format
 df_to_fasta(fasta_fastq_prep, "../saved_data/immunoseq.fasta")
+
+```
+
+
+# Investigate TCR length and germline-ness as a function of treatment status, box plots
+
+```{r}
+
+ici_length_and_germlineness_df <- combined_immunoseq_data %>%
+  select(n1_insertions, n2_insertions, cdr1_rearrangement_length, cdr2_rearrangement_length, cdr3_rearrangement_length, cdr3_length, ici_status) %>%
+  gather(key = "Category", value = "Value", -ici_status)
+
+ici_length_and_germlineness_df
+
+custom_labeller <- as_labeller(c("n1_insertions" = "n1\ninsertions", "n2_insertions" = "n2\ninsertions", "cdr1_rearrangement_length" = "cdr1\nrearrangement\nlength (nt)", "cdr2_rearrangement_length" = "cdr2\nrearrangement\nlength (nt)", "cdr3_rearrangement_length" = "cdr3\nrearrangement\nlength (nt)", "cdr3_length" = "cdr3\nlength (nt)"))
+
+# Create the box plot with facets
+ggplot(ici_length_and_germlineness_df, aes(x = ici_status, y = Value)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "ici_status", y = "Value")
+
+```
+
+# Histograms instead of boxplots, look at CDR1/2 rearrangement lengths
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by ici_status
+ggplot(ici_length_and_germlineness_df %>% filter(Category %in% c("cdr1_rearrangement_length", "cdr2_rearrangement_length")), aes(x = Value, fill = ici_status)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(14, 22) +
+  scale_fill_manual(values = c("pre" = "blue", "on" = "red"))
+
+```
+
+# Histograms instead of boxplots, look at CDR3 (rearrangement) lengths
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by ici_status
+ggplot(ici_length_and_germlineness_df %>% filter(Category %in% c("cdr3_rearrangement_length", "cdr3_length")), aes(x = Value, fill = ici_status)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(0, 80) +
+  scale_fill_manual(values = c("pre" = "blue", "on" = "red"))
+
+```
+
+# Histograms instead of boxplots, look at n1/2 insertions
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by ici_status
+ggplot(ici_length_and_germlineness_df %>% filter(Category %in% c("n1_insertions", "n2_insertions")), aes(x = Value, fill = ici_status)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(0, 20) +
+  scale_fill_manual(values = c("pre" = "blue", "on" = "red"))
+
+```
+
+# Investigate TCR length and germline-ness as a function of irAE development, box plots
+
+```{r}
+
+irae_length_and_germlineness_df <- combined_immunoseq_data %>%
+  select(n1_insertions, n2_insertions, cdr1_rearrangement_length, cdr2_rearrangement_length, cdr3_rearrangement_length, cdr3_length, severe_irae) %>%
+  gather(key = "Category", value = "Value", -severe_irae)
+
+irae_length_and_germlineness_df
+
+custom_labeller <- as_labeller(c("n1_insertions" = "n1\ninsertions", "n2_insertions" = "n2\ninsertions", "cdr1_rearrangement_length" = "cdr1\nrearrangement\nlength (nt)", "cdr2_rearrangement_length" = "cdr2\nrearrangement\nlength (nt)", "cdr3_rearrangement_length" = "cdr3\nrearrangement\nlength (nt)", "cdr3_length" = "cdr3\nlength (nt)"))
+
+# Create the box plot with facets
+ggplot(irae_length_and_germlineness_df, aes(x = severe_irae, y = Value)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Severe irAE", y = "Value")
+
+```
+
+# Histograms instead of boxplots, look at CDR1/2 rearrangement lengths
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by severe_irae
+ggplot(irae_length_and_germlineness_df %>% filter(Category %in% c("cdr1_rearrangement_length", "cdr2_rearrangement_length")), aes(x = Value, fill = severe_irae)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(14, 22) +
+  scale_fill_manual(values = c("Yes" = "blue", "No" = "red"))
+
+```
+
+# Histograms instead of boxplots, look at CDR3 (rearrangement) lengths
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by severe_irae
+ggplot(irae_length_and_germlineness_df %>% filter(Category %in% c("cdr3_rearrangement_length", "cdr3_length")), aes(x = Value, fill = severe_irae)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(0, 80) +
+  scale_fill_manual(values = c("Yes" = "blue", "No" = "red"))
+
+```
+
+# Histograms instead of boxplots, look at n1/2 insertions
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by severe_irae
+ggplot(irae_length_and_germlineness_df %>% filter(Category %in% c("n1_insertions", "n2_insertions")), aes(x = Value, fill = severe_irae)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(0, 20) +
+  scale_fill_manual(values = c("Yes" = "blue", "No" = "red"))
+
+```
+
+# Create df of hydrophobicity scores for amino acids, prepare score calculator
+
+```{r}
+
+# Define the amino acids and their corresponding Eisenberg hydrophobicity values
+amino_acids <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
+hydrophobicity_values <- c(0.620, -2.530, -0.780, -0.900, 0.290, -0.850, -0.740, 0.480, -0.400, 1.380, 1.060, -1.500, 0.640, 1.190, 0.120, -0.180, -0.050, 0.81, 0.26, 1.08)
+
+# Create a data frame
+hydrophobicity_df <- data.frame(Amino_Acid = amino_acids, Hydrophobicity = hydrophobicity_values)
+
+hydrophobicity_df
+
+calculate_hydrophobicity <- function(sequence, hydrophobicity_df) {
+  sequence <- toupper(sequence)
+  # Calculate the hydrophobicity scores for each amino acid, and sum them
+  scores <- sapply(strsplit(sequence, '')[[1]], function(aa) {
+    match_aa <- match(aa, hydrophobicity_df$Amino_Acid)
+    if (!is.na(match_aa)) {
+      return(hydrophobicity_df$Hydrophobicity[match_aa])
+    } else {
+      # If an amino acid is not found, return NA
+      return(NA)
+    }
+  })
+  # If there are any NAs in the scores, return NA; otherwise, return the sum
+  if (any(is.na(scores))) {
+    return(NA)
+  } else {
+    return(sum(scores))
+  }
+}
+
+```
+
+# Investigate hydrophobicity as a function of ICI status
+
+```{r}
+
+ici_hydrophobicity_df <- combined_immunoseq_data %>%
+  select(amino_acid, cdr1_amino_acid, cdr2_amino_acid, cdr3_amino_acid, ici_status) %>%
+  rowwise() %>%
+  mutate(amino_acid_score = calculate_hydrophobicity(amino_acid, hydrophobicity_df)) %>%
+  mutate(cdr1_amino_acid_score = calculate_hydrophobicity(cdr1_amino_acid, hydrophobicity_df)) %>%
+  mutate(cdr2_amino_acid_score = calculate_hydrophobicity(cdr2_amino_acid, hydrophobicity_df)) %>%
+  mutate(cdr3_amino_acid_score = calculate_hydrophobicity(cdr3_amino_acid, hydrophobicity_df)) %>%
+  ungroup() %>%
+  select(-amino_acid, -cdr1_amino_acid, -cdr2_amino_acid, -cdr3_amino_acid) %>%
+  gather(key = "Category", value = "Value", -ici_status)
+
+ici_hydrophobicity_df
+
+```
+
+# Plot hydrophobicity scores as a function of ICI status
+
+```{r}
+
+custom_labeller <- as_labeller(c("amino_acid_score" = "Amino\nacid score", "cdr1_amino_acid_score" = "CDR1 amino\nacid score", "cdr2_amino_acid_score" = "CDR2 amino\nacid score", "cdr3_amino_acid_score" = "CDR3 amino\nacid score"))
+
+# Create the box plot with facets
+ggplot(ici_hydrophobicity_df, aes(x = ici_status, y = Value)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "ici_status", y = "Value")
+
+```
+
+# Histograms instead of boxplots, look at amino acid and CDR3 AA
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by ici_status
+ggplot(ici_hydrophobicity_df %>% filter(Category %in% c("amino_acid_score", "cdr3_amino_acid_score")), aes(x = Value, fill = ici_status)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(-10, 10) +
+  scale_fill_manual(values = c("pre" = "blue", "on" = "red"))
+
+```
+
+# Histograms instead of boxplots, look at CDR1/2 AA
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by ici_status
+ggplot(ici_hydrophobicity_df %>% filter(Category %in% c("cdr1_amino_acid_score", "cdr2_amino_acid_score")), aes(x = Value, fill = ici_status)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(-6, 6) +
+  scale_fill_manual(values = c("pre" = "blue", "on" = "red"))
+
+```
+
+# Investigate hydrophobicity as a function of irAE status
+
+```{r}
+
+irae_hydrophobicity_df <- combined_immunoseq_data %>%
+  select(amino_acid, cdr1_amino_acid, cdr2_amino_acid, cdr3_amino_acid, severe_irae) %>%
+  rowwise() %>%
+  mutate(amino_acid_score = calculate_hydrophobicity(amino_acid, hydrophobicity_df)) %>%
+  mutate(cdr1_amino_acid_score = calculate_hydrophobicity(cdr1_amino_acid, hydrophobicity_df)) %>%
+  mutate(cdr2_amino_acid_score = calculate_hydrophobicity(cdr2_amino_acid, hydrophobicity_df)) %>%
+  mutate(cdr3_amino_acid_score = calculate_hydrophobicity(cdr3_amino_acid, hydrophobicity_df)) %>%
+  ungroup() %>%
+  select(-amino_acid, -cdr1_amino_acid, -cdr2_amino_acid, -cdr3_amino_acid) %>%
+  gather(key = "Category", value = "Value", -severe_irae)
+
+irae_hydrophobicity_df
+
+```
+
+# Plot hydrophobicity scores as a function of irAE status
+
+```{r}
+
+custom_labeller <- as_labeller(c("amino_acid_score" = "Amino\nacid score", "cdr1_amino_acid_score" = "CDR1 amino\nacid score", "cdr2_amino_acid_score" = "CDR2 amino\nacid score", "cdr3_amino_acid_score" = "CDR3 amino\nacid score"))
+
+# Create the box plot with facets
+ggplot(irae_hydrophobicity_df, aes(x = severe_irae, y = Value)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Severe irAE", y = "Value")
+
+```
+
+# Histograms instead of boxplots, look at amino acid and CDR3 AA
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by ici_status
+ggplot(irae_hydrophobicity_df %>% filter(Category %in% c("amino_acid_score", "cdr3_amino_acid_score")), aes(x = Value, fill = severe_irae)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(-10, 10) +
+  scale_fill_manual(values = c("Yes" = "blue", "No" = "red"))
+
+```
+
+# Histograms instead of boxplots, look at CDR1/2 AA
+
+```{r}
+
+# Create the overlaid histograms with facets and colored by ici_status
+ggplot(irae_hydrophobicity_df %>% filter(Category %in% c("cdr1_amino_acid_score", "cdr2_amino_acid_score")), aes(x = Value, fill = severe_irae)) +
+  geom_density(alpha = 0.5, position = "identity") +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Value", y = "Density") +
+  xlim(-6, 6) +
+  scale_fill_manual(values = c("Yes" = "blue", "No" = "red"))
+
+```
+
+# Test creating csv for stichr thimble input
+
+```{r}
+
+stitchr_df <- combined_immunoseq_data %>%
+  select(v_resolved, d_resolved, j_resolved, cdr3_amino_acid) %>%
+  mutate(TCR_name = row_number())
+
+stitchr_df
+
+write.csv(stitchr_df, file = "../saved_data/immunoseq_for_stitchr.csv", row.names = FALSE)
 
 ```
