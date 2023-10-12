@@ -686,7 +686,11 @@ ggplot(irae_hydrophobicity_df %>% filter(Category %in% c("cdr1_amino_acid_score"
 
 stitchr_df <- combined_immunoseq_data %>%
   select(v_resolved, d_resolved, j_resolved, cdr3_amino_acid) %>%
-  mutate(TCR_name = row_number())
+  mutate(TCR_name = row_number()) %>%
+  rename(TRBV = v_resolved,
+         TRBD = d_resolved,
+         TRBJ = j_resolved,
+         TRB_CDR3 = cdr3_amino_acid)
 
 stitchr_df
 
