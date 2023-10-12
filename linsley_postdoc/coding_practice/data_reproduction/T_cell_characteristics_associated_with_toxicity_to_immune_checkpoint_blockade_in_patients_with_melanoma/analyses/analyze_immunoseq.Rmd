@@ -690,6 +690,6 @@ stitchr_df <- combined_immunoseq_data %>%
 
 stitchr_df
 
-write.csv(stitchr_df, file = "../saved_data/immunoseq_for_stitchr.csv", row.names = FALSE)
+write.table(stitchr_df, file = "../saved_data/immunoseq_for_stitchr.tsv", sep = "\t", row.names = FALSE)
 
 ```
