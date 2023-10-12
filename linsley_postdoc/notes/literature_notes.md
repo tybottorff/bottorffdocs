@@ -686,6 +686,9 @@
  - identification of new epitopes recognized by these "orphan" T cells
 ## Summary
  - in the context of tumor-infiltrating lymphocyte therapy
+ - **shared x-x-x-A/G-I/L-G-I-x-x-x recognition motif was key for cross-reactive TCR**
+## Introduction
+ - 
 # Targeting PI3Kα increases the efficacy of anti-PD-1 antibody in cervical cancer
  - *PIK3CA* mutation results in increase PD-L1 levels, repression of CD8<sup>+</sup> T cell differentiation in cervical cancer
 # T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma
