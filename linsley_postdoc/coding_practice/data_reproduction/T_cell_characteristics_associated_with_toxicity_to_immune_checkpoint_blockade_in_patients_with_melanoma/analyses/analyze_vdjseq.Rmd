@@ -105,7 +105,7 @@ file_names <- c(
 combined_data <- data.frame()
 
 # Process each file and append it to the combined_data data frame
-for (file_name in selected_files) {
+for (file_name in file_names) {
   # Read the CSV file
   data <- read_csv(file_name)
   
@@ -171,5 +171,20 @@ stitchr_df <- combined_data %>%
          TRB_3_prime_seq = NA)
 
 stitchr_df
+
+write.table(stitchr_df, file = "../saved_data/vdjseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+
+```
+
+# Analyze stitchr output
+
+```{r}
+
+stitchr_output_df <- read_tsv("../saved_data/vdj_stitchr_out.tsv") %>%
+  filter(!(is.na(Linked_nt)))
+
+stitchr_output_df
+
+write.csv(stitchr_output_df, file = "../saved_data/igor_input.csv", row.names = FALSE)
 
 ```
