@@ -121,6 +121,15 @@
  - in patients with p16-positive HNSCC, see many antigens against which antibodies were formed during radiation therapy and ICI shared between patients
 # Characterization of Thyroid Disorders in Patients Receiving Immune Checkpoint Inhibition Therapy
  - thyroid disorders are a common irAE following ICI
+# Checkpoint-blocker-induced autoimmunity is associated with favorable outcome in metastatic melanoma and distinct T-cell expression profiles
+## Abstract
+ - pre-treatment monocyte and neutrophil counts also predicted clinical outcome
+ - DEGs in CD8<sup>+</sup> T cells by irAE development, patients not developing irAEs had upregulated *CXCR1* pre/post-treatment
+## Background
+ - it's not consistently observed but sometimes observed that there's an association between irAE development and improved treatment response (suggesting a link between reduced tolerance to self-antigens and tumor antigens)
+## Results
+### Immune-related adverse events
+ - 
 # Chimeric CTLA-4-CD28-CD3z T cells potentiate antitumor activity against CD80/CD86-positive B cell malignancies
  - overcome inhibitive microenvironment of tumor by making chimeric CTLA-4 (extracellular and transmembrane domains) CD28/CD3z (cytoplasmic domains) protein, so off signal becomes on signal
  - CTLA-4 upregulated after T cell activation, to prevent too much activation?
@@ -688,7 +697,10 @@
  - in the context of tumor-infiltrating lymphocyte therapy
  - **shared x-x-x-A/G-I/L-G-I-x-x-x recognition motif was key for cross-reactive TCR**
 ## Introduction
- - 
+ - "orphan" T cells refers to T cells with unknown specificities
+ - example cross-reactive T cell here recognized 3 peptides: EAAGIGILTV from Melan A,  LLLGIGILVL from tetherin/CD317/BST2, and NLSALGIFST from IMP2
+ - they use term "multipronged" whereas I've been reading/using cross-reactive
+ - multipronged recognition resulted in superior recognition of cancer cells vs. recognition by single TAA
 # Targeting PI3Kα increases the efficacy of anti-PD-1 antibody in cervical cancer
  - *PIK3CA* mutation results in increase PD-L1 levels, repression of CD8<sup>+</sup> T cell differentiation in cervical cancer
 # T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma
