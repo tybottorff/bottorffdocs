@@ -1,0 +1,190 @@
+---
+title: "T cell characteristics associated with irAE from ICI in melanoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in TCR, BCR data
+
+```{r}
+
+# List of file names
+file_names <- c(
+  "../raw_data/GSM5694801_YUFURL_TCR.csv.gz",
+  "../raw_data/GSM5694811_YUALOE_TCR.csv.gz",
+  "../raw_data/GSM5694802_YUGRUS_TCR.csv.gz",
+  "../raw_data/GSM5694812_YUHONEY_TCR.csv.gz",
+  "../raw_data/GSM5694803_YUHERN_TCR.csv.gz",
+  "../raw_data/GSM5694804_YUKEND_TCR.csv.gz",
+  "../raw_data/GSM5694805_YUPIXEL_TCR.csv.gz",
+  "../raw_data/GSM5694806_YUROD_TCR.csv.gz",
+  "../raw_data/GSM5694798_YUCARD_TCR.csv.gz",
+  "../raw_data/GSM5694808_YUTHEA_TCR.csv.gz",
+  "../raw_data/GSM5694799_YUENZO_TCR.csv.gz",
+  "../raw_data/GSM5694800_YUFUB_TCR.csv.gz",
+  "../raw_data/GSM5694810_YUVARDO_TCR.csv.gz",
+  "../raw_data/GSM5694809_YUTORY_TCR.csv.gz",
+  "../raw_data/GSM5694807_YUTAUR_TCR.csv.gz",
+  "../raw_data/GSM5694813_YUNANCY_TCR.csv.gz"
+#  "../raw_data/GSM5694821_YUPIXEL_BCR.csv.gz",
+#  "../raw_data/GSM5694822_YUROD_BCR.csv.gz",
+#  "../raw_data/GSM5694823_YUTAUR_BCR.csv.gz",
+#  "../raw_data/GSM5694814_YUCARD_BCR.csv.gz",
+#  "../raw_data/GSM5694824_YUTHEA_BCR.csv.gz",
+#  "../raw_data/GSM5694815_YUENZO_BCR.csv.gz",
+#  "../raw_data/GSM5694825_YUTORY_BCR.csv.gz",
+#  "../raw_data/GSM5694816_YUFUB_BCR.csv.gz",
+#  "../raw_data/GSM5694826_YUVARDO_BCR.csv.gz",
+#  "../raw_data/GSM5694817_YUFURL_BCR.csv.gz",
+#  "../raw_data/GSM5694818_YUGRUS_BCR.csv.gz",
+#  "../raw_data/GSM5694819_YUHERN_BCR.csv.gz",
+#  "../raw_data/GSM5694820_YUKEND_BCR.csv.gz"
+)
+
+## List of patient IDs we want to include
+#selected_patient_IDs <- c(
+#  "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+#  "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+#  "YUTORY", "YUHERN", "YUROD"
+#)
+
+# Filter the list of file names to include only selected patients
+#selected_files <- file_names[sapply(file_names, function(file_name) {
+#  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+#  patient_ID %in% selected_patient_IDs
+#})]
+
+# Create a mapping of patient.ID to their respective suffixes
+#suffix_mapping <- data.frame(
+#  patient.ID = c(
+#    "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+#    "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+#    "YUTORY", "YUHERN", "YUROD"
+#  ),
+#  suffix = c(
+#    ".1_1", ".1_2", ".1_3", ".1_4", ".1_5", ".1_6", ".1_7", ".1_8", ".1_9", ".1_10", ".1_11", ".1_12", #".1_13"
+#  )
+#)
+
+# Create an empty data frame to store the combined data
+combined_data <- data.frame()
+
+# Process each file and append it to the combined_data data frame
+for (file_name in file_names) {
+  # Read the CSV file
+  data <- read_csv(file_name)
+  
+  # Extract patient ID and CR type (TCR or BCR) from the file name
+  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+  
+  # Find the suffix based on patient ID from the mapping
+  #suffix <- suffix_mapping$suffix[suffix_mapping$patient.ID == patient_ID]
+  
+  # Add the suffix to the "Barcode" column
+  #data$Barcode <- paste(data$Barcode, suffix, sep = "")
+  
+  CR_type <- ifelse(grepl("_TCR", file_name), "TCR", "BCR")
+  
+  # Add patient ID and CR type as new columns
+  data$patient.ID <- patient_ID
+  data$CR.type <- CR_type
+  
+  # Append the data to the combined_data data frame
+  combined_data <- bind_rows(combined_data, data)
+}
+
+# Remove duplicate rows based on the "Barcode" column
+#combined_data <- combined_data %>%
+#  distinct(Barcode, .keep_all = TRUE)
+
+# Set row names based on the "Barcode" column
+#rownames(combined_data) <- combined_data$Barcode
+
+#combined_data <- combined_data %>% select(-Barcode)
+
+combined_data
+
+```
+
+# Prep for stitchr
+
+```{r}
+
+stitchr_df <- combined_data %>%
+  group_by(Barcode) %>%
+  # filter for 1 alpha and 1 beta chain per barcode (easiest way to start)
+  filter(sum(Chain == "TRA") == 1 & sum(Chain == "TRB") == 1) %>%
+  ungroup() %>%
+  filter(Chain %in% c("TRA", "TRB")) %>%
+  select(-CR.type, -`CDR3 NT Sequence`, -`D gene`, -patient.ID) %>%
+  rename(TCR_name = Barcode,
+         CDR3 = `CDR3 AA Sequence`,
+         V = `V gene`,
+         J = `J gene`,
+         C = `C gene`) %>%
+  pivot_wider(names_from = Chain, values_from = c(V, J, C, CDR3)) %>%
+  # rename, reorder, create cols for stitchr
+  rename(TRAV = V_TRA, TRAJ = J_TRA, TRBV = V_TRB, TRBJ = J_TRB, TRAC = C_TRA, TRBC = C_TRB, TRA_CDR3 = CDR3_TRA, TRB_CDR3 = CDR3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader =NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_df
+
+write.table(stitchr_df, file = "../saved_data/vdjseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+
+```
+
+# Analyze stitchr output
+
+```{r}
+
+stitchr_output_df <- read_tsv("../saved_data/vdj_stitchr_out.tsv") %>%
+  filter(!(is.na(Linked_nt)))
+
+stitchr_output_df
+
+write.csv(stitchr_output_df, file = "../saved_data/igor_input.csv", row.names = FALSE)
+
+```

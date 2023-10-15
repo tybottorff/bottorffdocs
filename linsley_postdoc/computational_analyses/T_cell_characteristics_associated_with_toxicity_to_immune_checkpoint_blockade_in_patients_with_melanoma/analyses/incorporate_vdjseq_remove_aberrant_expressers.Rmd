@@ -1,0 +1,651 @@
+---
+title: "T cell characteristics associated with irAE from ICI in melanoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+melanoma_T_cells_cell_type_clustered <- readRDS("../saved_data/mono_dc_rbcs_platelets_filtered_cell_type_clustered.rds")
+
+```
+
+# Read in TCR, BCR data, process to add in as metadata to Seurat RNA assay object
+
+```{r}
+
+# List of file names
+file_names <- c(
+  "../raw_data/GSM5694801_YUFURL_TCR.csv.gz",
+  "../raw_data/GSM5694811_YUALOE_TCR.csv.gz",
+  "../raw_data/GSM5694802_YUGRUS_TCR.csv.gz",
+  "../raw_data/GSM5694812_YUHONEY_TCR.csv.gz",
+  "../raw_data/GSM5694803_YUHERN_TCR.csv.gz",
+  "../raw_data/GSM5694804_YUKEND_TCR.csv.gz",
+  "../raw_data/GSM5694805_YUPIXEL_TCR.csv.gz",
+  "../raw_data/GSM5694806_YUROD_TCR.csv.gz",
+  "../raw_data/GSM5694798_YUCARD_TCR.csv.gz",
+  "../raw_data/GSM5694808_YUTHEA_TCR.csv.gz",
+  "../raw_data/GSM5694799_YUENZO_TCR.csv.gz",
+  "../raw_data/GSM5694800_YUFUB_TCR.csv.gz",
+  "../raw_data/GSM5694810_YUVARDO_TCR.csv.gz",
+  "../raw_data/GSM5694809_YUTORY_TCR.csv.gz",
+  "../raw_data/GSM5694807_YUTAUR_TCR.csv.gz",
+  "../raw_data/GSM5694813_YUNANCY_TCR.csv.gz",
+  "../raw_data/GSM5694821_YUPIXEL_BCR.csv.gz",
+  "../raw_data/GSM5694822_YUROD_BCR.csv.gz",
+  "../raw_data/GSM5694823_YUTAUR_BCR.csv.gz",
+  "../raw_data/GSM5694814_YUCARD_BCR.csv.gz",
+  "../raw_data/GSM5694824_YUTHEA_BCR.csv.gz",
+  "../raw_data/GSM5694815_YUENZO_BCR.csv.gz",
+  "../raw_data/GSM5694825_YUTORY_BCR.csv.gz",
+  "../raw_data/GSM5694816_YUFUB_BCR.csv.gz",
+  "../raw_data/GSM5694826_YUVARDO_BCR.csv.gz",
+  "../raw_data/GSM5694817_YUFURL_BCR.csv.gz",
+  "../raw_data/GSM5694818_YUGRUS_BCR.csv.gz",
+  "../raw_data/GSM5694819_YUHERN_BCR.csv.gz",
+  "../raw_data/GSM5694820_YUKEND_BCR.csv.gz"
+)
+
+# List of patient IDs we want to include
+selected_patient_IDs <- c(
+  "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+  "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+  "YUTORY", "YUHERN", "YUROD"
+)
+
+# Filter the list of file names to include only selected patients
+selected_files <- file_names[sapply(file_names, function(file_name) {
+  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+  patient_ID %in% selected_patient_IDs
+})]
+
+# Create a mapping of patient.ID to their respective suffixes
+suffix_mapping <- data.frame(
+  patient.ID = c(
+    "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+    "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+    "YUTORY", "YUHERN", "YUROD"
+  ),
+  suffix = c(
+    ".1_1", ".1_2", ".1_3", ".1_4", ".1_5", ".1_6", ".1_7", ".1_8", ".1_9", ".1_10", ".1_11", ".1_12", ".1_13"
+  )
+)
+
+# Create an empty data frame to store the combined data
+combined_data <- data.frame()
+
+# Process each file and append it to the combined_data data frame
+for (file_name in selected_files) {
+  # Read the CSV file
+  data <- read_csv(file_name)
+  
+  # Extract patient ID and CR type (TCR or BCR) from the file name
+  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+  
+  # Find the suffix based on patient ID from the mapping
+  suffix <- suffix_mapping$suffix[suffix_mapping$patient.ID == patient_ID]
+  
+  # Add the suffix to the "Barcode" column
+  data$Barcode <- paste(data$Barcode, suffix, sep = "")
+  
+  CR_type <- ifelse(grepl("_TCR", file_name), "TCR", "BCR")
+  
+  # Add patient ID and CR type as new columns
+  data$patient.ID <- patient_ID
+  data$CR.type <- CR_type
+  
+  # Append the data to the combined_data data frame
+  combined_data <- bind_rows(combined_data, data)
+}
+
+# remove duplicate barcode values (for now)
+combined_data <- combined_data %>%
+  distinct(Barcode, .keep_all = TRUE)
+
+# Ideally save duplicate barcodes, but it messes up metadata incorporation right now...
+# Pivot the dataframe wider
+#combined_data <- combined_data %>%
+#  pivot_wider(
+#    id_cols = c("Barcode", "patient.ID", "CR.type"),
+#    names_from = Chain,
+#    values_from = c("CDR3 AA Sequence", "CDR3 NT Sequence", "V gene", "D gene", "J gene", "C gene")
+#  )
+
+# Set row names based on the "Barcode" column
+rownames(combined_data) <- combined_data$Barcode
+
+combined_data <- combined_data %>% select(-Barcode)
+
+```
+
+# Add TCR/BCR metadata to Seurat scRNA assay
+
+```{r}
+
+rna_and_tcr_bcr_seurat <- AddMetaData(object = melanoma_T_cells_cell_type_clustered, metadata = combined_data)
+
+# restore patient IDs
+rna_and_tcr_bcr_seurat$patient.ID <- melanoma_T_cells_cell_type_clustered$patient.ID
+rna_and_tcr_bcr_seurat@meta.data$patient.ID <- melanoma_T_cells_cell_type_clustered@meta.data$patient.ID
+
+```
+
+# Assess aberrant TCR/BCR "expression"
+
+```{r}
+
+# subset Seurat for containing TCR/BCR seq data
+
+tcr_subset <- rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type %in% c("TCR")]
+
+# create df
+tcr_subset_df <- tibble(cellID = colnames(tcr_subset), clusterID = Idents(tcr_subset))
+
+summary_tcr <- tcr_subset_df %>%
+  group_by(clusterID) %>%
+  summarize(count = n()) %>%
+  arrange(count)
+
+print(summary_tcr)
+
+# non-T cells with "TCRs": 49 NKs
+# T cells with TCRs: 273 CD8, 243 T/NKT, 4460 CD4 T cells
+
+bcr_subset <- rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type %in% c("BCR")]
+
+bcr_subset_df <- tibble(cellID = colnames(bcr_subset), clusterID = Idents(bcr_subset))
+
+summary_bcr <- bcr_subset_df %>%
+  group_by(clusterID) %>%
+  summarize(count = n()) %>%
+  arrange(count)
+
+print(summary_bcr)
+
+# non-B cells with "BCRs": X DCs, 18 CD4 T cells
+# B cells with BCRs: 3952
+
+```
+
+# Eliminate cells with aberrant "expression" of TCR/BCR clonotypic sequences
+
+```{r}
+
+# Subset Seurat to remove cells aberrantly expressing TCRs
+no_aberrant_rna_and_tcr_bcr_seurat <- rna_and_tcr_bcr_seurat[, rna_and_tcr_bcr_seurat@meta.data$CR.type == "TCR" & !(rna_and_tcr_bcr_seurat@active.ident %in% c("CD8 T cells", "CD4 T cells", "T/NKTs")), invert = TRUE]
+
+# Subset Seurat to remove cells aberrantly expressing BCRs
+no_aberrant_rna_and_tcr_bcr_seurat <- no_aberrant_rna_and_tcr_bcr_seurat[, no_aberrant_rna_and_tcr_bcr_seurat@meta.data$CR.type == "BCR" & !(no_aberrant_rna_and_tcr_bcr_seurat@active.ident %in% c("B cells")), invert = TRUE]
+
+```
+
+# Compare sizes of Seurat before/after TCR/BCR subsetting, confirm we only lose the expected 67 cells
+
+```{r}
+
+length(colnames(rna_and_tcr_bcr_seurat)) - length(colnames(no_aberrant_rna_and_tcr_bcr_seurat))
+
+```
+
+# Repeat dimensional reduction (PCA, UMAP) and FindClusters since filtering out RBCs, platelets, and cells aberrantly "expressing" TCRs/BCRs
+
+```{r}
+
+no_aberrant_rna_and_tcr_bcr_seurat <- RunPCA(no_aberrant_rna_and_tcr_bcr_seurat, npcs = 30, verbose = FALSE)
+no_aberrant_rna_and_tcr_bcr_seurat <- RunUMAP(no_aberrant_rna_and_tcr_bcr_seurat, reduction = "pca", dims = 1:30)
+no_aberrant_rna_and_tcr_bcr_seurat <- FindNeighbors(no_aberrant_rna_and_tcr_bcr_seurat, reduction = "pca", dims = 1:30)
+no_aberrant_rna_and_tcr_bcr_seurat <- FindClusters(no_aberrant_rna_and_tcr_bcr_seurat, resolution = 3)
+
+```
+
+# Visualize UMAP by cluster
+
+```{r}
+
+DimPlot(no_aberrant_rna_and_tcr_bcr_seurat, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/umap_cluster_no_mono_dc_rbcs_platelets_tcr_bcr_check.svg")
+
+```
+
+# Find cluster biomarkers
+
+```{r}
+
+# find markers for every cluster compared to all remaining cells, report only the positive ones
+no_aberrant_rna_and_tcr_bcr_seurat.markers <- FindAllMarkers(no_aberrant_rna_and_tcr_bcr_seurat)
+
+```
+
+# Look at relevant cluster biomarkers
+
+```{r}
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "CD14", "FCGR3A", "FCER1A", "MS4A1", "HBB", "PPBP")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify CD4/8 T cells, T/NKTs, NKs
+
+```{r}
+
+# CD3D/CD3Ehi and CD8A/CD8Bhi and NKG7/GNLYlo = CD8 T cells
+# CD3D/CD3Ehi non-CD8 T cells with high IL7R expression and low NKG7/GNLY = CD4 T cells
+# T/NKT: high expression of CD3D/E and GNLY/NKG7 that were not annotated as CD4/CD8 T cells
+# NKG7/GNLYhi and CD3D/CD3Elo = NK cells
+
+#3D: 
+#3E: 
+#8A: 
+#8B: 
+#NKG7: 
+#GNLY: 
+#IL7R: 
+
+# CD4s:
+
+# CD8s:
+
+# T/NKTs: 
+
+# NKs: 
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("CD8A", "CD8B"), pt.size = 0)
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify B cells
+
+```{r}
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat, features = c("MS4A1"), pt.size = 0)
+# MS4A1hi = B cells
+
+# 
+
+no_aberrant_rna_and_tcr_bcr_seurat.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("MS4A1")) %>%
+  arrange(cluster)
+
+```
+
+# Name cell types for clusters
+
+```{r}
+
+new.cluster.ids <- c("CD4 T cells",
+                     # 0
+                     
+                     "B cells",
+                     "CD4 T cells",
+                     "Monocytes",
+                     "Monocytes",
+                     "CD4 T cells",
+                     "Monocytes",
+                     "B cells",
+                     "Monocytes",
+                     "NKs",
+                     
+                     "NKs",
+                     # 10
+                     
+                     "NKs",
+                     "T/NKT",
+                     "CD4 T cells",
+                     "Monocytes",
+                     "B cells",
+                     "Monocytes",
+                     "T/NKT",
+                     "B cells",
+                     "Monocytes",
+                     
+                     "T/NKT",
+                     # 20
+                     
+                     "CD8 T cells",
+                     "CD4 T cells",
+                     "CD4 T cells",
+                     "Monocytes",
+                     "CD4 T cells",
+                     "DCs",
+                     
+                     "Monocytes")
+                     # 27)
+
+names(new.cluster.ids) <- levels(no_aberrant_rna_and_tcr_bcr_seurat)
+no_aberrant_rna_and_tcr_bcr_seurat <- RenameIdents(no_aberrant_rna_and_tcr_bcr_seurat, new.cluster.ids)
+
+```
+
+# Plot UMAP with cell clusters
+
+```{r}
+
+DimPlot(no_aberrant_rna_and_tcr_bcr_seurat, reduction = "umap", label = TRUE, pt.size = 0.5)
+ggsave("../figures/umap_cell_type_no_mono_dc_rbcs_platelets_tcr_bcr_check.svg")
+
+```
+
+# Plot marker distribution across cell type assigned clusters
+
+```{r}
+
+VlnPlot(no_rbcs_platelets, features = c("IL7R", "GNLY", "NKG7", "CD14"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/IL7R_GNLY_NKG7_CD14_across_cell_types_no_mono_dc_rbcs_platelets_tcr_bcr_check.svg")
+
+VlnPlot(no_rbcs_platelets, features = c("MS4A1", "FCER1A", "CD8A", "CD8B"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/MS4A1_FCER1A_CD8A_CD8B_across_cell_types_no_mono_dc_rbcs_platelets_tcr_bcr_check.svg")
+
+VlnPlot(no_rbcs_platelets, features = c("CD3D", "CD3E", "HBB", "PPBP"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/CD3D_CD3E_HBB_PPBP_across_cell_types_no_mono_dc_rbcs_platelets_tcr_bcr_check.svg")
+
+```
+
+# Save cell type clustered, RBC/platelet filtered Seurat object
+
+```{r}
+
+saveRDS(no_aberrant_rna_and_tcr_bcr_seurat, file="../saved_data/mono_dc_rbc_platelet_filtered_tcr_bcr_checked_cell_type_clustered.rds")
+
+```
+
+# Read in data with monocytes/DCs kept in
+
+```{r}
+
+melanoma_T_cells_cell_type_clustered_with_mono_dc <- readRDS("../saved_data/rbc_platelet_filtered_cell_type_clustered.rds")
+
+```
+
+# Add TCR/BCR metadata to Seurat scRNA assay
+
+```{r}
+
+rna_and_tcr_bcr_seurat_with_mono_dc <- AddMetaData(object = melanoma_T_cells_cell_type_clustered_with_mono_dc, metadata = combined_data)
+
+# restore patient IDs
+rna_and_tcr_bcr_seurat_with_mono_dc$patient.ID <- melanoma_T_cells_cell_type_clustered$patient.ID
+rna_and_tcr_bcr_seurat_with_mono_dc@meta.data$patient.ID <- melanoma_T_cells_cell_type_clustered@meta.data$patient.ID
+
+```
+
+# Assess aberrant TCR/BCR "expression"
+
+```{r}
+
+# subset Seurat for containing TCR/BCR seq data
+
+tcr_subset <- rna_and_tcr_bcr_seurat_with_mono_dc[, rna_and_tcr_bcr_seurat_with_mono_dc@meta.data$CR.type %in% c("TCR")]
+
+# create df
+tcr_subset_df <- tibble(cellID = colnames(tcr_subset), clusterID = Idents(tcr_subset))
+
+summary_tcr <- tcr_subset_df %>%
+  group_by(clusterID) %>%
+  summarize(count = n()) %>%
+  arrange(count)
+
+print(summary_tcr)
+
+# non-T cells with "TCRs":  NKs
+# T cells with TCRs:  CD8,  T/NKT,  CD4 T cells
+
+bcr_subset <- rna_and_tcr_bcr_seurat_with_mono_dc[, rna_and_tcr_bcr_seurat_with_mono_dc@meta.data$CR.type %in% c("BCR")]
+
+bcr_subset_df <- tibble(cellID = colnames(bcr_subset), clusterID = Idents(bcr_subset))
+
+summary_bcr <- bcr_subset_df %>%
+  group_by(clusterID) %>%
+  summarize(count = n()) %>%
+  arrange(count)
+
+print(summary_bcr)
+
+# non-B cells with "BCRs":
+# B cells with BCRs: 
+
+```
+
+# Eliminate cells with aberrant "expression" of TCR/BCR clonotypic sequences
+
+```{r}
+
+# Subset Seurat to remove cells aberrantly expressing TCRs
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc <- rna_and_tcr_bcr_seurat_with_mono_dc[, rna_and_tcr_bcr_seurat_with_mono_dc@meta.data$CR.type == "TCR" & !(rna_and_tcr_bcr_seurat_with_mono_dc@active.ident %in% c("CD8 T cells", "CD4 T cells", "T/NKTs")), invert = TRUE]
+
+# Subset Seurat to remove cells aberrantly expressing BCRs
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc <- no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc[, no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc@meta.data$CR.type == "BCR" & !(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc@active.ident %in% c("B cells")), invert = TRUE]
+
+```
+
+# Compare sizes of Seurat before/after TCR/BCR subsetting, confirm we only lose the expected 67 cells
+
+```{r}
+
+length(colnames(rna_and_tcr_bcr_seurat_with_mono_dc)) - length(colnames(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc))
+
+```
+
+# Repeat dimensional reduction (PCA, UMAP) and FindClusters since filtering out RBCs, platelets, and cells aberrantly "expressing" TCRs/BCRs
+
+```{r}
+
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc <- RunPCA(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, npcs = 30, verbose = FALSE)
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc <- RunUMAP(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, reduction = "pca", dims = 1:30)
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc <- FindNeighbors(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, reduction = "pca", dims = 1:30)
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc <- FindClusters(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, resolution = 3)
+
+```
+
+# Visualize UMAP by cluster
+
+```{r}
+
+DimPlot(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/umap_cluster_no_rbcs_platelets_tcr_bcr_check.svg")
+
+```
+
+# Find cluster biomarkers
+
+```{r}
+
+# find markers for every cluster compared to all remaining cells, report only the positive ones
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc.markers <- FindAllMarkers(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc)
+
+```
+
+# Look at relevant cluster biomarkers
+
+```{r}
+
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "CD14", "FCGR3A", "FCER1A", "MS4A1", "HBB", "PPBP")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify CD4/8 T cells, T/NKTs, NKs
+
+```{r}
+
+# CD3D/CD3Ehi and CD8A/CD8Bhi and NKG7/GNLYlo = CD8 T cells
+# CD3D/CD3Ehi non-CD8 T cells with high IL7R expression and low NKG7/GNLY = CD4 T cells
+# T/NKT: high expression of CD3D/E and GNLY/NKG7 that were not annotated as CD4/CD8 T cells
+# NKG7/GNLYhi and CD3D/CD3Elo = NK cells
+
+#3D: 
+#3E: 
+#8A: 
+#8B: 
+#NKG7: 
+#GNLY: 
+#IL7R: 
+
+# CD4s:
+
+# CD8s:
+
+# T/NKTs: 
+
+# NKs: 
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, features = c("CD8A", "CD8B"), pt.size = 0)
+
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify B cells
+
+```{r}
+
+VlnPlot(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, features = c("MS4A1"), pt.size = 0)
+# MS4A1hi = B cells
+
+# 
+
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("MS4A1")) %>%
+  arrange(cluster)
+
+```
+
+# Name cell types for clusters
+
+```{r}
+
+new.cluster.ids <- c("CD4 T cells",
+                     # 0
+                     
+                     "B cells",
+                     "CD4 T cells",
+                     "Monocytes",
+                     "Monocytes",
+                     "CD4 T cells",
+                     "Monocytes",
+                     "B cells",
+                     "Monocytes",
+                     "NKs",
+                     
+                     "NKs",
+                     # 10
+                     
+                     "NKs",
+                     "T/NKT",
+                     "CD4 T cells",
+                     "Monocytes",
+                     "B cells",
+                     "Monocytes",
+                     "T/NKT",
+                     "B cells",
+                     "Monocytes",
+                     
+                     "T/NKT",
+                     # 20
+                     
+                     "CD8 T cells",
+                     "CD4 T cells",
+                     "CD4 T cells",
+                     "Monocytes",
+                     "CD4 T cells",
+                     "DCs",
+                     
+                     "Monocytes")
+                     # 27)
+
+names(new.cluster.ids) <- levels(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc)
+no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc <- RenameIdents(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, new.cluster.ids)
+
+```
+
+# Plot UMAP with cell clusters
+
+```{r}
+
+DimPlot(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, reduction = "umap", label = TRUE, pt.size = 0.5)
+ggsave("../figures/umap_cell_type_no_rbcs_platelets_tcr_bcr_check.svg")
+
+```
+
+# Plot marker distribution across cell type assigned clusters
+
+```{r}
+
+VlnPlot(no_rbcs_platelets, features = c("IL7R", "GNLY", "NKG7", "CD14"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/IL7R_GNLY_NKG7_CD14_across_cell_types_no_rbcs_platelets_tcr_bcr_check.svg")
+
+VlnPlot(no_rbcs_platelets, features = c("MS4A1", "FCER1A", "CD8A", "CD8B"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/MS4A1_FCER1A_CD8A_CD8B_across_cell_types_no_rbcs_platelets_tcr_bcr_check.svg")
+
+VlnPlot(no_rbcs_platelets, features = c("CD3D", "CD3E", "HBB", "PPBP"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/CD3D_CD3E_HBB_PPBP_across_cell_types_no_rbcs_platelets_tcr_bcr_check.svg")
+
+```
+
+# Save cell type clustered, RBC/platelet filtered Seurat object
+
+```{r}
+
+saveRDS(no_aberrant_rna_and_tcr_bcr_seurat_with_mono_dc, file="../saved_data/rbc_platelet_filtered_tcr_bcr_checked_cell_type_clustered.rds")
+
+```

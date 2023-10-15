@@ -1,0 +1,313 @@
+---
+title: "T cell characteristics associated with irAE from ICI in melanoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(forcats)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+clustered_immune <- readRDS("../saved_data/pre_renamed_clustered.rds")
+
+```
+
+# Name numbered cell types for clusters
+
+```{r}
+
+new.cluster.ids <- c("Monocyte 1",
+                     #0
+                     
+                     "B cell 1",
+                     #1
+                     
+                     "Monocyte 2",
+                     #2
+                     
+                     "CD4 T cell 1",
+                     #3
+                     
+                     "Monocyte 3",
+                     #4
+                     
+                     "CD4 T cell 2",
+                     #5
+                     
+                     "CD4 T cell 3",
+                     #6
+                     
+                     "Monocyte 4",
+                     #7
+                     
+                     "T/NKT 1",
+                     #8
+                     
+                     "CD4 T cell 4",
+                     #9
+                     
+                     "NK 1",
+                     #10
+                     
+                     "Monocyte 5",
+                     #11
+                     
+                     "CD4 T cell 5",
+                     #12
+                     
+                     "NK 2",
+                     #13
+                     
+                     "CD8 T cell 1",
+                     #14
+                     
+                     "NK 3",
+                     #15
+                     
+                     "Monocyte 6",
+                     #16
+                     
+                     "B cell 2",
+                     #17
+                     
+                     "B cell 3",
+                     #18
+                     
+                     "T/NKT 2",
+                     #19
+                     
+                     "CD4 T cell 6",
+                     #20
+                     
+                     "CD8 T cell 2",
+                     #21
+                     
+                     "Monocyte 7",
+                     #22
+                     
+                     "CD4 T cell 7",
+                     #23
+                     
+                     "CD8 T cell 3",
+                     #24
+                     
+                     "DC",
+                     #25
+                     
+                     "Monocyte 8",
+                     #26
+                     
+                     "Monocyte 9"
+                     #27
+                     )
+
+names(new.cluster.ids) <- levels(clustered_immune)
+clustered_immune <- RenameIdents(clustered_immune, new.cluster.ids)
+
+```
+
+# Find CD4 T subclusters of interest, looks like 5 and 7 (their 5 and 3)
+
+```{r}
+
+DimPlot(clustered_immune, reduction = "umap", label = TRUE, pt.size = 0.1, cols = c('B cell 1' = 'brown', 'B cell 2' = 'brown', 'B cell 3' = 'brown', 'Monocyte 1' = 'blue', 'Monocyte 2' = 'blue', 'Monocyte 3' = 'blue', 'Monocyte 4' = 'blue', 'Monocyte 5' = 'blue', 'Monocyte 6' = 'blue', 'Monocyte 7' = 'blue', 'Monocyte 8' = 'blue', 'Monocyte 9' = 'blue', 'T/NKT 1' = 'darkcyan', 'T/NKT 2' = 'darkcyan', 'NK 1' = 'purple', 'NK 2' = 'purple', 'NK 3' = 'purple', 'CD8 T cell 1' = 'green', 'CD8 T cell 2' = 'green', 'CD8 T cell 3' = 'green', 'DC' = 'orange', 'CD4 T cell 1' = 'red', 'CD4 T cell 2' = 'red', 'CD4 T cell 3' = 'red', 'CD4 T cell 4' = 'red', 'CD4 T cell 5' = 'black', 'CD4 T cell 6' = 'red', 'CD4 T cell 7' = 'black'), repel = TRUE, shuffle = TRUE, seed = 992)
+
+ggsave("../figures/umap_look_for_specific_cd4_subclusters.svg")
+
+```
+
+# Try to compare cell state abundances and irAE status
+
+```{r}
+
+#cell_states <- unique(Idents(clustered_immune))
+
+# some NA patient names not sure why
+#patient_names <- unique(clustered_immune$patient.ID)[2:14]
+
+#irae_patient_ids <- c("YUTAUR", "YUTORY", "YUVARD", "YUCARD", "YUFURL", "YUPIXEL")
+
+#non_irae_patient_ids <- c("YUENZO", "YUFUB", "YUGRUS", "YUHERN", "YUKEND", "YUROD", "YUTHEA")
+
+#metadata_df <- as_tibble(clustered_immune@meta.data)
+
+#metadata_df$cluster_name <- Idents(clustered_immune)
+
+#abundances_df <- data.frame(cell_type_number = character(),
+#                 status=character(),
+#                 patient_ID=character(),
+#                 count=integer())
+
+#for (ID in irae_patient_ids) {
+#  for (name in cell_states) {
+#    #print(length(which(metadata_df$patient.ID == ID & metadata_df$cluster_name == name)))
+#    abundances_df[nrow(abundances_df) + 1,] = c(name, "irAE", ID, length(which(metadata_df$patient.ID == ID & metadata_df$cluster_name == name)))
+#  }
+#}
+
+#for (ID in non_irae_patient_ids) {
+#  for (name in cell_states) {
+#    #print(length(which(metadata_df$patient.ID == ID & metadata_df$cluster_name == name)))
+#    abundances_df[nrow(abundances_df) + 1,] = c(name, "no_irAE", ID, length(which(metadata_df$patient.ID == ID & metadata_df$cluster_name == name)))
+#  }
+#}
+
+#abundances_df
+
+```
+
+# Continue investigation
+
+```{r}
+# remove cell clusters with 0 cells in either irAE or non_irAE group
+cell_states <- cell_states[!(cell_states %in% c("Monocyte 9", "Monocyte 8"))]
+
+states_and_irae <- data.frame(cell_type_number = character(),
+                 perc=character(),
+                 status=character())
+
+for (state in cell_states) {
+  subset_data <- subset(clustered_immune, idents = state)
+  subset_perc = length(colnames(subset_data)) / length(colnames(clustered_immune))
+  irAE_perc <- length(colnames((subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 1)))) / length(colnames(subset_data))
+  non_irAE_perc <- length(colnames(subset(subset_data, subset = Severe.irAE.status..1.Yes..0.No. == 0))) / length(colnames(subset_data))
+  perc = subset_perc*irAE_perc
+  states_and_irae[nrow(states_and_irae) + 1,] = c(state, perc, "irAE")
+  perc = subset_perc*non_irAE_perc
+  states_and_irae[nrow(states_and_irae) + 1,] = c(state, perc, "no irAE")
+  }
+
+states_and_irae <- states_and_irae %>%
+  mutate(perc = as.numeric(perc))
+
+#p <- ggplot(states_and_irae, aes(x=cell_type_number, y=perc, color=status)) +
+#  geom_bar(stat="identity") +
+#  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+#p
+
+```
+
+# Perform Wilcox test on state abundances vs. irAE status
+
+```{r}
+
+for (row in 1:nrow(states_and_irae)) {
+  if (states_and_irae[row, "status"] == "irAE") {
+    cell_type <- states_and_irae[row, "cell_type_number"]
+    test_perc <- states_and_irae[row, "perc"]
+    subset <- states_and_irae %>% filter(status == "irAE")
+    other_perc <- subset[-(row)]$perc
+    states_and_irae[row, "wilcox_result"] <- -log(wilcox.test(test_perc, other_perc)$p.value)
+  } else {
+      cell_type <- states_and_irae[row, "cell_type_number"]
+      test_perc <- states_and_irae[row, "perc"]
+      subset <- states_and_irae %>% filter(status == "no irAE")
+      other_perc <- subset[-(row)]$perc
+      states_and_irae[row, "wilcox_result"] <- log(wilcox.test(test_perc, other_perc)$p.value)
+  }
+}
+
+#wilcox_results$cell_type_number = with(wilcox_results, reorder(cell_type_number, score, median))
+# reordering not working yet
+#wilcox_results$cell_type_number <- reorder(wilcox_results$cell_type_number, wilcox_results$score)
+
+states_and_irae
+
+states_and_irae %>%
+  ggplot(aes(x=wilcox_result, y = cell_type_number)) +
+    geom_point() +
+    xlab("Abundance versus severe irAE
+    (scRNA-seq, -log(P))
+         No severe irAE to the left
+         Severe irAE to the right")
+
+```
+
+# Incorporate CyTOF data
+
+```{r}
+
+#unique(clustered_immune$Effector.memory.CD4.T.cells..CyTOF.)
+# CD4 TEM cell frequencies (CyTOF)
+# Spearman correlation with CD4 TEM cells (CyTOF)
+# then you can separately calculate the spearman correlation between the percent of cells in that population that correlate with CD4 Tem cells by CYTOF
+
+```
+
+# Analyze CD4 T cell subclusters 5 and 7 vs. rest of subclusters
+
+```{r}
+
+#de.markers <- FindMarkers(clustered_immune, ident.1 = c("CD4 T cell 5", "CD4 T cell 7"), ident.2 = NULL, only.pos = TRUE)
+
+#de.markers_list <- rownames(de.markers %>% filter(p_val_adj < 0.05))
+
+paper_de.markers_list <- c("S100A4", "IL32", "CCL5", "HLA-DRA", "IL7R", "TNFRSF4", "SELL", "TCF7", "CCR7")
+
+CD4_subset <- subset(clustered_immune, idents = c("CD4 T cell 1", "CD4 T cell 2", "CD4 T cell 3", "CD4 T cell 4", "CD4 T cell 5", "CD4 T cell 6", "CD4 T cell 7"))
+
+# change order of clusters to put 5 and 7 in front (subclusters of interest)
+my_levels <- c("CD4 T cell 5", "CD4 T cell 7", "CD4 T cell 1", "CD4 T cell 2", "CD4 T cell 3", "CD4 T cell 4", "CD4 T cell 6")
+levels(CD4_subset) <- my_levels
+
+DoHeatmap(CD4_subset, features = paper_de.markers_list)
+
+ggsave("../figures/cd4_subcluster_heatmap.svg")
+
+# need to split rows by patient.ID (to get the rows pixels effect they have)
+
+```
+
+# Look at association between subcell states and irAE
+
+```{r}
+
+# reference-guided annotation framework within Seurat v.4.0.1 (Azimuth) to project our scRNA-seq dataset onto a PBMC atlas of 161,764 cells spanning 6 major lineages and 27 finer-grained subsets defined with scRNA-seq and codetection of over 220 protein markers44
+
+# preprocessed the query dataset following the quality control steps described above, yielding 24,807 cells. normalized the query dataset by SCTransform, applied FindTransferAnchors to the query and reference datasets using a precomputed supervised PCA transformation with 50 dimensions, then applied MapQuery to map the cell type labels and UMAP structure from the reference to the query dataset.
+
+# results in extended data figure 2a
+
+# not sure if they used web version here (https://app.azimuth.hubmapconsortium.org/app/human-pbmc) but I can and then download script? just need to write object and then upload it (.rds is fine, just need to mount R servers to mac for easy upload otherwise transfer over ssh from server to local mac?)
+
+# just use their script. hard to upload file (sshfs/mount), but html not R, just run analyses locally before being able to mount
+
+# Among the 27 cell states identified by Azimuth (Extended Data Fig. 2a), CD4 TEM was most strongly associated with severe irAE development and most correlated with CD4 TEM cells enumerated by CyTOF (Extended Data Fig. 2c). Among two other CD4 TEM-like subsets identified by Azimuth (CD4 CTL, CD4 proliferating), CD4 proliferating showed the highest expression of HLA-DX and lowest expression of SELL (Extended Data Fig. 2d), which is consistent with an activated CD4 TEM phenotype. Additionally, when examining Azimuth-imputed protein expression from antibody-derived tag data, only CD4 TEM and CD4 proliferating states showed hallmarks of TEM cells (CD45ROhiCD45RAloCD27lo; Extended Data Fig. 2e). Indeed, a population combining CD4 TEM and CD4 proliferating was most associated with severe irAE development (Extended Data Fig. 2c). Hypergeometric testing was applied to assess overlap in cellular barcodes between the combined CD4 TEM + CD4 proliferating population (Azimuth) and states defined by de novo clustering. CD4 T 5 + 3 emerged as the top hit (Benjamini–Hochberg-adjusted P = 2.5 × 10−7). Despite strong overlap between unsupervised and supervised approaches, CD4 T 5 + 3 was more associated with severe irAE development and CyTOF than populations labeled by reference-guided annotation (Extended Data Fig. 2f).
+
+```

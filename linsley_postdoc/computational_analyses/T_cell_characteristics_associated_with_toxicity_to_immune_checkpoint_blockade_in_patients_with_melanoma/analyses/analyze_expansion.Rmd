@@ -1,0 +1,569 @@
+---
+title: "T cell characteristics associated with irAE from ICI in melanoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(forcats)
+library(vegan)
+library(readxl)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in bulk ImmunoSEQ data
+
+```{r}
+
+# List of file names
+file_names <- c(
+  "../raw_data/ImmunoSEQ/WUMENLO_pre.tsv",
+  "../raw_data/ImmunoSEQ/WUMENLO_on.tsv",
+  "../raw_data/ImmunoSEQ/YUAMIGO_on.tsv",
+  "../raw_data/ImmunoSEQ/YUCADA_on.tsv",
+  "../raw_data/ImmunoSEQ/YUFROZE_on.tsv",
+  "../raw_data/ImmunoSEQ/YUHONEY_on.tsv",
+  "../raw_data/ImmunoSEQ/YUNANCY_on.tsv",
+  "../raw_data/ImmunoSEQ/YUPOGER_on.tsv",
+  "../raw_data/ImmunoSEQ/YUTACI_on.tsv",
+  "../raw_data/ImmunoSEQ/YUAMIGO_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUCADA_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUFROZE_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUHONEY_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUNANCY_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUPOGER_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUTACI_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUALOE_on.tsv",
+  "../raw_data/ImmunoSEQ/YUBROMO_on.tsv",
+  "../raw_data/ImmunoSEQ/YUDEBIT_on.tsv",
+  "../raw_data/ImmunoSEQ/YUHERN_on.tsv",
+  "../raw_data/ImmunoSEQ/YULAMB_on.tsv",
+  "../raw_data/ImmunoSEQ/YUPESO_on.tsv",
+  "../raw_data/ImmunoSEQ/YUQIP_on.tsv",
+  "../raw_data/ImmunoSEQ/YUALOE_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUBROMO_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUDEBIT_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUHERN_pre.tsv",
+  "../raw_data/ImmunoSEQ/YULAMB_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUPESO_pre.tsv",
+  "../raw_data/ImmunoSEQ/YUQIP_pre.tsv"
+)
+
+# Create an empty data frame to store the combined data
+combined_immunoseq_data <- data.frame()
+
+# Process each file and append it to the combined_data data frame
+for (file_name in file_names) {
+  # Read the TSV file
+  data <- read_tsv(file_name)
+  
+  extracted_ici_status <- gsub(".*/[^/]+_(on|pre)\\.tsv$", "\\1", file_name)
+  extracted_patient_id <- gsub(".*/([^/]+)_(pre|on)\\.tsv$", "\\1", file_name)
+  
+  data$ici_status <- extracted_ici_status
+  data$patient_id <- extracted_patient_id
+  
+  # Append the data to the combined_data data frame
+  combined_immunoseq_data <- bind_rows(combined_immunoseq_data, data)
+}
+
+```
+
+# Read in metadata, clean, join with diversity scores
+
+```{r}
+
+irae_statuses <- read_excel("../raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1")
+
+irae_statuses <- irae_statuses %>%
+  select(`Patient ID`, `Highest irAE grade`) %>%
+  rename(patient_id = `Patient ID`, severe_irae = `Highest irAE grade`) %>%
+  mutate(severe_irae = if_else(severe_irae %in% c(3, 4), "Yes", "No"))
+
+```
+
+# Count repeats of various TCR measures, calculate diversity scores, join with metadata
+
+```{r}
+
+rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(rearrangement))) %>%
+  group_by(rearrangement, patient_id, ici_status) %>%
+  mutate(rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(rearrangement_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(rearrangement_count))) %>%
+  mutate(rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(rearrangement_score_delta = rearrangement_score[ici_status == "on"] - rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+amino_acid_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(amino_acid))) %>%
+  group_by(amino_acid, patient_id, ici_status) %>%
+  mutate(amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(amino_acid_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(amino_acid_count))) %>%
+  mutate(amino_acid_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(amino_acid_score_delta = amino_acid_score[ici_status == "on"] - amino_acid_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+rearrangement_trunc_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(rearrangement_trunc))) %>%
+  group_by(rearrangement_trunc, patient_id, ici_status) %>%
+  mutate(rearrangement_trunc_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(rearrangement_trunc_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(rearrangement_trunc_count))) %>%
+  mutate(rearrangement_trunc_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(rearrangement_trunc_score_delta = rearrangement_trunc_score[ici_status == "on"] - rearrangement_trunc_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+extended_rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(extended_rearrangement))) %>%
+  group_by(extended_rearrangement, patient_id, ici_status) %>%
+  mutate(extended_rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(extended_rearrangement_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(extended_rearrangement_count))) %>%
+  mutate(extended_rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(extended_rearrangement_score_delta = extended_rearrangement_score[ici_status == "on"] - extended_rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr1_rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr1_rearrangement))) %>%
+  group_by(cdr1_rearrangement, patient_id, ici_status) %>%
+  mutate(cdr1_rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr1_rearrangement_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr1_rearrangement_count))) %>%
+  mutate(cdr1_rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr1_rearrangement_score_delta = cdr1_rearrangement_score[ici_status == "on"] - cdr1_rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr1_amino_acid_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr1_amino_acid))) %>%
+  group_by(cdr1_amino_acid, patient_id, ici_status) %>%
+  mutate(cdr1_amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr1_amino_acid_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr1_amino_acid_count))) %>%
+  mutate(cdr1_amino_acid_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr1_amino_acid_score_delta = cdr1_amino_acid_score[ici_status == "on"] - cdr1_amino_acid_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr2_rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr2_rearrangement))) %>%
+  group_by(cdr2_rearrangement, patient_id, ici_status) %>%
+  mutate(cdr2_rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr2_rearrangement_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr2_rearrangement_count))) %>%
+  mutate(cdr2_rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr2_rearrangement_score_delta = cdr2_rearrangement_score[ici_status == "on"] - cdr2_rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr2_amino_acid_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr2_amino_acid))) %>%
+  group_by(cdr2_amino_acid, patient_id, ici_status) %>%
+  mutate(cdr2_amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr2_amino_acid_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr2_amino_acid_count))) %>%
+  mutate(cdr2_amino_acid_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr2_amino_acid_score_delta = cdr2_amino_acid_score[ici_status == "on"] - cdr2_amino_acid_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr3_rearrangement_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr3_rearrangement))) %>%
+  group_by(cdr3_rearrangement, patient_id, ici_status) %>%
+  mutate(cdr3_rearrangement_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr3_rearrangement_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr3_rearrangement_count))) %>%
+  mutate(cdr3_rearrangement_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr3_rearrangement_score_delta = cdr3_rearrangement_score[ici_status == "on"] - cdr3_rearrangement_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+cdr3_amino_acid_diversity_df <- combined_immunoseq_data %>%
+  filter(!(is.na(cdr3_amino_acid))) %>%
+  group_by(cdr3_amino_acid, patient_id, ici_status) %>%
+  mutate(cdr3_amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, ici_status) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr3_amino_acid_count)) %>%
+  # Calculate Pielou's evenness index (J)
+  mutate(pielou_evenness = shannon / log(specnumber(cdr3_amino_acid_count))) %>%
+  mutate(cdr3_amino_acid_score = 1 - pielou_evenness) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  summarize(cdr3_amino_acid_score_delta = cdr3_amino_acid_score[ici_status == "on"] - cdr3_amino_acid_score[ici_status == "pre"]) %>%
+  left_join(irae_statuses, by = "patient_id")
+
+```
+
+# Join dfs to plot all at once
+
+```{r}
+
+joined_diversity_df <- rearrangement_diversity_df %>%
+  full_join(amino_acid_diversity_df) %>%
+  full_join(rearrangement_trunc_diversity_df) %>%
+  full_join(extended_rearrangement_diversity_df) %>%
+  full_join(cdr1_rearrangement_diversity_df) %>%
+  full_join(cdr1_amino_acid_diversity_df) %>%
+  full_join(cdr2_rearrangement_diversity_df) %>%
+  full_join(cdr3_amino_acid_diversity_df) %>%
+  full_join(cdr3_rearrangement_diversity_df) %>%
+  full_join(cdr3_amino_acid_diversity_df) %>%
+  pivot_longer(cols = -c(patient_id, severe_irae), 
+               names_to = "variable",
+               values_to = "score_delta") %>%
+  mutate(origin = sub("_score_delta", "", variable)) %>%
+  select(-variable)
+
+joined_diversity_df
+
+```
+
+# Plot TCR diversity score changes upon treatment by future irAE status
+
+```{r}
+
+# Create a custom label function
+custom_label_function <- function(variable, value) {
+  # Define custom labels based on the values of 'origin'
+  custom_labels <- c(
+    extended_rearrangement = "Extended\n rearrangement",
+    rearrangement_trunc = "Truncated\nrearrangement",
+    amino_acid = "Amino\nacid",
+    cdr1_amino_acid = "CDR1\namino acid",
+    cdr1_rearrangement = "CDR1\nrearrangement",
+    cdr2_amino_acid = "CDR2\namino acid",
+    cdr2_rearrangement = "CDR2\nrearrangement",
+    cdr3_amino_acid = "CDR3\namino acid",
+    cdr3_rearrangement = "CDR3\nrearrangement")
+  
+  # Return the custom labels
+  return(custom_labels[value])
+}
+
+ggplot(joined_diversity_df, aes(x = severe_irae, y = score_delta, fill = severe_irae)) +
+  geom_boxplot() +
+  geom_point(size = 1) +
+  facet_wrap(~origin, scales = "free_y", labeller = labeller(origin = custom_label_function)) +
+  labs(x = "Severe irAE", y = "Change in clonality\nfrom baseline") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme(legend.position = "none",
+        strip.text = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.ticks.y = element_line(size = 0.5))
+
+ggsave("../figures/complement_of_clonal_evenness.svg")
+
+# the complement of clonal evenness (1-Pielou’s index) is often used to get a clonality score of 0 representing a maximally diverse population with even frequencies and values close to 1, a repertoire driven by clonal dominance. 
+
+```
+
+# Read in Seurat object with scV(D)Jseq metadata to analyze clonality among CD4 T cell subclusters, name clusters
+
+```{r}
+
+seurat_obj <- readRDS("../saved_data/pre_renamed_clustered.rds")
+
+new.cluster.ids <- c("Monocyte 1",
+                     #0
+                     
+                     "B cell 1",
+                     #1
+                     
+                     "Monocyte 2",
+                     #2
+                     
+                     "CD4 T cell 1",
+                     #3
+                     
+                     "Monocyte 3",
+                     #4
+                     
+                     "CD4 T cell 2",
+                     #5
+                     
+                     "CD4 T cell 3",
+                     #6
+                     
+                     "Monocyte 4",
+                     #7
+                     
+                     "T/NKT 1",
+                     #8
+                     
+                     "CD4 T cell 4",
+                     #9
+                     
+                     "NK 1",
+                     #10
+                     
+                     "Monocyte 5",
+                     #11
+                     
+                     "CD4 T cell 5",
+                     #12
+                     
+                     "NK 2",
+                     #13
+                     
+                     "CD8 T cell 1",
+                     #14
+                     
+                     "NK 3",
+                     #15
+                     
+                     "Monocyte 6",
+                     #16
+                     
+                     "B cell 2",
+                     #17
+                     
+                     "B cell 3",
+                     #18
+                     
+                     "T/NKT 2",
+                     #19
+                     
+                     "CD4 T cell 6",
+                     #20
+                     
+                     "CD8 T cell 2",
+                     #21
+                     
+                     "Monocyte 7",
+                     #22
+                     
+                     "CD4 T cell 7",
+                     #23
+                     
+                     "CD8 T cell 3",
+                     #24
+                     
+                     "DC",
+                     #25
+                     
+                     "Monocyte 8",
+                     #26
+                     
+                     "Monocyte 9"
+                     #27
+                     )
+
+names(new.cluster.ids) <- levels(seurat_obj)
+seurat_obj <- RenameIdents(seurat_obj, new.cluster.ids)
+
+```
+
+# Calculate clonality scores across CD4 T cell subclusters
+
+```{r}
+
+clonality_subcluster_df <- as_tibble(seurat_obj@meta.data)
+
+clonality_subcluster_df$subcluster <- Idents(seurat_obj)
+
+# create a joined subcluster 5 + 7, bring back into df
+five_and_seven_subcluster_df <- clonality_subcluster_df %>%
+  filter(subcluster %in% c("CD4 T cell 5", "CD4 T cell 7")) %>%
+  mutate(subcluster = "CD4 T cell 5 + 7")
+
+clonality_subcluster_df <- clonality_subcluster_df %>%
+  full_join(five_and_seven_subcluster_df) %>%
+  select(patient.ID, subcluster, CDR3.AA.Sequence, CDR3.NT.Sequence, CR.type) %>%
+  filter(grepl("CD4", subcluster),
+         !(is.na(CDR3.NT.Sequence)),
+         CR.type == "TCR") %>%
+  group_by(subcluster, patient.ID, CDR3.NT.Sequence) %>%
+  mutate(cdr3_nt_count = n()) %>%
+  ungroup() %>%
+  group_by(subcluster, patient.ID, CDR3.AA.Sequence) %>%
+  mutate(cdr3_aa_count = n()) %>%
+  ungroup() %>%
+  group_by(subcluster, patient.ID) %>%
+  # Calculate Shannon diversity indeces (H)
+  mutate(shannon_nt = diversity(cdr3_nt_count)) %>%
+  mutate(shannon_aa = diversity(cdr3_nt_count)) %>%
+  # Calculate Pielou's evenness indeces (J)
+  mutate(pielou_evenness_nt = shannon_nt / log(specnumber(cdr3_nt_count))) %>%
+  mutate(pielou_evenness_aa = shannon_aa / log(specnumber(cdr3_aa_count))) %>%
+  mutate(complement_score_nt = 1 - pielou_evenness_nt) %>%
+  mutate(complement_score_aa = 1 - pielou_evenness_aa) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(subcluster, patient.ID, shannon_nt, shannon_aa, complement_score_nt, complement_score_aa) %>%
+  pivot_longer(
+    cols = starts_with("shannon"),
+    names_to = "origin_1",
+    values_to = "shannon_score"
+  ) %>%
+  pivot_longer(
+    cols = starts_with("complement"),
+    names_to = "origin_2",
+    values_to = "complement_score"
+  ) %>%
+  mutate(across(c(origin_1, origin_2), ~gsub(".*_(nt|aa)$", "\\1", .))) %>%
+  filter(origin_1 == origin_2) %>%
+  select(-origin_2) %>%
+  rename(origin = origin_1) %>%
+  # calculate means across patients
+  group_by(subcluster) %>%
+  # nt and aa have same scores
+  filter(origin == "nt",
+  # some Shannon scores of 0 throw NaN for Pielou
+         shannon_score > 0) %>%
+  mutate(mean_shannon = mean(shannon_score),
+         mean_complement = mean(complement_score)) %>%
+  ungroup()
+
+clonality_subcluster_df
+
+```
+
+# Plot mean (across patients) clonality scores across CD4 T cell subclusters
+
+```{r}
+
+clonality_subcluster_df %>%
+  filter(origin == "nt") %>%
+  ggplot(aes(x = mean_complement, y = mean_shannon, color = subcluster)) +
+  geom_point() +
+  labs(x = "Clonality (1 - Pielou's evenness)", y = "Diversity (Shannon entropy)") +
+  geom_text(aes(label = subcluster), vjust = -0.5)
+
+  ggsave("../figures/shannon_vs_complement_by_cd4_subcluster.svg")
+
+```
+
+# Create clonal expansion count buckets for UMAP overlay
+
+```{r}
+
+expansion_df <- as_tibble(seurat_obj@meta.data)
+
+expansion_df$subcluster <- Idents(seurat_obj)
+
+expansion_df <- expansion_df %>%
+  select(patient.ID, subcluster, CDR3.AA.Sequence, CDR3.NT.Sequence, CR.type) %>%
+  group_by(patient.ID, CDR3.NT.Sequence) %>%
+  mutate(cdr3_nt_count = n()) %>%
+  mutate(expansion_group = if_else(
+        is.na(CR.type), "no TCR/BCR info",
+        ifelse(cdr3_nt_count <= 1, "single",
+        ifelse(cdr3_nt_count <= 5, "small",
+          ifelse(cdr3_nt_count <= 20, "medium",
+            ifelse(cdr3_nt_count <= 100, "large",
+              "hyperexpanded")))))) %>%
+  ungroup()
+
+seurat_obj@meta.data$expansion_group <- expansion_df$expansion_group
+  
+```
+
+# Plot UMAP with color of expansion count (bucketed)
+
+```{r}
+
+# Reorder factor levels so that "no TCR group" is plotted first
+seurat_obj@meta.data$expansion_group <- factor(seurat_obj@meta.data$expansion_group, levels = c("no TCR/BCR info", "single", "small", "medium", "large", "hyperexpanded"))
+
+DimPlot(seurat_obj, reduction = "umap", group.by = "expansion_group", shuffle = TRUE, seed = 992)
+
+ggsave("../figures/umap_expansion_group.svg")
+
+```
+
+# Look at bulk vs. remove clusters 5/7 vs. only clusters 5/7 CD4s for TCR diversity by irAE status (severe yes or no) for ext fig 4d-e and more specific irAE grade and different ICI (combo, anti-PD1, etc.) for ext figure 6
