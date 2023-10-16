@@ -1,0 +1,217 @@
+---
+title: "T cell characteristics associated with irAE from ICI in melanoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+no_rbcs_platelets <- readRDS("../saved_data/rbc_platelet_filtered_cell_type_clustered.rds")
+
+```
+
+# Filter out monocytes/DCs
+
+```{r}
+
+no_mono_dc_rbcs_platelets <- no_rbcs_platelets[, !(no_rbcs_platelets@active.ident %in% c("Monocytes", "DCs"))]
+
+```
+
+# Repeat dimensional reduction (PCA, UMAP) and FindClusters since filtering out monocytes, DCs, RBCs, platelets
+
+```{r}
+
+no_mono_dc_rbcs_platelets <- RunPCA(no_mono_dc_rbcs_platelets, npcs = 30, verbose = FALSE)
+no_mono_dc_rbcs_platelets <- RunUMAP(no_mono_dc_rbcs_platelets, reduction = "pca", dims = 1:30)
+no_mono_dc_rbcs_platelets <- FindNeighbors(no_mono_dc_rbcs_platelets, reduction = "pca", dims = 1:30)
+no_mono_dc_rbcs_platelets <- FindClusters(no_mono_dc_rbcs_platelets, resolution = 3)
+
+```
+
+# Visualize UMAP by cluster
+
+```{r}
+
+DimPlot(no_mono_dc_rbcs_platelets, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/umap_cluster_no_mono_dc_rbcs_platelets_filter.svg")
+
+```
+
+# Find markers for every cluster compared to all remaining cells
+
+```{r}
+
+no_mono_dc_rbcs_platelets.markers <- FindAllMarkers(no_mono_dc_rbcs_platelets)
+
+```
+
+# Look at relevant cluster biomarkers
+
+```{r}
+
+no_mono_dc_rbcs_platelets.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "MS4A1")) %>%
+  arrange(gene)
+
+```
+
+# Plot marker distribution across clusters to identify CD4/8 T cells, T/NKTs, NKs
+
+```{r}
+
+# CD3D/CD3Ehi and CD8A/CD8Bhi and NKG7/GNLYlo = CD8 T cells
+# CD3D/CD3Ehi non-CD8 T cells with high IL7R expression and low NKG7/GNLY = CD4 T cells
+# T/NKT: high expression of CD3D/E and GNLY/NKG7 that were not annotated as CD4/CD8 T cells
+# NKG7/GNLYhi and CD3D/CD3Elo = NK cells
+
+#3D: 1-3, 6-7, 10, 12, 14-16, 18-20
+#3E: 1-3, 6-7, 9-10, 12-16, 18-20
+#8A: 10, 15?
+#8B: 10, 12? 15?
+#IL7R: 1-3, 7, 12, 14-15, 18
+#NKG7: 5-6, 9-10, 13, 15-17, 19
+#GNLY: 5-6, 9-10, 13, 15-17, 19
+
+# CD4s 1, 2, 3, 7, 12, 14, 15 18, 20
+# NK: 5, 9, 13, 17
+# T/NKT: 6, 16, 19
+# CD8s: 10
+
+VlnPlot(no_mono_dc_rbcs_platelets, features = c("GNLY"), pt.size = 0)
+
+no_mono_dc_rbcs_platelets.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "IL7R", "NKG7", "GNLY")) %>%
+  arrange(cluster)
+
+```
+
+# Plot marker distribution across clusters to identify B cells
+
+```{r}
+
+VlnPlot(no_mono_dc_rbcs_platelets, features = c("MS4A1"), pt.size = 0)
+# MS4A1hi = B cells
+
+# B cells 0, 4, 8, 11, 21
+
+no_mono_dc_rbcs_platelets.markers %>%
+  group_by(cluster) %>%
+  filter(gene %in% c("MS4A1")) %>%
+  arrange(cluster)
+
+```
+
+# Name cell types for clusters
+
+```{r}
+
+new.cluster.ids <- c("B cells",
+                     # 0
+                     
+                     "CD4 T cells",
+                     "CD4 T cells",
+                     "CD4 T cells",
+                     "B cells",
+                     "NKs",
+                     "T/NKTs",
+                     "CD4 T cells",
+                     "B cells",
+                     "NKs",
+                     
+                     "CD8 T cells",
+                     # 10
+                     
+                     "B cells",
+                     "CD4 T cells",
+                     "NKs",
+                     "CD4 T cells",
+                     "CD4 T cells",
+                     "T/NKTs",
+                     "NKs",
+                     "CD4 T cells",
+                     "T/NKTs",
+                     
+                     "CD4 T cells",
+                     # 20
+                     
+                     "B cells")
+
+names(new.cluster.ids) <- levels(no_mono_dc_rbcs_platelets)
+no_mono_dc_rbcs_platelets <- RenameIdents(no_mono_dc_rbcs_platelets, new.cluster.ids)
+
+```
+
+# Plot UMAP with cell clusters
+
+```{r}
+
+DimPlot(no_mono_dc_rbcs_platelets, reduction = "umap", label = TRUE, pt.size = 0.5)
+ggsave("../figures/umap_cell_type_no_mono_dc_rbcs_platelets.svg")
+
+```
+
+# Plot marker distribution across cell type assigned clusters
+
+```{r}
+
+VlnPlot(no_mono_dc_rbcs_platelets, features = c("IL7R", "GNLY", "NKG7", "CD14"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/IL7R_GNLY_NKG7_CD14_across_cell_types_no_mono_dc_rbcs_platelets.svg")
+
+VlnPlot(no_mono_dc_rbcs_platelets, features = c("MS4A1", "FCER1A", "CD8A", "CD8B"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/MS4A1_FCER1A_CD8A_CD8B_across_cell_types_no_mono_dc_rbcs_platelets.svg")
+
+VlnPlot(no_mono_dc_rbcs_platelets, features = c("CD3D", "CD3E", "HBB", "PPBP"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/CD3D_CD3E_HBB_PPBP_across_cell_types_no_mono_dc_rbcs_platelets.svg")
+
+```
+
+# Save cell type clustered, monocyte/DC filtered Seurat object
+
+```{r}
+
+saveRDS(no_mono_dc_rbcs_platelets, file="../saved_data/mono_dc_rbcs_platelets_filtered_cell_type_clustered.rds")
+
+```
