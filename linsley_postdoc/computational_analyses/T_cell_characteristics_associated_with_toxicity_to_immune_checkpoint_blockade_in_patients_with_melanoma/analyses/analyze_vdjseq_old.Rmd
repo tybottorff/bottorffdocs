@@ -1,0 +1,364 @@
+---
+title: "T cell characteristics associated with irAE from ICI in melanoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.nature.com/articles/s41591-021-01623-z
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(readxl)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in TCR, BCR data
+
+```{r}
+
+# List of file names
+file_names <- c(
+  "../raw_data/GSM5694801_YUFURL_TCR.csv.gz",
+  "../raw_data/GSM5694811_YUALOE_TCR.csv.gz",
+  "../raw_data/GSM5694802_YUGRUS_TCR.csv.gz",
+  "../raw_data/GSM5694812_YUHONEY_TCR.csv.gz",
+  "../raw_data/GSM5694803_YUHERN_TCR.csv.gz",
+  "../raw_data/GSM5694804_YUKEND_TCR.csv.gz",
+  "../raw_data/GSM5694805_YUPIXEL_TCR.csv.gz",
+  "../raw_data/GSM5694806_YUROD_TCR.csv.gz",
+  "../raw_data/GSM5694798_YUCARD_TCR.csv.gz",
+  "../raw_data/GSM5694808_YUTHEA_TCR.csv.gz",
+  "../raw_data/GSM5694799_YUENZO_TCR.csv.gz",
+  "../raw_data/GSM5694800_YUFUB_TCR.csv.gz",
+  "../raw_data/GSM5694810_YUVARDO_TCR.csv.gz",
+  "../raw_data/GSM5694809_YUTORY_TCR.csv.gz",
+  "../raw_data/GSM5694807_YUTAUR_TCR.csv.gz",
+  "../raw_data/GSM5694813_YUNANCY_TCR.csv.gz"
+#  "../raw_data/GSM5694821_YUPIXEL_BCR.csv.gz",
+#  "../raw_data/GSM5694822_YUROD_BCR.csv.gz",
+#  "../raw_data/GSM5694823_YUTAUR_BCR.csv.gz",
+#  "../raw_data/GSM5694814_YUCARD_BCR.csv.gz",
+#  "../raw_data/GSM5694824_YUTHEA_BCR.csv.gz",
+#  "../raw_data/GSM5694815_YUENZO_BCR.csv.gz",
+#  "../raw_data/GSM5694825_YUTORY_BCR.csv.gz",
+#  "../raw_data/GSM5694816_YUFUB_BCR.csv.gz",
+#  "../raw_data/GSM5694826_YUVARDO_BCR.csv.gz",
+#  "../raw_data/GSM5694817_YUFURL_BCR.csv.gz",
+#  "../raw_data/GSM5694818_YUGRUS_BCR.csv.gz",
+#  "../raw_data/GSM5694819_YUHERN_BCR.csv.gz",
+#  "../raw_data/GSM5694820_YUKEND_BCR.csv.gz"
+)
+
+## List of patient IDs we want to include
+#selected_patient_IDs <- c(
+#  "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+#  "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+#  "YUTORY", "YUHERN", "YUROD"
+#)
+
+# Filter the list of file names to include only selected patients
+#selected_files <- file_names[sapply(file_names, function(file_name) {
+#  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+#  patient_ID %in% selected_patient_IDs
+#})]
+
+# Create a mapping of patient.ID to their respective suffixes
+#suffix_mapping <- data.frame(
+#  patient.ID = c(
+#    "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+#    "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+#    "YUTORY", "YUHERN", "YUROD"
+#  ),
+#  suffix = c(
+#    ".1_1", ".1_2", ".1_3", ".1_4", ".1_5", ".1_6", ".1_7", ".1_8", ".1_9", ".1_10", ".1_11", ".1_12", #".1_13"
+#  )
+#)
+
+# Create an empty data frame to store the combined data
+combined_data <- data.frame()
+
+# Process each file and append it to the combined_data data frame
+for (file_name in file_names) {
+  # Read the CSV file
+  data <- read_csv(file_name)
+  
+  # Extract patient ID and CR type (TCR or BCR) from the file name
+  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+  
+  # Find the suffix based on patient ID from the mapping
+  #suffix <- suffix_mapping$suffix[suffix_mapping$patient.ID == patient_ID]
+  
+  # Add the suffix to the "Barcode" column
+  #data$Barcode <- paste(data$Barcode, suffix, sep = "")
+  
+  CR_type <- ifelse(grepl("_TCR", file_name), "TCR", "BCR")
+  
+  # Add patient ID and CR type as new columns
+  data$patient.ID <- patient_ID
+  data$CR.type <- CR_type
+  
+  # Append the data to the combined_data data frame
+  combined_data <- bind_rows(combined_data, data)
+}
+
+# Remove duplicate rows based on the "Barcode" column
+#combined_data <- combined_data %>%
+#  distinct(Barcode, .keep_all = TRUE)
+
+# Set row names based on the "Barcode" column
+#rownames(combined_data) <- combined_data$Barcode
+
+#combined_data <- combined_data %>% select(-Barcode)
+
+combined_data
+
+```
+
+# Prep hydrophobicity calculator
+
+```{r}
+
+# Define the amino acids and their corresponding Eisenberg hydrophobicity values
+amino_acids <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
+hydrophobicity_values <- c(0.620, -2.530, -0.780, -0.900, 0.290, -0.850, -0.740, 0.480, -0.400, 1.380, 1.060, -1.500, 0.640, 1.190, 0.120, -0.180, -0.050, 0.81, 0.26, 1.08)
+
+# Create a data frame
+hydrophobicity_df <- data.frame(Amino_Acid = amino_acids, Hydrophobicity = hydrophobicity_values)
+
+hydrophobicity_df
+
+calculate_hydrophobicity <- function(sequence, hydrophobicity_df) {
+  sequence <- toupper(sequence)
+  # Calculate the hydrophobicity scores for each amino acid, and sum them
+  scores <- sapply(strsplit(sequence, '')[[1]], function(aa) {
+    match_aa <- match(aa, hydrophobicity_df$Amino_Acid)
+    if (!is.na(match_aa)) {
+      return(hydrophobicity_df$Hydrophobicity[match_aa])
+    } else {
+      # If an amino acid is not found, return NA
+      return(NA)
+    }
+  })
+  # If there are any NAs in the scores, return NA; otherwise, return the sum
+  if (any(is.na(scores))) {
+    return(NA)
+  } else {
+    return(sum(scores))
+  }
+}
+
+```
+
+# Bring in irAE severity
+
+```{r}
+
+irae_severity <- read_excel("../raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1") %>%
+  select(`Patient ID`, `Highest irAE grade`) %>%
+  mutate(severe_irae = if_else(`Highest irAE grade` %in% c(3,4), "Yes", "No")) %>%
+  select(-`Highest irAE grade`) %>%
+  rename(patient.ID = `Patient ID`)
+
+irae_severity
+
+```
+
+# Analyze TR CDR3 length and hydrophobicity as a function of severe irAE development
+
+```{r}
+
+length_hydrophobicity_df <- combined_data %>%
+  select(Chain, `CDR3 AA Sequence`, patient.ID) %>%
+  mutate(CDR3_aa_length = nchar(`CDR3 AA Sequence`)) %>%
+  rowwise() %>%
+  mutate(CDR3_hydrophobicity = calculate_hydrophobicity(`CDR3 AA Sequence`, hydrophobicity_df)) %>%
+  ungroup() %>%
+  select(-`CDR3 AA Sequence`) %>%
+  left_join(irae_severity, by = "patient.ID") %>%
+  select(-patient.ID) %>%
+  gather(key = "Category", value = "Value", -severe_irae, -Chain)
+
+length_hydrophobicity_df
+
+```
+
+# Plot analysis
+
+```{r}
+
+custom_labeller <- as_labeller(c("CDR3_aa_length" = "CDR3\nAA length", "CDR3_hydrophobicity" = "CDR3\nhydrophobicity"))
+
+# Create the box plot with facets
+ggplot(length_hydrophobicity_df, aes(x = Chain, y = Value, color = severe_irae)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Chain", y = "Value")
+
+```
+
+```{r}
+combined_data
+```
+
+# Prep for stitchr
+
+```{r}
+
+stitchr_df <- combined_data %>%
+  group_by(Barcode) %>%
+  # filter for 1 alpha and 1 beta chain per barcode (easiest way to start)
+  filter(sum(Chain == "TRA") == 1 & sum(Chain == "TRB") == 1) %>%
+  ungroup() %>%
+  filter(Chain %in% c("TRA", "TRB")) %>%
+  select(-CR.type, -`CDR3 NT Sequence`, -`D gene`, -patient.ID) %>%
+  rename(TCR_name = Barcode,
+         CDR3 = `CDR3 AA Sequence`,
+         V = `V gene`,
+         J = `J gene`,
+         C = `C gene`) %>%
+  pivot_wider(names_from = Chain, values_from = c(V, J, C, CDR3)) %>%
+  # rename, reorder, create cols for stitchr
+  rename(TRAV = V_TRA, TRAJ = J_TRA, TRBV = V_TRB, TRBJ = J_TRB, TRAC = C_TRA, TRBC = C_TRB, TRA_CDR3 = CDR3_TRA, TRB_CDR3 = CDR3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader =NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_df
+
+write.table(stitchr_df, file = "../saved_data/vdjseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+
+```
+
+# Analyze stitchr output
+
+```{r}
+
+stitchr_output_analysis <- read_tsv("../saved_data/vdj_stitchr_out.tsv")
+
+error_rows <- grep("Cannot stitch", stitchr_output_analysis$`Warnings/Errors`)
+
+stitchr_output_analysis[error_rows, ]
+
+```
+
+# Prep IGoR input
+
+```{r}
+
+stitchr_output_df <- read_tsv("../saved_data/vdj_stitchr_out.tsv") %>%
+  filter(!(is.na(Linked_nt)))
+
+stitchr_output_df
+
+write.csv(stitchr_output_df, file = "../saved_data/igor_input.csv", row.names = FALSE)
+
+```
+
+# Prep IMGT/HighV-Quest input
+
+```{r}
+
+fasta_df <- read_tsv("../saved_data/vdj_stitchr_out.tsv") %>%
+  filter(!(is.na(Linked_nt))) %>%
+  rename(Barcode = TCR_name) %>%
+  left_join(combined_data, by = "Barcode") %>%
+  select(Barcode, Linked_nt, patient.ID) %>%
+  group_by(patient.ID) %>%
+  mutate(suffix = row_number()) %>%
+  ungroup()
+
+# Function to convert a data frame to FASTA format
+df_to_fasta <- function(df, output_file) {
+  # Open/create the output file for writing
+  fasta_file <- file(output_file, "w")
+  
+  # Iterate through rows of the data frame
+  for (i in 1:nrow(df)) {
+    # Combine name columns and add a suffix numbering
+    label <- paste(df$patient.ID[i], df$suffix[i], sep="_")
+    
+    # Write the sequence and label to the FASTA file
+    writeLines(paste(">", label), con = fasta_file)
+    writeLines(df$Linked_nt[i], con = fasta_file)
+  }
+  
+  # Close the output file
+  close(fasta_file)
+}
+
+# Call the function to convert the data frame to FASTA format
+df_to_fasta(fasta_df, "../saved_data/vdjseq.fasta")
+
+```
+
+# Analyze IMGT/HighV-Quest output
+
+```{r}
+
+imgt_df_2 <- read.table("../saved_data/IMGT_HIGHV_QUEST/2_IMGT-gapped-nt-sequences.txt", header = TRUE, sep = "\t")
+
+imgt_df_2
+
+imgt_df_4 <- read.table("../saved_data/IMGT_HIGHV_QUEST/4_IMGT-gapped-AA-sequences.txt", header = TRUE, sep = "\t")
+
+imgt_df_4
+
+imgt_df_5 <- read.table("../saved_data/IMGT_HIGHV_QUEST/5_AA-sequences.txt", header = TRUE, sep = "\t")
+
+imgt_df_5
+
+imgt_df_7 <- read.table("../saved_data/IMGT_HIGHV_QUEST/7_V-REGION-mutation-and-AA-change-table.txt", header = TRUE, sep = "\t")
+
+imgt_df_7
+
+imgt_df_8 <- read.table("../saved_data/IMGT_HIGHV_QUEST/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t")
+
+imgt_df_8
+
+imgt_df_9 <- read.table("../saved_data/IMGT_HIGHV_QUEST/9_V-REGION-AA-change-statistics.txt", header = TRUE, sep = "\t")
+
+imgt_df_9
+
+imgt_df_10 <- read.table("../saved_data/IMGT_HIGHV_QUEST/10_V-REGION-mutation-hotspots.txt", header = TRUE, sep = "\t")
+
+imgt_df_10
+
+imgt_df_11 <- read.table("../saved_data/IMGT_HIGHV_QUEST/11_Parameters.txt", header = TRUE, sep = "\t")
+
+imgt_df_11
+
+```
