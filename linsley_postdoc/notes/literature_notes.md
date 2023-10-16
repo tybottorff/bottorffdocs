@@ -116,6 +116,13 @@
 ### Signal 3: Cytokines
  - IL-12, type I IFN, also IL-1/6/10/18/27/33 and TGFβ, among others
 # Cellular and molecular waypoints along the path of T cell exhaustion
+# Changes of peripheral T cell subsets in melanoma patients with immune-related adverse events
+## T cell changes in patients with severe irAEs receiving anti-PD-1 monotherapy
+ - no clear differences
+## Changes in T cell subsets in patients with severe irAEs receiving dual immune checkpoint blockade
+ - **decreased frequency of CD4<sup>+</sup> T cells and increased frequency of CD56<sup>+</sup> T cells and CD8<sup>+</sup> T cells before and after the start of the treatment**
+ - **increased frequency of EMRA CD8<sup>+</sup> T cells seen before and after start of dual ICB**
+ - **increase in Ki67<sup>+</sup> CD8 T cells after starting the treatment in patients experiencing severe irAE**
 # Characterization of antibody repertoires in patients with HPV-related HNSCC undergoing definitive radiation with immunotherapy
  - HNSCC: head and neck squamous cell carcinoma
  - in patients with p16-positive HNSCC, see many antigens against which antibodies were formed during radiation therapy and ICI shared between patients
@@ -123,18 +130,31 @@
  - thyroid disorders are a common irAE following ICI
 # Checkpoint-blocker-induced autoimmunity is associated with favorable outcome in metastatic melanoma and distinct T-cell expression profiles
 ## Abstract
- - pre-treatment monocyte and neutrophil counts also predicted clinical outcome
+ - pre-treatment monocyte and neutrophil counts also predicted clinical outcome (negatively prognostic)
  - DEGs in CD8<sup>+</sup> T cells by irAE development, patients not developing irAEs had upregulated *CXCR1* pre/post-treatment
 ## Background
  - it's not consistently observed but sometimes observed that there's an association between irAE development and improved treatment response (suggesting a link between reduced tolerance to self-antigens and tumor antigens)
 ## Results
-### Immune-related adverse events
- - 
+### Association of irAE development with divergent CD8<sup>+</sup> T-cell gene expression
+ - peripheral CD8<sup>+</sup> T cell expression profiles have been linked with clinical outcome
+ - **gene pathways including chemokine-mediated signaling, extracellular matrix organisation, and platelet degranulation altered in irAE development**
+### *CXCR1* and irAE
+ - increased *CXCR1* expression (and *CXCR2* but less so) associated with reduced irAE development
+ - *CXCR1/2* encode chemokine receptors for IL-8
+ - IL-8 levels a negative prognostic
+## Discussion
+ - sex is more likely to be associated with autoimmune incidence than irAE development, so classical risk factors for autoimmunity may be less relevant for irAEs, **back to Peter's point of not treating them the same**
+ - different irAEs occur at different times (cutaneous ones, colitis, hepatitis early, gastritis and pneumonitis late), suggesting divergent pathophysiology
+ - **they say steroids and other immunosuppressants used to manage irAEs are unlikely to affect prognosis, which surprises me as I thought they could interfere with the anti-tumor activities of ICB**
+ - **see baseline changes in single ICB recipients who proceeded to develop irAE with enrichment in complement activity, innate immunity and neutrophil degranulation pathways**
 # Chimeric CTLA-4-CD28-CD3z T cells potentiate antitumor activity against CD80/CD86-positive B cell malignancies
  - overcome inhibitive microenvironment of tumor by making chimeric CTLA-4 (extracellular and transmembrane domains) CD28/CD3z (cytoplasmic domains) protein, so off signal becomes on signal
  - CTLA-4 upregulated after T cell activation, to prevent too much activation?
  - CD80/86 are CTLA-4 ligands
  - CAR T cells (chimeric antigen receptor T cells): extracellular ligand recognition domain (single chain variable fragment, ScFv) fused to signaling domain of CD3z, intracellular costimulatory molecule (CD28, 4-1BB, ICOS, CD40, or CD27)
+# Clinical characteristics and treatment of immune-related adverse events of immune checkpoint inhibitors
+## Mechanisms of irAEs
+ - hypotheses: ICI usage breaks up homeostasis and reduces T cell tolerance, cross-reactivity of T cells between tumor cells and normal tissue, ICI usage can increase pre-existing autoantibody levels as well as inflammatory cytokine levels, ICI can disturb CTLA-4/PD-L1 blocks in tissue expressing those inhibitory receptors to protect normal tissue
 # Clonal exhaustion as a mechanism to protect against severe immunopathology and death from an overwhelming CD8 T cell response
  - possible evolutionary reason for T cell exhaustion
 # Clonal expansion of CD8 T cells in the systemic circulation precedes development of ipilimumab-induced toxicities
@@ -562,6 +582,29 @@
  - **many mutant neoantigens in mismatch repair-deficient cancers makes them sensitive to immune checkpoint blockade, regardless of cancer's tissue of origin**
  - show that ICI induces peripheral expansion of tumor-specific T cells and that mismatch repair-deficient tumors harbor functional MANA (mutation-associated neoantigens) specific T cells
  - TCR-seq works by CDR3 sequencing (most variable region of TCRα and β chains, governs interactions with peptide-MHC complexes, junction between V and J or D and J genes)
+# Molecular mechanisms of cutaneous immune-related adverse events (irAEs) induced by immune checkpoint blockade
+## The biological function of immune checkpoints
+### CTLA-4
+ - CD28 homolog (with higher affinity for ligands than CD28) mostly expressed by activated T cells, constitutively expressed on Tregs
+ - CTLA-4 ligands CD80/86 mostly on APCs
+ - attenuates T cell activation to reduce immune responses to weak antigens (like self/tumor)
+ - CTLA-4 expression in Tregs downregulates immune responses to maintain self-tolerance by inhibiting effector T cell proliferation and cytokine release
+### PD-1
+ - CD279, expressed by activated T cells, B cells, NKs, some myeloid cells
+ - contributes to peripheral tolerance by binding ligands PD-L1 (CD274, B7-H1) or PD-L2 (CD273, B7-DC) on APCs (macrophages, DCs, some B cells)
+ - PD-L1 expression induced in APCs by interferon and IL-17, PD-L2 expression stimulated by IL-4
+### LAG-3
+ - CD223
+ - expressed by activated T cells, NKs, Tregs, B cells, DCs
+ - **MHC II is primary LAG-3 ligand, higher affinity between LAG-3:MHC II than CD4:MHC II, so LAG-3 may downregulate T cell function by competing with CD4**
+## Subtypes and possible mechanisms of cutaneous immune-related adverse events
+ - type IV hypersensitivity reactions
+ - genetic differences in HLA variants
+ - increased proinflammatory cytokines
+ - **autoreactive cytotoxic T cells against common antigens**, specifically for vitiligo-like depigmentation, Lichenoid eruption, Stevens-Johnson syndrome/toxic epidermal necrolysis
+ - innate immunity
+ - Th17 pathway activation
+ - T-cell (in)dependent humoral immunity
 # mTOR regulates T cell exhaustion and PD-1-targeted immunotherapy response during chronic viral infection
  - background: PD-1-blockade enhances T cell response by promoting differentiation of stem-like T cells towards TIM3<sup>+</sup> cells
  - results: blocking mTOR during T cell expansion enhances T cell response (stem-like T cells accumulate), but blocking mTOR after exhaustion has progressed causes immunosuppression (decreased TIM3<sup>+</sup> cells, increased viral load)
