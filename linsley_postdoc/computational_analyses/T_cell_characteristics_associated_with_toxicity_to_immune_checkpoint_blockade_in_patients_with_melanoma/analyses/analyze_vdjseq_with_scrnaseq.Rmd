@@ -50,6 +50,41 @@ cleaned_seurat <- readRDS("../saved_data/mono_dc_rbc_platelet_filtered_tcr_bcr_c
 
 ```
 
+# Prep hydrophobicity calculator
+
+```{r}
+
+# Define the amino acids and their corresponding Eisenberg hydrophobicity values
+amino_acids <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
+hydrophobicity_values <- c(0.620, -2.530, -0.780, -0.900, 0.290, -0.850, -0.740, 0.480, -0.400, 1.380, 1.060, -1.500, 0.640, 1.190, 0.120, -0.180, -0.050, 0.81, 0.26, 1.08)
+
+# Create a data frame
+hydrophobicity_df <- data.frame(Amino_Acid = amino_acids, Hydrophobicity = hydrophobicity_values)
+
+hydrophobicity_df
+
+calculate_hydrophobicity <- function(sequence, hydrophobicity_df) {
+  sequence <- toupper(sequence)
+  # Calculate the hydrophobicity scores for each amino acid, and sum them
+  scores <- sapply(strsplit(sequence, '')[[1]], function(aa) {
+    match_aa <- match(aa, hydrophobicity_df$Amino_Acid)
+    if (!is.na(match_aa)) {
+      return(hydrophobicity_df$Hydrophobicity[match_aa])
+    } else {
+      # If an amino acid is not found, return NA
+      return(NA)
+    }
+  })
+  # If there are any NAs in the scores, return NA; otherwise, return the sum
+  if (any(is.na(scores))) {
+    return(NA)
+  } else {
+    return(sum(scores))
+  }
+}
+
+```
+
 # Create features for UMAP overlay
 
 ```{r}
@@ -58,9 +93,12 @@ cleaned_seurat <- readRDS("../saved_data/mono_dc_rbc_platelet_filtered_tcr_bcr_c
 feature_df <- as_tibble(cleaned_seurat@meta.data)
 
 feature_df$cell_type <- Idents(cleaned_seurat)
+feature_df$severe_irAE <- cleaned_seurat@meta.data$Severe.irAE.status..1.Yes..0.No.
+feature_df$cluster_number <- as.numeric(cleaned_seurat@meta.data$seurat_clusters)
 
 feature_df <- feature_df %>%
-  select(patient.ID, cell_type, CDR3.AA.Sequence, CDR3.NT.Sequence, CR.type) %>%
+  select(patient.ID, Chain, severe_irAE, cell_type, CDR3.AA.Sequence, CDR3.NT.Sequence, CR.type, cluster_number) %>%
+  mutate(severe_irAE = if_else(severe_irAE == 1, "Yes", "No")) %>%
   group_by(patient.ID, CDR3.NT.Sequence) %>%
   mutate(cdr3_nt_count = n()) %>%
   mutate(expansion_group = if_else(
@@ -71,10 +109,65 @@ feature_df <- feature_df %>%
             ifelse(cdr3_nt_count <= 100, "large",
               "hyperexpanded")))))) %>%
   ungroup() %>%
-  mutate(CDR3_length = nchar(CDR3.AA.Sequence))
+  mutate(CDR3_length = as.numeric(nchar(CDR3.AA.Sequence))) %>%
+  rowwise() %>%
+  mutate(CDR3_hydrophobicity = as.numeric(calculate_hydrophobicity(CDR3.AA.Sequence, hydrophobicity_df))) %>%
+  mutate(CDR3_hydrophobicity_rounded = round(as.numeric(calculate_hydrophobicity(CDR3.AA.Sequence, hydrophobicity_df)))) %>%
+  ungroup()
 
+# copy mapping from earlier analysis
+cell_type_mapping <- c("B cells 1",
+                     # 0
+                     
+                     "CD4 T cells 1",
+                     "CD4 T cells 2",
+                     "CD4 T cells 3",
+                     "B cells 2",
+                     "T/NKTs 1",
+                     "T/NKTs 2",
+                     "CD4 T cells 4",
+                     "B cells 3",
+                     "T/NKTs 3",
+                     
+                     "B cells 4",
+                     # 10
+                     
+                     "CD8 T cells 1",
+                     "T/NKTs 4",
+                     "CD4 T cells 5",
+                     "CD4 T cells 6",
+                     "T/NKTs 5",
+                     "T/NKTs 6",
+                     "T/NKTs 7",
+                     "CD4 T cells 7",
+                     "T/NKTs 8",
+                     
+                     "CD4 T cells 8",
+                     # 20
+                     
+                     "B cells 5",
+                     "NKs 1"
+                     )
+
+# Create a new column 'cell_type' based on the mapping
+feature_df$cell_type_subcluster <- cell_type_mapping[feature_df$cluster_number]
+
+# bring back features to seurat metadata in case needed later
 cleaned_seurat@meta.data$expansion_group <- feature_df$expansion_group
 cleaned_seurat@meta.data$cdr3_aa_length <- feature_df$CDR3_length
+cleaned_seurat@meta.data$cdr3_hydrophobicity_rounded <- feature_df$CDR3_hydrophobicity_rounded
+cleaned_seurat@meta.data$cdr3_hydrophobicity <- feature_df$CDR3_hydrophobicity
+cleaned_seurat@meta.data$cell_type_subcluster <- feature_df$cell_type_subcluster
+
+```
+
+# Plot UMAP with color of patient ID
+
+```{r}
+
+DimPlot(cleaned_seurat, reduction = "umap", group.by = "patient.ID", shuffle = TRUE, seed = 992, pt.size = 0)
+
+ggsave("../figures/umap_patient_id_no_mono_dc.svg")
 
 ```
 
@@ -85,8 +178,209 @@ cleaned_seurat@meta.data$cdr3_aa_length <- feature_df$CDR3_length
 # Reorder factor levels so that "no TCR group" is plotted first
 cleaned_seurat@meta.data$expansion_group <- factor(cleaned_seurat@meta.data$expansion_group, levels = c("no TCR/BCR info", "single", "small", "medium", "large", "hyperexpanded"))
 
-DimPlot(cleaned_seurat, reduction = "umap", group.by = "expansion_group", shuffle = TRUE, seed = 992)
+DimPlot(cleaned_seurat, reduction = "umap", group.by = "expansion_group", shuffle = TRUE, seed = 992, pt.size = 0)
 
 ggsave("../figures/umap_expansion_group_no_mono_dc.svg")
+
+```
+
+# Plot UMAP with color of CDR3 AA length
+
+```{r}
+
+DimPlot(cleaned_seurat, reduction = "umap", group.by = "cdr3_aa_length", shuffle = TRUE, seed = 992, pt.size = 0)
+
+ggsave("../figures/umap_cdr3_aa_length_no_mono_dc.svg")
+
+```
+
+# Plot UMAP with color of CDR3 hydrophobicity
+
+```{r}
+
+DimPlot(cleaned_seurat, reduction = "umap", group.by = "cdr3_hydrophobicity_rounded", shuffle = TRUE, seed = 992, pt.size = 0)
+
+ggsave("../figures/umap_cdr3_hydrophobicity_no_mono_dc.svg")
+
+```
+
+# Analyze TCR/BCR length and unique counts as a function of severe irAE development, cell type
+
+```{r}
+
+custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion"))
+
+length_expansion_boxplot_df <- feature_df %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity) %>%
+  filter(cell_type != "NKs") %>%
+  mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
+
+# Create the box plot with facets
+ggplot(length_expansion_boxplot_df, aes(x = cell_type, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Cell type", y = "Value")
+
+ggsave("../figures/cdr3_aa_length_expansion_by_cell_type_no_mono_dc.svg")
+
+```
+
+# Analyze TCR/BCR hydrophobicty as a function of severe irAE development, cell type
+
+```{r}
+
+custom_labeller <- as_labeller(c("CDR3_hydrophobicity" = "CDR3\nhydrophobicity"))
+
+hydrophobicity_boxplot_df <- feature_df %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_length, -cdr3_nt_count) %>%
+  filter(cell_type != "NKs") %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
+
+# Create the box plot with facets
+ggplot(hydrophobicity_boxplot_df, aes(x = cell_type, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Cell Type", y = "Value")
+
+ggsave("../figures/cdr3_hydrophobicity_by_cell_type_no_mono_dc.svg")
+
+```
+
+# Investigate patient bias for B cell effects
+
+```{r}
+
+custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion"))
+
+b_cell_boxplot_df <- feature_df %>%
+  select(-CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity) %>%
+  filter(cell_type == "B cells") %>%
+  mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type, -patient.ID)
+
+# Create a custom list of patient IDs in the order you want
+custom_order <- c("YUCARD", "YUFURL", "YUPIXEL", "YUTAUR", "YUTORY", "YUVARDO", "YUENZO", "YUFUB", "YUGRUS", "YUKEND", "YUHERN", "YUROD", "YUTHEA")
+
+# Reorder the patient.ID based on the custom order
+b_cell_boxplot_df$patient.ID <- factor(b_cell_boxplot_df$patient.ID, levels = custom_order)
+
+# Create the box plot with facets
+ggplot(b_cell_boxplot_df, aes(x = patient.ID, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6)) +
+  labs(x = "Patient ID", y = "Value")
+
+ggsave("../figures/b_cell_features_by_patient.svg")
+
+```
+
+# Analyze TCR/BCR length and unique counts as a function of severe irAE development, cell type without YUROD outlier patient
+
+```{r}
+
+custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion"))
+
+no_yurod_boxplot_df <- feature_df %>%
+  filter(patient.ID != "YUROD") %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity) %>%
+  filter(cell_type != "NKs") %>%
+  mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
+
+# Create the box plot with facets
+ggplot(no_yurod_boxplot_df, aes(x = cell_type, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Cell type", y = "Value")
+
+ggsave("../figures/cdr3_aa_length_expansion_by_cell_type_no_yurod_outlier_no_mono_dc.svg")
+
+```
+
+# Re-look at UMAP to estimate CD4 T cell subclusters of interest, looks like 2, 4, 7 are potentially what the paper found interesting (CD4 effector memory)
+
+```{r}
+
+DimPlot(cleaned_seurat, reduction = "umap", group.by = "cell_type_subcluster", shuffle = TRUE, seed = 992, pt.size = 0, cols = c('B cells 1' = 'brown', 'B cells 2' = 'brown', 'B cells 3' = 'brown', 'B cells 4' = 'brown', 'B cells 5' = 'brown', 'T/NKTs 1' = 'darkcyan', 'T/NKTs 2' = 'darkcyan', 'T/NKTs 3' = 'darkcyan', 'T/NKTs 4' = 'darkcyan', 'T/NKTs 5' = 'darkcyan', 'T/NKTs 6' = 'darkcyan', 'T/NKTs 7' = 'darkcyan', 'T/NKTs 8' = 'darkcyan', 'NKs 1' = 'purple', 'CD8 T cells 1' = 'pink', 'CD4 T cells 1' = 'blue', 'CD4 T cells 2' = 'green', 'CD4 T cells 3' = 'red', 'CD4 T cells 4' = 'blue', 'CD4 T cells 5' = 'red', 'CD4 T cells 6' = 'red', 'CD4 T cells 7' = 'black', 'CD4 T cells 8' = 'red'))
+
+```
+
+# Analyze CD4 TCR CDR3 hydrophobicity and AA length as a function of severe irAE development, cell cluster
+
+```{r}
+
+custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion", "CDR3_hydrophobicity" = "CDR3\nhydrophobicity"))
+
+cd4_hydrophobicity_length_boxplot_df <- feature_df %>%
+  filter(cell_type == "CD4 T cells") %>%
+  mutate(cell_type_subcluster = str_extract(cell_type_subcluster, "\\d+$")) %>%
+  select(-patient.ID, -cell_type, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -cluster_number, -cdr3_nt_count) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type_subcluster)
+
+# Create the box plot with facets
+ggplot(cd4_hydrophobicity_length_boxplot_df, aes(x = cell_type_subcluster, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "CD4 subcluster", y = "Value")
+
+ggsave("../figures/cdr3_aa_length_hydrophobicity_by_cd4_subcluster_no_mono_dc.svg")
+
+```
+
+# Analyze CD4 TCR expansion as a function of severe irAE development, cell cluster
+
+```{r}
+
+custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion", "CDR3_hydrophobicity" = "CDR3\nhydrophobicity"))
+
+cd4_expansion_boxplot_df <- feature_df %>%
+  filter(cell_type == "CD4 T cells",
+         Chain %in% c("TRA", "TRB")) %>%
+  mutate(cell_type_subcluster = str_extract(cell_type_subcluster, "\\d+$")) %>%
+  select(-patient.ID, -cell_type, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -cluster_number, -CDR3_length, -CDR3_hydrophobicity) %>%
+  mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type_subcluster)
+
+# Create the box plot with facets
+ggplot(cd4_expansion_boxplot_df, aes(x = cell_type_subcluster, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  labs(x = "CD4 subcluster", y = "CDR3 expansion")
+
+ggsave("../figures/expansion_by_cd4_subcluster_no_mono_dc.svg")
+
+```
+
+# Analyze CD4 T cell subcluster 4 TCR expansion as a function of severe irAE development, chain
+
+```{r}
+
+cd4_subcluster_4_expansion_boxplot_df <- feature_df %>%
+  filter(cell_type == "CD4 T cells",
+         cell_type_subcluster == "CD4 T cells 4",
+         # one B cell snuck through somehow, many NAs
+         Chain %in% c("TRA", "TRB")) %>%
+  select(-patient.ID, -cell_type, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -cluster_number, -CDR3_length, -CDR3_hydrophobicity) %>%
+  mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type_subcluster)
+
+# Create the box plot with facets
+ggplot(cd4_subcluster_4_expansion_boxplot_df, aes(x = Chain, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  labs(x = "Chain", y = "CDR3 expansion")
+
+ggsave("../figures/cd4_subcluster_4_expansion_by_chain_no_mono_dc.svg")
+
+```
+
+
+# Analyze stitched TCRalpha IGoR results
+
+```{r}
+
+
 
 ```
