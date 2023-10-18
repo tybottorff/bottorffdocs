@@ -152,7 +152,7 @@ cell_type_mapping <- c("B cells 1",
 # Create a new column 'cell_type' based on the mapping
 feature_df$cell_type_subcluster <- cell_type_mapping[feature_df$cluster_number]
 
-# bring back features to seurat metadata in case needed later
+# bring back features to seurat metadata
 cleaned_seurat@meta.data$expansion_group <- feature_df$expansion_group
 cleaned_seurat@meta.data$cdr3_aa_length <- feature_df$CDR3_length
 cleaned_seurat@meta.data$cdr3_hydrophobicity_rounded <- feature_df$CDR3_hydrophobicity_rounded
@@ -377,10 +377,43 @@ ggsave("../figures/cd4_subcluster_4_expansion_by_chain_no_mono_dc.svg")
 ```
 
 
-# Analyze stitched TCRalpha IGoR results
+# Combine stitched TCR IGoR alpha and beta pgen results
 
 ```{r}
 
+tcr_alpha_igor <- read_csv("../saved_data/igor_output_alpha.csv") %>%
+  filter(!(is.na(pgen))) %>%
+  rename(pgen_alpha = pgen)
+
+tcr_igor <- read_csv("../saved_data/igor_output_beta.csv") %>%
+  filter(!(is.na(pgen))) %>%
+  rename(pgen_beta = pgen) %>%
+  left_join(tcr_alpha_igor, by = c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ", "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", "Linked_aa", "Warnings/Errors")) %>%
+  select(TCR_name, pgen_alpha, pgen_beta) %>%
+  pivot_longer(cols = starts_with("pgen"), 
+               names_to = "Chain", 
+               values_to = "pgen") %>%
+  mutate(Chain = ifelse(grepl("alpha", Chain), "alpha", "beta"))
+
+tcr_igor
+
+# lose ~40ish cells/barcodes with NaN pgen values
+
+```
+
+# Plot alpha vs. beta pgen scores
+
+```{r}
+
+ggplot(tcr_igor, aes(x = Chain, y = -log10(pgen))) +
+  geom_violin() +
+  labs(x = "Chain", y = "-log10(pgen)")
+
+# IGoR pgen notes: Junction sequences with higher (less negative) pgen values have a higher probability of generation by V(D)J recombination. Conversely, sequences with lower (more negative) pgen values have a lower probability of generation. FOR plotting, make violin plots of y-axis -log10(pgen)
+
+```
 
 
+```{r}
+# Add Igor as metadata! then can do faceting/overlays I'd like to do
 ```
