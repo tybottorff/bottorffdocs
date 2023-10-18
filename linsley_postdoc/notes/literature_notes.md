@@ -29,6 +29,8 @@
  - here, they describe a subset of human memory T<sub>H2</sub> cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific T<sub>H2</sub> cells, denoted as T<sub>H2A</sub> cells, characterized by co-expression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional T<sub>H2</sub> cells
  - transcriptome analysis reveals distinct pathway in initiation of pathogenic responses to allergen
  - elimination of these cells is indicative of clinical responses induced by immunotherapy
+# Association of antithyroglobulin antibodies with the development of thyroid dysfunction induced by nivolumab
+ - pre-existing thryoglobulin antibodies (TgAb) and elevated TSH (thyroid-stimulating hormone) associated with development of thyroid dysfunction induced by nivolumab
 # Association of checkpoint inhibitor-induced toxic effects with shared cancer and tissue antigens in non-small cell lung cancer
  - irAEs more common in patients with complete/partial remission than in those with progressive/stable disease, **autoimmune adverse effects are associated with response to therapy**
  - **identify 9 T cell antigens shared between tumor and skin (including desmocollin 3, keratin 6, mapsin, LL37, keratin 14), different from crossreactivity hypothesis seems to just be exact same antigen shared between tumor and self**, these antigens stimulate T cells *in vitro* (significant for CD8<sup>+</sup> IFN-γ<sup>+</sup> but not CD4<sup>+</sup> IFN-γ<sup>+</sup> T cells)
@@ -64,6 +66,7 @@
  - T cells thought to be major mediators of irAEs (activity enhanced by ICB)
  - theories for breached regulation of T cell activity during ICB: **neoantigen (T cells targeting cancer neoantigens cross-react with WT version of protein in healthy tissue)** and tissue-associated antigen (antigens shared between tumor and healthy tissue) theories
 # Autoreactive T cell receptors with shared germline-like α chains in type 1 diabetes
+## Abstract
  - identify class of TCRs that share TCR α chains between individuals ("public" chains, scRNAseq)
  - use multiplexed CD154 enrichment to isolate IAR T cells from peripheral blood
  - identify paired TCRαβ sequences from 2,767 cells, more than 1/4 share TCR junctions between 2 or more cells ("expanded"), and ~62% of expanded TCRs show specificity for islet antigen epitopes
@@ -72,6 +75,22 @@
  - public TCRα junctions most often paired with mismatched TCRβ junctions in TCRs, a subset of these TCRs cross-reactive towards distinct islet antigen peptides
  - takehome: population of IAR T cells with diverse specificities determined by TCRs with restricted TCRα junctions and germline-constrained antigen recognition properties
  - "innate-like" TCRs differ from immunodominant TCRβ chains in autoimmunity
+## Introduction
+ - human islet antigen reactive CD4<sup>+</sup> memory T cells (IAR T cells) involved in beta cell destruction, perhaps biomark T1D
+ - the extreme diversity of TCR sequences allows for private expanded TCR clonotypes, but public expanded TCR sequences are also sometimes observed (perhaps a continuum rather than a binary public/private)
+ - shared public sequences prominent in TCRs recognizing microbial antigens, **I wonder why**, and have been implicated in autoimmune disease
+## Results
+### Expanded IAR T cells recognize multiple islet epitopes
+ - recombinant lentiviral transduction to ectopically express TCR sequences in primary CD4<sup>+</sup> T cells
+ - **expanded TCRs had multiple specificities**
+ - most often TCRs recognized GAD65 peptides, then IGRP, then ZNT8 (there were more GADD65 peptides in the pool though), surprisingly no recognition of preproinsulin epitope
+### Expanded public IAR TCRs are more prevalent in new-onset T1D
+### Public TCRs are more germline like
+ - junction length inversely related to germline-ness (fewer nontemplated nucleotide additions i.e. shorter junction means more germline-like)
+## Discussion
+ - increased frequency of public TCRs in IAR T cells of new-onset T1D patients relative to established T1D patients, perhaps due to a dilution of specificities as epitope spreading occurs, migration of islet antigen-specific T cells to pancreas, or clone contraction due to antigen loss during islet destruction
+ - **would expect more germline-like TCRs to be more cross-reactive (lower sequence complexity)**
+ - **cross-reactivity need not result from sequence similarity (3D structural similarity more important than 1D sequence similarity)**
 # AXL receptor tyrosine kinase inhibition improves the anti-tumor effects of CD8<sup>+</sup> T cells by inducing CD103<sup>+</sup> dendritic cell-mediated T cell priming
  - AXL inhibited clonal expansion of tumor-specific CD8<sup>+</sup> T cells
 # B cells as biomarkers: predicting immune checkpoint therapy adverse events
@@ -302,6 +321,14 @@
  - key effector genes (like *Prf1*, *Gzmb*) demethylated and gain chromatin accessibility upon antigen recognition
  - after pathogen clearance, memory precursor cells can differentiate into long-lived memory cells by demethylating naive-associated genes (*Bcl2*, *Il7r*), demethylated and open chromatin at both effector and naive genes allowing rapid effector responses upon reencountering pathogens
  - CD8<sup>+</sup> T cells can become exhausted due to persistent antigen exposure, proliferating less, expressing inhibitory cell receptors (PD-1, CTLA-4, TIM3, LAG3), losing effector function
+# Epitope spreading toward wild type melanocyte-lineage antigens rescues suboptimal immune checkpoint blockade responses
+## Abstract
+ - prior literature: ICI efficacy correlates with load of tumor-specific neoantigens and vitiligo development in patients with melanoma
+ - here, they report that patients with low melanoma neoantigen burdens who did respond to ICIs had tumors with higher expression of pigmentation-related genes
+ - **expansion of peripheral CD8<sup>+</sup> T cell populations specific for melanocyte antigens observed only in patients who responded to anti-PD-1 therapy, so ICI can promote breakdown of tolerance towards tumor-lineage self-antigens**
+ - **mouse model of poorly immunogenic melanomas: skew epitope recognition toward wild type melanocyte antigens associated with improved anti-PD-1 efficacy (can introduce neoantigens with UVB radiation mutagenesis), and got long term protection against engrafted melanomas not sharing neoantigens**
+## Introduction
+ - 
 # Expression of MHC class II in T cells is associated with increased HIV-1 expression
  - CD4 primary HIV-1 infection receptor, expressed on T cells, monocytes, macrophages, DCs
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
@@ -542,6 +569,10 @@
 ### Mechanisms of B cell reactivity in irAEs
  - advanced melanoma patients receiving combination ICI had decreased circulating B cell counts, increased CXCL13 (germinal center activation marker) plasma levels, increased B cell clonality (in terms of immunoglobulin gene expression), and increased plasmablasts after treatment, and early changes in B cells correlated with higher rates of severe irAEs
  - subset of CD21<sup>low</sup> memory B cells particularly affected by combination ICI with restricted PD-1 expression and increased IFN-γ signaling after treatment
+### Pre-existing autoimmune disease and immune checkpoint therapy
+ - ICIs can flare underlying autoimmune disease
+### Immunosuppression and tumor response
+ - **lower response rate to anti-PD-1 therapy if on immunosuppressive therapy at treatment onset (i.e. for pre-existing autoimmune disease)**
 # Mechanisms of T cell exhaustion guiding next generation immunotherapy
  - resting exhausted T cells in antigen-free environments doesn't reinvigorate them (exhaustion is a committed cell fate)
  - exhausted T cells, unlike functional memory T cells, do not exhibit antigen-independent homeostatic proliferation (self-renewal in presence of homeostatic cytokines IL-7, IL-15); exhausted T cells require antigen exposure for maintenance
@@ -652,9 +683,11 @@
  - FAP: fibroblast activation protein, upregulated in tumor in response to radiation (which can be taken advantage of for drug delivery to TME via FAP-CD40 DARPin)
  - FAP-CD40 DARPin: uses FAP and CD40 binding domains to cross-link and activate CD40 specifically in tumor
 # Quantifiable predictive features define epitope-specific T cell receptor repertoires
+## Abstract
  - TCR is heterodimer, mediates pathogen-associated epitope recognition through interactions between peptide and MHC, generated by genomic rearrangement of germline TCR locus (VDJ recombination) to allow potentially 10^15 to 10^61 unique receptors
  - TCRs from T cells that recognize the same pMHC epitope often share conserved sequence features, perhaps able to predict model epitope specificity
  - here, they study CD8<sup>+</sup> TCRs in mice and humans to study these conserved features as well as features differentiating them
+ - **takehome: each epitope-specific repertoire studied had a clustered group of receptors with core sequence similarities plus a dispersed set of diverse "outlier" sequences, so some similar but some different sort of unhelpful**
 # Regulatory T cells suppress CD4<sup>+</sup> effector T cell activation by controlling protein synthesis
 ## Abstract
  - Tregs suppress CD4 effector T cells
