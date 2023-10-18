@@ -282,7 +282,7 @@ stitchr_output_analysis
 
 ```{r}
 
-stitchr_output_df <- read_tsv("../saved_data/vdj_stitchr_out.tsv") %>%
+stitchr_output_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
   filter(!(is.na(Linked_nt)))
 
 stitchr_output_df
