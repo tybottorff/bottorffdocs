@@ -29,6 +29,13 @@
  - here, they describe a subset of human memory T<sub>H2</sub> cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific T<sub>H2</sub> cells, denoted as T<sub>H2A</sub> cells, characterized by co-expression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional T<sub>H2</sub> cells
  - transcriptome analysis reveals distinct pathway in initiation of pathogenic responses to allergen
  - elimination of these cells is indicative of clinical responses induced by immunotherapy
+# Association between immune-related side effects and efficacy and benefit of immune checkpoint inhibitors - a systemic review and meta-analysis
+## Highlights
+ - association between irAEs and clinical benefit across all solid tumors regardless of ICI type
+## Abstract
+ - grade 3 or higher irAEs (severe irAEs) resulted in better objective response rate but worse overall survival
+## Introduction
+ - ICIs can unleash T cells with subsequent production of pro-inflammatory cytokines like interferon γ, TNF, can result in excessive off-tumor inflammation and autoimmunity
 # Association of antithyroglobulin antibodies with the development of thyroid dysfunction induced by nivolumab
  - pre-existing thryoglobulin antibodies (TgAb) and elevated TSH (thyroid-stimulating hormone) associated with development of thyroid dysfunction induced by nivolumab
 # Association of checkpoint inhibitor-induced toxic effects with shared cancer and tissue antigens in non-small cell lung cancer
@@ -76,7 +83,7 @@
  - takehome: population of IAR T cells with diverse specificities determined by TCRs with restricted TCRα junctions and germline-constrained antigen recognition properties
  - "innate-like" TCRs differ from immunodominant TCRβ chains in autoimmunity
 ## Introduction
- - human islet antigen reactive CD4<sup>+</sup> memory T cells (IAR T cells) involved in beta cell destruction, perhaps biomark T1D
+ - human islet antigen reactive CD4<sup>+</sup> memory T cells (IAR T cells) involved in β cell destruction, perhaps biomark T1D
  - the extreme diversity of TCR sequences allows for private expanded TCR clonotypes, but public expanded TCR sequences are also sometimes observed (perhaps a continuum rather than a binary public/private)
  - shared public sequences prominent in TCRs recognizing microbial antigens, **I wonder why**, and have been implicated in autoimmune disease
 ## Results
@@ -145,6 +152,8 @@
 # Characterization of antibody repertoires in patients with HPV-related HNSCC undergoing definitive radiation with immunotherapy
  - HNSCC: head and neck squamous cell carcinoma
  - in patients with p16-positive HNSCC, see many antigens against which antibodies were formed during radiation therapy and ICI shared between patients
+# Characterization of nivolumab-associated skin reactions in patients with metastatic non-small cell lung cancer
+ - skin irAEs correlated with tumor responses in most responders and barely any non-responders
 # Characterization of Thyroid Disorders in Patients Receiving Immune Checkpoint Inhibition Therapy
  - thyroid disorders are a common irAE following ICI
 # Checkpoint-blocker-induced autoimmunity is associated with favorable outcome in metastatic melanoma and distinct T-cell expression profiles
@@ -327,8 +336,6 @@
  - here, they report that patients with low melanoma neoantigen burdens who did respond to ICIs had tumors with higher expression of pigmentation-related genes
  - **expansion of peripheral CD8<sup>+</sup> T cell populations specific for melanocyte antigens observed only in patients who responded to anti-PD-1 therapy, so ICI can promote breakdown of tolerance towards tumor-lineage self-antigens**
  - **mouse model of poorly immunogenic melanomas: skew epitope recognition toward wild type melanocyte antigens associated with improved anti-PD-1 efficacy (can introduce neoantigens with UVB radiation mutagenesis), and got long term protection against engrafted melanomas not sharing neoantigens**
-## Introduction
- - 
 # Expression of MHC class II in T cells is associated with increased HIV-1 expression
  - CD4 primary HIV-1 infection receptor, expressed on T cells, monocytes, macrophages, DCs
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
@@ -702,6 +709,8 @@
  - upon activation, resting T cells undergo rapid reprogramming in preparation of cell division, includes increased translation
 ## Results
 ### Tregs control the protein synthetic capacity of activated CD4 Teffs
+# Retrospective study of advanced melanoma patients treated with ipilimumab after nivolumab: analysis of 60 Japanese patients
+ - 
 # Risk factors and biomarkers for immune-related adverse events: a practical guide to identifying high-risk patients and re-challenging immune checkpoint inhibitors
  - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
  - organ-specific irAEs associated with pre-existing organ dysfunction
@@ -1069,6 +1078,11 @@
  - FoxP3 is main Treg transcription factor, associated with high CD25 expression
  - Tregs defined as CD3<sup>+</sup>CD4<sup>+</sup>CD25<sup>high</sup>FoxP3<sup>+</sup>CD127<sup>low</sup>
  - Tregs can develop in thymus (tTregs, express FoxP3, high autoaffinity TCR, provide tolerance to autoantigens) or peripherally (pTregs, prevent local inflammation in presence of exogenous antigens) from effector cells
+# Tumor-reactive CD8<sup>+</sup> T cells enter a TCF1<sup>+</sup>PD1<sup>-</sup> dysfunctional state
+ - self/shared antigens (SSA): tumor antigens aberrantly expressed but not mutated i.e. shared with normal tissue
+ - tumor-specific antigens: mutated proteins or oncogenic viral proteins
+ - genetic cancer mouse model in which they can track tumor-specific CD8<sup>+</sup> T cell and self/shared antigen-specific CD8<sup>+</sup> T cell differentiation longitudinally as liver cancers develop
+ - find that both tumor and self/shared antigen specific CD8<sup>+</sup> T cells lost effector function over time but in different ways: **tumor-specific CD8<sup>+</sup> T cells persist long term but are dysfunctional/exhausted (PD-1<sup>+</sup>, CD39<sup>+</sup>, TOX<sup>+</sup>) while self/shared antigen specific CD8<sup>+</sup> T cells exit cell cycle prematurely and disappear from liver lesions but persist in spleen in dysfunctional TCF1<sup>+</sup>PD-1<sup>-</sup> state unable to produce effector cytokines or proliferate in response to PD-1 blockade**
 # Type 1/Type 2 immunity in infectious diseases
  - Th1 (T helper type 1) cells secrete IL-2, interferon-γ, lymphotoxin-α and stimulate type 1 immunity (intense phagocytic activity), more or less synonymous with cell-mediated immunity but some antibodies are still produced, protective for most infections
  - Th2 cells secrete IL-4/5/9/10/13 and stimulate type 2 immunity (high antibody titers), more or less synonymous with humoral immunity (Th2 cells suppress phagocytosis), resolves cell-mediated inflammation
