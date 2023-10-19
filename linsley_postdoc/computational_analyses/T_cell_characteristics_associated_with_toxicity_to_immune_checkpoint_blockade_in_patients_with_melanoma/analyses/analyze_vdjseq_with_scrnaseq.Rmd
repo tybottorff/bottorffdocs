@@ -211,7 +211,7 @@ ggsave("../figures/umap_cdr3_hydrophobicity_no_mono_dc.svg")
 custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion"))
 
 length_expansion_boxplot_df <- feature_df %>%
-  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity) %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity, -cluster_number, -cell_type_subcluster) %>%
   filter(cell_type != "NKs") %>%
   mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
   gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
@@ -234,7 +234,7 @@ ggsave("../figures/cdr3_aa_length_expansion_by_cell_type_no_mono_dc.svg")
 custom_labeller <- as_labeller(c("CDR3_hydrophobicity" = "CDR3\nhydrophobicity"))
 
 hydrophobicity_boxplot_df <- feature_df %>%
-  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_length, -cdr3_nt_count) %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_length, -cdr3_nt_count, -cluster_number, -cell_type_subcluster) %>%
   filter(cell_type != "NKs") %>%
   gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
 
@@ -255,7 +255,7 @@ ggsave("../figures/cdr3_hydrophobicity_by_cell_type_no_mono_dc.svg")
 custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion"))
 
 b_cell_boxplot_df <- feature_df %>%
-  select(-CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity) %>%
+  select(-CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity, -cluster_number, -cell_type_subcluster) %>%
   filter(cell_type == "B cells") %>%
   mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
   gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type, -patient.ID)
@@ -285,7 +285,7 @@ custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_cou
 
 no_yurod_boxplot_df <- feature_df %>%
   filter(patient.ID != "YUROD") %>%
-  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity) %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity, -cluster_number, -cell_type_subcluster) %>%
   filter(cell_type != "NKs") %>%
   mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
   gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
@@ -376,8 +376,67 @@ ggsave("../figures/cd4_subcluster_4_expansion_by_chain_no_mono_dc.svg")
 
 ```
 
+# Restore patient IDs/full barcodes (with suffixes) to IGoR output data
 
-# Combine stitched TCR IGoR alpha and beta pgen results
+```{r}
+
+# List of file names
+file_names <- c(
+  "../raw_data/GSM5694801_YUFURL_TCR.csv.gz",
+  "../raw_data/GSM5694811_YUALOE_TCR.csv.gz",
+  "../raw_data/GSM5694802_YUGRUS_TCR.csv.gz",
+  "../raw_data/GSM5694812_YUHONEY_TCR.csv.gz",
+  "../raw_data/GSM5694803_YUHERN_TCR.csv.gz",
+  "../raw_data/GSM5694804_YUKEND_TCR.csv.gz",
+  "../raw_data/GSM5694805_YUPIXEL_TCR.csv.gz",
+  "../raw_data/GSM5694806_YUROD_TCR.csv.gz",
+  "../raw_data/GSM5694798_YUCARD_TCR.csv.gz",
+  "../raw_data/GSM5694808_YUTHEA_TCR.csv.gz",
+  "../raw_data/GSM5694799_YUENZO_TCR.csv.gz",
+  "../raw_data/GSM5694800_YUFUB_TCR.csv.gz",
+  "../raw_data/GSM5694810_YUVARDO_TCR.csv.gz",
+  "../raw_data/GSM5694809_YUTORY_TCR.csv.gz",
+  "../raw_data/GSM5694807_YUTAUR_TCR.csv.gz",
+  "../raw_data/GSM5694813_YUNANCY_TCR.csv.gz"
+#  "../raw_data/GSM5694821_YUPIXEL_BCR.csv.gz",
+#  "../raw_data/GSM5694822_YUROD_BCR.csv.gz",
+#  "../raw_data/GSM5694823_YUTAUR_BCR.csv.gz",
+#  "../raw_data/GSM5694814_YUCARD_BCR.csv.gz",
+#  "../raw_data/GSM5694824_YUTHEA_BCR.csv.gz",
+#  "../raw_data/GSM5694815_YUENZO_BCR.csv.gz",
+#  "../raw_data/GSM5694825_YUTORY_BCR.csv.gz",
+#  "../raw_data/GSM5694816_YUFUB_BCR.csv.gz",
+#  "../raw_data/GSM5694826_YUVARDO_BCR.csv.gz",
+#  "../raw_data/GSM5694817_YUFURL_BCR.csv.gz",
+#  "../raw_data/GSM5694818_YUGRUS_BCR.csv.gz",
+#  "../raw_data/GSM5694819_YUHERN_BCR.csv.gz",
+#  "../raw_data/GSM5694820_YUKEND_BCR.csv.gz"
+)
+
+# Create an empty data frame to store the combined data
+combined_data <- data.frame()
+
+# Process each file and append it to the combined_data data frame
+for (file_name in file_names) {
+  # Read the CSV file
+  data <- read_csv(file_name)
+  
+  # Extract patient ID and CR type (TCR or BCR) from the file name
+  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+  
+  # Add patient ID as new column
+  data$patient.ID <- patient_ID
+  
+  # Append the data to the combined_data data frame
+  combined_data <- bind_rows(combined_data, data)
+}
+
+combined_data <- combined_data %>%
+  select(Barcode, patient.ID)
+
+```
+
+# Combine stitched TCR IGoR alpha and beta pgen results, restore full barcodes (with suffixes)
 
 ```{r}
 
@@ -385,35 +444,113 @@ tcr_alpha_igor <- read_csv("../saved_data/igor_output_alpha.csv") %>%
   filter(!(is.na(pgen))) %>%
   rename(pgen_alpha = pgen)
 
+# Create a mapping of patient.ID to their respective suffixes
+suffix_mapping <- data.frame(
+  patient.ID = c(
+    "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+    "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+    "YUTORY", "YUHERN", "YUROD"
+  ),
+  suffix = c(
+    ".1_1", ".1_2", ".1_3", ".1_4", ".1_5", ".1_6", ".1_7", ".1_8", ".1_9", ".1_10", ".1_11", ".1_12", ".1_13"
+  )
+)
+
 tcr_igor <- read_csv("../saved_data/igor_output_beta.csv") %>%
   filter(!(is.na(pgen))) %>%
   rename(pgen_beta = pgen) %>%
   left_join(tcr_alpha_igor, by = c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ", "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", "Linked_aa", "Warnings/Errors")) %>%
   select(TCR_name, pgen_alpha, pgen_beta) %>%
+  rename(Barcode = TCR_name)
+
+tcr_igor_metadata <- tcr_igor %>%
+  mutate(neg_log_pgen_alpha = -log10(pgen_alpha),
+         neg_log_pgen_beta = -log10(pgen_beta)) %>%
+  left_join(combined_data, by = "Barcode") %>%
+  # join suffixes
+  left_join(suffix_mapping, by = "patient.ID") %>%
+  filter(!(is.na(suffix))) %>%
+  mutate(Barcode = paste(Barcode, suffix, sep = "")) %>%
+  select(-suffix) %>%
+  group_by(Barcode) %>%
+  slice(1) %>%
+  ungroup()
+
+rownames(tcr_igor_metadata) <- tcr_igor_metadata$Barcode
+
+tcr_igor_pivoted <- tcr_igor %>%
   pivot_longer(cols = starts_with("pgen"), 
                names_to = "Chain", 
                values_to = "pgen") %>%
-  mutate(Chain = ifelse(grepl("alpha", Chain), "alpha", "beta"))
-
-tcr_igor
+  mutate(Chain = ifelse(grepl("alpha", Chain), "alpha", "beta"),
+         neg_log_pgen = -log10(pgen))
 
 # lose ~40ish cells/barcodes with NaN pgen values
 
 ```
 
-# Plot alpha vs. beta pgen scores
+# Join pivoted IGoR TCR data with irAE development
 
 ```{r}
 
-ggplot(tcr_igor, aes(x = Chain, y = -log10(pgen))) +
-  geom_violin() +
-  labs(x = "Chain", y = "-log10(pgen)")
+supp_data <- read_excel("../raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1") %>%
+  rename(patient.ID = `Patient ID`) %>%
+  mutate(severe_irAE = if_else(`Highest irAE grade` > 2, "Yes", "No")) %>%
+  select(patient.ID, severe_irAE)
 
-# IGoR pgen notes: Junction sequences with higher (less negative) pgen values have a higher probability of generation by V(D)J recombination. Conversely, sequences with lower (more negative) pgen values have a lower probability of generation. FOR plotting, make violin plots of y-axis -log10(pgen)
+tcr_igor_pivoted_with_irAE <- tcr_igor_pivoted %>%
+  left_join(combined_data, by = "Barcode") %>%
+  left_join(supp_data, by = "patient.ID")
+
+tcr_igor_pivoted_with_irAE
 
 ```
 
+# Plot alpha vs. beta pgen (-log) scores by severe irAE development
 
 ```{r}
-# Add Igor as metadata! then can do faceting/overlays I'd like to do
+
+ggplot(tcr_igor_pivoted_with_irAE, aes(x = Chain, y = neg_log_pgen, color = severe_irAE)) +
+  geom_violin() +
+  labs(x = "Chain", y = "-log10(pgen, ~germline-ness)")
+
+# IGoR pgen notes: Junction sequences with higher (less negative) pgen values have a higher probability of generation by V(D)J recombination. Conversely, sequences with lower (more negative) pgen values have a lower probability of generation. So higher -log10(pgen value) means higher probability of generation (more germline-like)
+
+```
+
+# Look at pgen scores overlayed onto UMAP, too sparse to make conclusions
+
+```{r}
+
+cleaned_seurat_with_igor <- AddMetaData(object = cleaned_seurat, metadata = tcr_igor_metadata)
+
+plot <- DimPlot(cleaned_seurat_with_igor, reduction = "umap", group.by = "neg_log_pgen_beta", shuffle = TRUE, seed = 992, pt.size = 0)
+
+plot + theme(legend.position = "None")
+
+```
+
+# Plot alpha vs. beta pgen (-log) scores faceted by cell type, irAE development
+
+```{r}
+
+tcr_igor_with_seurat_pivoted <-as_tibble(cleaned_seurat_with_igor@meta.data) %>%
+  select(Severe.irAE.status..1.Yes..0.No., cell_type_subcluster, pgen_alpha, pgen_beta) %>%
+  mutate(severe_irAE = if_else(Severe.irAE.status..1.Yes..0.No. == 1, "Yes", "No")) %>%
+  select(-Severe.irAE.status..1.Yes..0.No.) %>%
+  mutate(cell_type = sub("\\s\\d+$", "", cell_type_subcluster)) %>%
+  filter(cell_type %in% c("CD4 T cells", "CD8 T cells", "T/NKTs")) %>%
+  pivot_longer(cols = starts_with("pgen"), 
+               names_to = "Chain", 
+               values_to = "pgen") %>%
+  mutate(Chain = ifelse(grepl("alpha", Chain), "alpha", "beta"),
+         neg_log_pgen = -log10(pgen))
+
+ggplot(tcr_igor_with_seurat_pivoted, aes(x = Chain, y = neg_log_pgen, color = severe_irAE)) +
+  geom_violin() +
+  facet_wrap(~ cell_type) +
+  labs(x = "Chain", y = "-log10(pgen, ~germline-ness)")
+
+# IGoR pgen notes: Junction sequences with higher (less negative) pgen values have a higher probability of generation by V(D)J recombination. Conversely, sequences with lower (more negative) pgen values have a lower probability of generation. So higher -log10(pgen value) means higher probability of generation (more germline-like)
+
 ```
