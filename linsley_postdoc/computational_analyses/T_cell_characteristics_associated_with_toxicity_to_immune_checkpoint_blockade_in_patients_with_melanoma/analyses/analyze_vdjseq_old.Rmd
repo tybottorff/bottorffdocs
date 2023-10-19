@@ -327,8 +327,8 @@ suffix_mapping <- data.frame(
   )
 )
 
-fasta_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
-  filter(!(is.na(Linked_nt))) %>%
+fasta_df_alpha <- read_tsv("../saved_data/stitchr_out.tsv") %>%
+  filter(!(is.na(TRA_nt))) %>%
   rename(Barcode = TCR_name) %>%
   left_join(combined_data, by = "Barcode") %>%
   # remove redundancy (alpha/beta don't need to be both shown)
@@ -336,10 +336,10 @@ fasta_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
   slice(1) %>%
   mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID]))
 
-fasta_df
+fasta_df_alpha
 
 # Function to convert a data frame to FASTA format
-df_to_fasta <- function(df, output_file) {
+df_to_fasta_alpha <- function(df, output_file) {
   # Open/create the output file for writing
   fasta_file <- file(output_file, "w")
   
@@ -350,7 +350,7 @@ df_to_fasta <- function(df, output_file) {
 
     # Write the sequence and label to the FASTA file
     writeLines(paste(">", label), con = fasta_file)
-    writeLines(df$Linked_nt[i], con = fasta_file)
+    writeLines(df$TRA_nt[i], con = fasta_file)
   }
   
   # Close the output file
@@ -358,7 +358,40 @@ df_to_fasta <- function(df, output_file) {
 }
 
 # Call the function to convert the data frame to FASTA format
-df_to_fasta(fasta_df, "../saved_data/vdjseq.fasta")
+df_to_fasta_alpha(fasta_df_alpha, "../saved_data/vdjseq_alpha.fasta")
+
+fasta_df_beta <- read_tsv("../saved_data/stitchr_out.tsv") %>%
+  filter(!(is.na(TRB_nt))) %>%
+  rename(Barcode = TCR_name) %>%
+  left_join(combined_data, by = "Barcode") %>%
+  # remove redundancy (alpha/beta don't need to be both shown)
+  group_by(Barcode) %>%
+  slice(1) %>%
+  mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID]))
+
+fasta_df_beta
+
+# Function to convert a data frame to FASTA format
+df_to_fasta_beta <- function(df, output_file) {
+  # Open/create the output file for writing
+  fasta_file <- file(output_file, "w")
+  
+  # Iterate through rows of the data frame
+  for (i in 1:nrow(df)) {
+    # Combine name columns and add a suffix numbering
+    label <- df$Barcode[i]
+
+    # Write the sequence and label to the FASTA file
+    writeLines(paste(">", label), con = fasta_file)
+    writeLines(df$TRB_nt[i], con = fasta_file)
+  }
+  
+  # Close the output file
+  close(fasta_file)
+}
+
+# Call the function to convert the data frame to FASTA format
+df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
 
 ```
 
