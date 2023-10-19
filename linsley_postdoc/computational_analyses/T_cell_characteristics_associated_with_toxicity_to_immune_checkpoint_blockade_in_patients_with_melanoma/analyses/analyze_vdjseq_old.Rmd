@@ -225,7 +225,14 @@ ggplot(length_hydrophobicity_df, aes(x = Chain, y = Value, color = severe_irae))
 ```
 
 ```{r}
-combined_data
+
+combined_data %>%
+  group_by(Barcode) %>%
+  # filter for 1 alpha and 1 beta chain per barcode (easiest way to start)
+  filter(sum(Chain == "TRA") == 1 & sum(Chain == "TRB") == 1) %>%
+  ungroup() %>%
+  arrange(Barcode)
+
 ```
 
 # Prep for stitchr
@@ -255,7 +262,8 @@ stitchr_df <- combined_data %>%
          TRA_5_prime_seq = NA,
          TRA_3_prime_seq = NA,
          TRB_5_prime_seq = NA,
-         TRB_3_prime_seq = NA)
+         TRB_3_prime_seq = NA) %>%
+  mutate(across(all_of(c("TRAV", "TRAJ", "TRBV", "TRBJ", "TRAC", "TRBC")), ~ifelse(!stringr::str_detect(., "\\*01$"), paste0(., "*01"), .)))
 
 # I could add *01 or *% to end of gene names to specify specific allele or all alleles to stitch, but this doesn't get me any more barcodes/cells TCRs stitched (just more possibilities per cell/barcode)
 
@@ -265,16 +273,21 @@ write.table(stitchr_df, file = "../saved_data/vdjseq_for_stitchr.tsv", sep = "\t
 
 ```
 
-# Analyze stitchr output
+# Investigate stitchr errors
 
 ```{r}
 
-stitchr_output_analysis <- read_tsv("../saved_data/stitchr_out.tsv") %>%
-  filter(!(is.na(Linked_nt)))
+stitchr_errors <- read_tsv("../saved_data/stitchr_out.tsv") %>%
+  mutate(alpha_fail = is.na(TRA_nt),
+         beta_fail = is.na(TRB_nt)) %>%
+  select(TCR_name, TRA_nt, beta_fail, alpha_fail, TRA_CDR3, TRAV) %>%
+  filter(beta_fail == FALSE)
 
-stitchr_output_analysis
+stitchr_errors
 
-# 1067 unique barcodes
+# so it does look like failed alpha stitching TRAVs don't have allele specified, and successful ones do (same for beta...) BUT I thought I tried stitching with *01 allele specified for all and didn't recover any more barcodes...
+
+# worth retrying thimble/stitchr with *01 and rechecking errors...
 
 ```
 
@@ -282,18 +295,37 @@ stitchr_output_analysis
 
 ```{r}
 
-stitchr_output_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
-  filter(!(is.na(Linked_nt)))
+stitchr_output_alpha_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
+  filter(!(is.na(TRA_nt)))
 
-stitchr_output_df
+stitchr_output_alpha_df
 
-write.csv(stitchr_output_df, file = "../saved_data/igor_input.csv", row.names = FALSE)
+write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
+
+stitchr_output_beta_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
+  filter(!(is.na(TRB_nt)))
+
+stitchr_output_beta_df
+
+write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
 
 ```
 
 # Prep IMGT/HighV-Quest input
 
 ```{r}
+
+# Create a mapping of patient.ID to their respective suffixes
+suffix_mapping <- data.frame(
+  patient.ID = c(
+    "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+    "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+    "YUTORY", "YUHERN", "YUROD"
+  ),
+  suffix = c(
+    ".1_1", ".1_2", ".1_3", ".1_4", ".1_5", ".1_6", ".1_7", ".1_8", ".1_9", ".1_10", ".1_11", ".1_12", ".1_13"
+  )
+)
 
 fasta_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
   filter(!(is.na(Linked_nt))) %>%
@@ -302,11 +334,9 @@ fasta_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
   # remove redundancy (alpha/beta don't need to be both shown)
   group_by(Barcode) %>%
   slice(1) %>%
-  ungroup() %>%
-  select(Barcode, Linked_nt, patient.ID) %>%
-  group_by(patient.ID) %>%
-  mutate(suffix = row_number()) %>%
-  ungroup()
+  mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID]))
+
+fasta_df
 
 # Function to convert a data frame to FASTA format
 df_to_fasta <- function(df, output_file) {
@@ -316,8 +346,8 @@ df_to_fasta <- function(df, output_file) {
   # Iterate through rows of the data frame
   for (i in 1:nrow(df)) {
     # Combine name columns and add a suffix numbering
-    label <- paste(df$patient.ID[i], df$suffix[i], sep="_")
-    
+    label <- df$Barcode[i]
+
     # Write the sequence and label to the FASTA file
     writeLines(paste(">", label), con = fasta_file)
     writeLines(df$Linked_nt[i], con = fasta_file)
@@ -338,34 +368,22 @@ df_to_fasta(fasta_df, "../saved_data/vdjseq.fasta")
 
 imgt_df_2 <- read.table("../saved_data/IMGT_HIGHV_QUEST/2_IMGT-gapped-nt-sequences.txt", header = TRUE, sep = "\t")
 
-imgt_df_2
-
 imgt_df_4 <- read.table("../saved_data/IMGT_HIGHV_QUEST/4_IMGT-gapped-AA-sequences.txt", header = TRUE, sep = "\t")
-
-imgt_df_4
 
 imgt_df_5 <- read.table("../saved_data/IMGT_HIGHV_QUEST/5_AA-sequences.txt", header = TRUE, sep = "\t")
 
-imgt_df_5
-
 imgt_df_7 <- read.table("../saved_data/IMGT_HIGHV_QUEST/7_V-REGION-mutation-and-AA-change-table.txt", header = TRUE, sep = "\t")
-
-imgt_df_7
 
 imgt_df_8 <- read.table("../saved_data/IMGT_HIGHV_QUEST/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t")
 
-imgt_df_8
-
 imgt_df_9 <- read.table("../saved_data/IMGT_HIGHV_QUEST/9_V-REGION-AA-change-statistics.txt", header = TRUE, sep = "\t")
-
-imgt_df_9
 
 imgt_df_10 <- read.table("../saved_data/IMGT_HIGHV_QUEST/10_V-REGION-mutation-hotspots.txt", header = TRUE, sep = "\t")
 
-imgt_df_10
-
 imgt_df_11 <- read.table("../saved_data/IMGT_HIGHV_QUEST/11_Parameters.txt", header = TRUE, sep = "\t")
 
-imgt_df_11
+```
 
+```{r}
+imgt_df_8
 ```
