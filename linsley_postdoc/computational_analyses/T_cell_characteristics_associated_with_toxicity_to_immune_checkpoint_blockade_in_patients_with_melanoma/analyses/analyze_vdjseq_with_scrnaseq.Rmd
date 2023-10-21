@@ -301,6 +301,127 @@ ggsave("../figures/cdr3_aa_length_expansion_by_cell_type_no_yurod_outlier_no_mon
 
 ```
 
+# Analyze TCR CDR3 AA hydrophobicity as a function of chain and severe irAE development
+
+```{r}
+
+no_yurod_boxplot_df <- feature_df %>%
+  filter(Chain %in% c("TRA", "TRB"),
+         cell_type != "B cells") %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -cluster_number, -cell_type_subcluster, -cdr3_nt_count, -CDR3_length) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
+
+# Create the box plot with facets
+ggplot(no_yurod_boxplot_df, aes(x = Chain, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ cell_type, ncol = 3, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Cell type", y = "CDR3 hydrophobicity")
+
+ggsave("../figures/tcr_cdr3_aa_hydrophobicity_by_chain_cell_type_no_mono_dc.svg")
+
+```
+
+# Analyze TCR CDR3 AA length as a function of chain and severe irAE development
+
+```{r}
+
+boxplot_df <- feature_df %>%
+  filter(Chain %in% c("TRA", "TRB"),
+         cell_type != "B cells") %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity, -cluster_number, -cell_type_subcluster, -cdr3_nt_count) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
+
+# Create the box plot with facets
+ggplot(boxplot_df, aes(x = Chain, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ cell_type, ncol = 3, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Cell type", y = "CDR3 AA length")
+
+ggsave("../figures/tcr_cdr3_aa_length_by_chain_cell_type_no_mono_dc.svg")
+
+```
+
+# Analyze TCR unique counts as a function of chain and severe irAE development
+
+```{r}
+
+boxplot_df <- feature_df %>%
+  filter(Chain %in% c("TRA", "TRB"),
+         cell_type != "B cells") %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity, -cluster_number, -cell_type_subcluster, -CDR3_length) %>%
+  mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
+
+# Create the box plot with facets
+ggplot(boxplot_df, aes(x = Chain, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ cell_type, ncol = 3, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Cell type", y = "CDR3 expansion")
+
+ggsave("../figures/tcr_cdr3_expansion_by_chain_cell_type_no_mono_dc.svg")
+
+# Filter the data for CD8 T cell (cell type) and TRB (Chain) groups
+test_data <- boxplot_df %>%
+  filter(cell_type == "CD8 T cells", Chain == "TRB")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$Value ~ test_data$severe_irAE)
+
+# Print the results
+print(wilcox_result)
+
+```
+
+# Analyze CD8 T cell TCRB unique counts as a function of patient ID and severe irAE development
+
+```{r}
+
+boxplot_df <- feature_df %>%
+  filter(Chain %in% c("TRB"),
+         cell_type == "CD8 T cells") %>%
+  select(-CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -CDR3_hydrophobicity, -cluster_number, -cell_type_subcluster, -CDR3_length) %>%
+  mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type, -patient.ID) %>%
+  mutate(patient.ID = factor(patient.ID, levels = unique(patient.ID[order(severe_irAE)])))
+
+# Create the box plot with facets
+ggplot(boxplot_df, aes(x = patient.ID, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Patient.ID", y = "CD8 T cell beta\nchain CDR3 expansion")
+
+ggsave("../figures/cd8_tcrb_cdr3_expansion_by_patient.svg")
+
+```
+
+# Analyze BCR CDR3 length, hydrophobicity and unique counts as a function of severe irAE development, cell type without YUROD outlier patient
+
+```{r}
+
+custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion", "CDR3_hydrophobicity" = "CDR3\nhydro-\nphobicity"))
+
+no_yurod_boxplot_df <- feature_df %>%
+  filter(patient.ID != "YUROD",
+         cell_type == "B cells",
+         Chain %in% c("IGH", "IGK", "IGL")) %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -CR.type, -expansion_group, -CDR3_hydrophobicity_rounded, -cluster_number, -cell_type_subcluster) %>%
+  mutate(cdr3_nt_count = if_else(is.na(Chain), NA, cdr3_nt_count)) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type)
+
+# Create the box plot with facets
+ggplot(no_yurod_boxplot_df, aes(x = Chain, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, scales = "free_y", labeller = custom_labeller) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Chain", y = "Value")
+
+ggsave("../figures/bcr_cdr3_length_hydrophobicity_expansion_by_chain_cell_type_no_yurod_outlier_no_mono_dc.svg")
+
+```
+
 # Re-look at UMAP to estimate CD4 T cell subclusters of interest, looks like 2, 4, 7 are potentially what the paper found interesting (CD4 effector memory)
 
 ```{r}
@@ -431,9 +552,6 @@ for (file_name in file_names) {
   combined_data <- bind_rows(combined_data, data)
 }
 
-combined_data <- combined_data %>%
-  select(Barcode, patient.ID)
-
 ```
 
 # Combine stitched TCR IGoR alpha and beta pgen results, restore full barcodes (with suffixes)
@@ -512,9 +630,19 @@ tcr_igor_pivoted_with_irAE
 
 ggplot(tcr_igor_pivoted_with_irAE, aes(x = Chain, y = neg_log_pgen, color = severe_irAE)) +
   geom_violin() +
-  labs(x = "Chain", y = "-log10(pgen, ~germline-ness)")
+  labs(x = "Chain", y = "-log10(pgen, higher is\nless germline-like)")
 
-# IGoR pgen notes: Junction sequences with higher (less negative) pgen values have a higher probability of generation by V(D)J recombination. Conversely, sequences with lower (more negative) pgen values have a lower probability of generation. So higher -log10(pgen value) means higher probability of generation (more germline-like)
+# Filter the data for CD8 T cell (cell type) and TRB (Chain) groups
+test_data <- tcr_igor_pivoted_with_irAE %>%
+  filter(Chain == "alpha")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$neg_log_pgen ~ test_data$severe_irAE)
+
+test_data
+
+# Print the results
+print(wilcox_result)
 
 ```
 
@@ -534,7 +662,7 @@ plot + theme(legend.position = "None")
 
 ```{r}
 
-tcr_igor_with_seurat_pivoted <-as_tibble(cleaned_seurat_with_igor@meta.data) %>%
+tcr_igor_with_seurat_pivoted <- as_tibble(cleaned_seurat_with_igor@meta.data) %>%
   select(Severe.irAE.status..1.Yes..0.No., cell_type_subcluster, pgen_alpha, pgen_beta) %>%
   mutate(severe_irAE = if_else(Severe.irAE.status..1.Yes..0.No. == 1, "Yes", "No")) %>%
   select(-Severe.irAE.status..1.Yes..0.No.) %>%
@@ -549,8 +677,89 @@ tcr_igor_with_seurat_pivoted <-as_tibble(cleaned_seurat_with_igor@meta.data) %>%
 ggplot(tcr_igor_with_seurat_pivoted, aes(x = Chain, y = neg_log_pgen, color = severe_irAE)) +
   geom_violin() +
   facet_wrap(~ cell_type) +
-  labs(x = "Chain", y = "-log10(pgen, ~germline-ness)")
+  labs(x = "Chain", y = "-log10(pgen, higher is\nless germline-like)")
 
-# IGoR pgen notes: Junction sequences with higher (less negative) pgen values have a higher probability of generation by V(D)J recombination. Conversely, sequences with lower (more negative) pgen values have a lower probability of generation. So higher -log10(pgen value) means higher probability of generation (more germline-like)
+```
+
+# Find CDR3 sequences differentially encountered in +/- severe irAE development
+
+```{r}
+
+diff_seq_df <- feature_df %>%
+  select(patient.ID, CDR3.NT.Sequence, CDR3.AA.Sequence, severe_irAE, Chain, CDR3_length, CDR3_hydrophobicity, cell_type) %>%
+  filter(!(is.na(CDR3.AA.Sequence)),
+         patient.ID != "YUROD") %>%
+  group_by(CDR3.AA.Sequence, severe_irAE) %>%
+  mutate(irae_specific_sequence_count = n()) %>%
+  ungroup() %>%
+  group_by(CDR3.AA.Sequence) %>%
+  mutate(irae_seq_differential = abs(sum(severe_irAE=="Yes")- sum(severe_irAE=="No"))) %>%
+  ungroup() %>%
+  filter(irae_seq_differential > 6)
+
+diff_seq_boxplot_df <- diff_seq_df %>%
+  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -irae_specific_sequence_count) %>%
+  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type, -irae_seq_differential)
+
+custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion", "CDR3_hydrophobicity" = "CDR3\nhydrophobicity"))
+
+# Create the box plot with facets
+ggplot(diff_seq_boxplot_df, aes(x = cell_type, y = Value, color = severe_irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Cell type", y = "Value")
+
+```
+
+# Look at differential histogram
+
+```{r}
+
+diff_seq_df <- feature_df %>%
+  select(patient.ID, CDR3.NT.Sequence, CDR3.AA.Sequence, severe_irAE, Chain, CDR3_length, CDR3_hydrophobicity, cell_type) %>%
+  filter(!(is.na(CDR3.AA.Sequence)),
+         patient.ID != "YUROD") %>%
+  group_by(CDR3.AA.Sequence, severe_irAE) %>%
+  mutate(irae_specific_sequence_count = n()) %>%
+  ungroup() %>%
+  group_by(CDR3.AA.Sequence) %>%
+  mutate(irae_seq_differential = abs(sum(severe_irAE=="Yes")- sum(severe_irAE=="No"))) %>%
+  ungroup() %>%
+  arrange(-irae_seq_differential)
+
+diff_seq_df
+
+# Create a histogram for irae_seq_differential
+ggplot(diff_seq_df, aes(x = irae_seq_differential)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
+  labs(x = "irAE CDR3 AA sequence differential", y = "Frequency")
+
+```
+
+# Look at histogram for each yes/no severe irAE CD3 AA seq counts
+
+```{r}
+
+diff_seq_df <- feature_df %>%
+  select(patient.ID, CDR3.NT.Sequence, CDR3.AA.Sequence, severe_irAE, Chain, CDR3_length, CDR3_hydrophobicity, cell_type) %>%
+  filter(!(is.na(CDR3.AA.Sequence)),
+         patient.ID != "YUROD") %>%
+  group_by(severe_irAE) %>%
+  mutate(irae_total_count = n()) %>%
+  ungroup() %>%
+  group_by(CDR3.AA.Sequence, severe_irAE) %>%
+  mutate(irae_specific_sequence_count = n()) %>%
+  ungroup() %>%
+  group_by(CDR3.AA.Sequence) %>%
+  mutate(irae_seq_differential = abs(sum(severe_irAE=="Yes")- sum(severe_irAE=="No"))) %>%
+  ungroup()
+
+diff_seq_df
+
+# Create a histogram for irae_seq_differential
+ggplot(diff_seq_df, aes(x = irae_specific_sequence_count, fill = severe_irAE)) +
+  geom_histogram(binwidth = 1) +
+  labs(x = "irAE CDR3 AA sequence counts", y = "Frequency")
 
 ```
