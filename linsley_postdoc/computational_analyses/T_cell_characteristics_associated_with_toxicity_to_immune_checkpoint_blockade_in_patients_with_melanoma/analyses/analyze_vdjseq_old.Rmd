@@ -334,7 +334,8 @@ fasta_df_alpha <- read_tsv("../saved_data/stitchr_out.tsv") %>%
   # remove redundancy (alpha/beta don't need to be both shown)
   group_by(Barcode) %>%
   slice(1) %>%
-  mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID]))
+  mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID], sep = "")) %>%
+  ungroup()
 
 fasta_df_alpha
 
@@ -367,7 +368,8 @@ fasta_df_beta <- read_tsv("../saved_data/stitchr_out.tsv") %>%
   # remove redundancy (alpha/beta don't need to be both shown)
   group_by(Barcode) %>%
   slice(1) %>%
-  mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID]))
+  mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID], sep = "")) %>%
+  ungroup()
 
 fasta_df_beta
 
@@ -395,28 +397,40 @@ df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
 
 ```
 
-# Analyze IMGT/HighV-Quest output
+# Analyze IMGT/HighV-Quest output 8: V region nt mutation statistics
 
 ```{r}
 
-imgt_df_2 <- read.table("../saved_data/IMGT_HIGHV_QUEST/2_IMGT-gapped-nt-sequences.txt", header = TRUE, sep = "\t")
+imgt_df_8_alpha <- read.table("../saved_data/IMGT_HIGHV_QUEST/alpha/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
+  select(-Sequence.number) %>%
+  rename(Barcode = Sequence.ID)
 
-imgt_df_4 <- read.table("../saved_data/IMGT_HIGHV_QUEST/4_IMGT-gapped-AA-sequences.txt", header = TRUE, sep = "\t")
+colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"] <- paste0(colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"], "_alpha")
 
-imgt_df_5 <- read.table("../saved_data/IMGT_HIGHV_QUEST/5_AA-sequences.txt", header = TRUE, sep = "\t")
+imgt_df_8_beta <- read.table("../saved_data/IMGT_HIGHV_QUEST/beta/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
+  select(-Sequence.number) %>%
+  rename(Barcode = Sequence.ID)
 
-imgt_df_7 <- read.table("../saved_data/IMGT_HIGHV_QUEST/7_V-REGION-mutation-and-AA-change-table.txt", header = TRUE, sep = "\t")
+colnames(imgt_df_8_beta)[colnames(imgt_df_8_beta) != "Barcode"] <- paste0(colnames(imgt_df_8_beta)[colnames(imgt_df_8_beta) != "Barcode"], "_beta")
+  
+imgt_df_8 <- imgt_df_8_alpha %>%
+  full_join(imgt_df_8_beta, by = "Barcode") %>%
+  # too many columns, focus on CDR3 ones for now
+  select(matches("^CDR3|^Barcode"))
 
-imgt_df_8 <- read.table("../saved_data/IMGT_HIGHV_QUEST/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t")
+# join with patient ID to get severe_irAE yes/no --> plots
+# join with cell_type for barcodes with suffixes (i.e. scRNAseq paired barcodes) --> plots (expecting I lost too many to make useful UMAP overlays)
 
-imgt_df_9 <- read.table("../saved_data/IMGT_HIGHV_QUEST/9_V-REGION-AA-change-statistics.txt", header = TRUE, sep = "\t")
-
-imgt_df_10 <- read.table("../saved_data/IMGT_HIGHV_QUEST/10_V-REGION-mutation-hotspots.txt", header = TRUE, sep = "\t")
-
-imgt_df_11 <- read.table("../saved_data/IMGT_HIGHV_QUEST/11_Parameters.txt", header = TRUE, sep = "\t")
+imgt_df_8
 
 ```
 
+# Analyze IMGT/HighV-Quest output 6: junction data
+
 ```{r}
-imgt_df_8
+
+#imgt_df_6_alpha <- read.table("../saved_data/IMGT_HIGHV_QUEST/alpha/6_Junction.txt", header = TRUE, sep = "\t")
+
+#imgt_df_6_alpha
+
 ```
