@@ -710,7 +710,6 @@
 ## Results
 ### Tregs control the protein synthetic capacity of activated CD4 Teffs
 # Retrospective study of advanced melanoma patients treated with ipilimumab after nivolumab: analysis of 60 Japanese patients
- - 
 # Risk factors and biomarkers for immune-related adverse events: a practical guide to identifying high-risk patients and re-challenging immune checkpoint inhibitors
  - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
  - organ-specific irAEs associated with pre-existing organ dysfunction
