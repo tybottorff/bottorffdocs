@@ -257,9 +257,52 @@
  - **CTLA-4 blockade induces expansion of ICOS<sup>+</sup> Th1-like CD4<sup>+</sup> effector T cells, also engages specific subsets of exhausted-like CD8<sup>+</sup> T cells**
  - **different ICI target different T cell subsets**
 # Distinct mechanisms of mismatch repair deficiency delineate two modes of response to PD-1 immunotherpy in endometrial carcinoma
+## Abstract
  - mismatch repair-deficient cancers have varied responses to immune checkpoint blockade
  - patients with mutational mismatch repair-deficient endometrial cancers (higher mutational burden) here had higher response rates, longer survival rates than those with epigenetic mismatch repair-deficient tumors, but mutational burden not correlated with ICB response within each category
  - longitudinal scRNAseq: CD8<sup>+</sup> effector T cells correlated with regression of mutational mismatch repair-deficient tumors, activated CD16<sup>+</sup> NK cells associated with ICB-responsive epigenetic mismatch repair-deficient tumors
+## Introduction
+ - mismatch repair-deficient (MMRd) cancers have high mutational loads, especially at repetitive microsatellite regions prone to replication errors (microsatellite instability-high, MSI-H)
+ - high mutational burden thought to make many tumor neoantigens that immune system can target
+ - however, even among MSI-H/mismatch repair-deficient tumors, ICB response rate varies within and across cancer types (for example 44, 57, 18, 0% responses in colorectal, endometrial, pancreatic, brain cancers respectively)
+ - > 70% of MSI-H/MMRd endometrial cancer cases have epigenetic rather than mutational "silencing" (of MLH1 gene promoter, DNA methylation), i.e. epigenetic rather than mutational MMRd
+ - here, they classify patients into mutational or epigenetic MMRd, see 100% objective response rate, faster clinical response, and longer progression-free survival for mutational-MMRd patients vs. epigenetic-MMRd patients (44% ORR)
+ - uncover two distinct axes of anti-tumor immunity in mutational vs. epigenetic MMRd tumors
+## Results
+### The molecular mechanism of mismatch repair deficiency impacts tumor mutation burden and response to immunotherapy
+ - group patients into mutational or epigenetic MMRd by MLH1 promoter methylation analysis, whole exome sequencing, PCR, immunohistochemistry for MMR proteins, get 6 mutational and 18 epigenetic MMRd patients
+ - PD-1 blockade (treated every 3 weeks) responders defined as patients with > 30% decrease in tumor size, all mutational and 44% of epigenetic MMRd patients responded to PD-1 blockade
+ - faster response kinetics in mutational MMRd patients, also longer progression-free survival and overall survival compared to epi-MMRd patients
+ - **don't observe differences in tumor mutational burden between responders and non-responders within each group (i.e. MMRd type), so while mutational MMRd has higher TMB and higher response rate, it's not the whole picture**
+### Association between specific gene mutations and immunotherapy response
+ - find commonly mutated genes: PTEN, ARID1A, RPL22, KMT2B, and KMT2D
+ - mutations in ARID1A (subunit of BAF SWI/SNF chromatin remodeling complex, commonly mutated in cancer) and CTCF (TF for 3D chromatin organizer, binding sites often mutated in cancer) associaed with PD-1 blockade response
+ - ARID1A deficiency associated previosuly with enhanced ICB responsiveness, but here they see the opposite (mutations associated with PD-1 blockade resistance)
+ - prior studies have indicated that JAK1 mutations can protect tumor cells from CD8<sup>+</sup> T cell cytotoxicity by disabling IFN-γ pathway signal transduction, JAK1 loss suggested to confer ICB resistance
+ - 42% of tumors in this study had pathogenic/deleterious JAK1 mutations before treatment, but pre-treatment JAK1 mutations are not found here to be associated with PD-1 blockade resistance (even slightly see the opposite), complete response observed in 3 paitnets with tumors largely comprised of JAK1-mutant cells
+ - JAK1 mutations may be advantageous for endometrial cancer by subverting immuen surveillance, 3 patients' tumors acquire JAK1 mutations following PD-1 blockade, but pre-treatment JAK1 mutations don't necessarily confer PD-1 blockade resistance (3 tumors with complete PD-1 blockade response had near-clonal JAK1 mutations at baseline)
+### Longitudinal single-cell transcriptional profiling of circulating immune cells
+ - they were interested in immunological mechanisms driving differential ICB responses across patients (tumor mutational burden alone couldn't explain)
+ - paired scRNA-seq and scTCR-seq on over 260,000 PBMCs (n = 52 samples)
+ - compare relative frequencies of cell types across timepoints and patient categories, do not see differences
+### Mutational MMRd is associated with effector CD8<sup>+</sup> T cell responses
+ - prior to ICB, mutational MMRd (but not epigenetic MMRd) had enrichment for specific subpopulations of activated CD8<sup>+</sup> T cells (high expression of KLRG1, EOMES, LAG3, lower expression of inhibitory receptors PDCD1, CTLA4, KLRC1 encoding NKG2A) compared to non-responders, indicative of a poised subpopulation
+ - after ICB, mutR patients enriched for CD8<sup>+</sup> T cell subpopulations (elevated expression of cytolytic effectors GZMB, GNLY, TNF but not IFNG, reduced expression of inhibitory receptors TIM-3, PDCD1, LAG3), epiR patients didn't show this, indicative of activated CD8<sup>+</sup> T cell population in mutR patients
+ - no differences in TCR clonality (Simpson's clonality index) among patient categories before/after ICB, but increased clonality in responders, particularly subset of mutR patients
+ - use pre-treatment bulk TCR-seq data from TILs, create reference library of tumor-reactive TCRs in patients, identify tumor-reactive clonotypes among peripheral T cells
+ - quantify percentage of circulating T cells with TIL-matching TCR sequences in each sample, no differences prior to treatment but increase in TIL-matched circulating T cells in mutR patients compared to NR, in line with expansion of peripheral T cell populations with ICB
+ - patients with JAK1-mutant tumors don't have systemic differences in composition of circulating immune response
+### Distinct transcriptional profiles of circulating immune cells in epigenetic MMRd responders
+ - unlike mutR patients, epiR patients had similar TMB as NR patients and didn't show enrichment for activated CD8<sup>+</sup> T cells, so mutational vs. epigenetic mechanism of MMRd affects intensity of microsatellite instability
+ - wanted to study transcriptional profiles of epi-MMRd tumors that respond vs. don't respond to PD-1 blockade
+ - random sample to partition cells in each sample into "pseudobulk" profiles (5 for each cell type), then perform DEG analysis using generalized linear model as implemented in DESeq2 to equally weight each sample and not overcount single cells as independent events
+ - CD16<sup>+</sup> NK cells in epiR patients show strong upregulation of genes involved in proteasome, NK cell-mediated cytotoxicity, oxidative phosphorylation, and NOD-like receptor signaling (not seen in mutR patients), so prior to PD-1 blockade CD16<sup>+</sup> NK cells in epiR patients were transcriptionally distinct from those in NR patients
+ - after PD-1 blockade, activated CD8<sup>+</sup> T cells in epiR patients showed upregulation of genes involved in NOD-like receptor signaling and FA metabolism, mutR-specific downregulation in NK cells after treatment
+ - transcriptional profiles of T and NK cell populations in epiR patients are distinct from those of NR and mutR patients, both before and after pembrolizumab treatment
+### Activated NK cells are associated with survival in endometrial cancer
+ - DEG analyses pointed to enhanced functionality of NK cells in epiR patients compared to NR patients
+ - hypothesis: NK cells might be responsible for promoting anti-tumor responses in epiR patients
+### Transcriptional signatures of CD16<sup>+</sup> NK cells in epigenetic MMRd responders are associated with longer survival
 # Divergent clonal differentiation trajectories establish CD8<sup>+</sup> memory T cell heterogeneity during acute viral infections in humans
 ## Abstract
  - decrease in human CD8<sup>+</sup> T cell clonal diversity from acute (days 10-30) to memory phase (days 90-150 for early memory, day 500+ for late memory)
@@ -313,6 +356,8 @@
 # Effective use of latent semantic indexing and computational linguistics in biological and biomedical applications
  - LSI = latent semantic indexing, computational linguistics technique, outperforms Boolean text searches and co-occurrence models at information retrieval, dimensional reduction technique used to compare concepts/topics among collection of terms
  - clustering genes/proteins into GO groups/signaling pathways relies on curation of these groups/pathways, could be supplemented by LSI/LSA (latent semantic analysis)
+# Entropic contributions and the influence of the hydrophobic environment in promiscuous protein-protein association
+ - **trying to find evidence for increased hydrophobicity relating to cross-reactivity of TCRs: here they discuss how a particular PKA/AKAP interface demonstrates promiscuity in part due to the number of interactions this hydrophobic interface allows, which allows many alternative contacts (increased entropy, drives forward binding) with other binding partners hence promiscuity**
 # Epigenetic regulation of monoallelic rearrangement (allelic exclusion) of antigen receptor genes
 ## Summary
  - ~10% of genes are expressed monoallelically (any given cell expressed only paternal or maternal allele but not both)
@@ -670,6 +715,8 @@
  - NKs are part of the innate immune system but are similar to cytotoxic T cells, they lack antigen specificity and are usually short-lived (< 10 days), so their exhaustion is likely less important
  - there are long-lived, somewhat antigen-specific NKs with memory recall though
  - B cell exhaustion: weaker antibody response (inhibited normal function)
+# On the specificity of protein-protein interactions in the context of disorder
+ - **trying to find evidence for relation between hydrophobicity and cross-reactivity: bring up idea of transcriptional (co)activators being non-specific due to hydrophobicity, and negative charge (perhaps unhelpful with negatively charged DNA)**
 # PD-1 blockade induces responses by inhibiting adaptive immune resistance
  - adaptive immune resistance: upregulation of PD-L1 on cancer tissues, interaction with PD-1 on antigen-specific CD8 T cells
  - here, show that pre-existing CD8 T cells on tumor margin associated with expression of PD-1/PD-L1 and may predict response to therapy
@@ -1014,6 +1061,8 @@
  - ST2 (IL-33 receptor) is present in multiple isoforms including membrane-bound ST2L and soluble sST2 (may be decoy for IL-33)
  - ST2 participates in activation of antigen-primed Th2 cells
  - ST2 implicated in inflammatory conditions
+# The relationship between hydrophobicity and drug-protein binding in human serum albumin: a quartz crystal microbalance study
+ - positive correlation between drug hydrophobicity and binding strength to human serum albumin, **perhaps in contrast to hypothesis of increased crossreactivity from more hydrophobic TCRs, assuming increased crossreactivity means lower strength binding for each or a lower possible maximum...**
 # The role of metabolic dysfunction in T-cell exhaustion during chronic viral infection
  - dysfunction of T cell metabolism contributes to exhaustion
  - naive (Th0) and memory T cells rely mostly on OXPHOS and FA oxidation for energy, metabolism reprogrammed upon antigen recognition (generates energy but also fuels intermediates for nucleotide, amino acid, and FA synthesis and mitochondrial function, all important for T cell proliferation, differentiation, function), enhanced glycolysis ("Warburg effect", lactic acid fermentation rather than TCA despite normoxic conditions which is less efficient ATP production wise but faster kinetically, glycolysis also helps create intermediates for biomolecule synthesis) important reprogramming during CD4<sup>+</sup> and CD8<sup>+</sup> T cell activation and functioning
@@ -1091,5 +1140,9 @@
 ### Broadening checkpoint blockade antibody strategies
  - perhaps try dual immunodulatory antibodies (bispecific or antibody-based alternative structures), for example targeting PD-1/PD-L1 in combination with LAG-3/TIM-3 (perhaps promotes retention in tumor microenvironment over healthy tissue)
  - perhaps modify anti-CTLA-4 antibodies to permit expression of CTLA-4 on Tregs (CTLA-4 required for Treg inhibitory function)
+# Using surface hydrophobicity together with empirical potentials to identify protein-protein binding sites. Application to the interactions of E-cadherins
+ - **not sure why yet and surprising to me, but apparently hydrophobic interactions are generally the strongest for protein binding BUT don't necessarily provide specificity that comes from other residues**
+ - **idea is that hydrophobic residues provide affinity and polar/charged ones provide specificity via a more limited set of specific favorable structures**
+ - **takehome for me is that yes hydrophobicity should correlate with crossreactivity as more possible favorable structures are likely with higher hydrophobicity**
 # γδ T cell exhaustion: Opportunities for intervention
  - γδ T cells (TCRs with γ and δ chains instead of the usual α and β ones) can respond to varied infections/tumor challenges in a non-MHC-restricted manner, involved in immune surveillance (pleiotropic i.e. more than one effector functions)
