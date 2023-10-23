@@ -75,11 +75,11 @@ DimPlot(data, group.by = "finalIdent", raster = F)
 ```{r}
 
 # T cells
-tdat = subset(data,subset=meta.data$finalIdent %in% c("CD4 Activated", "CD4 Naive", "CD8 Activated", "CD8 Exhausted", "CD8 Naive", "Treg", "MAIT", "GDT", "Cycling"))
+tdat = subset(data,subset=finalIdent %in% c("CD4 Activated", "CD4 Naive", "CD8 Activated", "CD8 Exhausted", "CD8 Naive", "Treg", "MAIT", "GDT", "Cycling"))
 
 ```
 
-# Plot UMAP of just T cells
+# Plot UMAP of just T cells before re-performing dimensional reduction and clustering
 
 ```{r}
 
@@ -91,6 +91,6 @@ DimPlot(tdat,group.by="finalIdent",cols = c('#395DA7','#72A5D9','#359E48','#125C
 
 ```{r}
 
-saveRDS(tdat, "../saved_data/seurat_T_cells.rds")
+saveRDS(tdat, "../saved_data/seurat_T_cells_pre_reduction.rds")
 
 ```
