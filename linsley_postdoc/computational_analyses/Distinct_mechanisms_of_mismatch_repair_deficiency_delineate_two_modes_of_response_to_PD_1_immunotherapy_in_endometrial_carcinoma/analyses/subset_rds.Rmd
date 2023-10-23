@@ -1,0 +1,96 @@
+---
+title: "Distinct mechanisms of mismatch repair deficiency delineate two modes of response to PD-1 immunotherapy in endometrial carcinoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9905265/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+data = readRDS("../raw_data/rds/GSE212217_seurat_scRNAseq.v2.rds")
+
+# QC, normalization, dimensional reduction... was done already to make this RDS file. I could go back and recreate it, but I'm not too interested in doing that at this point
+
+# Seurat scRNAseq QC: >= 400 counts, >= 150 unique expressed genes, <= 20% mito
+# Filter out samples with fewer than 1000 total cells (n = 3 samples removed)
+# Seurat normalization: SCTransform, regress out counts per cell, features per cell, mito gene expr
+# Bring in healthy donor scRNAseq and scTCRseq data from 102/103 pubs, respectively
+# Seurat: integrate datasets, dimensional reduction & clustering (manual analysis of marker genes and automatic SingleR citation 105), don't ever here use TCR V/J genes for dimensional reduction/clusering (or that will dominate how clustering is done)
+# Seurat: take out 14 T cell clusters and re-do dimensional reduction/clustering on them alone. make sure to take out high mito reads clusters
+
+```
+
+# Add metadata
+
+```{r}
+
+metadata = read.table("../raw_data/GSE212217_seurat_scRNAseq_metadata.txt",sep="\t",header=TRUE,row.names=1)
+data@meta.data=metadata
+
+```
+
+# Plot UMAP with all cells
+
+```{r}
+
+DimPlot(data, group.by = "finalIdent", raster = F)
+
+```
+
+# Subset for just T cells
+
+```{r}
+
+# T cells
+tdat = subset(data,subset=meta.data$finalIdent %in% c("CD4 Activated", "CD4 Naive", "CD8 Activated", "CD8 Exhausted", "CD8 Naive", "Treg", "MAIT", "GDT", "Cycling"))
+
+```
+
+# Plot UMAP of just T cells
+
+```{r}
+
+DimPlot(tdat,group.by="finalIdent",cols = c('#395DA7','#72A5D9','#359E48','#125C2F','#91CD88','#A01F6A','#6B8739','#7F7F7F','#9172B3'),raster=F)
+
+```
+
+# Save subsetted T cell Seurat object
+
+```{r}
+
+saveRDS(tdat, "../saved_data/seurat_T_cells.rds")
+
+```
