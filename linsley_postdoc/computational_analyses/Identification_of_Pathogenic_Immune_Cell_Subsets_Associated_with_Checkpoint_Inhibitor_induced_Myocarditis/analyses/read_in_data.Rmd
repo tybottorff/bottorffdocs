@@ -1,0 +1,109 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+#GSM5449974	Group A - Patient 1
+#GSM5449975	Group A - Patient 2
+#GSM5449976	Group A - Patient 3
+#GSM5449978	Group B - Patient 1
+#GSM5449979	Group B - Patient 2
+#GSM5449980	Group B - Patient 3
+#GSM5449981	Group C - Patient 1 Early
+#GSM5449982	Group C - Patient 2
+#GSM5449984	Group C - Patient 1 Late
+#GSM5449985	Group C - Patient 3
+#GSM5449986	Group A - Patient 1-TCR
+#GSM5449987	Group A - Patient 2-TCR
+#GSM5449988	Group A - Patient 3-TCR
+#GSM5449990	Group B - Patient 1-TCR
+#GSM5449991	Group B - Patient 2-TCR
+#GSM5449992	Group B - Patient 3-TCR
+#GSM5449993	Group C - Patient 1 Early-TCR
+#GSM5449994	Group C - Patient 2-TCR
+#GSM5449996	Group C - Patient 1 Late-TCR
+#GSM5449997	Group C - Patient 3-TCR
+#GSM5449998	Group A - Patient 1-Feature
+#GSM5449999	Group A - Patient 2-Feature
+#GSM5450000	Group A - Patient 3-Feature
+#GSM5450002	Group B - Patient 1-Feature
+#GSM5450003	Group B - Patient 2-Feature
+#GSM5450004	Group B - Patient 3-Feature
+#GSM5450005	Group C - Patient 1 Early-Feature
+#GSM5450006	Group C - Patient 2-Feature
+#GSM5450008	Group C - Patient 1 Late-Feature
+#GSM5450009	Group C - Patient 3-Feature
+#GSM6346292	A6-A9-B13-B9
+#GSM6346293	A8-B11
+#GSM6346294	B12-MCE6-MCE7
+#GSM6346295	A10-B10-MCE12-MCE13
+#GSM6346296	A5-B14
+#GSM6346297	A6-A9-B13-B9-TCR
+#GSM6346298	A8-B11-TCR
+#GSM6346299	B12-MCE6-MCE7-TCR
+#GSM6346300	A10-B10-MCE12-MCE13-TCR
+#GSM6346301	A5-B14-TCR
+#GSM6346302	A6-A9-B13-B9-Feature
+#GSM6346303	A8-B11-Feature
+#GSM6346304	B12-MCE6-MCE7-Feature
+#GSM6346305	A10-B10-MCE12-MCE13-Feature
+#GSM6346306	A5-B14-Feature
+#GSM6346307	PBMC10
+#GSM6346308	PBMC11
+#GSM6346309	PBMC12
+#GSM6346310	PBMC13
+#GSM6346311	PBMC14
+#GSM6346312	PBMC15
+#GSM6346313	PBMC7
+#GSM6346314	PBMC8
+#GSM6346315	PBMC10-TCR
+#GSM6346316	PBMC11-TCR
+#GSM6346317	PBMC12-TCR
+#GSM6346318	PBMC13-TCR
+#GSM6346319	PBMC14-TCR
+#GSM6346320	PBMC15-TCR
+#GSM6346321	PBMC7-TCR
+#GSM6346322	PBMC8-TCR
+#GSM6346323	PBMC12-Feature
+#GSM6346324	PBMC13-Feature
+#GSM6346325	PBMC14-Feature
+#GSM6346326	PBMC15-Feature
+
+```
