@@ -1,0 +1,117 @@
+---
+title: "Distinct mechanisms of mismatch repair deficiency delineate two modes of response to PD-1 immunotherapy in endometrial carcinoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9905265/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SingleR)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+tdat_no_mito = readRDS("../saved_data/seurat_T_cells_no_mito.rds")
+
+```
+
+# Re-perform dimensional reduction and clustering on filtered data
+
+```{r}
+
+# exclude V/J genes that would otherwise dominate dimensional reduction and clustering
+excluded_genes <- grep("^TRAV|^TRBV|^TRAJ|^TRBJ", rownames(tdat_no_mito), value = TRUE)
+included_genes <- setdiff(rownames(tdat_no_mito), excluded_genes)
+
+tdat_no_mito <- RunPCA(tdat_no_mito, npcs = 30, verbose = FALSE, genes.use = included_genes)
+tdat_no_mito <- RunUMAP(tdat_no_mito, reduction = "pca", dims = 1:30)
+tdat_no_mito <- FindNeighbors(tdat_no_mito, reduction = "pca", dims = 1:30, k.param = 200)
+# authors share k param
+tdat_no_mito <- FindClusters(tdat_no_mito)
+
+```
+
+# UMAP by cluster
+
+```{r}
+
+DimPlot(tdat_no_mito, reduction = "umap", label = TRUE, repel = TRUE)
+
+```
+
+# Find markers for every cluster compared to all remaining cells, make sure there are no VJ genes here! Apparently these dominate clustering, if there aren't VJ genes, just go ahead with trying to assign CD4/8s
+
+```{r}
+
+tdat_no_mito.markers <- FindAllMarkers(tdat_no_mito, logfc.threshold = 0.5, min.pct = 0.25)
+# trying to use params to speed up function, I just want to check no VJ genes first tbh before assigning cell types (I'd have to redo dimensional reduction/clustering making sure to never take into account VJ genes)
+
+```
+
+# Look at relevant cluster biomarkers for manual anaylsis of marker genes to assign cell types
+
+```{r}
+
+
+#2, 5 might be CD4 naive
+#0, 21 might be CD4 activated
+#22, 18, 1, 16, 3, 9 might be CD8 activated
+#15, 7 might be CD8 naive
+#11 might be Treg
+
+tdat_no_mito.markers %>%
+  group_by(cluster) %>%
+  #filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "MS4A1")) %>%
+  arrange(gene)
+
+VlnPlot(tdat_no_mito, features = c("GNLY"), pt.size = 0)
+
+```
+
+# Use automatic SingleR to help assign cell types
+
+```{r}
+
+# Not sure what they used as reference map...
+
+# SingleCellExperiment objects can be used directly. Seurat objects can be converted to SingleCellExperiment objects via Seurat's as.SingleCellExperiment() function or their normalized counts can be retrieved via GetAssayData or FetchData.
+
+# SingleR results labels can be easily added back to the metadata of these objects as well:
+
+# seurat.obj[["SingleR.labels"]] <- singler.results$labels
+
+# Or if `method="cluster"` was used:
+#seurat.obj[["SingleR.cluster.labels"]] <- 
+#        singler.results$labels[match(seurat.obj[[]][["my.input.clusters"]], rownames(singler.results))]
+
+```

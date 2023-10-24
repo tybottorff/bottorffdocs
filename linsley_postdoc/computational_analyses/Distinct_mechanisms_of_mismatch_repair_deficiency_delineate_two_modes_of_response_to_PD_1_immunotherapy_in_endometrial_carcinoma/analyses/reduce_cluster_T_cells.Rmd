@@ -54,8 +54,8 @@ excluded_genes <- grep("^TRAV|^TRBV|^TRAJ|^TRBJ", rownames(tdat), value = TRUE)
 included_genes <- setdiff(rownames(tdat), excluded_genes)
 
 tdat <- RunPCA(tdat, npcs = 30, verbose = FALSE, genes.use = included_genes)
-tdat <- RunUMAP(tdat, reduction = "pca", dims = 1:30, genes.use = included_genes)
-tdat <- FindNeighbors(tdat, reduction = "pca", dims = 1:30, genes.use = included_genes)
+tdat <- RunUMAP(tdat, reduction = "pca", dims = 1:30)
+tdat <- FindNeighbors(tdat, reduction = "pca", dims = 1:30, k.param = 200)
 tdat <- FindClusters(tdat)
 
 ```
@@ -68,57 +68,46 @@ DimPlot(tdat, reduction = "umap", label = TRUE, repel = TRUE)
 
 ```
 
-# Re-check mito % across clusters, re-dimensional reduce/cluster if I remove any clusters
+# Re-check mito % across clusters
 
 ```{r}
 
-DimPlot(tdat, reduction = "umap", group.by = "mito_perc", label = TRUE, repel = TRUE)
+tdat_mito_by_cluster <- as_tibble(tdat@meta.data) %>%
+  select(propMt, seurat_clusters)
+
+# Calculate the median propMt for each seurat_clusters group
+median_values <- tdat_mito_by_cluster %>%
+  group_by(seurat_clusters) %>%
+  summarize(median_propMt = median(propMt))
+
+# Reorder seurat_clusters based on median_propMt
+tdat_mito_by_cluster$seurat_clusters <- factor(tdat_mito_by_cluster$seurat_clusters, 
+                                                levels = median_values %>% 
+                                                  arrange(desc(median_propMt)) %>%
+                                                  pull(seurat_clusters))
+
+# Create a ggplot with tilted x-axis labels and arranged x-axis
+ggplot(tdat_mito_by_cluster, aes(x = seurat_clusters, y = propMt)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
 
 ```
 
-# Begin by trying to just use their figure 3B UMAP to assign my cell clusters... (I don't know what markers they used for manual assigning and I don't know what reference they used for SingleR)
+# Remove clusters with uniformly high mitochondrial reads
 
 ```{r}
 
-# dimplot but have everything 1 color (non-black) except for 1 cluster being black at a time
+# remove clusters 25 & 31
+clusters_to_remove <- WhichCells(tdat, idents = c(25, 31))
+
+tdat_no_mito <- subset(tdat, cells = setdiff(Cells(tdat), clusters_to_remove))
 
 ```
 
-# Find markers for every cluster compared to all remaining cells
+# Save RDS
 
 ```{r}
 
-tdat.markers <- FindAllMarkers(tdat)
-
-```
-
-# Look at relevant cluster biomarkers for manual anaylsis of marker genes to assign cell types
-
-```{r}
-
-tdat.markers %>%
-  group_by(cluster) %>%
-  #filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "MS4A1")) %>%
-  arrange(gene)
-
-VlnPlot(no_mono_dc_rbcs_platelets, features = c("GNLY"), pt.size = 0)
-
-```
-
-# Use automatic SingleR to help assign cell types
-
-```{r}
-
-# Not sure what they used as reference map...
-
-# SingleCellExperiment objects can be used directly. Seurat objects can be converted to SingleCellExperiment objects via Seurat's as.SingleCellExperiment() function or their normalized counts can be retrieved via GetAssayData or FetchData.
-
-# SingleR results labels can be easily added back to the metadata of these objects as well:
-
-# seurat.obj[["SingleR.labels"]] <- singler.results$labels
-
-# Or if `method="cluster"` was used:
-#seurat.obj[["SingleR.cluster.labels"]] <- 
-#        singler.results$labels[match(seurat.obj[[]][["my.input.clusters"]], rownames(singler.results))]
+saveRDS(tdat_no_mito, "../saved_data/seurat_T_cells_no_mito.rds")
 
 ```
