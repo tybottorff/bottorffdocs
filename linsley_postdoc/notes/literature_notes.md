@@ -51,6 +51,11 @@
 # Association of vitiligo with tumor response in patients with metastatic melanoma treated with pembrolizumab
  - 25% of patients developed vitiligo
  - **objective response associated with higher occurrence of vitiligo**
+# Autoimmune panels as predictors of toxicity in patients treated with immune checkpoint inhibitors (ALERT)
+ - auto antigen microarray to profile autoantibodies related to irAEs in patients receiving ICI
+ - greater number of IgG and IgM reactivites in pre-ICI in patients vs. healthy controls
+ - patients with severe irAEs had pre-ICI IgG reactivity to more autoantigens than patients who didn't develop severe irAEs
+ - post-treatment increase in IgM reactivities in people developing irAEs, decrease in IgG levels after steroids
 # Autoreactive napsin A-specific T cells are enriched in lung tumors and inflammatory lung lesions during immune checkpoint blockade
 ## Summary
  - DITAS: discovery of tumor-associated self-antigens to find peptides that induce both antitumor and irAE responses, analyze shared antigens between NSCLC and lung tissue, determine which HLA peptides bind to, predicting CD8<sup>+</sup> T cell epitopes of peptides
@@ -337,6 +342,14 @@
  - chronic antigen exposure leads to T cell exhaustion with reduced effector function
  - do all antigen-specific T cell clones follow the same T<sub>ex</sub> differentiation trajectory?
  - results: high T cell receptor signaling aviditiy correlates with T<sub>ex</sub> terminal phenotype, low avidity correlates with effector-like T<sub>ex</sub> KLR fate (so higher signaling response from TCR activation leads to higher exhaustion)
+# Divergent tumor and immune cell reprogramming underlying immunotherapy response and immune-related adverse events in lung squamos cell carcinoma
+ - scRNAseq before/after ICI
+ - increased proportions of macrophage subcluster with highly expressed SPP1, tumor tumor cell subclusters in irAE patients
+ - TNF signaling pathway conversely associated with treatment efficacy and irAE development in most macrophage and tumor cell subclusters
+ - cell-cell communications for TNF ligand-receptor pairs between macrophage/T cells and tumor cells bidirectionally remodeled in responders vs. non-responders and irAE vs. non-irAE patients
+ - enhanced macrophage abundance and TNF signaling in on-treatment tumors and organs developing irAEs
+ - increased circulating TNF protein in plasma/serum of irAE patients but not ICI responders
+ - Th17 abundance didn't change in irAE group, nor was 
 # Dynamic single-cell mapping unveils Epstein-Barr virus-imprinted T-cell exhaustion and on-treatment response
 ## Abstract
  - Epstein-Barr virus associated gastric cancer exhibits an inflammed-immune phenotype, increased T and B cell infiltration
