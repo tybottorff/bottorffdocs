@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 
 library(Seurat)
+library(SingleR)
 library(ggplot2)
 library(dplyr)
 
@@ -69,6 +70,20 @@ DimPlot(tdat, reduction = "umap", label = TRUE, repel = TRUE)
 
 # Re-check mito % across clusters, re-dimensional reduce/cluster if I remove any clusters
 
+```{r}
+
+DimPlot(tdat, reduction = "umap", group.by = "mito_perc", label = TRUE, repel = TRUE)
+
+```
+
+# Begin by trying to just use their figure 3B UMAP to assign my cell clusters... (I don't know what markers they used for manual assigning and I don't know what reference they used for SingleR)
+
+```{r}
+
+# dimplot but have everything 1 color (non-black) except for 1 cluster being black at a time
+
+```
+
 # Find markers for every cluster compared to all remaining cells
 
 ```{r}
@@ -91,3 +106,19 @@ VlnPlot(no_mono_dc_rbcs_platelets, features = c("GNLY"), pt.size = 0)
 ```
 
 # Use automatic SingleR to help assign cell types
+
+```{r}
+
+# Not sure what they used as reference map...
+
+# SingleCellExperiment objects can be used directly. Seurat objects can be converted to SingleCellExperiment objects via Seurat's as.SingleCellExperiment() function or their normalized counts can be retrieved via GetAssayData or FetchData.
+
+# SingleR results labels can be easily added back to the metadata of these objects as well:
+
+# seurat.obj[["SingleR.labels"]] <- singler.results$labels
+
+# Or if `method="cluster"` was used:
+#seurat.obj[["SingleR.cluster.labels"]] <- 
+#        singler.results$labels[match(seurat.obj[[]][["my.input.clusters"]], rownames(singler.results))]
+
+```
