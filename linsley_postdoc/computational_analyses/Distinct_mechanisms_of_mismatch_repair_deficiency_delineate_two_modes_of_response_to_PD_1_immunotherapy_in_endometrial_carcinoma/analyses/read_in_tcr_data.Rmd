@@ -1,0 +1,83 @@
+---
+title: "Distinct mechanisms of mismatch repair deficiency delineate two modes of response to PD-1 immunotherapy in endometrial carcinoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9905265/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+tcr_data = readRDS("../raw_data/rds/GSE212217_scTCR.rds")
+
+```
+
+# Prep for stitchr
+
+```{r}
+
+stitchr_data <- tcr_data@contig_tbl %>%
+  group_by(barcode) %>%
+  filter(sum(chain == "TRA") == 1 & sum(chain == "TRB") == 1) %>%
+  ungroup() %>%
+  select(barcode, v_gene, d_gene, j_gene, c_gene, chain, cdr3) %>%
+  rename(TCR_name = barcode,
+         CDR3 = `cdr3`,
+         V = `v_gene`,
+         J = `j_gene`,
+         C = `c_gene`) %>%
+  pivot_wider(names_from = chain, values_from = c(V, J, C, CDR3)) %>%
+  # rename, reorder, create cols for stitchr
+  rename(TRAV = V_TRA, TRAJ = J_TRA, TRBV = V_TRB, TRBJ = J_TRB, TRAC = C_TRA, TRBC = C_TRB, TRA_CDR3 = CDR3_TRA, TRB_CDR3 = CDR3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_data
+
+write.table(stitchr_data, file = "../saved_data/tcrseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+
+# not sure what different contigs mean, but for stitching I might just want to look at barcodes with 1 of each alpha/beta for a given barcode? most barcodes have the rightish number of reads (~1-3)
+
+# barely any paired alpha beta from same barcode come from same contig... ask Matt Dufort maybe
+
+```
