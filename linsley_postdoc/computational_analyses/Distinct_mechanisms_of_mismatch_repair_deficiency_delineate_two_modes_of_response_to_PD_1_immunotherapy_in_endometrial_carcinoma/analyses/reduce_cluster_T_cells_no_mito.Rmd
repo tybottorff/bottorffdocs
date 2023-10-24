@@ -91,10 +91,9 @@ tdat_no_mito.markers <- FindAllMarkers(tdat_no_mito, logfc.threshold = 0.5, min.
 
 tdat_no_mito.markers %>%
   group_by(cluster) %>%
-  #filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "MS4A1")) %>%
-  arrange(gene)
+  filter(grepl("^TRAV|^TRBV|^TRAJ|^TRBJ", gene, ignore.case = TRUE))
 
-VlnPlot(tdat_no_mito, features = c("GNLY"), pt.size = 0)
+#VlnPlot(tdat_no_mito, features = c("GNLY"), pt.size = 0)
 
 ```
 
