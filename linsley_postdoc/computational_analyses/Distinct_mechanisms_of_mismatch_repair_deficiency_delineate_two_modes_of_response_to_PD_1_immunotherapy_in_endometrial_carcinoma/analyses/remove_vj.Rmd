@@ -1,0 +1,64 @@
+---
+title: "Distinct mechanisms of mismatch repair deficiency delineate two modes of response to PD-1 immunotherapy in endometrial carcinoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9905265/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SingleR)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+tdat = readRDS("../saved_data/seurat_T_cells_pre_reduction.rds")
+
+```
+
+# Subset Seurat object to exclude V/J genes that would otherwise dominate dimensional reduction and clustering
+
+```{r}
+
+counts <- LayerData(tdat, assay = "RNA")
+counts <- counts[!grepl("^(TRAV|TRBV|TRAJ|TRBJ|TRAC|TRBC)", rownames(counts)), ]
+tdat_no_vj <- subset(tdat, features = rownames(counts))
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(tdat_no_vj, "../saved_data/seurat_T_cells_no_vj.rds")
+
+```

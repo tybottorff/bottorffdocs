@@ -81,3 +81,73 @@ write.table(stitchr_data, file = "../saved_data/tcrseq_for_stitchr.tsv", sep = "
 # barely any paired alpha beta from same barcode come from same contig... ask Matt Dufort maybe
 
 ```
+
+# Read in stitchr output, fix formatting
+
+```{r}
+
+stitchr_output <- read.delim("../saved_data/stitchr_out.tsv", header = TRUE, sep = "\t")
+
+# Columns that need further separation by space
+columns_to_split_by_space <- c("TRA_nt", "TRA_aa", "TRB_nt", "TRB_aa", "Linked_nt")
+
+# Split the specified columns by space
+for (col_name in columns_to_split_by_space) {
+  stitchr_output[[col_name]] <- sapply(stitchr_output[[col_name]], function(x) unlist(strsplit(x, " ")))
+}
+
+# Assign the column names
+colnames(stitchr_output) <- c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ",
+                    "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", 
+                    "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", 
+                    "Linked_aa", "Warnings.Errors")
+
+# Define a function to replace with NA if length is 0
+replace_empty_with_na <- function(x) {
+  if (length(x) == 0) {
+    return(NA)
+  } else {
+    return(x)
+  }
+}
+
+# Replace values in the specified columns with real NA
+cols_to_update <- c("TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "Linked_nt")
+
+for (col_name in cols_to_update) {
+  stitchr_output[[col_name]] <- lapply(stitchr_output[[col_name]], replace_empty_with_na)
+}
+
+stitchr_output$TRA_nt <- sapply(stitchr_output$TRA_nt, as.character)
+stitchr_output$TRA_aa <- sapply(stitchr_output$TRA_aa, as.character)
+stitchr_output$TRB_nt <- sapply(stitchr_output$TRB_nt, as.character)
+stitchr_output$TRB_aa <- sapply(stitchr_output$TRB_aa, as.character)
+stitchr_output$Linked_nt <- sapply(stitchr_output$Linked_nt, as.character)
+
+stitchr_output
+
+# 171,541 rows (as before stitching)
+
+```
+
+# Prep IGoR input
+
+```{r}
+
+stitchr_output_alpha_df <- stitchr_output %>%
+  filter(!(is.na(TRA_nt)))
+
+stitchr_output_alpha_df
+# 29,465 rows
+
+write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
+
+stitchr_output_beta_df <- stitchr_output %>%
+  filter(!(is.na(TRB_nt)))
+
+stitchr_output_beta_df
+# 70,713 rows
+
+write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
+
+```

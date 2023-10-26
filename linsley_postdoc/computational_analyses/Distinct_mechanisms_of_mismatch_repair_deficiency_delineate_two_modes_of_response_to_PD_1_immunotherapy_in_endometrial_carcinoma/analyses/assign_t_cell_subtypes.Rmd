@@ -1,0 +1,190 @@
+---
+title: "Distinct mechanisms of mismatch repair deficiency delineate two modes of response to PD-1 immunotherapy in endometrial carcinoma"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9905265/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SingleR)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+tdat_no_vj_no_mito = readRDS("../saved_data/seurat_T_cells_no_vj_no_mito.rds")
+
+```
+
+# Re-perform dimensional reduction and clustering on filtered data
+
+```{r}
+
+tdat_no_vj_no_mito <- RunPCA(tdat_no_vj_no_mito, npcs = 30, verbose = FALSE)
+tdat_no_vj_no_mito <- RunUMAP(tdat_no_vj_no_mito, reduction = "pca", dims = 1:30)
+tdat_no_vj_no_mito <- FindNeighbors(tdat_no_vj_no_mito, reduction = "pca", dims = 1:30, k.param = 200)
+# authors share k param
+tdat_no_vj_no_mito <- FindClusters(tdat_no_vj_no_mito)
+
+```
+
+# UMAP by cluster
+
+```{r}
+
+DimPlot(tdat_no_vj_no_mito, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/no_vj_no_mito_cluster_umap.svg")
+
+```
+
+# Find markers for every cluster compared to all remaining cells
+
+```{r}
+
+tdat_no_vj_no_mito.markers <- FindAllMarkers(tdat_no_vj_no_mito)
+
+```
+
+# Look at relevant cluster biomarkers for manual anaylsis of marker genes to assign cell types
+
+```{r}
+
+tdat_no_vj_no_mito.markers %>%
+  filter(gene %in% c("CD4", "CD8A", "CD8B", "CD3D", "CD3E", "CD25", "CD27", "CD28", "FOXP3", "PECAM1", "CD103", "CD38", "PD-1", "TIGIT", "LAG-3", "TIM-3", "CTLA-4", "2B4", "CD244", "SLAMF4", "CD160", "CD161", "CCR5", "CXCR6", "CCR6", "CD44", "CD45RO", "CCR7", "CD62L", "CD127", "IL7R", "IL2RA", "HLA-DR", "TBX21", "GZMA", "GZMB", "CD69", "CD103", "CD152"))
+
+#VlnPlot(tdat_no_vj_no_mito, features = c("CD3D", "CD3E"), pt.size = 0)
+# T cells, all uniformly high as expected
+
+#VlnPlot(tdat_no_vj_no_mito, features = c("CD8A", "CD8B", "CD25", "CD27", "CD28"), pt.size = 0)
+# CD8s: 2, 3, 4, 6, 10, 12?
+
+#VlnPlot(tdat_no_vj_no_mito, features = c("IL7R"), pt.size = 0)
+# CD4s: 0, 10, 11, 4-8, not 2-3/9/12-13
+
+#VlnPlot(tdat_no_vj_no_mito, features = c("FOXP3", "CTLA-4"), pt.size = 0)
+# Tregs: 9
+
+#VlnPlot(tdat_no_vj_no_mito, features = c("CD103", "PECAM1"), pt.size = 0)
+# naive: 5-6?
+
+#VlnPlot(tdat_no_vj_no_mito, features = c("CD38"), pt.size = 0)
+# activated: 12
+
+#VlnPlot(tdat_no_vj_no_mito, features = c("PD-1", "TIGIT", "LAG-3", "TIM-3", "CTLA-4", "CD244", "SLAMF4", "2B4", "CD160"), pt.size = 0)
+# exhausted: 13, 9/12?
+
+```
+
+# Use automatic SingleR to help assign cell types
+
+```{r}
+
+# Not sure what they used as reference map...
+
+# SingleCellExperiment objects can be used directly. Seurat objects can be converted to SingleCellExperiment objects via Seurat's as.SingleCellExperiment() function or their normalized counts can be retrieved via GetAssayData or FetchData.
+
+# SingleR results labels can be easily added back to the metadata of these objects as well:
+
+# seurat.obj[["SingleR.labels"]] <- singler.results$labels
+
+# Or if `method="cluster"` was used:
+#seurat.obj[["SingleR.cluster.labels"]] <- 
+#        singler.results$labels[match(seurat.obj[[]][["my.input.clusters"]], rownames(singler.results))]
+
+```
+
+# Assign cell types to clusters
+
+```{r}
+
+new.cluster.ids <- c("CD4 activated",
+                     # 0
+                     
+                     "CD4 naive",
+                     "CD8 activated",
+                     "CD8 activated",
+                     "CD8 activated",
+                     
+                     "CD4 naive",
+                     # 5
+                     
+                     "CD8 naive",
+                     "CD4 activated",
+                     "CD4 activated",
+                     "Treg",
+                     
+                     "MAIT",
+                     # 10
+                     
+                     "CD4 activated",
+                     "Cycling",
+                     
+                     "CD8 exhausted")
+                     # 13
+
+names(new.cluster.ids) <- levels(tdat_no_vj_no_mito)
+tdat_no_vj_no_mito <- RenameIdents(tdat_no_vj_no_mito, new.cluster.ids)
+
+```
+
+# UMAP by cell type
+
+```{r}
+
+DimPlot(tdat_no_vj_no_mito, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/no_vj_no_mito_cell_type_umap.svg")
+
+```
+
+# Summarize markers by cell type
+
+```{r}
+
+VlnPlot(tdat_no_vj_no_mito, features = c("CD8B", "IL7R", "FOXP3", "PECAM1"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/no_vj_no_mito_cell_type_markers_cd4_cd8_treg_naive.svg")
+
+VlnPlot(tdat_no_vj_no_mito, features = c("TIGIT", "CD244", "CD160", "CD38"), pt.size = 0, ncol = 2)
+
+ggsave("../figures/no_vj_no_mito_cell_type_markers_exhausted_cycling.svg")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(tdat_no_vj_no_mito, "../saved_data/seurat_T_cells_no_vj_no_mito_cell_typed.rds")
+
+```

@@ -41,22 +41,18 @@ theme_set(
 
 ```{r}
 
-tdat = readRDS("../saved_data/seurat_T_cells_pre_reduction.rds")
+tdat_no_vj = readRDS("../saved_data/seurat_T_cells_no_vj.rds")
 
 ```
 
-# Repeat dimensional reduction FindClusters since subsetting for T cells
+# Dimensional reduction & find clusters
 
 ```{r}
 
-# exclude V/J genes that would otherwise dominate dimensional reduction and clustering
-excluded_genes <- grep("^TRAV|^TRBV|^TRAJ|^TRBJ", rownames(tdat), value = TRUE)
-included_genes <- setdiff(rownames(tdat), excluded_genes)
-
-tdat <- RunPCA(tdat, npcs = 30, verbose = FALSE, genes.use = included_genes)
-tdat <- RunUMAP(tdat, reduction = "pca", dims = 1:30)
-tdat <- FindNeighbors(tdat, reduction = "pca", dims = 1:30, k.param = 200)
-tdat <- FindClusters(tdat)
+tdat_no_vj <- RunPCA(tdat_no_vj, npcs = 30, verbose = FALSE)
+tdat_no_vj <- RunUMAP(tdat_no_vj, reduction = "pca", dims = 1:30)
+tdat_no_vj <- FindNeighbors(tdat_no_vj, reduction = "pca", dims = 1:30, k.param = 200)
+tdat_no_vj <- FindClusters(tdat_no_vj)
 
 ```
 
@@ -64,7 +60,7 @@ tdat <- FindClusters(tdat)
 
 ```{r}
 
-DimPlot(tdat, reduction = "umap", label = TRUE, repel = TRUE)
+DimPlot(tdat_no_vj, reduction = "umap", label = TRUE, repel = TRUE)
 
 ```
 
@@ -72,22 +68,22 @@ DimPlot(tdat, reduction = "umap", label = TRUE, repel = TRUE)
 
 ```{r}
 
-tdat_mito_by_cluster <- as_tibble(tdat@meta.data) %>%
+tdat_no_vj_mito_by_cluster <- as_tibble(tdat_no_vj@meta.data) %>%
   select(propMt, seurat_clusters)
 
 # Calculate the median propMt for each seurat_clusters group
-median_values <- tdat_mito_by_cluster %>%
+median_values <- tdat_no_vj_mito_by_cluster %>%
   group_by(seurat_clusters) %>%
   summarize(median_propMt = median(propMt))
 
 # Reorder seurat_clusters based on median_propMt
-tdat_mito_by_cluster$seurat_clusters <- factor(tdat_mito_by_cluster$seurat_clusters, 
+tdat_no_vj_mito_by_cluster$seurat_clusters <- factor(tdat_no_vj_mito_by_cluster$seurat_clusters, 
                                                 levels = median_values %>% 
                                                   arrange(desc(median_propMt)) %>%
                                                   pull(seurat_clusters))
 
 # Create a ggplot with tilted x-axis labels and arranged x-axis
-ggplot(tdat_mito_by_cluster, aes(x = seurat_clusters, y = propMt)) +
+ggplot(tdat_no_vj_mito_by_cluster, aes(x = seurat_clusters, y = propMt)) +
   geom_boxplot() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
 
@@ -98,9 +94,9 @@ ggplot(tdat_mito_by_cluster, aes(x = seurat_clusters, y = propMt)) +
 ```{r}
 
 # remove clusters 25 & 31
-clusters_to_remove <- WhichCells(tdat, idents = c(25, 31))
+clusters_to_remove <- WhichCells(tdat_no_vj, idents = c(8, 14))
 
-tdat_no_mito <- subset(tdat, cells = setdiff(Cells(tdat), clusters_to_remove))
+tdat_no_vj_no_mito <- subset(tdat_no_vj, cells = setdiff(Cells(tdat_no_vj), clusters_to_remove))
 
 ```
 
@@ -108,6 +104,6 @@ tdat_no_mito <- subset(tdat, cells = setdiff(Cells(tdat), clusters_to_remove))
 
 ```{r}
 
-saveRDS(tdat_no_mito, "../saved_data/seurat_T_cells_no_mito.rds")
+saveRDS(tdat_no_vj_no_mito, "../saved_data/seurat_T_cells_no_vj_no_mito.rds")
 
 ```
