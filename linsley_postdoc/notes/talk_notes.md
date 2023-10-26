@@ -17,3 +17,7 @@
  - overlap more with public not private junction (expected)
  - matches have shorter junctions (CRD1/3 not CRD2), more germline-like, less random DNA added
  - α junctions more similar than β ones
+# Erin geneal notes
+ - more likely for cell to have 2 alpha (maybe real) than 2 betas (doublet)
+ - no nt deletions just additions in TCR generation
+ - some autoreactivity good to tone down excessive immune responses from self
