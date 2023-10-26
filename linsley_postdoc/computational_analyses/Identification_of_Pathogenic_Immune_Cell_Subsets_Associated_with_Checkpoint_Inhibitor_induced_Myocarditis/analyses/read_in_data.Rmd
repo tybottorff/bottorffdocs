@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 
 library(Seurat)
+library(Matrix)
 library(ggplot2)
 library(dplyr)
 
@@ -40,12 +41,91 @@ theme_set(
 
 ```{r}
 
-#GSM5449974	Group A - Patient 1
-#GSM5449975	Group A - Patient 2
-#GSM5449976	Group A - Patient 3
-#GSM5449978	Group B - Patient 1
-#GSM5449979	Group B - Patient 2
-#GSM5449980	Group B - Patient 3
+# List of sample names
+sample_names <- c(
+#"A10-B10-MCE12-MCE13-filtered_feature_bc_matrix", "B2-filtered_feature_bc_matrix", "pbmc12-filtered_feature_bc_matrix",
+#"A1-filtered_feature_bc_matrix", "B3-filtered_feature_bc_matrix", "pbmc13-filtered_feature_bc_matrix",
+#"A2-filtered_feature_bc_matrix", "pbmc14-filtered_feature_bc_matrix", "A3-filtered_feature_bc_matrix",
+#"MCE1-filtered_feature_bc_matrix", "pbmc15-filtered_feature_bc_matrix", "A5-B14-MCL15-filtered_feature_bc_matrix",
+#"MCE2-filtered_feature_bc_matrix", "pbmc7-filtered_feature_bc_matrix", "A6-A9-B13-B9-filtered_feature_bc_matrix",
+#"MCL1-filtered_feature_bc_matrix", "pbmc8-filtered_feature_bc_matrix", "A8-B11-filtered_feature_bc_matrix",
+#"MCL3-filtered_feature_bc_matrix", "B12-NCE6-NCE7-filtered_feature_bc_matrix", "pbmc10-filtered_feature_bc_matrix",
+"B1-filtered_feature_bc_matrix", "pbmc11-filtered_feature_bc_matrix"
+)
+
+output_dir = "../raw_data/"
+
+# Create Seurat objects for each sample
+heart_t_cells_objects <- list()
+
+for (sample_name in sample_names) {
+  # Construct file paths
+  counts_file <- paste0(output_dir, sample_name, "/matrix.mtx.gz")
+  barcodes_file <- paste0(output_dir, sample_name, "/barcodes.tsv.gz")
+  genes_file <- paste0(output_dir, sample_name, "/features.tsv.gz")
+  
+  # Read data files
+  counts <- readMM(counts_file)
+  barcodes <- read.table(barcodes_file, stringsAsFactors = FALSE)[, 1]
+  features <- read.csv(genes_file, stringsAsFactors = FALSE, sep = "\t", header = FALSE)
+  rownames(counts) <- make.unique(features[, 2])
+  colnames(counts) <- barcodes
+  
+  # Create Seurat object
+  heart_t_cells <- CreateSeuratObject(counts, project = sample_name)
+  
+  # Store Seurat object in the list
+  heart_t_cells_objects[[sample_name]] <- heart_t_cells
+}
+
+
+```
+
+# Merge Seurat objects from all samples
+
+```{r}
+
+# Merge the first element with a sublist of the rest excluding the first element
+heart_t_cells <- merge(heart_t_cells_objects[[1]], y = heart_t_cells_objects[-1])
+
+```
+
+# Metadata
+
+```{r}
+
+                                                            GSM6346295_A10-B10-MCE12-MCE13-filtered_feature_bc_matrix.tar.gz
+GSM5449974_A1-filtered_feature_bc_matrix.tar.gz             GSM6346296_A5-B14-filtered_feature_bc_matrix.tar.gz
+GSM5449975_A2-filtered_feature_bc_matrix.tar.gz             GSM6346297_A6-A9-B13-B9-filtered_contig_annotations.csv.gz
+GSM5449976_A3-filtered_feature_bc_matrix.tar.gz             GSM6346298_A8-B11-filtered_contig_annotations.csv.gz
+GSM5449978_B1-filtered_feature_bc_matrix.tar.gz             GSM6346299_B12-MCE6-MCE7-filtered_contig_annotations.csv.gz
+GSM5449979_B2-filtered_feature_bc_matrix.tar.gz             GSM6346300_A10-B10-MCE12-MCE13-filtered_contig_annotations.csv.gz
+GSM5449980_B3-filtered_feature_bc_matrix.tar.gz             GSM6346301_A5-B14-filtered_contig_annotations.csv.gz
+GSM5449981_MCE1-filtered_feature_bc_matrix.tar.gz           GSM6346307_pbmc10-filtered_feature_bc_matrix.tar.gz
+GSM5449982_MCE2-filtered_feature_bc_matrix.tar.gz           GSM6346308_pbmc11-filtered_feature_bc_matrix.tar.gz
+GSM5449984_MCL1-filtered_feature_bc_matrix.tar.gz           GSM6346309_pbmc12-filtered_feature_bc_matrix.tar.gz
+GSM5449985_MCL3-filtered_feature_bc_matrix.tar.gz           GSM6346310_pbmc13-filtered_feature_bc_matrix.tar.gz
+GSM5449986_A1-filtered_contig_annotations.csv.gz            GSM6346311_pbmc14-filtered_feature_bc_matrix.tar.gz
+GSM5449987_A2-filtered_contig_annotations.csv.gz            GSM6346312_pbmc15-filtered_feature_bc_matrix.tar.gz
+GSM5449988_A3-filtered_contig_annotations.csv.gz            GSM6346313_pbmc7-filtered_feature_bc_matrix.tar.gz
+GSM5449990_B1-filtered_contig_annotations.csv.gz            GSM6346314_pbmc8-filtered_feature_bc_matrix.tar.gz
+GSM5449991_B2-filtered_contig_annotations.csv.gz            GSM6346315_pbmc10-filtered_contig_annotations.csv.gz
+GSM5449992_B3-filtered_contig_annotations.csv.gz            GSM6346316_pbmc11-filtered_contig_annotations.csv.gz
+GSM5449993_MCE1-filtered_contig_annotations.csv.gz          GSM6346317_pbmc12-filtered_contig_annotations.csv.gz
+GSM5449994_MCE2-filtered_contig_annotations.csv.gz          GSM6346318_pbmc13-filtered_contig_annotations.csv.gz
+GSM5449996_MCL1-filtered_contig_annotations.csv.gz          GSM6346319_pbmc14-filtered_contig_annotations.csv.gz
+GSM5449997_MCL3-filtered_contig_annotations.csv.gz          GSM6346320_pbmc15-filtered_contig_annotations.csv.gz
+GSM6346292_A6-A9-B13-B9-filtered_feature_bc_matrix.tar.gz   GSM6346321_pbmc7-filtered_contig_annotations.csv.gz
+GSM6346293_A8-B11-filtered_feature_bc_matrix.tar.gz         GSM6346322_pbmc8-filtered_contig_annotations.csv.gz
+GSM6346294_B12-MCE6-MCE7-filtered_feature_bc_matrix.tar.gz
+
+#GSM5449974	Group A - Patient 1 - A1-filtered
+#GSM5449975	Group A - Patient 2 - A2-filtered
+#GSM5449976	Group A - Patient 3 - A3-filtered
+#GSM5449978	Group B - Patient 1 - B1-filtered
+#GSM5449979	Group B - Patient 2 - B2-filtered
+#GSM5449980	Group B - Patient 3 - B3-filtered
+
 #GSM5449981	Group C - Patient 1 Early
 #GSM5449982	Group C - Patient 2
 #GSM5449984	Group C - Patient 1 Late
