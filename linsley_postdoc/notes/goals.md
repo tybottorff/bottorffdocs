@@ -22,6 +22,10 @@
 
 # Mine their data for...
 ## Does ICB induce expansion of T cells?
+ - idea is that checkpoint inhibition could have been inhibiting proliferation of (exhausted) T cells, so ICB releases 'brake' on T cells and allows proliferation in response to tumor/self antigens
 ## If ICB does induce expansion, do the TCR repertoires before and after ICB have distinct TCR features (as a proxy for cross-reactivity) that can allow prediction of irAE development?
  - what happens to expanded cells after treatment? do they persist? keep expanding? move to a specific tissue?
  - caveat to using pgen as crossreactivity proxy: germlineness pgen calculated from entire TCR seq but only (?) CDR3 contributes most to antigen specificity? how much of pgen variance comes from cdr3 nt variance?
+
+# Takehome
+ - knowing who might be more likely to develop irAEs could inform medical treatment (i.e. give monotherapy ICB rather than combination therapy which has a higher likelihood of irAEs)
