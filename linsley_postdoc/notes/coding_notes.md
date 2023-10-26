@@ -1,3 +1,5 @@
+# General
+ - nohup command & at end. to not get kicked off server while script running, detach head alternative
 # Bioinformatics/biostatistics
  - ROC: receiver operating characteristics, performance measure for automated classification, provides visual and numerical summary of predictor behavior
  - voom algorithm: mean-variance modeling, estimate mean-variance in data, then use this to compute appropriate precision weight for each observation. count data (like RNAseq) always shows mean-variance relationships (increasing variance with increasing count size). convert counts to logCPM values (adding 0.5 to avoid log of 0), normalize matrix of logCPM values, fit linear models, fit trend to square root standard deviations as function of average log count measure, use trend line to predict variance of each logCPM value, inverse variance is precision weight estimate
