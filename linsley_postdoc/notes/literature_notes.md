@@ -8,6 +8,9 @@
  - main targets of recipient immune response against allograft are donor MHC antigens on allogenic tissue
  - recognition of mismatched MHC antigens leads to allograft rejection
  - allorecognition can occur directly and/or indirectly: directly refers to recognition of intact donor MHC molecules on donor cells (APC)s, indirectly refers to presentation of processed antigens by recipient APCs to recipient T cells
+# An anti-CD3 antibody, teplizumab, in relatives at risk for type 1 diabetes
+ - teplizumab delays progression of type 1 diabetes in high risk participants
+ - KLRG1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells more common in teplizumab group than placebo
 # An increased population of regulatory T cells improves the pathophysiology of placental ischemia in a rat model of preeclampsia
  - preeclampsia pathology: suppressed Tregs, autoantibodies to Ang II type I receptor
 # Antigen presentation in the thymus for positive selection and central tolerance induction
@@ -23,6 +26,28 @@
  - cathepsins (lysosomal proteases) and thymus-specific serine protease alter MHC ligand repertoire presented to T cells during development, helps positive selection
 ### Antigen presentation in the medulla
  - transcriptional noise (low level transcription of any gene) may expose developing thymocytes to antigenic diversity of peripheral tissue (tissue-restricted antigens) without those peripheral antigens needing to be transited to thymus, not just inherent leaky gene expression but rather promiscuous gene expression and a distinct property of medullary thymic epithelial cells (1-3% of these cells express a particular tissue-restricted antigen but the cells get replace weekly changing topology of antigen expression in medulla)
+# Anti-PD-1 and anti-CTLA-4 therapies in cancer: mechanisms of action, efficacy, and limitations
+## Cancers evade and inhibit immune responses
+ - cytokines (like IL-12) also help effective T cell stimulation
+ - immunoediting: selection of clones able to avoid immune system leading to tumor establishment
+ - evasion mechanisms: downregulation of tumor antigens or MHC class I, use of inhibitory cytokines (IL-10, TGF-beta), use of inhibitory Tregs, Bregs, or myeloid-derived suppressor cells, or inhibitory receptors (PD-1, CTLA-4)
+## Immune exhaustion contributes to immune dysfunction in cancer
+ - exhaustion can lead to deletion (following progressive loss of proliferative potential and effector functions)
+## The immune checkpoint receptor CTLA-4
+ - CTLA-4 expressed by Tregs, also CD4<sup>+</sup> T cells upon activation, also exhausted T cells
+ - CTLA-4 outcompetes CD28 for CD80/86 ligands and can remove ligands CD80/86 from APC surface via trans-endocytosis
+ - CTLA-4 increases activation threshold of T cells (limits CD28-mediated signaling during antigen presentation to reduce immune responses to weak antigens like self/tumor antigens)
+## The immune checkpoint receptor PD-1
+ - follicular helper T cells constitutively express PD-1
+ - PD-1 expressed by activated/induced T cells (TCR stimulation or cytokines like IL-2/7/15/21 or TGF-beta)
+ - IFN-gamma upregulates PD-L1/2
+## CTLA-4, PD-1, and their ligands in cancer
+ - CTLA-4 expression on tumors associated with decreased survival in nasopharyngeal carcinoma but increased survival in NSCLC
+ - CTLA-4 blockade likely mostly impacts T cell activation in draining lymph node when CTLA-4 expressing Tregs remove CD80/86 from surface of APCs (reducing their ability to stimulate tumor-specific T cells), possibly also at tumor site as exhauted CTLA-4 expressing T cells and Tregs accumulate in tumor microenvironment
+ - PD-1 blockade thought to act mainly at effector stage of immune response
+## Limitations of immune checkpoint inhibitors
+ - selection for tumor cells that can evade immune system (perhaps they lose MHC class I or IFN-gamma response elements)
+ - ICB can induce upregulation of other inhibitory receptors
 # A phenotypically and functionally distinct human T<sub>H2</sub> cell subpopulation is associated with allergic disorders
  - allergen-specific type 2 helper T (T<sub>H2</sub>) cells critical in initiating/orchestrating allergic/asthmatic inflammatory response pathways
  - currently lack methodology to identify and differentiate these cells from nonpathogenic T<sub>H2</sub> cell types (otherwise would be able to use them as therapeutic targets and biomarkers)
@@ -124,6 +149,16 @@
 # Cardiac myosin-specific autoimmune T cells contribute to immune-checkpoint-inhibitor-associated myocarditis
  - cardiac myosin-specific autoreactive T cells drive pathogenesis of PD-1 inhibitor-induced myocarditis in mice
  - PD-1 expressing cardiac myosin-specific autoimmune T cells are present in heart during naive conditions
+# CD4<sup>+</sup> T cells are essential for the development of destructive thyroiditis induced by anti-PD-1 antibody in thyroglobulin-immunized mice
+## Abstract
+ - PD-1 blockade in thyroglobulin-immunized mice induces destructive thyroiditis, prevented by previous depletion of CD4<sup>+</sup> T cells and partially prevented by previous depletion of CD8<sup>+</sup> T cells
+ - CD4<sup>+</sup> T cell subsets (central and effector memory) frequencies and interferon gamma production after stimulation with thyroglobulin increased in lymph nodes of mice with thyroid irAE over controls
+ - infiltration of CD4<sup>+</sup> T cells expressing granzyme B in thyroid glands and MHC class II expression on thyrocytes in mice with thyroid irAE
+ - adoptive transfer of CD4<sup>+</sup> T cells from lymph nodes in mice with thyroid irAE destroys thryoid follicular architecture in irradiated recipient mice
+ - frequencies of central and effector memory CD4<sup>+</sup> T cells expressing CD27 (CD4<sup>+</sup> T cell cytotoxic marker) higher in PBMCs from human patients with thyroid irAE induced by PD-1 blockade than those without (also higher CD4<sup>+</sup> T cell frequencies in general), similar CD8<sup>+</sup> T cell frequencies
+## Discussion
+ - mouse destructive thyroiditis only induced by PD-1 blockade with prior immunization with thyroglobulin, so there's an involvement of activated memory cells specific for thyroglobulin in irAEs (memory CD4<sup>+</sup> T cells induced by previous immunization with thyroglobulin activated by PD-1 blockade and cause irAE)
+ - CD4<sup>+</sup> T cells can show cytotoxic characteristics in some chronic inflammatory diseases and cancer
 # CD8<sup>+</sup> T cells in the cancer-immunity cycle
 ## Introduction
  - 3 signal model for effective T cell priming and differentiation: 1) TCR signaling by antigens presented by MHCs, 2) co-stimulation, 3) cytokines, all 3 signals necessary to effectively prime naive T cells and differentiate them into effector T cells, perhaps a fourth signal being nutrients/metabolites fueling T cell metabolism
@@ -308,6 +343,9 @@
  - DEG analyses pointed to enhanced functionality of NK cells in epiR patients compared to NR patients
  - hypothesis: NK cells might be responsible for promoting anti-tumor responses in epiR patients
 ### Transcriptional signatures of CD16<sup>+</sup> NK cells in epigenetic MMRd responders are associated with longer survival
+## Discussion
+ - epiMMRd tumor gene expression of key genes could vary (more than in "static" mutational sense) across cells/time
+ - NK cells may play a larger role in epiMMRd anti-tumor response as they can efficiently mount cytotoxic responses in a neoantigen-independent manner (lower tumor mutational burden for epiMMRd than mutMMRd)
 # Divergent clonal differentiation trajectories establish CD8<sup>+</sup> memory T cell heterogeneity during acute viral infections in humans
 ## Abstract
  - decrease in human CD8<sup>+</sup> T cell clonal diversity from acute (days 10-30) to memory phase (days 90-150 for early memory, day 500+ for late memory)
@@ -349,7 +387,7 @@
  - cell-cell communications for TNF ligand-receptor pairs between macrophage/T cells and tumor cells bidirectionally remodeled in responders vs. non-responders and irAE vs. non-irAE patients
  - enhanced macrophage abundance and TNF signaling in on-treatment tumors and organs developing irAEs
  - increased circulating TNF protein in plasma/serum of irAE patients but not ICI responders
- - Th17 abundance didn't change in irAE group, nor was 
+ - Th17 abundance didn't change in irAE group, nor was Th17 identified in CD4<sup>+</sup> T cells in tumors 
 # Dynamic single-cell mapping unveils Epstein-Barr virus-imprinted T-cell exhaustion and on-treatment response
 ## Abstract
  - Epstein-Barr virus associated gastric cancer exhibits an inflammed-immune phenotype, increased T and B cell infiltration
@@ -436,6 +474,8 @@
  - other methods generally fall into cell-based normalization (estimate cell-specific global size factor to normalize all genes in same cell, pool cells to estimate more robust size factors then deconvolve pooled size factors to get cell-specific size factors) and gene-based normalization (parametric modeling of individual genes, **like Pearson residuals method SCTransform**, perform adjustments individually for each group of genes with different sequencing depths or different ranges of abundance levels)
 ## Feature selection and dimension reduction
  - identify few latent variables that explain the most variance in data
+# FDA approves anti-CD3 antibody to delay type 1 diabetes onset
+ - T1D: autoreactive T cells destroy insulin secreting beta cells
 # High-throughput and single-cell T cell receptor sequencing technologies
 ## Introduction
  - diversity (D) gene segment only contributes to TCRβ
@@ -466,6 +506,41 @@
  - **shared antigens between tumor and peripheral normal tissue may drive both antitumor responses and organ-specific autoimmunity, activating tumor/auto-reactive T cells**
  - organ-specific autoantibodies can predict organ-specific irAEs
  - baseline immune cell profiles are being studied as predictors of irAEs: high CD2<sup>low</sup> PD-1<sup>+</sup> B cells, high eosinophil count, high proliferation of control memory CD8<sup>+</sup> T cells, higher expression of CD27/28 on CD4/8 effector T cells, increased activated CD4 memory T cells and TCR diversity
+# Identification of pathogenic immune cell subsets associated with checkpoint inhibitor-induced myocarditis
+## Abstract
+ - patients with ICI myocarditis have lymphocytic infiltrates in the heart, implicating T cell mediated mechanisms
+ - find expansion of cytotoxic CD8<sup>+</sup> T effector cells re-expressing CD45RA (Temra CD8<sup>+</sup>> T cells) in ICI myocarditis patients compared to controls
+ - these CD8<sup>+</sup> Temra cells were clonally expanded, express proinflammatory cytokines (CCL5/CCL4/CCL4L2), they progress into exhausted phenotype 2 months after treatment with glucocorticoids
+## Results
+### Analysis of immune cell populations in ICI myocarditis using CyTOF reveals cytotoxic Temra CD8<sup>+</sup> expansion
+ - reduction in circulating T/B cells, increase in monocytes/macrophages, increased Tregs, reduced naive CD8<sup>+</sup> T cells, increased Temra CD8<sup>+</sup> T cells in ICI-treated groups
+ - increased Temra CD8<sup>+</sup> T cells in ICI myocarditis vs. other ICI groups
+### Global analysis of immune cell populations in ICI myocarditis using scRNA-seq corroborates CyTOF results
+ - increase in monocytes, reduction in circulating T cells in ICI-treated groups
+### Confirmation of myocarditis-associated Temra CD8<sup>+</sup> expansion by scRNA-seq
+ - increase in Temra CD8<sup>+</sup> in ICI-treated groups and in myocarditis group relative to other ICI groups
+ - these Temra CD8<sup>+</sup> cells expressed high levels of cytotoxicity/activation genes like granzyme B (GZMB), IL-32, CCL5 (chemokine), so they seem cytotoxic
+ - don't see unique CD4<sup>+</sup> subpopulation differences
+### Single-cell TCR sequencing reveals myocarditis-associated clonal expansion of cytotoxic Temra CD8<sup>+</sup> cell clusters
+ - 83% of CD3<sup>+</sup> cells express alpha beta TCRs, **not sure what the normal/expected frequency is**
+ - identify top 50 clonotypes for each patient
+ - find expansion of top 50 clonotypes in ICI myocarditis group relative to no ICI and non-myocarditis irAEs (i.e. for myocarditis group the top 50 clonotypes constitute a higher percentage of the CD3<sup>+</sup> cells so they're more expanded)
+ - myocarditis expansion mostly in Temra CD8<sup>+</sup> cells
+ - myocarditis-associated clusters had somewhat high pro-inflammatory and cytotoxicity markers
+### Activated and expanded Temra CD8<sup>+</sup> clones in myocarditis transition from an early cytotoxic phenotype to a late exhaustion phenotype over time
+ - have data for 1 myocarditis patient for longitudinal study (2 months)
+ - persistence of clonally expanded Temra CD8<sup>+</sup> cells in myocarditis patient even after clinical indices of inflammation resolve
+ - top 10 clonotypes first belong to Temra CD8<sup>+</sup> but switch to central/effector memory over time
+ - early see cytotoxic and chemokine (recruitng immune/inflammatory cells) transcriptomic programs that become attenuated over time, see increase in exhaustion markers over time
+### Ligand-receptor analysis of myocarditis-associated T cell populations exhibits interactions with other immune cell types through cardiotropic chemokines
+ - use CellPhoneDB algorithm to predict potential ligand-receptor interactions in scRNA-seq data
+ - find interactions between ligands expressed by Temra CD8<sup>+</sup> cells with members of innate immune system (DCs, monocytes/macrophages, neutrophils) via pro-inflammatory crosstalk between CCL5-CCR1 and TNF superfamily members
+ - more pro-inflammatory (vs. anti-inflammatory) interactions in ICI-treated groups
+ - myocarditis group had lack of key interaction between CD52 and SIGLEC10 (T cell interaction), **also seen lacking in T1D!**
+## Discussion
+ - they hypothesize that the systemic inflammatory response in ICI myocarditis patients may be greater than that in the relatively milder irAEs in the other group (and in the non-irAE group too), leading to a greater effector T cell expansion in the peripheral blood
+ - Temra CD8<sup>+</sup> cells previously shown to be expanded in peripheral blood of patients with autoimmune diseases, like RA
+ - don't see Th17 effector cell increases in heart as previously seen, although perhaps this is because it was previously seen in autoimmunity vs. irAE?
 # Identifying specificity groups in the T cell receptor repertoire
  - TCR sequences are diverse
  - here, they define the minimal requirements for TCR antigen specificity through analysis of TCR sequences using a panel of pMHC tetramer sorted cells and structural data
@@ -524,6 +599,9 @@
  - **mechanistic model: CTLA-4 blockade induces autoreactivity by mobilizing newly detectable clones, irAE-mediating clones may be enriched within population of activated T cells, distinct from other tissue-specific immunopathologies driven by oligoclonal response to specific antigens like celiac**
 ## Discussion
  - **with how early TCR diversification is here compared to how late irAEs can develop, TCR repertoire changes can't be the only factor in irAE development**
+# Immunogenicity of somatic mutations in human gastrointestinal cancers
+ - tumor-infiltrating leukocytes from 9/10 patients with metastatic gastrointestinal cancers contained CD4<sup>+</sup> and/or CD8<sup>+</sup> T cells recognizing 1-3 neo-epitopes from somatic mutations expressed in their own tumors
+ - **takehome: surprisingly few neo-epitopes of cancer recognized by immune system, guessing that cancer has many more than 1-3 neo-epitopes, but perhaps I'm mistaken**
 # Improved survival with T cell clonotype stability after anti-CTLA-4 treatment in cancer patients
 # Abstract
  - **CTLA-4 blockade results in both expansion and loss of T cell clonotypes, global turnover of T cell repertoire**
@@ -539,6 +617,7 @@
  - both CD4<sup>+</sup> and CD8<sup>+</sup> T cells can become exhausted
  - T cell inhibitory receptors: PD-1, TIM-3, LAG-3, TIGIT, CTLA-4, but several of these inhibitory receptors are upregulated in T cell activation to modulate co-stimulatory signaling (**so inhibitory receptors alone aren't enough to distinguish between exhausted and activated T cells**)
  - targeting TGF-β signaling to help prevent exhaustion: TGF-β is highly expressed in tumor microenvironment and suppresses T cells
+# Improving T cell recpetor on-target specificity via structure-guided design
 # Incidence of Endocrine Dysfunction Following the Use of Different Immune Checkpoint Inhibitor Regimens
  - high incidence of endocrine dysfunction (hypo/hyper-thyroidism) in patients receiving ICI (immune checkpoint inhibitor) regimens, higher with combination therapy
 # Induction of neoantigen-specific cytotoxic T cells and construction of T-cell receptor co-engineered T cells for ovarian cancer
@@ -774,6 +853,40 @@
  - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
  - organ-specific irAEs associated with pre-existing organ dysfunction
  - high pre-treatment soluble CTLA4 associated with irAEs
+# Role of recombination activating genes in the generation of antigen receptor diversity and beyond
+## Abstract
+ - V(D)J recombination: antigen receptor gene segments cleaved, rejoined by NHEJ
+ - RAG1/2 (recombination activating genes) drive cleavage, sequence specific nucleases
+## The discovery of *RAG* genes
+ - RAG1/2 unique to vertebrates
+## Antigen receptors of lymphoid system
+ - antibodies/immunoglobulins are glycoproteins composed of 4 polypeptides (2 identical heavy chains and 2 identical light chains held together by disulfide bonds)
+ - N-terminal sequences of antibodies (variable region, 110-130 residues) vary greatly and gives antigen specificity, C-terminal seqences more constant (constant region)
+ - exon encoding variable region (N-terminus of antibodies) assembled from 2 or 3 gene segments: V (variable), D (diversity, only for immunoglobulin heavy chains, TCR-beta, and TCR-delta), J (joining)
+ - recombination between D and J occurs to yield DJ segment, and recombination between V and DJ occurs to yield VDJ segment
+ - TCR structure similar to antigen-binding fragment (F(ab)) of antibody, also has 2 glycoprotein subunits each encoded by rearranged gene, also has interchain disulfide bonds
+ - TCRs are α beta or gamma delta pairs
+ - heavy chain recombination occurs before light chain recombination (strict order, same as D-J before V-DJ and TCR-beta before TCR-α), cell cycle restricted expression of enzymes helps enforce order
+ - rearrangements restricted to early developmental stage
+ - allelic exclusion: process by which specificity is acquired for mature lymphocytes to only express a single species of antibody/BCR/TCR in spite of having multiple allelic loci for different options
+## Antigen receptor loci
+ - immunoglobulin heavy chain IgH and light chain kappa (IgK) and lambda (IgL)
+## Mechanism of V(D)J recombination
+### Recombination signal sequence and 12/23 rule
+ - recombination signal sequence (RSS): fairly conserved, adjacent to each subexon, heptamer and nonamer sequence separated by spacer of 12 or 23 bp (12RSS, 23RSS)
+ - generally, 12RSS recombines only with 23RSS (and vice versa), '12/23' rule (prevents non-productive rearrangements)
+### The perfect cleavage
+ - RAG1/2 initiate recombination by introducing ssDNA nick at border of RSS and coding segment
+### The imperfect joining
+ - blund-ended signal ends can be ligated diereclty, coding ends undergo further processing (NHEJ)
+## Diversity at the junction
+ - when V, D, and J subexons join, several modifications like insertions and deletions can occur at junctions
+## Other modes of generation of the diversity
+### Class switch recombination (CSR)
+ - rearrangements of constant regions upon encountering an antigen, switching of immunoglobulin isotype from IgM to IgG/E/A without changing antigen specificity
+### Somatic hypermutation (SHM)
+ - random genetic mutations in B cells (not T cells) at certain hotspots in antigen-binding regions following antigen encounter, increases affinity of antibodies for antigen (cells secreting antibodies that increase affinity expand)
+ - within V region of heavy and light chains
 # Sequence count data are poorly fit by the negative binomial distribution
 # Simultaneous epitope and transcriptome measurement in single cells
  - cellular indexing of transcriptomes and epitopes by sequencing (CITE-seq), oligonucleotide-labeled antibodies are used to integrate cellular protein and transcriptome measurements into a single cell readout
@@ -1064,6 +1177,22 @@
  - exhausted T cells accumulate when amount of antigen exceeds ability for clearance by antigen-specific T cells
  - characterized by increased expression of coinhibitory receptors (PD-1, LAG-3, TIM-3, TIGIT), these receptors also mark T cell activation
  - blocking coinhibitory receptors (i.e. ICB) can reinvigorate exhausted T cells but exhaustion is a difficult to reverse, altered epigenetic state
+# The diverse functions of the PD1 inhibitory pathway
+## Key points
+ - PD1: inhibitory receptor expressed by all T cells during activation (also B cells, NKs, some myeloid cells), regulates effector functions, often high and sustained expression in persistent antigen exposure (chronic infections, cancer) and can limit protective immunity in these cases, limits autoreactive T cells
+ - PDL1: expressed broadly, can shield organs from autoimmune attack
+## Abstract
+ - early in the activation process, coinhibitory 'checkpoints' (like PD1) are induced to regulate T cells (counteract activation program)
+## Main
+ - costimulatory signals: CD28 on T cells and CD80 (B7.1) and/or CD86 (B7.2) on APCs (for example, there are other costimulatory signals)
+ - CTLA-4 is one of the first negative regulators induced during T cell activation (competes with CD28 for ligands CD80/86)
+ - PD1 (PDCD1, CD279) expressed during T cell activation (so PD1 marks effector T cells too not just exhausted T cells), engages ligands PDL1 (CD274, B7-H1) and/or PDL2 (CD273, B7-DC) expressed by same cell engaging T cell with pMHCI
+ - effector T cells must mass these inhibitory checkpoints in order to exert full effector function
+ - PD1 can also trigger phosphatases (SHP2) to counteract positive signaling between TCR-pMHCI and CD28/CD80/86
+ - downstream of TCR-pMHC is transcription factor activation (like AP-1, NFAT, NK-kappa B)
+ - PD1 can increase expression of transcription factors like BATF to counteract T cell activation transcriptional program
+ - PDL1 can also bind CD80
+ - after T cell activation, if antigen is cleared, memory T cells form and PD1 expression levels decrease (PD1 expression remains high if antigen persists and T cell exhaustion can develop)
 # The graft-versus-leukemia effect in AML
  - allogenic hematopoietic stem cell transplantation (allo-SCT) commonly used in cancer care, most potent anti-leukemic therapy in AML (acute myeloid leukemia) patients
  - donor T cells (and maybe other immune cells) eliminate residual leukemia cells after radio/chemotherapy = graft-versus-leukemia response
@@ -1157,5 +1286,47 @@
  - **not sure why yet and surprising to me, but apparently hydrophobic interactions are generally the strongest for protein binding BUT don't necessarily provide specificity that comes from other residues**
  - **idea is that hydrophobic residues provide affinity and polar/charged ones provide specificity via a more limited set of specific favorable structures**
  - **takehome for me is that yes hydrophobicity should correlate with crossreactivity as more possible favorable structures are likely with higher hydrophobicity**
+# V(D)J recombination, somatic hypermutation and class switch recombination of immunoglobulins: mechanism and regulation
+## Summary
+ - V, D, J segments exist as multiple copy arrays on chromosome
+ - V(D)J recombination can include deleting or inverting of intervening DNA between V, D, J segments and ligation
+## Immunoglobulin structure and genetic encoding
+ - immunoglobulin: 2 heavy chains (IgH) and 2 light chains (IgL, encoded by IgK and IgL genes)
+ - IgH chains ahve 4 or 5 domains, IgL have 2 domains
+ - IgH chains have 5 major isotypes: IgM, IgD, IgG, IgA, IgE, 4 subtypes of IgG and 2 subtypes of IgA
+# Virus-specific memory T cell responses unmasked by immune checkpoint blockade cause hepatitis
+## Abstract
+ - identify subset of melanoma patients predisposed to ICB-related hepatitis distinguished by chronic expansion of effector memory CD4<sup>+</sup> T cells (T<sub>EM</sub> cells)
+ - pre-therapy CD4<sup>+</sup> T<sub>EM</sub> cell expansion in patients with metastatic disease and high CMV-specific serum antibody titers
+ - CMV reactivation as cause of CD4<sup>+</sup> T<sub>EM</sub> expansion
+ - pre-therapy CD4<sup>+</sup> T<sub>EM</sub> expansion predicts hepatitis in CMV-seropositive patients
+## Introduction
+ - **irAEs different from autoimmune diseases**
+ - irAEs attributed to dysregulated T cells, autoantibodies, here they propose also pathogen-specific memory T cells
+ - CMV seroprevalence is high (at least among Europeans), blood cells are major reservoir for CMV (latent)
+ - CMV reactivation follows immune compromise by immunosuppressive therapy or other viral infections, reactivation can present as colitis, hepatitis, pneumonitis, encephalitis (**some irAEs might just be CMV reactivation from ICB??**) through viral replication and T cell immunity (overreaction of inflammation to low level viral replication)
+ - cycles of CMV latency and reactivation lead to phenomenon of memory inflation: failure of primed CMV-specific CD8<sup>+</sup> T cells to contract and give rise to central memory T cells (instead maintain a dominant pool of effector memory CD8<sup>+</sup> T cells that doesn't become exhausted)
+## Results
+### Clinical features do not predict αPD-1/αCTLA-4 related hepatitis
+ - don't observe associations/coinciding of different irAEs (hepatitis, colitis, thyroiditis) in same patients, so **perhaps some individuals are predisposed to particular irAEs**
+ - hepatitis irAE associated with younger age and less rounds of ICB (**surprising**), no association with liver function markers, tumor burden, hepatitis B/C/E virus seropositivity, or autoimmune hepatitis-related autoantibodies
+### CD4<sup>+</sup> T<sub>EM</sub> cell expansion predicts αPD-1/αCTLA-4 related hepatitis
+ - pre-ICB: see over-representation of CD4<sup>+</sup> T<sub>EM</sub> cells associated with hepatitis, baseline expansion of these cells predicts hepatitis irAE (and not colitis, thyroiditis, or clinical response to ICB)
+### Opting for αPD-1 monotherapy reduces risk of hepatitis
+ - not surprising, less irAEs than combination ICB
+### CD4<sup>+</sup> T<sub>EM</sub> frequency is an independent predictor of hepatitis
+ - want to investigate causes of baseline CD4<sup>+</sup> T<sub>EM</sub> expansion, find liver inflammation as a common cause
+### CD4<sup>+</sup> T<sub>EM</sub> cell expansion is associated with chronic T cell activation
+ - higher CD4<sup>+</sup> T<sub>EM</sub> patients had more exhausted CD8<sup>+</sup> T cells (CD160<sup>+</sup> CD244<sup>+</sup>)
+ - these higher CD4<sup>+</sup> T<sub>EM</sub> patients aren't generally immunocompromised despite chronically activated and exhausted T cells (no differences in Torque Teno Virus load)
+### CD4<sup>+</sup> T<sub>EM</sub> cell expansion correlates with immunity to CMV
+ - see association between CMV-specific IgG antibody levels and T cell reactivity against CMV peptides and CD4<sup>+</sup> T<sub>EM</sub> status
+### CMV-reactive CD4<sup>+</sup> T cells are enriched in CD4<sup>+</sup> T<sub>EM</sub><sup>high</sup> patients
+### Valganciclovir reverses αPD-1/αCTLA-4 related hepatitis
+ - anti-viral therapy with valganciclovir (anti-CMV) reverses hepatitis irAE
+### Valganciclovir prophylaxis prevents αPD-1/αCTLA-4-related hepatitis
+## Discussion
+ - model: metastatic disease promotes compartmentalised CMV reactivation in latently infected individuals, possibly triggered by an unknown winter virus infection; in turn, CMV stimulates expansion of CD4<sup>+</sup> T<sub>EM</sub> cells prior to immunotherapy. When αPD-1/αCTLA-4 therapy is given, these T<sub>EM</sub> cells might inflict liver injury directly or promote bystander T cell responses
+ - **anti-viral immunity might also explain predisposition to other adverse reactions following αPD-1/αCTLA-4 therapy, such as colitis or pneumonitis**
 # γδ T cell exhaustion: Opportunities for intervention
  - γδ T cells (TCRs with γ and δ chains instead of the usual α and β ones) can respond to varied infections/tumor challenges in a non-MHC-restricted manner, involved in immune surveillance (pleiotropic i.e. more than one effector functions)
