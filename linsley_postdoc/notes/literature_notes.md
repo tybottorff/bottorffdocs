@@ -143,6 +143,8 @@
  - **baseline markers: peripheral blood lymphocyte counts > 2,000, lower % PD-1 expression on T cells, lower % Tregs, lower IL-6/8 levels, higher IL-17 levels, autoantibodies, some HLA alleles, among other things all associated with more irAEs**
  - **on treatment markers: increased leukocyte count, clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality, increased IL-6 levels, among other things all associated with more irAEs**
  - **takehome for me: on treatment markers including clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality all very interestingly associated with more irAEs**
+# Cancer immunotherapy based on mutation-speciifc CD4<sup>+</sup> T cells in a patient with epithelial cancer
+ - find TILs from patient with metastatic cholangiocarcinoma had CD4<sup>+</sup> T<sub>H</sub>1 cells recognizing mutation in ERBB2IP expressed by cancer (neoantigen)
 # Canonical correlation analysis for multi-omics: application to cross-cohort analysis
  - CCA: correlation-based integrative method to extract latent features shared between multiple assays by finding linear combination of features (canonical variables, CVs) within each assay that achieve maximal across-assay correlation
  - PCA is a special case of CCA as optimization objective is the same if same data used for both assays
@@ -159,6 +161,8 @@
 ## Discussion
  - mouse destructive thyroiditis only induced by PD-1 blockade with prior immunization with thyroglobulin, so there's an involvement of activated memory cells specific for thyroglobulin in irAEs (memory CD4<sup>+</sup> T cells induced by previous immunization with thyroglobulin activated by PD-1 blockade and cause irAE)
  - CD4<sup>+</sup> T cells can show cytotoxic characteristics in some chronic inflammatory diseases and cancer
+# CD8<sup>+</sup> CD103<sup>+</sup> PD1<sup>+</sup> TIM3<sup>+</sup> T cells in glioblastoma microenvironment correlate with prognosis
+ - Trm cells
 # CD8<sup>+</sup> T cells in the cancer-immunity cycle
 ## Introduction
  - 3 signal model for effective T cell priming and differentiation: 1) TCR signaling by antigens presented by MHCs, 2) co-stimulation, 3) cytokines, all 3 signals necessary to effectively prime naive T cells and differentiate them into effector T cells, perhaps a fourth signal being nutrients/metabolites fueling T cell metabolism
@@ -196,6 +200,7 @@
  - skin irAEs correlated with tumor responses in most responders and barely any non-responders
 # Characterization of Thyroid Disorders in Patients Receiving Immune Checkpoint Inhibition Therapy
  - thyroid disorders are a common irAE following ICI
+# Checkpoint blockade cancer immunotherapy targets tumor-specific mutant antigens
 # Checkpoint-blocker-induced autoimmunity is associated with favorable outcome in metastatic melanoma and distinct T-cell expression profiles
 ## Abstract
  - pre-treatment monocyte and neutrophil counts also predicted clinical outcome (negatively prognostic)
@@ -506,6 +511,12 @@
  - **shared antigens between tumor and peripheral normal tissue may drive both antitumor responses and organ-specific autoimmunity, activating tumor/auto-reactive T cells**
  - organ-specific autoantibodies can predict organ-specific irAEs
  - baseline immune cell profiles are being studied as predictors of irAEs: high CD2<sup>low</sup> PD-1<sup>+</sup> B cells, high eosinophil count, high proliferation of control memory CD8<sup>+</sup> T cells, higher expression of CD27/28 on CD4/8 effector T cells, increased activated CD4 memory T cells and TCR diversity
+# Identification of neoantigens for individualized cancer immunotherapy
+ - neoepitopes are attractive targets for therapeutic cancer vaccines, **but most cancer mutations are unique for individual patients (neoantigenome), requiring individualized treatment**
+ - **not all tumor mutations give rise to neoantigens, neoepitope-specific T cells reflect only 1-2% of mutations in an individual tumor, this could be due to not all tumor mutations giving rise to neoantigens and from T cell repertoire not recognizing all neoantigens perhaps as well**
+ - **cross-reactivity is possible due to low affinity of functional TCR-pMHC interaction**
+ - **heterologous immunity refers to crossreactive T cells induced by unrelated antigen, often pre-existent before tumor onset (like gut microbiota or infections)**
+ - **MHC-I encoded in HLA-A/B/C, MHC-II encoded in HLA-DP/DQ/DR**
 # Identification of pathogenic immune cell subsets associated with checkpoint inhibitor-induced myocarditis
 ## Abstract
  - patients with ICI myocarditis have lymphocytic infiltrates in the heart, implicating T cell mediated mechanisms
@@ -788,6 +799,15 @@
  - DESeq2, edgeR (based on negative binomial regression to model gene counts)
  - voom (based on empirical Bayes model)
  - BBSeq, based on β-binomial regression model
+# Neoantigens: promising targets for cancer therapy
+## Abstract
+ - neoantigens come from mutations, dysregulated RNA splicing, disordered PTMs, and integrated viral ORFs (in the cases of viral cancers like HPV and EBV, called oncoviral antigens)
+## Introduction
+ - tumor vaccines can be used to improve antigen presentation
+ - tumor associated antigens exhibit abnormal expression in tumors, limited expression in normal tissue (like overexpressed proteins, lineage-specific differentiation markers), but as these tumor associated antigens are non-mutated self-antigens central tolerance mechanisms may prevent effective immune responses
+## The source of neoantigens
+ - MHC-I presentation pathway: intracellular cytosolic (neo)antigens are processed in proteasome, transported into ER (via TAP), loaded onto MHC in ER, then pMHC complexes are transported to cell surface in vesicles
+ - MHC-II presentation pathway: extracellular (neo)antigens are endocytosed, processed in endosome, loaded onto MHC in endosome, then pMHC complexes are transported to cell surface in vesicles
 # Network-based machine learning approach to predict immunotherapy response in cancer patients
  - tumor mutation burden improves model
 # New epigenetic regulators of T cell exhaustion
@@ -956,8 +976,15 @@
 ## Introduction
  - "orphan" T cells refers to T cells with unknown specificities
  - example cross-reactive T cell here recognized 3 peptides: EAAGIGILTV from Melan A,  LLLGIGILVL from tetherin/CD317/BST2, and NLSALGIFST from IMP2
- - they use term "multipronged" whereas I've been reading/using cross-reactive
+ - they use term "multipronged" whereas I've been reading/using cross-reactive, **these are different terms, multipronged for antigens on same cell and crossreactive for different antigens on different cells**
  - multipronged recognition resulted in superior recognition of cancer cells vs. recognition by single TAA
+## Results
+### Patient MM909.24 TIL infusion product responds to widely shared HLA A*02:01-restricted antigens
+## Discussion
+ - goal: what do cancer-specific T cells respond to following successful TIL therapy for stage IV melanoma
+ - TIL infusion used to induce a complete response responded to a range of different cancer cell lines from different tissues, suggesting that the majority of the anticancer response in these TILs acted to target widely shared antigens rather than patient-specific, mutation-derived neoantigens
+ - dominant T cell clonotype in Melan-A-reactive TIL persisted following remission, also responds to a wide range of cancer cell lines not expressing Melan A, suggesting response to widely expressed tumor associated antigens
+ - **what they discuss as multipronged here is different from crossreactivity I'm interested in as crossreactivity is for antigens on different cancer cells and, here, multipronged is for different antigens on the same cancer cell**
 # Targeting PI3Kα increases the efficacy of anti-PD-1 antibody in cervical cancer
  - *PIK3CA* mutation results in increase PD-L1 levels, repression of CD8<sup>+</sup> T cell differentiation in cervical cancer
 # T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma
