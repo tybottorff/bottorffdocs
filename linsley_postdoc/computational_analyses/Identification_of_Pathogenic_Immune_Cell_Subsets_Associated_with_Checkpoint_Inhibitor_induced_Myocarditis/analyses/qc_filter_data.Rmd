@@ -71,56 +71,242 @@ for (sample_name in sample_names) {
   heart_t_cells_objects[[sample_name]] <- heart_t_cells
 }
 
-```
+new_object_names <- lapply(names(heart_t_cells_objects), function(name) {
+  new_name <- gsub("-filtered_feature_bc_matrix$", "", name)
+  return(new_name)
+})
 
-# Dehash samples
-
-```{r}
-#matrix <- readMM("../raw_data/A10-B10-MCE12-MCE13-filtered_feature_bc_matrix/matrix.mtx.gz")
-
-#file_path <- "../raw_data/A10-B10-MCE12-MCE13-filtered_feature_bc_matrix/features.tsv.gz"  # Replace with the actual file path
-#features_data <- read.table(gzfile(file_path), sep = "\t", header = TRUE)
-
-# Close the gzipped file connection
-#close(gzfile(file_path))
-
-#file_path <- "../raw_data/A10-B10-MCE12-MCE13-filtered_feature_bc_matrix/barcodes.tsv.gz"  # Replace with the actual file path
-#barcodes_data <- read.table(gzfile(file_path), sep = "\t", header = TRUE)
-
-# Close the gzipped file connection
-#close(gzfile(file_path))
-
-#matrix
-# 36608 by 12649
-
-matrix[c(36602, 36603, 36604, 36605), ]
-# want 1st 4 from 7 last
-# generally see one number much higher, so this is the correct hash call ?!
-# ok good, now just need to track this somehow...
-# WHY DOESNT THIS GET PUT INTO SEURAT OBJECT?
-
-#filt_feat_dat <- features_data %>%
-#  tail(10)
-
-#filt_feat_dat
-
-#features_data
-# 36607 rows
-
-# rows 36601-4 have hashes in features_data, look at same rows in matrix to see values? would be values for all 
-
-#barcodes_data
-# 12648 rows
+# Rename the objects in the list
+names(heart_t_cells_objects) <- new_object_names
 
 ```
 
+# Dehash A10-B10-MCE12-MCE13 sample
+
 ```{r}
 
-test <- heart_t_cells_objects[["A10-B10-MCE12-MCE13-filtered_feature_bc_matrix"]]
+# A10 (Group A, Hash3-TotalSeqC), B10 (Group B, Hash4-TotalSeqC), MCE12 (Group C, Hash1-TotalSeqC), MCE13 (Group C, Hash2-TotalSeqC)
 
-subset_seurat_obj <- subset(test, features = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash3-TotalSeqC", "Hash4-TotalSeqC"))
+dehash_1 <- heart_t_cells_objects[["A10-B10-MCE12-MCE13"]]
 
-View(subset_seurat_obj)
+hash_features_dehash_1 <- subset(dehash_1, features = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash3-TotalSeqC", "Hash4-TotalSeqC"))
+
+hash_counts_1 <- as_tibble(hash_features_dehash_1@assays$RNA@data)
+
+hash_counts_1$hash = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash3-TotalSeqC", "Hash4-TotalSeqC")
+
+# Find the row number of the maximum value for each barcode column
+max_row_numbers_1 <- apply(hash_counts_1[, -ncol(hash_counts_1)], 2, which.max)
+
+# Create a new data frame with the hash values for the maximum in each barcode column
+hash_calls_1 <- data.frame(
+  Barcode = colnames(hash_counts_1)[-ncol(hash_counts_1)],  # All barcode column names
+  Hash = hash_counts_1[max_row_numbers_1, "hash"]  # Corresponding hash values
+)
+
+hash_calls_1 <- hash_calls_1 %>%
+  mutate(
+    orig.ident = case_when(
+      hash == "Hash3-TotalSeqC" ~ "A10",
+      hash == "Hash4-TotalSeqC" ~ "B10",
+      hash == "Hash1-TotalSeqC" ~ "MCE12",
+      hash == "Hash2-TotalSeqC" ~ "MCE13"))
+
+rownames(hash_calls_1) <- hash_calls_1$Barcode
+
+hash_calls_1 <- hash_calls_1 %>%
+  select(-Barcode)
+
+dehash_1 <- AddMetaData(object = dehash_1, metadata = hash_calls_1)
+
+dehash_1_split <- SplitObject(dehash_1, split.by = "orig.ident")
+
+heart_t_cells_objects[["A10-B10-MCE12-MCE13"]] <- NULL
+
+heart_t_cells_objects <- c(heart_t_cells_objects, dehash_1_split)
+
+```
+
+# Dehash B12-MCE6-MCE7 sample
+
+```{r}
+
+# B12 (Group B, Hash4-TotalSeqC), MCE6 (Group C, Hash 1-TotalSeqC), MCE7 (Group C, Hash2-TotalSeqC)
+
+dehash_2 <- heart_t_cells_objects[["B12-NCE6-NCE7"]]
+
+hash_features_dehash_2 <- subset(dehash_2, features = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash4-TotalSeqC"))
+
+rownames(hash_features_dehash_2)
+
+hash_counts_2 <- as_tibble(hash_features_dehash_2@assays$RNA@data)
+
+hash_counts_2$hash = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash4-TotalSeqC")
+
+# Find the row number of the maximum value for each barcode column
+max_row_numbers_2 <- apply(hash_counts_2[, -ncol(hash_counts_2)], 2, which.max)
+
+# Create a new data frame with the hash values for the maximum in each barcode column
+hash_calls_2 <- data.frame(
+  Barcode = colnames(hash_counts_2)[-ncol(hash_counts_2)],  # All barcode column names
+  Hash = hash_counts_2[max_row_numbers_2, "hash"]  # Corresponding hash values
+)
+
+hash_calls_2 <- hash_calls_2 %>%
+  mutate(
+    orig.ident = case_when(
+      hash == "Hash4-TotalSeqC" ~ "B12",
+      hash == "Hash1-TotalSeqC" ~ "MCE6",
+      hash == "Hash2-TotalSeqC" ~ "MCE7"))
+
+rownames(hash_calls_2) <- hash_calls_2$Barcode
+
+hash_calls_2 <- hash_calls_2 %>%
+  select(-Barcode)
+
+dehash_2 <- AddMetaData(object = dehash_2, metadata = hash_calls_2)
+
+dehash_2_split <- SplitObject(dehash_2, split.by = "orig.ident")
+
+heart_t_cells_objects[["B12-NCE6-NCE7"]] <- NULL
+
+heart_t_cells_objects <- c(heart_t_cells_objects, dehash_2_split)
+
+```
+
+# Dehash A8-B11 sample
+
+```{r}
+
+# A8 (Group A, Hash4-TotalSeqC), B11 (Group B, Hash3-TotalSeqC)
+
+dehash_3 <- heart_t_cells_objects[["A8-B11"]]
+
+hash_features_dehash_3 <- subset(dehash_3, features = c("Hash3-TotalSeqC", "Hash4-TotalSeqC"))
+
+hash_counts_3 <- as_tibble(hash_features_dehash_3@assays$RNA@data)
+
+hash_counts_3$hash = c("Hash3-TotalSeqC", "Hash4-TotalSeqC")
+
+# Find the row number of the maximum value for each barcode column
+max_row_numbers_3 <- apply(hash_counts_3[, -ncol(hash_counts_3)], 2, which.max)
+
+# Create a new data frame with the hash values for the maximum in each barcode column
+hash_calls_3 <- data.frame(
+  Barcode = colnames(hash_counts_3)[-ncol(hash_counts_3)],  # All barcode column names
+  Hash = hash_counts_3[max_row_numbers_3, "hash"]  # Corresponding hash values
+)
+
+hash_calls_3 <- hash_calls_3 %>%
+  mutate(
+    orig.ident = case_when(
+      hash == "Hash4-TotalSeqC" ~ "A8",
+      hash == "Hash3-TotalSeqC" ~ "B11"))
+
+rownames(hash_calls_3) <- hash_calls_3$Barcode
+
+hash_calls_3 <- hash_calls_3 %>%
+  select(-Barcode)
+
+dehash_3 <- AddMetaData(object = dehash_3, metadata = hash_calls_3)
+
+dehash_3_split <- SplitObject(dehash_3, split.by = "orig.ident")
+
+heart_t_cells_objects[["A8-B11"]] <- NULL
+
+heart_t_cells_objects <- c(heart_t_cells_objects, dehash_3_split)
+
+```
+
+# Dehash A6-A9-B9-B13 sample
+
+```{r}
+
+# A6 (Group A, Hash1-TotalSeqC), A9 (Group A, Hash2-TotalSeqC), B9 (Group B, Hash3-TotalSeqC), B13 (Group B, Hash4-TotalSeqC)
+
+dehash_4 <- heart_t_cells_objects[["A6-A9-B13-B9"]]
+
+hash_features_dehash_4 <- subset(dehash_4, features = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash3-TotalSeqC", "Hash4-TotalSeqC"))
+
+hash_counts_4 <- as_tibble(hash_features_dehash_4@assays$RNA@data)
+
+hash_counts_4$hash = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash3-TotalSeqC", "Hash4-TotalSeqC")
+
+# Find the row number of the maximum value for each barcode column
+max_row_numbers_4 <- apply(hash_counts_4[, -ncol(hash_counts_4)], 2, which.max)
+
+# Create a new data frame with the hash values for the maximum in each barcode column
+hash_calls_4 <- data.frame(
+  Barcode = colnames(hash_counts_4)[-ncol(hash_counts_4)],  # All barcode column names
+  Hash = hash_counts_4[max_row_numbers_4, "hash"]  # Corresponding hash values
+)
+
+# A6 (Group A, Hash1-TotalSeqC), A9 (Group A, Hash2-TotalSeqC), B9 (Group B, Hash3-TotalSeqC), B13 (Group B, Hash4-TotalSeqC)
+
+hash_calls_4 <- hash_calls_4 %>%
+  mutate(
+    orig.ident = case_when(
+      hash == "Hash1-TotalSeqC" ~ "A6",
+      hash == "Hash2-TotalSeqC" ~ "A9",
+      hash == "Hash3-TotalSeqC" ~ "B9",
+      hash == "Hash4-TotalSeqC" ~ "B13"))
+
+rownames(hash_calls_4) <- hash_calls_4$Barcode
+
+hash_calls_4 <- hash_calls_4 %>%
+  select(-Barcode)
+
+dehash_4 <- AddMetaData(object = dehash_4, metadata = hash_calls_4)
+
+dehash_4_split <- SplitObject(dehash_4, split.by = "orig.ident")
+
+heart_t_cells_objects[["A6-A9-B13-B9"]] <- NULL
+
+heart_t_cells_objects <- c(heart_t_cells_objects, dehash_4_split)
+
+```
+
+# Dehash A5-B14 sample
+
+```{r}
+
+# A5 (Group A, Hash4-TotalSeqC), B14 (Group B, Hash3-TotalSeqC), not sure hash1/2 for MCL15... excluding for now
+
+dehash_5 <- heart_t_cells_objects[["A5-B14-MCL15"]]
+
+hash_features_dehash_5 <- subset(dehash_5, features = c("Hash1-TotalSeqC", "Hash2-TotalSeqC"))
+
+hash_counts_5 <- as_tibble(hash_features_dehash_5@assays$RNA@data)
+
+hash_counts_5$hash = c("Hash3-TotalSeqC", "Hash4-TotalSeqC")
+
+# Find the row number of the maximum value for each barcode column
+max_row_numbers_5 <- apply(hash_counts_5[, -ncol(hash_counts_5)], 2, which.max)
+
+# Create a new data frame with the hash values for the maximum in each barcode column
+hash_calls_5 <- data.frame(
+  Barcode = colnames(hash_counts_5)[-ncol(hash_counts_5)],  # All barcode column names
+  Hash = hash_counts_5[max_row_numbers_5, "hash"]  # Corresponding hash values
+)
+
+hash_calls_5 <- hash_calls_5 %>%
+  mutate(
+    orig.ident = case_when(
+      hash == "Hash3-TotalSeqC" ~ "B14",
+      hash == "Hash4-TotalSeqC" ~ "A5"))
+
+rownames(hash_calls_5) <- hash_calls_5$Barcode
+
+hash_calls_5 <- hash_calls_5 %>%
+  select(-Barcode)
+
+dehash_5 <- AddMetaData(object = dehash_5, metadata = hash_calls_5)
+
+dehash_5_split <- SplitObject(dehash_5, split.by = "orig.ident")
+
+heart_t_cells_objects[["A5-B14-MCL15"]] <- NULL
+
+heart_t_cells_objects <- c(heart_t_cells_objects, dehash_5_split)
 
 ```
 
@@ -157,84 +343,11 @@ heart_t_cells <- merge(heart_t_cells_objects[[1]], y = heart_t_cells_objects[-1]
 
 ```
 
-# Metadata
+# Fix labels
 
 ```{r}
 
-# Group A: 3/8 accounted for
-
-#GSM5449974	Group A - Patient 1 - A1-filtered GSM5449974_A1-filtered_feature_bc_matrix.tar.gz
-#GSM5449986	Group A - Patient 1-TCR GSM5449986_A1-filtered_contig_annotations.csv.gz
-#GSM5449998	Group A - Patient 1-Feature
-
-#GSM5449975	Group A - Patient 2 - A2-filtered GSM5449975_A2-filtered_feature_bc_matrix.tar.gz
-#GSM5449987	Group A - Patient 2-TCR GSM5449987_A2-filtered_contig_annotations.csv.gz
-#GSM5449999	Group A - Patient 2-Feature
-
-#GSM5449976	Group A - Patient 3 - A3-filtered GSM5449976_A3-filtered_feature_bc_matrix.tar.gz
-#GSM5449988	Group A - Patient 3-TCR GSM5449988_A3-filtered_contig_annotations.csv.gz
-#GSM5450000	Group A - Patient 3-Feature
-
-# Group B: 3/8 accounted for
-
-#GSM5449978	Group B - Patient 1 - B1-filtered GSM5449978_B1-filtered_feature_bc_matrix.tar.gz
-#GSM5449990	Group B - Patient 1-TCR GSM5449990_B1-filtered_contig_annotations.csv.gz
-#GSM5450002	Group B - Patient 1-Feature
-
-#GSM5449979	Group B - Patient 2 - B2-filtered GSM5449979_B2-filtered_feature_bc_matrix.tar.gz
-#GSM5449991	Group B - Patient 2-TCR GSM5449991_B2-filtered_contig_annotations.csv.gz
-#GSM5450003	Group B - Patient 2-Feature
-
-#GSM5449980	Group B - Patient 3 - B3-filtered GSM5449980_B3-filtered_feature_bc_matrix.tar.gz
-#GSM5449992	Group B - Patient 3-TCR GSM5449992_B3-filtered_contig_annotations.csv.gz
-#GSM5450004	Group B - Patient 3-Feature
-
-# Group C: 3/8 accounted for
-
-#GSM5449981	Group C - Patient 1 Early GSM5449981_MCE1-filtered_feature_bc_matrix.tar.gz
-#GSM5449993	Group C - Patient 1 Early-TCR GSM5449993_MCE1-filtered_contig_annotations.csv.gz
-#GSM5450005	Group C - Patient 1 Early-Feature
-
-#GSM5449984	Group C - Patient 1 Late GSM5449984_MCL1-filtered_feature_bc_matrix.tar.gz
-#GSM5449996	Group C - Patient 1 Late-TCR GSM5449996_MCL1-filtered_contig_annotations.csv.gz
-#GSM5450008	Group C - Patient 1 Late-Feature 
-
-#GSM5449982	Group C - Patient 2 GSM5449982_MCE2-filtered_feature_bc_matrix.tar.gz
-#GSM5449994	Group C - Patient 2-TCR GSM5449994_MCE2-filtered_contig_annotations.csv.gz
-#GSM5450006	Group C - Patient 2-Feature
-
-#GSM5449985	Group C - Patient 3 GSM5449985_MCL3-filtered_feature_bc_matrix.tar.gz
-#GSM5449997	Group C - Patient 3-TCR GSM5449997_MCL3-filtered_contig_annotations.csv.gz
-#GSM5450009	Group C - Patient 3-Feature
-
-# More A, B, and C... kinda get to #s said by paper I guess...
-
-#GSM6346296	A5-B14 GSM6346296_A5-B14-filtered_feature_bc_matrix.tar.gz
-#GSM6346301	A5-B14-TCR GSM6346301_A5-B14-filtered_contig_annotations.csv.gz
-#GSM6346306	A5-B14-Feature
-# A5 (Group A, Hash4-TotalSeqC), B14 (Group B, Hash3-TotalSeqC)
-
-#GSM6346297	A6-A9-B13-B9-TCR GSM6346297_A6-A9-B13-B9-filtered_contig_annotations.csv.gz
-#GSM6346302	A6-A9-B13-B9-Feature 
-#GSM6346292	A6-A9-B13-B9 GSM6346292_A6-A9-B13-B9-filtered_feature_bc_matrix.tar.gz
-# A6 (Group A, Hash1-TotalSeqC), A9 (Group A, Hash2-TotalSeqC), B9 (Group B, Hash3-TotalSeqC), B13 (Group B, Hash4-TotalSeqC)
-
-#GSM6346303	A8-B11-Feature
-#GSM6346293	A8-B11 GSM6346293_A8-B11-filtered_feature_bc_matrix.tar.gz
-#GSM6346298	A8-B11-TCR GSM6346298_A8-B11-filtered_contig_annotations.csv.gz
-# A8 (Group A, Hash4-TotalSeqC), B11 (Group B, Hash3-TotalSeqC)
-
-#GSM6346304	B12-MCE6-MCE7-Feature
-#GSM6346299	B12-MCE6-MCE7-TCR GSM6346299_B12-MCE6-MCE7-filtered_contig_annotations.csv.gz
-#GSM6346294	B12-MCE6-MCE7 GSM6346294_B12-MCE6-MCE7-filtered_feature_bc_matrix.tar.gz
-# B12 (Group B, Hash4-TotalSeqC), MCE6 (Group C, Hash 1-TotalSeqC), MCE7 (Group C, Hash2-TotalSeqC)
-
-#GSM6346300	A10-B10-MCE12-MCE13-TCR GSM6346300_A10-B10-MCE12-MCE13-filtered_contig_annotations.csv.gz
-#GSM6346305	A10-B10-MCE12-MCE13-Feature
-#GSM6346295	A10-B10-MCE12-MCE13 GSM6346295_A10-B10-MCE12-MCE13-filtered_feature_bc_matrix.tar.gz
-# A10 (Group A, Hash3-TotalSeqC), B10 (Group B, Hash4-TotalSeqC), MCE12 (Group C, Hash1-TotalSeqC), MCE13 (Group C, Hash2-TotalSeqC)
-
-# 6/6 no ICI controls accounted for (.rds files in hc_rds subfolder)
+heart_t_cells@meta.data$orig.ident <- gsub("-filtered_feature_bc_matrix$", "", heart_t_cells@meta.data$orig.ident)
 
 ```
 
@@ -252,13 +365,13 @@ heart_t_cells[["percent_hb"]] <- PercentageFeatureSet(heart_t_cells, pattern = "
 
 ```{r}
 
-length(colnames(heart_t_cells)) # 278794 cells
+length(colnames(heart_t_cells)) # 278,794 cells
 
 View(heart_t_cells)
 
 ```
 
-# Count cells per each of the 21 (yet to be dehashed) samples
+# Count cells per each of the 31 samples
 
 ```{r}
 
@@ -266,7 +379,7 @@ cell_capture <- heart_t_cells@meta.data %>%
   group_by(orig.ident) %>%
   dplyr::count()
 
-cell_capture %>% arrange(n)
+cell_capture %>% arrange(orig.ident)
 
 ```
 
@@ -394,7 +507,7 @@ length(colnames(heart_t_cells_filtered)) # 223,715 cells left behind in filtered
 
 ```
 
-# Count cells by (yet to be dehashed) sample after QC filtering
+# Count cells by sample after QC filtering
 
 ```{r}
 
@@ -407,7 +520,22 @@ cell_capture %>% arrange(n)
 ```
 
 # Normalize cell numbers across samples
- - retain a final number of ~48k cells
+
+```{r}
+
+downsampled_colnames <- WhichCells(heart_t_cells_filtered, downsample = 2283, seed = 720)
+
+length(downsampled_colnames)
+
+heart_t_cells_filtered_downsampled <- heart_t_cells_filtered[, colnames(heart_t_cells_filtered) %in% downsampled_colnames]
+
+cell_capture <- heart_t_cells_filtered_downsampled@meta.data %>%
+  group_by(orig.ident) %>%
+  dplyr::count()
+
+cell_capture %>% arrange(n)
+
+```
 
 # Save RDS file
 
