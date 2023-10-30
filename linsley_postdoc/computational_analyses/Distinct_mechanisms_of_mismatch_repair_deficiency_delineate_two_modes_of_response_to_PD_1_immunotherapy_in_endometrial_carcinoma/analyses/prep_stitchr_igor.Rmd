@@ -78,7 +78,7 @@ write.table(stitchr_data, file = "../saved_data/tcrseq_for_stitchr.tsv", sep = "
 
 # not sure what different contigs mean, but for stitching I might just want to look at barcodes with 1 of each alpha/beta for a given barcode? most barcodes have the rightish number of reads (~1-3)
 
-# barely any paired alpha beta from same barcode come from same contig... ask Matt Dufort maybe
+# barely any paired alpha beta from same barcode come from same contig... not sure what that means
 
 ```
 
