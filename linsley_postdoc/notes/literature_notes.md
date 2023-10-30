@@ -481,6 +481,15 @@
  - identify few latent variables that explain the most variance in data
 # FDA approves anti-CD3 antibody to delay type 1 diabetes onset
  - T1D: autoreactive T cells destroy insulin secreting beta cells
+# Hallmarks of response, resistance, and toxicity to immune checkpoint blockade
+## Other immune checkpoints: positive immune regulation
+ - ICOS (immune co-stimulator) expressed on T cells, enhances function/expansion of CD8<sup>+</sup> T cells and Tregs
+ - possibly could use ICOS agonist monoclonal antibodies for immunotherapy
+## Factors impacting response and resistance to ICB
+### Host-intrinsic factors
+ - tumor mutational burden (total number of distinct mutations per coding area of tumor genome) helps explain ICB response (higher burden for example in environmental DNA damage associated melanoma, lung/bladder cancer better response with more neoantigens)
+## Factors impacting toxcitiy to ICB
+### Characteristics of irAEs
 # High-throughput and single-cell T cell receptor sequencing technologies
 ## Introduction
  - diversity (D) gene segment only contributes to TCRβ
