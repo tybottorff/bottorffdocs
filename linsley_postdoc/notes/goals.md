@@ -26,6 +26,12 @@
 ## If ICB does induce expansion, do the TCR repertoires before and after ICB have distinct TCR features (as a proxy for cross-reactivity) that can allow prediction of irAE development?
  - what happens to expanded cells after treatment? do they persist? keep expanding? move to a specific tissue?
  - caveat to using pgen as crossreactivity proxy: germlineness pgen calculated from entire TCR seq but only (?) CDR3 contributes most to antigen specificity? how much of pgen variance comes from cdr3 nt variance?
+ - **BRI data shows monoclonal CD8s in respone to varied antigens (TAA, T1D, HA from flu), perhaps crossreactive, and they have shorter alpha chains --> do I see this in mined data??**
 
 # Takehome
  - knowing who might be more likely to develop irAEs could inform medical treatment (i.e. give monotherapy ICB rather than combination therapy which has a higher likelihood of irAEs)
+
+# Related project ideas
+ - Matt Lawrence has 850 TCRs, 15 of which experimentally seem to be crossreactive, investigate TCR features!
+ - VDJdb tracks number of epitope targets, can also compare TCRs with many epitope targets vs. 1
+ - experimental collaboration with Jane/Karen for testing TCR crossreactivity
