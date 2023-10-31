@@ -328,12 +328,10 @@ suffix_mapping <- data.frame(
 )
 
 fasta_df_alpha <- read_tsv("../saved_data/stitchr_out.tsv") %>%
-  filter(!(is.na(TRA_nt))) %>%
+  filter(!(is.na(TRA_nt)),
+         Chain == "TRA") %>%
   rename(Barcode = TCR_name) %>%
   left_join(combined_data, by = "Barcode") %>%
-  # remove redundancy (alpha/beta don't need to be both shown)
-  group_by(Barcode) %>%
-  slice(1) %>%
   mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID], sep = "")) %>%
   ungroup()
 
@@ -362,12 +360,10 @@ df_to_fasta_alpha <- function(df, output_file) {
 df_to_fasta_alpha(fasta_df_alpha, "../saved_data/vdjseq_alpha.fasta")
 
 fasta_df_beta <- read_tsv("../saved_data/stitchr_out.tsv") %>%
-  filter(!(is.na(TRB_nt))) %>%
+  filter(!(is.na(TRB_nt)),
+         Chain == "TRB") %>%
   rename(Barcode = TCR_name) %>%
   left_join(combined_data, by = "Barcode") %>%
-  # remove redundancy (alpha/beta don't need to be both shown)
-  group_by(Barcode) %>%
-  slice(1) %>%
   mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID], sep = "")) %>%
   ungroup()
 
