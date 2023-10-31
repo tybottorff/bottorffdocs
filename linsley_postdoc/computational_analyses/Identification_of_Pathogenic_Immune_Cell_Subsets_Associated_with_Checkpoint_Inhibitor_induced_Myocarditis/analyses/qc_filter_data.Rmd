@@ -81,7 +81,7 @@ names(heart_t_cells_objects) <- new_object_names
 
 ```
 
-# Dehash A10-B10-MCE12-MCE13 sample
+# Dehash A10-B10-MCE12-MCE13 sample, remove multiplets/0-lets
 
 ```{r}
 
@@ -93,18 +93,46 @@ hash_features_dehash_1 <- subset(dehash_1, features = c("Hash1-TotalSeqC", "Hash
 
 hash_counts_1 <- as_tibble(hash_features_dehash_1@assays$RNA@data)
 
+# Convert each row into a list
+row_list <- lapply(1:nrow(hash_counts_1), function(i) unlist(hash_counts_1[i, ]))
+# Now row_list is a list where each element is a vector containing the values of a row
+
+cutoff_list_1 <- c()
+
+# Apply a function to each row in the list
+for (row in row_list) {
+  percentile_1_75 <- quantile(row, probs = 0.75)
+  cutoff_list_1 <- c(cutoff_list_1, percentile_1_75)
+}
+
 hash_counts_1$hash = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash3-TotalSeqC", "Hash4-TotalSeqC")
+hash_counts_1$cutoffs = cutoff_list_1
 
-# Find the row number of the maximum value for each barcode column
-max_row_numbers_1 <- apply(hash_counts_1[, -ncol(hash_counts_1)], 2, which.max)
+hash_calls_1 <- hash_counts_1 %>%
+  mutate(across(-c(hash, cutoffs), ~ ifelse(. > cutoffs, 1, 0)))
+  #1 is pass, 0 is fail
 
-# Create a new data frame with the hash values for the maximum in each barcode column
-hash_calls_1 <- data.frame(
-  Barcode = colnames(hash_counts_1)[-ncol(hash_counts_1)],  # All barcode column names
-  Hash = hash_counts_1[max_row_numbers_1, "hash"]  # Corresponding hash values
+# Count the number of "pass" values in each column
+pass_counts_1 <- colSums(hash_calls_1[, !(colnames(hash_calls_1) %in% c("hash", "cutoffs"))])
+
+hist(pass_counts_1, main = "Histogram of Column Sums", xlab = "Sum of 'pass' Values")
+
+# Identify columns with sum equal to 1
+cols_to_keep <- which(pass_counts_1 == 1)
+
+# Subset the data frame to keep only the columns with sum equal to 1
+hash_calls_subsetted_1 <- hash_calls_1[, c(colnames(hash_calls_1)[cols_to_keep], "hash")]
+
+# Find the row number of the pass (1) value for each barcode column
+pass_row_numbers_1 <- apply(hash_calls_subsetted_1[, -ncol(hash_calls_subsetted_1)], 2, which.max)
+
+# Create a new data frame with the hash values for the pass in each barcode column
+hash_calls_named_1 <- data.frame(
+ Barcode = colnames(hash_calls_subsetted_1)[-ncol(hash_calls_subsetted_1)],  # All barcode column names
+  Hash = hash_calls_subsetted_1[pass_row_numbers_1, "hash"]  # Corresponding hash values
 )
 
-hash_calls_1 <- hash_calls_1 %>%
+hash_calls_named_1 <- hash_calls_named_1 %>%
   mutate(
     orig.ident = case_when(
       hash == "Hash3-TotalSeqC" ~ "A10",
@@ -112,14 +140,17 @@ hash_calls_1 <- hash_calls_1 %>%
       hash == "Hash1-TotalSeqC" ~ "MCE12",
       hash == "Hash2-TotalSeqC" ~ "MCE13"))
 
-rownames(hash_calls_1) <- hash_calls_1$Barcode
+rownames(hash_calls_named_1) <- hash_calls_named_1$Barcode
 
-hash_calls_1 <- hash_calls_1 %>%
+hash_calls_named_1 <- hash_calls_named_1 %>%
   select(-Barcode)
 
-dehash_1 <- AddMetaData(object = dehash_1, metadata = hash_calls_1)
+# subset hashed Seurat object to remove non-single hash calls
+dehash_1_subset <- subset(dehash_1, cells = rownames(hash_calls_named_1))
 
-dehash_1_split <- SplitObject(dehash_1, split.by = "orig.ident")
+dehash_1_subset <- AddMetaData(object = dehash_1_subset, metadata = hash_calls_named_1)
+
+dehash_1_split <- SplitObject(dehash_1_subset, split.by = "orig.ident")
 
 heart_t_cells_objects[["A10-B10-MCE12-MCE13"]] <- NULL
 
@@ -127,7 +158,7 @@ heart_t_cells_objects <- c(heart_t_cells_objects, dehash_1_split)
 
 ```
 
-# Dehash B12-MCE6-MCE7 sample
+# Dehash B12-MCE6-MCE7 sample, remove multiplets/0-lets
 
 ```{r}
 
@@ -137,36 +168,65 @@ dehash_2 <- heart_t_cells_objects[["B12-NCE6-NCE7"]]
 
 hash_features_dehash_2 <- subset(dehash_2, features = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash4-TotalSeqC"))
 
-rownames(hash_features_dehash_2)
-
 hash_counts_2 <- as_tibble(hash_features_dehash_2@assays$RNA@data)
 
+# Convert each row into a list
+row_list <- lapply(1:nrow(hash_counts_2), function(i) unlist(hash_counts_2[i, ]))
+# Now row_list is a list where each element is a vector containing the values of a row
+
+cutoff_list_2 <- c()
+
+# Apply a function to each row in the list
+for (row in row_list) {
+  percentile_2_65 <- quantile(row, probs = 0.65)
+  cutoff_list_2 <- c(cutoff_list_2, percentile_2_65)
+}
+
 hash_counts_2$hash = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash4-TotalSeqC")
+hash_counts_2$cutoffs = cutoff_list_2
 
-# Find the row number of the maximum value for each barcode column
-max_row_numbers_2 <- apply(hash_counts_2[, -ncol(hash_counts_2)], 2, which.max)
+hash_calls_2 <- hash_counts_2 %>%
+  mutate(across(-c(hash, cutoffs), ~ ifelse(. > cutoffs, 1, 0)))
+  #1 is pass, 0 is fail
 
-# Create a new data frame with the hash values for the maximum in each barcode column
-hash_calls_2 <- data.frame(
-  Barcode = colnames(hash_counts_2)[-ncol(hash_counts_2)],  # All barcode column names
-  Hash = hash_counts_2[max_row_numbers_2, "hash"]  # Corresponding hash values
+# Count the number of "pass" values in each column
+pass_counts_2 <- colSums(hash_calls_2[, !(colnames(hash_calls_2) %in% c("hash", "cutoffs"))])
+
+hist(pass_counts_2, main = "Histogram of Column Sums", xlab = "Sum of 'pass' Values")
+
+# Identify columns with sum equal to 1
+cols_to_keep <- which(pass_counts_2 == 1)
+
+# Subset the data frame to keep only the columns with sum equal to 1
+hash_calls_subsetted_2 <- hash_calls_2[, c(colnames(hash_calls_2)[cols_to_keep], "hash")]
+
+# Find the row number of the pass (1) value for each barcode column
+pass_row_numbers_2 <- apply(hash_calls_subsetted_2[, -ncol(hash_calls_subsetted_2)], 2, which.max)
+
+# Create a new data frame with the hash values for the pass in each barcode column
+hash_calls_named_2 <- data.frame(
+  Barcode = colnames(hash_calls_subsetted_2)[-ncol(hash_calls_subsetted_2)],  # All barcode column names
+  Hash = hash_calls_subsetted_2[pass_row_numbers_2, "hash"]  # Corresponding hash values
 )
 
-hash_calls_2 <- hash_calls_2 %>%
+hash_calls_named_2 <- hash_calls_named_2 %>%
   mutate(
     orig.ident = case_when(
       hash == "Hash4-TotalSeqC" ~ "B12",
       hash == "Hash1-TotalSeqC" ~ "MCE6",
       hash == "Hash2-TotalSeqC" ~ "MCE7"))
 
-rownames(hash_calls_2) <- hash_calls_2$Barcode
+rownames(hash_calls_named_2) <- hash_calls_named_2$Barcode
 
-hash_calls_2 <- hash_calls_2 %>%
+hash_calls_named_2 <- hash_calls_named_2 %>%
   select(-Barcode)
 
-dehash_2 <- AddMetaData(object = dehash_2, metadata = hash_calls_2)
+# subset hashed Seurat object to remove non-single hash calls
+dehash_2_subset <- subset(dehash_2, cells = rownames(hash_calls_named_2))
 
-dehash_2_split <- SplitObject(dehash_2, split.by = "orig.ident")
+dehash_2_subset <- AddMetaData(object = dehash_2_subset, metadata = hash_calls_named_2)
+
+dehash_2_split <- SplitObject(dehash_2_subset, split.by = "orig.ident")
 
 heart_t_cells_objects[["B12-NCE6-NCE7"]] <- NULL
 
@@ -174,7 +234,7 @@ heart_t_cells_objects <- c(heart_t_cells_objects, dehash_2_split)
 
 ```
 
-# Dehash A8-B11 sample
+# Dehash A8-B11 sample, remove multiplets/0-lets
 
 ```{r}
 
@@ -186,31 +246,62 @@ hash_features_dehash_3 <- subset(dehash_3, features = c("Hash3-TotalSeqC", "Hash
 
 hash_counts_3 <- as_tibble(hash_features_dehash_3@assays$RNA@data)
 
+# Convert each row into a list
+row_list <- lapply(1:nrow(hash_counts_3), function(i) unlist(hash_counts_3[i, ]))
+# Now row_list is a list where each element is a vector containing the values of a row
+
+cutoff_list_3 <- c()
+
+# Apply a function to each row in the list
+for (row in row_list) {
+  percentile_3_60 <- quantile(row, probs = 0.60)
+  cutoff_list_3 <- c(cutoff_list_3, percentile_3_60)
+}
+
 hash_counts_3$hash = c("Hash3-TotalSeqC", "Hash4-TotalSeqC")
+hash_counts_3$cutoffs = cutoff_list_3
 
-# Find the row number of the maximum value for each barcode column
-max_row_numbers_3 <- apply(hash_counts_3[, -ncol(hash_counts_3)], 2, which.max)
+hash_calls_3 <- hash_counts_3 %>%
+  mutate(across(-c(hash, cutoffs), ~ ifelse(. > cutoffs, 1, 0)))
+  #1 is pass, 0 is fail
 
-# Create a new data frame with the hash values for the maximum in each barcode column
-hash_calls_3 <- data.frame(
-  Barcode = colnames(hash_counts_3)[-ncol(hash_counts_3)],  # All barcode column names
-  Hash = hash_counts_3[max_row_numbers_3, "hash"]  # Corresponding hash values
+# Count the number of "pass" values in each column
+pass_counts_3 <- colSums(hash_calls_3[, !(colnames(hash_calls_3) %in% c("hash", "cutoffs"))])
+
+hist(pass_counts_3, main = "Histogram of Column Sums", xlab = "Sum of 'pass' Values")
+
+# Identify columns with sum equal to 1
+cols_to_keep <- which(pass_counts_3 == 1)
+
+# Subset the data frame to keep only the columns with sum equal to 1
+hash_calls_subsetted_3 <- hash_calls_3[, c(colnames(hash_calls_3)[cols_to_keep], "hash")]
+
+# Find the row number of the pass (1) value for each barcode column
+pass_row_numbers_3 <- apply(hash_calls_subsetted_3[, -ncol(hash_calls_subsetted_3)], 2, which.max)
+
+# Create a new data frame with the hash values for the pass in each barcode column
+hash_calls_named_3 <- data.frame(
+  Barcode = colnames(hash_calls_subsetted_3)[-ncol(hash_calls_subsetted_3)],  # All barcode column names
+  Hash = hash_calls_subsetted_3[pass_row_numbers_3, "hash"]  # Corresponding hash values
 )
 
-hash_calls_3 <- hash_calls_3 %>%
+hash_calls_named_3 <- hash_calls_named_3 %>%
   mutate(
     orig.ident = case_when(
-      hash == "Hash4-TotalSeqC" ~ "A8",
-      hash == "Hash3-TotalSeqC" ~ "B11"))
+      hash == "Hash3-TotalSeqC" ~ "B11",
+      hash == "Hash4-TotalSeqC" ~ "A8"))
 
-rownames(hash_calls_3) <- hash_calls_3$Barcode
+rownames(hash_calls_named_3) <- hash_calls_named_3$Barcode
 
-hash_calls_3 <- hash_calls_3 %>%
+hash_calls_named_3 <- hash_calls_named_3 %>%
   select(-Barcode)
 
-dehash_3 <- AddMetaData(object = dehash_3, metadata = hash_calls_3)
+# subset hashed Seurat object to remove non-single hash calls
+dehash_3_subset <- subset(dehash_3, cells = rownames(hash_calls_named_3))
 
-dehash_3_split <- SplitObject(dehash_3, split.by = "orig.ident")
+dehash_3_subset <- AddMetaData(object = dehash_3_subset, metadata = hash_calls_named_3)
+
+dehash_3_split <- SplitObject(dehash_3_subset, split.by = "orig.ident")
 
 heart_t_cells_objects[["A8-B11"]] <- NULL
 
@@ -218,7 +309,7 @@ heart_t_cells_objects <- c(heart_t_cells_objects, dehash_3_split)
 
 ```
 
-# Dehash A6-A9-B9-B13 sample
+# Dehash A6-A9-B9-B13 sample, remove multiplets/0-lets
 
 ```{r}
 
@@ -230,20 +321,46 @@ hash_features_dehash_4 <- subset(dehash_4, features = c("Hash1-TotalSeqC", "Hash
 
 hash_counts_4 <- as_tibble(hash_features_dehash_4@assays$RNA@data)
 
+# Convert each row into a list
+row_list <- lapply(1:nrow(hash_counts_4), function(i) unlist(hash_counts_4[i, ]))
+# Now row_list is a list where each element is a vector containing the values of a row
+
+cutoff_list_4 <- c()
+
+# Apply a function to each row in the list
+for (row in row_list) {
+  percentile_4_70 <- quantile(row, probs = 0.70)
+  cutoff_list_4 <- c(cutoff_list_4, percentile_4_70)
+}
+
 hash_counts_4$hash = c("Hash1-TotalSeqC", "Hash2-TotalSeqC", "Hash3-TotalSeqC", "Hash4-TotalSeqC")
+hash_counts_4$cutoffs = cutoff_list_4
 
-# Find the row number of the maximum value for each barcode column
-max_row_numbers_4 <- apply(hash_counts_4[, -ncol(hash_counts_4)], 2, which.max)
+hash_calls_4 <- hash_counts_4 %>%
+  mutate(across(-c(hash, cutoffs), ~ ifelse(. > cutoffs, 1, 0)))
+  #1 is pass, 0 is fail
 
-# Create a new data frame with the hash values for the maximum in each barcode column
-hash_calls_4 <- data.frame(
-  Barcode = colnames(hash_counts_4)[-ncol(hash_counts_4)],  # All barcode column names
-  Hash = hash_counts_4[max_row_numbers_4, "hash"]  # Corresponding hash values
+# Count the number of "pass" values in each column
+pass_counts_4 <- colSums(hash_calls_4[, !(colnames(hash_calls_4) %in% c("hash", "cutoffs"))])
+
+hist(pass_counts_4, main = "Histogram of Column Sums", xlab = "Sum of 'pass' Values")
+
+# Identify columns with sum equal to 1
+cols_to_keep <- which(pass_counts_4 == 1)
+
+# Subset the data frame to keep only the columns with sum equal to 1
+hash_calls_subsetted_4 <- hash_calls_4[, c(colnames(hash_calls_4)[cols_to_keep], "hash")]
+
+# Find the row number of the pass (1) value for each barcode column
+pass_row_numbers_4 <- apply(hash_calls_subsetted_4[, -ncol(hash_calls_subsetted_4)], 2, which.max)
+
+# Create a new data frame with the hash values for the pass in each barcode column
+hash_calls_named_4 <- data.frame(
+  Barcode = colnames(hash_calls_subsetted_4)[-ncol(hash_calls_subsetted_4)],  # All barcode column names
+  Hash = hash_calls_subsetted_4[pass_row_numbers_4, "hash"]  # Corresponding hash values
 )
 
-# A6 (Group A, Hash1-TotalSeqC), A9 (Group A, Hash2-TotalSeqC), B9 (Group B, Hash3-TotalSeqC), B13 (Group B, Hash4-TotalSeqC)
-
-hash_calls_4 <- hash_calls_4 %>%
+hash_calls_named_4 <- hash_calls_named_4 %>%
   mutate(
     orig.ident = case_when(
       hash == "Hash1-TotalSeqC" ~ "A6",
@@ -251,14 +368,17 @@ hash_calls_4 <- hash_calls_4 %>%
       hash == "Hash3-TotalSeqC" ~ "B9",
       hash == "Hash4-TotalSeqC" ~ "B13"))
 
-rownames(hash_calls_4) <- hash_calls_4$Barcode
+rownames(hash_calls_named_4) <- hash_calls_named_4$Barcode
 
-hash_calls_4 <- hash_calls_4 %>%
+hash_calls_named_4 <- hash_calls_named_4 %>%
   select(-Barcode)
 
-dehash_4 <- AddMetaData(object = dehash_4, metadata = hash_calls_4)
+# subset hashed Seurat object to remove non-single hash calls
+dehash_4_subset <- subset(dehash_4, cells = rownames(hash_calls_named_4))
 
-dehash_4_split <- SplitObject(dehash_4, split.by = "orig.ident")
+dehash_4_subset <- AddMetaData(object = dehash_4_subset, metadata = hash_calls_named_4)
+
+dehash_4_split <- SplitObject(dehash_4_subset, split.by = "orig.ident")
 
 heart_t_cells_objects[["A6-A9-B13-B9"]] <- NULL
 
@@ -266,7 +386,7 @@ heart_t_cells_objects <- c(heart_t_cells_objects, dehash_4_split)
 
 ```
 
-# Dehash A5-B14 sample
+# Dehash A5-B14 sample, remove multiplets/0-lets
 
 ```{r}
 
@@ -274,35 +394,66 @@ heart_t_cells_objects <- c(heart_t_cells_objects, dehash_4_split)
 
 dehash_5 <- heart_t_cells_objects[["A5-B14-MCL15"]]
 
-hash_features_dehash_5 <- subset(dehash_5, features = c("Hash1-TotalSeqC", "Hash2-TotalSeqC"))
+hash_features_dehash_5 <- subset(dehash_5, features = c("Hash3-TotalSeqC", "Hash4-TotalSeqC"))
 
 hash_counts_5 <- as_tibble(hash_features_dehash_5@assays$RNA@data)
 
+# Convert each row into a list
+row_list <- lapply(1:nrow(hash_counts_5), function(i) unlist(hash_counts_5[i, ]))
+# Now row_list is a list where each element is a vector containing the values of a row
+
+cutoff_list_5 <- c()
+
+# Apply a function to each row in the list
+for (row in row_list) {
+  percentile_5_55 <- quantile(row, probs = 0.55)
+  cutoff_list_5 <- c(cutoff_list_5, percentile_5_55)
+}
+
 hash_counts_5$hash = c("Hash3-TotalSeqC", "Hash4-TotalSeqC")
+hash_counts_5$cutoffs = cutoff_list_5
 
-# Find the row number of the maximum value for each barcode column
-max_row_numbers_5 <- apply(hash_counts_5[, -ncol(hash_counts_5)], 2, which.max)
+hash_calls_5 <- hash_counts_5 %>%
+  mutate(across(-c(hash, cutoffs), ~ ifelse(. > cutoffs, 1, 0)))
+  #1 is pass, 0 is fail
 
-# Create a new data frame with the hash values for the maximum in each barcode column
-hash_calls_5 <- data.frame(
-  Barcode = colnames(hash_counts_5)[-ncol(hash_counts_5)],  # All barcode column names
-  Hash = hash_counts_5[max_row_numbers_5, "hash"]  # Corresponding hash values
+# Count the number of "pass" values in each column
+pass_counts_5 <- colSums(hash_calls_5[, !(colnames(hash_calls_5) %in% c("hash", "cutoffs"))])
+
+hist(pass_counts_5, main = "Histogram of Column Sums", xlab = "Sum of 'pass' Values")
+
+# Identify columns with sum equal to 1
+cols_to_keep <- which(pass_counts_5 == 1)
+
+# Subset the data frame to keep only the columns with sum equal to 1
+hash_calls_subsetted_5 <- hash_calls_5[, c(colnames(hash_calls_5)[cols_to_keep], "hash")]
+
+# Find the row number of the pass (1) value for each barcode column
+pass_row_numbers_5 <- apply(hash_calls_subsetted_5[, -ncol(hash_calls_subsetted_5)], 2, which.max)
+
+# Create a new data frame with the hash values for the pass in each barcode column
+hash_calls_named_5 <- data.frame(
+  Barcode = colnames(hash_calls_subsetted_5)[-ncol(hash_calls_subsetted_5)],  # All barcode column names
+  Hash = hash_calls_subsetted_5[pass_row_numbers_5, "hash"]  # Corresponding hash values
 )
 
-hash_calls_5 <- hash_calls_5 %>%
+hash_calls_named_5 <- hash_calls_named_5 %>%
   mutate(
     orig.ident = case_when(
       hash == "Hash3-TotalSeqC" ~ "B14",
       hash == "Hash4-TotalSeqC" ~ "A5"))
 
-rownames(hash_calls_5) <- hash_calls_5$Barcode
+rownames(hash_calls_named_5) <- hash_calls_named_5$Barcode
 
-hash_calls_5 <- hash_calls_5 %>%
+hash_calls_named_5 <- hash_calls_named_5 %>%
   select(-Barcode)
 
-dehash_5 <- AddMetaData(object = dehash_5, metadata = hash_calls_5)
+# subset hashed Seurat object to remove non-single hash calls
+dehash_5_subset <- subset(dehash_5, cells = rownames(hash_calls_named_5))
 
-dehash_5_split <- SplitObject(dehash_5, split.by = "orig.ident")
+dehash_5_subset <- AddMetaData(object = dehash_5_subset, metadata = hash_calls_named_5)
+
+dehash_5_split <- SplitObject(dehash_5_subset, split.by = "orig.ident")
 
 heart_t_cells_objects[["A5-B14-MCL15"]] <- NULL
 
@@ -365,7 +516,7 @@ heart_t_cells[["percent_hb"]] <- PercentageFeatureSet(heart_t_cells, pattern = "
 
 ```{r}
 
-length(colnames(heart_t_cells)) # 278,794 cells
+length(colnames(heart_t_cells)) # 231,927 cells
 
 View(heart_t_cells)
 
@@ -498,12 +649,12 @@ cellsKeep <-
       heart_t_cells, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
 cellsDrop <-
   setdiff(colnames(heart_t_cells), cellsKeep)
-length(cellsDrop) # 55,079 cells dropped from analysis
+length(cellsDrop) # 50,524 cells dropped from analysis
 
 heart_t_cells_filtered <-
   subset(heart_t_cells, cells = cellsKeep)
 
-length(colnames(heart_t_cells_filtered)) # 223,715 cells left behind in filtered data
+length(colnames(heart_t_cells_filtered)) # 181,403 cells left behind in filtered data
 
 ```
 
@@ -523,11 +674,33 @@ cell_capture %>% arrange(n)
 
 ```{r}
 
-downsampled_colnames <- WhichCells(heart_t_cells_filtered, downsample = 2283, seed = 720)
+num_random_barcodes = 2000
 
-length(downsampled_colnames)
+set.seed(123)
 
-heart_t_cells_filtered_downsampled <- heart_t_cells_filtered[, colnames(heart_t_cells_filtered) %in% downsampled_colnames]
+# Get the list of unique orig.ident groups
+unique_orig_idents <- unique(heart_t_cells_filtered$orig.ident)
+
+# Initialize an empty list to store the subset Seurat objects
+subset_seurat_list <- list()
+
+# Loop through each orig.ident group
+for (orig_ident in unique_orig_idents) {
+  # Get the barcodes for the current orig.ident
+  current_barcodes <- colnames(heart_t_cells_filtered)[heart_t_cells_filtered$orig.ident == orig_ident]
+  
+  # Randomly choose 2000 barcodes
+  random_barcodes <- sample(current_barcodes, num_random_barcodes)
+  
+  # Subset the Seurat object to the randomly chosen barcodes
+  subset_seurat <- subset(heart_t_cells_filtered, cells = random_barcodes)
+  
+  # Append the subset Seurat object to the list
+  subset_seurat_list[[orig_ident]] <- subset_seurat
+}
+
+# Merge the first element with a sublist of the rest excluding the first element
+heart_t_cells_filtered_downsampled <- merge(subset_seurat_list[[1]], y = subset_seurat_list[-1])
 
 cell_capture <- heart_t_cells_filtered_downsampled@meta.data %>%
   group_by(orig.ident) %>%

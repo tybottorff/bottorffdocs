@@ -49,7 +49,7 @@ heart_t_cells_filtered <- readRDS("../saved_data/qc_filtered.rds")
 
 ```{r}
 
-# split the dataset into a list of 13 seurat objects (for each patient sample)
+# split the dataset into a list of seurat objects (for each patient sample)
 heart_t_cells_filtered.list <- SplitObject(heart_t_cells_filtered, split.by = "orig.ident")
 
 # normalize and identify variable features for each dataset independently
@@ -121,7 +121,7 @@ immune.combined <- FindClusters(immune.combined, resolution = 3)
 
 ```{r}
 
-DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident", dims = c(2, 1))
+DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident")
 
 ggsave("../figures/umap_patient_id.svg")
 
@@ -134,5 +134,13 @@ ggsave("../figures/umap_patient_id.svg")
 DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE)
 
 ggsave("../figures/umap_cluster.svg")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/transformed_reduced.rds")
 
 ```
