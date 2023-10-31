@@ -151,6 +151,11 @@
 # Cardiac myosin-specific autoimmune T cells contribute to immune-checkpoint-inhibitor-associated myocarditis
  - cardiac myosin-specific autoreactive T cells drive pathogenesis of PD-1 inhibitor-induced myocarditis in mice
  - PD-1 expressing cardiac myosin-specific autoimmune T cells are present in heart during naive conditions
+# CD28/PD1 co-expression: dual impact on CD8<sup>+</sup> T cells in peripheral blood and tumor tissue, and its significance in NSCLC patients' survival and ICB response
+## Background
+ - exhaustion is now recognized to have a dynamic progression from a long-lived "pre-exhausted stem-like progenitor" (more responsive likely to re-invigoration by ICB) to a "terminally exhausted" state
+ - **CD28 is a prerequisite for optimal T cell re-invigoration following PD1 blockade, CD28 primary target downstream of PD1-mediated inhibitory signaling**
+ - **main finding: signatures of heterogeneous tumor infiltrating TRM and “pre-exhausted” long-lived effector-memory CD8<sup>+</sup> T cells were associated with better ICB response only in the presence of CD28**
 # CD4<sup>+</sup> T cells are essential for the development of destructive thyroiditis induced by anti-PD-1 antibody in thyroglobulin-immunized mice
 ## Abstract
  - PD-1 blockade in thyroglobulin-immunized mice induces destructive thyroiditis, prevented by previous depletion of CD4<sup>+</sup> T cells and partially prevented by previous depletion of CD8<sup>+</sup> T cells
