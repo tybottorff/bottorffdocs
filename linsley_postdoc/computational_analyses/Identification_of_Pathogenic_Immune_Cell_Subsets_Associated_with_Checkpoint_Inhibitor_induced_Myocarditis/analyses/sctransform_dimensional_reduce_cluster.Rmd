@@ -53,28 +53,60 @@ heart_t_cells_filtered <- readRDS("../saved_data/qc_filtered.rds")
 heart_t_cells_filtered.list <- SplitObject(heart_t_cells_filtered, split.by = "orig.ident")
 
 # normalize and identify variable features for each dataset independently
-heart_t_cells_filtered.list <- lapply(X = heart_t_cells_filtered.list, FUN = function(x) {
-    x <- SCTransform(x, variable.features.n = 2000)
-})
+heart_t_cells_filtered.list <- lapply(X = heart_t_cells_filtered.list, FUN = SCTransform, method = "glmGamPoi")
 
 # select features that are repeatedly variable across datasets for integration
-features <- SelectIntegrationFeatures(object.list = heart_t_cells_filtered.list)
+features <- SelectIntegrationFeatures(object.list = heart_t_cells_filtered.list, nfeatures = 3000)
 
 # prep step
-heart_t_cells_filtered.list <- PrepSCTIntegration(
-  heart_t_cells_filtered.list,
-  anchor.features = features
-)
+heart_t_cells_filtered.list <- PrepSCTIntegration(object.list = heart_t_cells_filtered.list, anchor.features = features)
+
+# run PCA to allow rpca use later
+heart_t_cells_filtered.list <- lapply(X = heart_t_cells_filtered.list, FUN = RunPCA, features = features)
 
 ```
 
-# Integrate via anchors
+# Randomly select a single sample per group to use as a reference
 
 ```{r}
 
-immune.anchors <- FindIntegrationAnchors(object.list = heart_t_cells_filtered.list, normalization.method = "SCT", anchor.features = features)
+# all samples have been downsampled to the same number of cells, so I can choose randomly (with seed)
 
+# Set a random seed for reproducibility
+set.seed(123)
+
+# Extract the starting letters from the names
+starting_letters <- substr(names(heart_t_cells_filtered.list), 1, 1)
+
+# Create a data frame with Seurat object names and their starting letters
+seurat_info <- data.frame(name = names(heart_t_cells_filtered.list), starting_letter = starting_letters)
+
+# Randomly sample one Seurat object from each starting letter group
+randomly_selected_seurat <- seurat_info %>%
+  group_by(starting_letter) %>%
+  sample_n(1) %>%
+  ungroup() %>%
+  select(name)
+
+randomly_selected_seurat
+
+```
+
+# Find integration anchors using the above single sample/group as references
+
+```{r}
+
+# first integrates these references, then aligns other samples within each group to that integrated reference
 # this command creates an 'integrated' data assay
+
+immune.anchors <- FindIntegrationAnchors(object.list = heart_t_cells_filtered.list, reference = match(heart_t_cells_filtered.list, randomly_selected_seurat$name), normalization.method = "SCT", anchor.features = features, reduction = "rpca", k.anchor = 10, dims = 1:30)
+
+```
+
+# Integrate the data
+
+```{r}
+
 immune.combined <- IntegrateData(anchorset = immune.anchors, normalization.method = "SCT")
 
 ```

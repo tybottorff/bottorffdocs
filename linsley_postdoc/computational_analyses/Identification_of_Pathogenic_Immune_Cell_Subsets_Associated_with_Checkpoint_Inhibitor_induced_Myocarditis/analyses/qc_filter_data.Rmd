@@ -461,6 +461,14 @@ heart_t_cells_objects <- c(heart_t_cells_objects, dehash_5_split)
 
 ```
 
+# Save dehashed RDS
+
+```{r}
+
+saveRDS(heart_t_cells_objects, "../saved_data/dehashed.rds")
+
+```
+
 # Read in control data, add to Seurat list
 
 ```{r}
