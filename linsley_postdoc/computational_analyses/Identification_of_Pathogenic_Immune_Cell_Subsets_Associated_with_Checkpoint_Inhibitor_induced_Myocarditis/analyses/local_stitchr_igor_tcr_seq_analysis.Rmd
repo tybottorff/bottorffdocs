@@ -18,6 +18,7 @@ library(Matrix)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(stringr)
 
 ```
 
@@ -72,22 +73,126 @@ for (file in csv_files) {
 # Combine all data frames into a single data frame
 combined_tcr_seq <- bind_rows(data_frames)
 
-combined_tcr_seq
+```
+
+# Read in dehashed RDS
+
+```{r}
+
+dehashed <- readRDS("../saved_data/dehashed.rds")
+
+```
+
+# Dehash TCRseq data, lose some barcodes in process (0-lets, multiplets, no hash marker)
+
+```{r}
+
+A6 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A6-A9-B13-B9"),
+         barcode %in% colnames(dehashed$A6)) %>%
+  mutate(Patient_ID = "A6")
+
+A9 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A6-A9-B13-B9"),
+         barcode %in% colnames(dehashed$A9)) %>%
+  mutate(Patient_ID = "A9")
+
+B13 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A6-A9-B13-B9"),
+         barcode %in% colnames(dehashed$B13)) %>%
+  mutate(Patient_ID = "B13")
+
+B9 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A6-A9-B13-B9"),
+         barcode %in% colnames(dehashed$B9)) %>%
+  mutate(Patient_ID = "B9")
+
+A8 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A8-B11"),
+         barcode %in% colnames(dehashed$A8)) %>%
+  mutate(Patient_ID = "A8")
+
+B11 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A8-B11"),
+         barcode %in% colnames(dehashed$B11)) %>%
+  mutate(Patient_ID = "B11")
+
+B12 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("B12-MCE6-MCE7"),
+         barcode %in% colnames(dehashed$B12)) %>%
+  mutate(Patient_ID = "B12")
+
+MCE6 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("B12-MCE6-MCE7"),
+         barcode %in% colnames(dehashed$MCE6)) %>%
+  mutate(Patient_ID = "MCE6")
+
+MCE7 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("B12-MCE6-MCE7"),
+         barcode %in% colnames(dehashed$MCE7)) %>%
+  mutate(Patient_ID = "MCE7")
+
+A10 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A10-B10-MCE12-MCE13"),
+         barcode %in% colnames(dehashed$A10)) %>%
+  mutate(Patient_ID = "A10")
+
+B10 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A10-B10-MCE12-MCE13"),
+         barcode %in% colnames(dehashed$B10)) %>%
+  mutate(Patient_ID = "B10")
+
+MCE12 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A10-B10-MCE12-MCE13"),
+         barcode %in% colnames(dehashed$MCE12)) %>%
+  mutate(Patient_ID = "MCE12")
+
+MCE13 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A10-B10-MCE12-MCE13"),
+         barcode %in% colnames(dehashed$MCE13)) %>%
+  mutate(Patient_ID = "MCE13")
+
+A5 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A5-B14"),
+         barcode %in% colnames(dehashed$A5)) %>%
+  mutate(Patient_ID = "A5")
+
+B14 <- combined_tcr_seq %>%
+  filter(Patient_ID %in% c("A5-B14"),
+         barcode %in% colnames(dehashed$B14)) %>%
+  mutate(Patient_ID = "B14")
+
+dehashed_combined_tcr_seq <- combined_tcr_seq %>%
+  filter(!(Patient_ID %in% c("A5-B14", "A10-B10-MCE12-MCE13", "B12-MCE6-MCE7", "A6-A9-B13-B9", "A8-B11")),
+         productive != "False")
+
+# Define a list of data frames for each patient or barcode
+patient_dataframes <- list(A6, A9, B13, B9, A8, B11, B12, MCE6, MCE7, A10, B10, MCE12, MCE13, A5, B14)
+
+# Concatenate the data frames into a single data frame
+dehashed_combined_tcr_seq <- bind_rows(dehashed_combined_tcr_seq, patient_dataframes)
+
+dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes"))
+
+dehashed_combined_tcr_seq
 
 ```
 
 # Prep for stitchr
 
 ```{r}
-stitchr_data <- combined_tcr_seq %>%
+stitchr_data <- dehashed_combined_tcr_seq %>%
+  filter(chain %in% c("TRA", "TRB")) %>%
   group_by(barcode) %>%
-  filter(chain %in% c("TRA", "TRB"),
-         # remove multi chain duplicate issues (2 barcodes)
-         sum(chain == "TRA") == 1 & sum(chain == "TRB") == 1) %>%
+  filter(sum(chain == "TRA") == 1 & sum(chain == "TRB") == 1) %>%
   ungroup() %>%
-  select(barcode, v_gene, d_gene, j_gene, c_gene, chain, cdr3) %>%
+  select(barcode, v_gene, d_gene, j_gene, c_gene, chain, cdr3_nt) %>%
   rename(TCR_name = barcode,
-         CDR3 = `cdr3`,
+         CDR3 = `cdr3_nt`,
          V = `v_gene`,
          J = `j_gene`,
          C = `c_gene`) %>%
@@ -108,7 +213,7 @@ stitchr_data <- combined_tcr_seq %>%
 
 stitchr_data
 
-# 31,866 rows
+# 32,089 rows
 
 write.table(stitchr_data, file = "../saved_data/tcrseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
 
@@ -156,7 +261,41 @@ stitchr_output$TRB_nt <- sapply(stitchr_output$TRB_nt, as.character)
 stitchr_output$TRB_aa <- sapply(stitchr_output$TRB_aa, as.character)
 stitchr_output$Linked_nt <- sapply(stitchr_output$Linked_nt, as.character)
 
-stitchr_output
+```
+
+# Analyze stitchr errors. "Unable to locate N terminus of CDR3 in V gene correctly. Please ensure sequence plausibility" is main error for TRA/TRB
+
+```{r}
+
+filtered_results_list <- list()
+
+for (i in 1:nrow(stitchr_output)) {
+  # Split the row using the specified pattern and extract the relevant elements
+  split_result <- strsplit(stitchr_output$Warnings.Errors[i], "\\(TRA\\)|\\(TRB\\)")[[1]]
+  filtered_list <- split_result[grep("Cannot stitch", split_result)]
+  
+  # Store the filtered list for this row in the results list
+  filtered_results_list[[i]] <- filtered_list
+}
+
+your_df <- data.frame(Column1 = unlist(unlist(filtered_results_list)))
+
+# Optionally, rename the column
+colnames(your_df) <- c("errors")
+
+count_df <- your_df %>%
+  group_by(errors) %>%
+  summarize(count = n()) %>%
+  arrange(-count)
+
+count_df
+
+# try to see if there are commonalities to V genes/CDR3s for issue-causing rows
+
+errors <- stitchr_output %>%
+  mutate(common_error = if_else(str_detect(Warnings.Errors, "Unable to locate N terminus of CDR3 in V gene correctly"), "Yes", "No")) %>%
+  arrange(common_error) %>%
+  select(TRA_CDR3, TRAV, TRB_CDR3, TRBV, common_error)
 
 ```
 
@@ -168,7 +307,7 @@ stitchr_output_alpha_df <- stitchr_output %>%
   filter(!(is.na(TRA_nt)))
 
 stitchr_output_alpha_df
-# 9,571 rows
+# 9,475 rows
 
 write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
 
@@ -176,7 +315,7 @@ stitchr_output_beta_df <- stitchr_output %>%
   filter(!(is.na(TRB_nt)))
 
 stitchr_output_beta_df
-# 21,560 rows
+# 22,053 rows
 
 write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
 
@@ -188,21 +327,56 @@ write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", ro
 
 igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
   rename(barcode = TCR_name) %>%
-  left_join(combined_tcr_seq, by = "barcode") %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
   mutate(patient_group = case_when(
     startsWith(Patient_ID, "A") ~ "ici_no_irae",
     startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
-    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae",
-    startsWith(Patient_ID, "control") ~ "no_ici")) %>%
-  select(patient_group, chain, pgen) %>%
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(patient_group, irAE, chain, pgen, barcode, cdr3) %>%
   filter(chain == "TRA",
          pgen != "NaN")
 
-igor_alpha
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
+  mutate(patient_group = case_when(
+    startsWith(Patient_ID, "A") ~ "ici_no_irae",
+    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(Patient_ID, patient_group, irAE, chain, pgen, barcode, cdr3) %>%
+  filter(chain == "TRB",
+         pgen != "NaN") %>%
+  full_join(igor_alpha, by = c("barcode", "chain", "patient_group", "pgen", "cdr3", "irAE"))
 
-ggplot(igor_alpha, aes(x = patient_group, y = -log10(pgen))) +
+igor_combined
+
+```
+
+# Plot pgen scores across all TCRs by irAE development
+
+```{r}
+
+ggplot(igor_combined, aes(x = chain, y = -log10(pgen), fill = irAE)) +
   geom_boxplot() +
-  labs(x = "Patient group", y = "TRA -log10(pgen)")
+  labs(x = "Chain", y = "-log10(pgen)")
+
+# Filter the data for statistical test
+test_data <- igor_combined %>%
+  filter(chain == "TRA")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
 
 ```
 
@@ -212,7 +386,7 @@ ggplot(igor_alpha, aes(x = patient_group, y = -log10(pgen))) +
 
 fasta_prep <- stitchr_output %>%
   rename(barcode = TCR_name) %>%
-  left_join(combined_tcr_seq, by = "barcode")
+  left_join(dehashed_combined_tcr_seq, by = "barcode")
 
 fasta_df_alpha <- fasta_prep %>%
   filter(!(is.na(TRA_nt)),
@@ -272,11 +446,36 @@ df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
 
 ```
 
-# Calculate CDR3 hydrophobicity and length by patient group
+# Analyze IMGT/HighV-Quest output 8: V region nt mutation statistics
 
 ```{r}
 
+imgt_df_8_alpha <- read.table("../saved_data/myocarditis_dehashed_alpha/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
+  select(-Sequence.number) %>%
+  rename(Barcode = Sequence.ID)
+
+colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"] <- paste0(colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"], "_alpha")
+
+imgt_df_8_beta <- read.table("../saved_data/myocarditis_dehashed_beta/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
+  select(-Sequence.number) %>%
+  rename(Barcode = Sequence.ID)
+
+colnames(imgt_df_8_beta)[colnames(imgt_df_8_beta) != "Barcode"] <- paste0(colnames(imgt_df_8_beta)[colnames(imgt_df_8_beta) != "Barcode"], "_beta")
+  
+imgt_df_8 <- imgt_df_8_alpha %>%
+  full_join(imgt_df_8_beta, by = "Barcode") %>%
+  # too many columns, focus on CDR3 ones for now
+  select(matches("^CDR3|^Barcode"))
+
+# join with patient ID to get patient group --> plots
+
+imgt_df_8
+
+```
+
 # Prep hydrophobicity calculator
+
+```{r}
 
 # Define the amino acids and their corresponding Eisenberg hydrophobicity values
 amino_acids <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
@@ -307,26 +506,24 @@ calculate_hydrophobicity <- function(sequence, hydrophobicity_df) {
   }
 }
 
-feature_df <- combined_tcr_seq %>%
-  select(cdr3, Patient_ID, chain) %>%
-  filter(cdr3 != "None",
-         !(Patient_ID %in% c("A6-A9-B13-B9", "A8-B11", "B12-MCE6-MCE7", "A10-B10-MCE12-MCE13", "A5-B14"))) %>%
-         # until dehashed, ignore mixed hashed samples
-  mutate(cdr3_length = nchar(cdr3)) %>%
+```
+
+# Prep feature df
+
+```{r}
+
+feature_df <- dehashed_combined_tcr_seq %>%
+  select(-cdr3_nt) %>%
   rowwise() %>%
-  mutate(cdr3_hydrophobicity = calculate_hydrophobicity(cdr3, hydrophobicity_df)) %>%
-  ungroup() %>%
-  mutate(patient_group = case_when(
-    startsWith(Patient_ID, "A") ~ "ici_no_irae",
-    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
-    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae",
-    startsWith(Patient_ID, "control") ~ "no_ici"))
+  mutate(cdr3_length = nchar(cdr3),
+         cdr3_hydrophobicity = calculate_hydrophobicity(cdr3, hydrophobicity_df)) %>%
+  ungroup()
 
 feature_df
 
 ```
 
-# Plot CDR3 hydrophobicity and length by patient group
+# Plot CDR3 hydrophobicity and length by irAE status
 
 ```{r}
 
@@ -336,136 +533,287 @@ plot_df <- feature_df %>%
   pivot_longer(cols = starts_with("cdr3_"), values_to = "value") %>%
   filter(chain != "Multi")
 
-ggplot(plot_df, aes(x = chain, y = value, fill = patient_group)) +
+ggplot(plot_df, aes(x = chain, y = value, fill = irAE)) +
   geom_boxplot() +
   facet_wrap(~ name, scales = "free_y", labeller = custom_labeller) +
-  labs(x = "Chain", fill = "Patient Group", y = "Value")
+  labs(x = "Chain", fill = "irAE", y = "Value")
+
+# Filter the data for statistical test
+test_data <- plot_df %>%
+  filter(chain == "TRA",
+         name == "cdr3_hydrophobicity")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$value ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
 
 ```
 
-# Find CDR3 sequences differentially encountered in different patient groups
+# Find CDR3 sequences differentially encountered in yes/no irAE
 
 ```{r}
 
-diff_df <- combined_tcr_seq %>%
+diff_df <- feature_df %>%
   select(barcode, cdr3, chain, Patient_ID) %>%
-  filter(cdr3 != "None") %>%
-  mutate(patient_group = case_when(
-    startsWith(Patient_ID, "A") ~ "ici_no_irae",
-    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
-    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae",
-    startsWith(Patient_ID, "control") ~ "no_ici")) %>%
+  filter(cdr3 != "None",
+         chain != "Multi") %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
   select(-Patient_ID) %>%
-  group_by(cdr3, patient_group) %>%
+  group_by(cdr3, irAE, chain) %>%
   summarize(count = n()) %>%
   ungroup() %>%
-  pivot_wider(names_from = patient_group, values_from = count, values_fill = 0) %>%
+  pivot_wider(names_from = c(irAE, chain), values_from = count, values_fill = 0) %>%
   rowwise() %>%
-  mutate(p_value = chisq.test(c(ici_no_irae, ici_non_myocarditis_irae, ici_myocarditis_irae))$p.value) %>%
-  ungroup() %>%
-  filter(p_value < 10^-2) %>%
-  arrange(p_value)
+  mutate(tra_diff = abs(No_TRA - Yes_TRA),
+         trb_diff = abs(No_TRB - Yes_TRB)) %>%
+  ungroup()
 
-diff_df
+diff_df_tra <- diff_df %>%
+  select(-No_TRB, -Yes_TRB, -trb_diff) %>%
+  filter(tra_diff > 3) %>%
+  arrange(-tra_diff)
+
+diff_df_tra
+
+diff_df_trb <- diff_df %>%
+  select(-No_TRA, -Yes_TRA, -tra_diff) %>%
+  filter(trb_diff > 3) %>%
+  arrange(-trb_diff)
+
+diff_df_trb
 
 ```
 
-# Test patient bias
+# Test patient bias (TRA, expect same for TRB)
 
 ```{r}
 
 # looks like most dramatically differentially encountered CDR3 sequences are due to single patient bias
 
-bias_df <- combined_tcr_seq %>%
-  filter(cdr3 %in% diff_df$cdr3) %>%
+bias_df_tra <- feature_df %>%
+  filter(cdr3 %in% diff_df_tra$cdr3,
+         chain == "TRA") %>%
   group_by(Patient_ID, cdr3) %>%
   summarize(count = n()) %>%
-  arrange(cdr3) %>%
-  filter(cdr3 %in% head(diff_df$cdr3))
+  arrange(cdr3, -count) %>%
+  filter(cdr3 %in% head(diff_df_tra$cdr3))
 
-bias_df
+bias_df_tra
 
 ```
 
-
+# Plot CDR3 hydrophobicity and length by irAE development for differentially encountered CDR3 sequences
 
 ```{r}
 
-diff_seq_df <- feature_df %>%
-  select(patient.ID, CDR3.NT.Sequence, CDR3.AA.Sequence, severe_irAE, Chain, CDR3_length, CDR3_hydrophobicity, cell_type) %>%
-  filter(!(is.na(CDR3.AA.Sequence)),
-         patient.ID != "YUROD") %>%
-  group_by(CDR3.AA.Sequence, severe_irAE) %>%
-  mutate(irae_specific_sequence_count = n()) %>%
-  ungroup() %>%
-  group_by(CDR3.AA.Sequence) %>%
-  mutate(irae_seq_differential = abs(sum(severe_irAE=="Yes")- sum(severe_irAE=="No"))) %>%
-  ungroup() %>%
-  filter(irae_seq_differential > 6)
+custom_labeller <- as_labeller(c("cdr3_length" = "CDR3\nAA length", "cdr3_hydrophobicity" = "CDR3\nhydrophobicity"))
 
-diff_seq_boxplot_df <- diff_seq_df %>%
-  select(-patient.ID, -CDR3.AA.Sequence, -CDR3.NT.Sequence, -irae_specific_sequence_count) %>%
-  gather(key = "Category", value = "Value", -severe_irAE, -Chain, -cell_type, -irae_seq_differential)
+plot_df <- feature_df %>%
+  filter(cdr3 %in% diff_df_tra$cdr3 & chain == "TRA" | cdr3 %in% diff_df_trb$cdr3 & chain == "TRB") %>%
+  pivot_longer(cols = starts_with("cdr3_"), values_to = "value") %>%
+  filter(chain != "Multi")
 
-custom_labeller <- as_labeller(c("CDR3_length" = "CDR3\nAA length", "cdr3_nt_count" = "CDR3\nexpansion", "CDR3_hydrophobicity" = "CDR3\nhydrophobicity"))
-
-# Create the box plot with facets
-ggplot(diff_seq_boxplot_df, aes(x = cell_type, y = Value, color = severe_irAE)) +
+ggplot(plot_df, aes(x = chain, y = value, fill = irAE)) +
   geom_boxplot() +
-  facet_wrap(~ Category, ncol = 2, scales = "free_y", labeller = custom_labeller) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Cell type", y = "Value")
+  facet_wrap(~ name, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Chain", fill = "irAE", y = "Value")
+
+# Filter the data for statistical test
+test_data <- plot_df %>%
+  filter(chain == "TRB",
+         name == "cdr3_hydrophobicity")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$value ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
 
 ```
 
-# Look at differential histogram
+# Plot CDR3 hydrophobicity and length by irAE development for differentially encountered CDR3 sequences IGNORING HOW MANY TIMES EACH APPEARS
 
 ```{r}
 
-diff_seq_df <- feature_df %>%
-  select(patient.ID, CDR3.NT.Sequence, CDR3.AA.Sequence, severe_irAE, Chain, CDR3_length, CDR3_hydrophobicity, cell_type) %>%
-  filter(!(is.na(CDR3.AA.Sequence)),
-         patient.ID != "YUROD") %>%
-  group_by(CDR3.AA.Sequence, severe_irAE) %>%
-  mutate(irae_specific_sequence_count = n()) %>%
-  ungroup() %>%
-  group_by(CDR3.AA.Sequence) %>%
-  mutate(irae_seq_differential = abs(sum(severe_irAE=="Yes")- sum(severe_irAE=="No"))) %>%
-  ungroup() %>%
-  arrange(-irae_seq_differential)
+custom_labeller <- as_labeller(c("cdr3_length" = "CDR3\nAA length", "cdr3_hydrophobicity" = "CDR3\nhydrophobicity"))
 
-diff_seq_df
+plot_df <- feature_df %>%
+  filter(cdr3 %in% diff_df_tra$cdr3 & chain == "TRA" | cdr3 %in% diff_df_trb$cdr3 & chain == "TRB") %>%
+  group_by(cdr3, chain, irAE) %>%
+  slice(1) %>%
+  ungroup() %>%
+  pivot_longer(cols = starts_with("cdr3_"), values_to = "value") %>%
+  filter(chain != "Multi")
 
-# Create a histogram for irae_seq_differential
-ggplot(diff_seq_df, aes(x = irae_seq_differential)) +
-  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
-  labs(x = "irAE CDR3 AA sequence differential", y = "Frequency")
+ggplot(plot_df, aes(x = chain, y = value, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ name, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Chain", fill = "irAE", y = "Value")
+
+# Filter the data for statistical test
+test_data <- plot_df %>%
+  filter(chain == "TRB",
+         name == "cdr3_length")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$value ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
 
 ```
 
-# Look at histogram for each yes/no severe irAE CD3 AA seq counts
+# Plot pgen for differentially encountered CDR3 sequences
 
 ```{r}
 
-diff_seq_df <- feature_df %>%
-  select(patient.ID, CDR3.NT.Sequence, CDR3.AA.Sequence, severe_irAE, Chain, CDR3_length, CDR3_hydrophobicity, cell_type) %>%
-  filter(!(is.na(CDR3.AA.Sequence)),
-         patient.ID != "YUROD") %>%
-  group_by(severe_irAE) %>%
-  mutate(irae_total_count = n()) %>%
-  ungroup() %>%
-  group_by(CDR3.AA.Sequence, severe_irAE) %>%
-  mutate(irae_specific_sequence_count = n()) %>%
-  ungroup() %>%
-  group_by(CDR3.AA.Sequence) %>%
-  mutate(irae_seq_differential = abs(sum(severe_irAE=="Yes")- sum(severe_irAE=="No"))) %>%
+plot_df <- igor_combined %>%
+  filter(cdr3 %in% diff_df_tra$cdr3 & chain == "TRA" | cdr3 %in% diff_df_trb$cdr3 & chain == "TRB")
+
+ggplot(plot_df, aes(x = chain, y = -log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "Chain", y = "-log10(pgen)")
+
+```
+
+# Plot pgen for differentially encountered CDR3 sequences IGNORING HOW MANY TIMES EACH APPEARS
+
+```{r}
+
+plot_df <- igor_combined %>%
+  filter(cdr3 %in% diff_df_tra$cdr3 & chain == "TRA" | cdr3 %in% diff_df_trb$cdr3 & chain == "TRB") %>%
+  group_by(cdr3, chain, patient_group) %>%
+  slice(1) %>%
   ungroup()
 
-diff_seq_df
+ggplot(plot_df, aes(x = chain, y = -log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "Chain", y = "-log10(pgen)")
 
-# Create a histogram for irae_seq_differential
-ggplot(diff_seq_df, aes(x = irae_specific_sequence_count, fill = severe_irAE)) +
-  geom_histogram(binwidth = 1) +
-  labs(x = "irAE CDR3 AA sequence counts", y = "Frequency")
+# Filter the data for statistical test
+test_data <- plot_df %>%
+  filter(chain == "TRB")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+```
+
+# Look at public TCRs only
+
+```{r}
+
+alpha_public_df <- feature_df %>%
+  select(barcode, cdr3, chain, Patient_ID) %>%
+  filter(cdr3 != "None",
+         chain == "TRA") %>%
+  group_by(cdr3, Patient_ID) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  pivot_wider(names_from = c(Patient_ID), values_from = count, values_fill = 0) %>%
+  rowwise() %>%
+  filter(sum(c_across(-cdr3)) > 1)
+
+beta_public_df <- feature_df %>%
+  select(barcode, cdr3, chain, Patient_ID) %>%
+  filter(cdr3 != "None",
+         chain == "TRB") %>%
+  group_by(cdr3, Patient_ID) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  pivot_wider(names_from = c(Patient_ID), values_from = count, values_fill = 0) %>%
+  rowwise() %>%
+  filter(sum(c_across(-cdr3)) > 1)
+
+public_feature_df <- feature_df %>%
+  filter(cdr3 %in% alpha_public_df$cdr3 & chain == "TRA" | cdr3 %in% beta_public_df$cdr3 & chain == "TRB")
+
+public_igor_df <- igor_combined %>%
+  filter(cdr3 %in% alpha_public_df$cdr3 & chain == "TRA" | cdr3 %in% beta_public_df$cdr3 & chain == "TRB")
+
+```
+
+# Plot CDR3 hydrophobicity and length by irAE status for public TCRs
+
+```{r}
+
+custom_labeller <- as_labeller(c("cdr3_length" = "CDR3\nAA length", "cdr3_hydrophobicity" = "CDR3\nhydrophobicity"))
+
+plot_df <- public_feature_df %>%
+  pivot_longer(cols = starts_with("cdr3_"), values_to = "value") %>%
+  filter(chain != "Multi")
+
+ggplot(plot_df, aes(x = chain, y = value, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ name, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Chain", fill = "irAE", y = "Value")
+
+```
+
+# Plot pgen scores by irAE development for public TCRs
+
+```{r}
+
+ggplot(public_igor_df, aes(x = chain, y = -log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "Chain", y = "-log10(pgen)")
+
+```
+
+# Stratify analysis by expansion degree
+
+```{r}
+
+feature_df <- feature_df %>%
+  group_by(Patient_ID, cdr3) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "1",
+    count > 1 & count <= 5 ~ "1-5",
+    count > 5 & count <= 20 ~ "5-20",
+    count > 20 & count <= 100 ~ "20-100",
+    count > 100 ~ "> 100"))
+
+feature_df$expansion_degree <- factor(feature_df$expansion_degree, levels = c("1", "1-5", "5-20", "20-100", "> 100"))
+
+plot_df <- feature_df %>%
+  filter(chain != "Multi")
+
+ggplot(plot_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~expansion_degree, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length (AA)")
+
+ggplot(plot_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~expansion_degree, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
+
+igor_combined <- igor_combined %>%
+  group_by(Patient_ID, cdr3) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "1",
+    count > 1 & count <= 5 ~ "1-5",
+    count > 5 & count <= 20 ~ "5-20",
+    count > 20 & count <= 100 ~ "20-100",
+    count > 100 ~ "> 100"))
+
+igor_combined$expansion_degree <- factor(igor_combined$expansion_degree, levels = c("1", "1-5", "5-20", "20-100", "> 100"))
+
+ggplot(igor_combined, aes(x = chain, y = -log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~expansion_degree) +
+  labs(x = "Chain", y = "-log10(pgen)")
 
 ```
