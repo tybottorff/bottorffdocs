@@ -69,7 +69,7 @@
  - **seems like most similar self tissue to tumor has highest chance of irAE, skin second most similar to NSCLC after lung and had second highest proportion of irAEs**
  - **see dense infiltration of T cells in sites of irAEs**
  - **same T cell clonotypes infiltrated both lung tumor and autoimmune skin lesions**
- - **not all tumor sharbor potent neoantigens, effective immunotherapy favors neoantigens**
+ - **not all tumors harbor potent neoantigens, effective immunotherapy favors neoantigens**
 # Association of immune-related adverse events with nivolumab efficacy in non-small-cell lung cancer
  - irAEs observed in 51% of patients (9% grades 3 or 4 i.e. severe irAEs)
  - irAEs associated with better overall survival
@@ -457,6 +457,15 @@
 # Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
  - chronic stimulation assay
  - *in vivo* validation of screen results (perturbation of INO80 and BAF chromatin remodeling complexes improves T cell persistence in tumors)
+# Germline variants associated with toxicity to immune checkpoint blockade
+## Abstract
+ - GWAS of 1,751 patients on ICIs across 12 cancer types
+ - 3 genome-wide significant associations: one near *IL7* (regulator of lymphocyte homeostasis) in a new cryptic exon (patients with this variant had increased lymphocyte stability after ICI which predicted irAEs and improved survival), one near *IL22RA1*, and one on 4p15
+## Main
+ - hypothesis for irAE onset heterogeneity: impact of germline genetic determinants of immune activity
+ - evidence for this hypothesis: polygenic risk for autoimmune conditions correlated with onset of cutaneous and thyroid irAEs
+## Discussion
+ - ***IL7* supports aberrant immune activity in autoimmunity, limits organ toxicity during antiviral immune response, blocks PD-1 leading to T1D (blocking checkpoint when it would have prevented autoimmunity, so IL7 acts as a natural ICB and is therefore rationally associated with irAEs**), can try *IL7* receptor blockade to treat *IL7*-irAEs
 # Graft-versus-host disease versus graft-versus-leukemia
  - graft-versus-host is characterized by robust T-cell activation and proliferation followed by infiltration of host target structures
  - it's less clear to what degree T-cell activation and proliferation are required for effective graft-versus-leukemia, so perhaps controlling T-cell proliferation can uncouple graft-versus-leukemia from graft-versus host
@@ -575,6 +584,32 @@
  - metastases macrophages less M1-like, inflammatory markers (HLA-DR, CD127)
 # Immune-Related Adverse Events and Their Association With the Effectiveness of PD-1/PD-L1 Inhibitors in Non-Small Cell Lung Cancer: A Real-World Study From China
  - see more antitumor response in irAE group compared to non-irAE group, irAE associated with progression-free survival but not with overall survival
+# Immune-related adverse events in various organs caused by checkpoint inhibitors
+## Abstract
+ - PD-1 receptor on T and B cells, binds PD-L1/2 ligands
+ - PD-L1 dominant role in Th1/17 immunity, PD-L2 works mainly in Th2 immunity
+## Epidemiology of irAEs
+ - irAEs common in skin, gastrointestinal tract, liver, endocrine organs, lungs
+ - irAEs more common with CTLA-4 blockade than PD-1 blockade
+## Mechanisms of irAEs
+ - some irAEs have immune counterparts (like thyroiditis and Hashimoto disease, gastrointestinal irAEs and IBD)
+ - **irAEs progress more rapidly than autoimmune conditions, also transient often with quick recovery**
+## The roles of CTLA-4
+ - CTLA-4 expressed on activated T cells, some CD25<sup>+</sup>CD4<sup>+</sup> Treg cells, **CTLA-4 blockade can interfere with T cell differentiation and eliminate Tregs peripherally and in TME**
+## The roles of PD-1
+ - PD-L1/2 expressed on APCs and in peripheral tissue (PD-L1 expression enhanced with activation stimuli like IFN-gamma or IL-17A, PD-L2 mostly induced on APCs by IL-4, higher affinity for receptor than PD-L1)
+ - **no antibodies for PD-L2, only PD-L1, in clinical use**
+ - PD-L2 has stimulatory and inhibitory effects depending on context
+## Differences between CTLA-4 and PD-1
+ - **CTLA-4 and PD-1 signaling converge on Akt, regulator of T cell activation, via PI3K antagonization (CD28 activation promotes Akt phosphorylation via PI3K)**
+## T cell reactivity in irAEs
+ - **CTLA-4 blockade induces more diversified T cells (including autoreactive ones), PD-1 blockade induce more clonal TCR repertoire and proliferation of intratumoral CD8<sup>+</sup> T cells**
+ - **T cells seen infiltrating into irAE tissue, T cells seen targeting irAE tissue seen in blood, so T cells involved in irAEs**
+## B cell reactivity in irAEs
+ - **ICB induces reduction in circulating B cells, increase in CD21<sup>low</sup>PD-1<sup>+</sup> memory B cells and plasmablasts that precede and correlate with irAEs**
+ - **autoantibodies present ~50% of time for irAEs**
+# Immune-related adverse events of anti-PD-1 immune checkpoint inhibitors: a single center experience
+ - patients who developed irAEs were younger
 # Immune-Related Gene Expression Profiling After PD-1 Blockade in Non–Small Cell Lung Carcinoma, Head and Neck Squamous Cell Carcinoma, and Melanoma
  - most patients exhibit partial/complete resistance to PD-1 blockade
  - study patients with various cancers treated with PD-1 blockade
@@ -614,7 +649,7 @@
 # Immune toxicities elicited by CTLA-4 blockade in cancer patients are associated with early diversification of the T cell repertoire
 ## Abstract
  - CTLA-4 blockade leads to proliferation of circulating T cells, also clonal expansion of tissue-reactive T cells?
- - **CTLA-4 blockade induced greater diversification of T cell repertoire (more clonotypes including newly detected clones, declined clonality) in irAE patients compared to no irAE patients**
+ - **CTLA-4 blockade induced greater diversification of T cell repertoire (more clonotypes including newly detected clones, decreased clonality) in irAE patients compared to no irAE patients**
  - initial broadening in repertoire occured within 2 weeks of treatment preceeding irAE onset
  - irAE patients had more diverse CD4<sup>+</sup> and CD8<sup>+</sup> T cells but no differences in Tregs
 ## Introduction
@@ -841,6 +876,8 @@
  - NKs are part of the innate immune system but are similar to cytotoxic T cells, they lack antigen specificity and are usually short-lived (< 10 days), so their exhaustion is likely less important
  - there are long-lived, somewhat antigen-specific NKs with memory recall though
  - B cell exhaustion: weaker antibody response (inhibited normal function)
+# Ocular adverse events associated with immune checkpoint inhibitors, a scoping review
+ - they suggest irAEs can be broken into 2 categories: true irAEs (T cells activated against tumor and normal cells, theoretically this wanes after ICBs are stopped) and induction/exacerbation of paraneoplastic syndromes triggered by ICB (remote effects of cancer not caused by tumor/metastases, like immune response against tumor with cross-reaction of antibodies between tumor and self), **I don't really understand the difference between these two types here**
 # On the specificity of protein-protein interactions in the context of disorder
  - **trying to find evidence for relation between hydrophobicity and cross-reactivity: bring up idea of transcriptional (co)activators being non-specific due to hydrophobicity, and negative charge (perhaps unhelpful with negatively charged DNA)**
 # PD-1 blockade induces responses by inhibiting adaptive immune resistance
@@ -1102,6 +1139,10 @@
  - Gini-Simpson index: order (α) of 2, 0 means monoclonal, 1 means polyclonal with equivalent representation of all clones, barely affected by increasing number of unique TCRs in repertoire (unlike Shannon entropy)
  - Pielou's index (evenness measure): clonal evenness refers to clonal diversity, 1 - Pielou's index is often used and here 0 means maximally diverse and 1 means monoclonal
  - Gini coefficient: inequality measure, distinct from Gini-Simpson index, 0 means maximal diversity, high value means monoclonal
+# T cell repertoire diversity: friend or foe for protective antitumor response?
+ - **CD3 is signal transducing subunit for TCR**
+ - immune changes in aging: fewer naive T cells able to respond to new antigens, higher representation of more differentiated effector/memory T cells
+ - **high TCR diversity/richness/evenness (all same here, highly polyclonal synonyms) in blood associted with good ICB outcome**
 # T cell tolerance: central and peripheral
 ## Summary
  - central tolerance: clonal deletion and diversion (Treg differentiation) control self-reactive T cells in the thymus
@@ -1244,6 +1285,44 @@
  - ST2 (IL-33 receptor) is present in multiple isoforms including membrane-bound ST2L and soluble sST2 (may be decoy for IL-33)
  - ST2 participates in activation of antigen-primed Th2 cells
  - ST2 implicated in inflammatory conditions
+# The nexus of dynamic T cell states and immune checkpoint blockade therapy in the periphery and tumor microenvironment
+## Abstract
+ - *de novo* priming of antigen-specific cytotoxic T cells in peripheral blood occurs throughout course of ICB (rather than reinvigoration of pre-ICB-existing tumor infiltrating exhausted lymphocytes), possible that local expansion of antigen-specific T cells within tumor also important though
+## Introduction
+ - VISTA is an immune checkpoint regulator, **that I haven't heard of before**, expressed on tumor-infiltrating leukocytes and myeloid cells, suppresses T cells
+ - agonists for co-stimulators, like ICOS, also being tested
+ - higher intratumor PD-L1 levels correlates with higher ICB benefit, but patients with PD-1 negative tumors can still sometimes respond to ICBs (and conversely high PD-L1 expressing tumors can be ICB resistant), PD-L1 expression also varies spatially and temporally, so we need more response markers besides PD-L1 ezpression
+ - using tumor biopsies to identify predictive response markers: hard to biopsy metastases, tumors are heterogeneous (sampling error), hard to obtain consecutive biopsies over ICB course
+ - peripheral blood profiling: less invasive, easier longitudinally
+## Immune checkpoint blockades
+ - CTLA-4 blocks early T cell activation via interruption of costimulatory CD28, failure of CTLA-4 blockade to treat cancer may mean that **early T cell response is intact in cancer patients**
+ - PD-1 (on T cells) interaction with PD-L1 (on tumor cells) inhibits T cells in tumor microenvironment
+ - **tumor type matters for ICB response: melanoma/NSCLC have higher response rates, colon/endometrium cancers do not respond well to ICB (although those with high microsatellite instability and MMRd repsond well), tumor burden is a good predictor of ICB response (neoantigen generation to elicit antitumor immunity)**
+ - **ovarian cancers ICB resistant, not known why (perhaps TIM-3 checkpoint), despite tumor-infiltrating leukocytes present in most ovarian cancer patients (or perhaps these are bystanders reactive to viruses rather than tumor antigens)**
+## T-cell receptor repertoire analysis and its application to dissect the mechanisms of ICB therapies
+ - tumor infiltrating leukocytes may predict patient survival, ICBs originally thought to activate tumor infiltrating leukocytes, but **in responsive patients peripheral compartment is a major source of T cells activated by ICB and majority of pre-existing intratumoral T cells are terminally exhausted and refractory to ICB**
+ - some pre-exhausted CD8<sup>+</sup> T cells in tumor microenvironment (precursors of exhausted T cells, Tpex) may contribute to ICB repsonse
+ - **ICB-induced clonal expansion of antigen-specific T cells may be indicated by a decrease in TCR diversity**
+ - **conversely, ICB-induced migration of T cells to the tumor may increase the diversity of TCR repertoire**
+## Overview of the CD8<sup>+</sup> T cell infiltrates in human tumor microenvironment
+ - T cell infiltrates in tumor microenvironment can be tumor-reactive (CD8<sup>+</sup> T cells) or bystander virus-reactive (CD8<sup>+</sup> T cells, don't contribute to antitumor immunity or respond to ICB)
+ - > 80% of tumor infiltrating leukocytes in ovarian tumors are bystanders, perhaps related to the lethality and ICB resistance of ovarian cancer
+ - **CD8<sup>+</sup> T cell subsets: naive (not yet exposed to antigenic stimulation, CCR7, LEF1, IL7R, TCF7, SELL), effector (stimulated by antigens, acquired cytotoxicity, perforin 1, granzymes, NK cell granule 7, CX3CR1, KLRG1, FCGR3A), memory (subset of Teff convert into resting memory that can generate many Teff cells upon restimulation by cognate antigens)**
+ - **central memory vs. effector memory CD8<sup>+</sup> T cells: Tcm abundant in spleen, blood, lymph, highly proliferative upon reactivation, lymphatic homing markers (CD62L, CCR7, GPR183, CD27/28), Tem abundant in spleen and blood, highly cytotoxic upon reactivation, granzymes, KLRG1, CXCR4, GCGR3A, lack CD62L, there's also tissue resident memory T cells (Trm) that are CD103<sup>+</sup>CD69<sup>+</sup> and excluded from circulation**
+ - tumor-reactive cytotoxic T cells eventually become exhausted due to chronic antigen stimulation, increased inhibitory receptors (PD-1, CTLA-4, LAG3, TIM-3), reduced effector functions (reduced IL-2, TNF, IFN-gamma production)
+### CD8<sup>+</sup> T cell dysfunction is a progressive state within tumor microenvironment
+ - earlier stage tumors likely have T cells on path to terminal exhaustion, late stage tumors likely have terminally exhausted T cells
+ - no drugs to reverse cellular state of terminally exhausted Tex cells, need to manipulate epigenetics/metabolism
+### Characterization of CD8<sup>+</sup> T cells in tumor microenvironment during ICB therapies
+ - PD-1 blockade may **transiently** reduce/revert dysfunction of tumor-specific CD8<sup>+</sup> Tex cells in tumor microenvironment
+## Characterization of CD8<sup>+</sup> T cells in peripheral blood during ICBs
+ - lymph nodes primary location for antigen presentation cells to activate antigen-specific T cells (**less exhausted than those in tumor microenvironment**) that can then migrate and infiltrate into tumor to complement effector population
+ - **some circulating PD-1<sup>+</sup> CD8<sup>+</sup> T cells share TCR sequences with T cells in TME, and this frequency predicts ICB response**
+# The promising link among tumor mutational burden, immune-related adverse events, and immune checkpoint inhibitors efficacy in SCLC
+ - letter in response to findings of irAEs correlating with ICB efficacy, perhaps related to association between irAE occurence and tumor mutational burden (also correlates with ICB efficacy)
+ - **can see same clonotypes of T cells reactive against tumor and self in irAEs**
+ - **higher tumor mutational burden and therefore antigenicity increase probability of crossreactivity because there are more distinct clonotypes of activated T cells and therefore more chances for a crossreactive clonotype to induce irAEs**, alternative hypothesis is that high tumor mutational burden correlates with ICI response therefore patients live longer and are more likely to eventually experience irAEs
+ - another caveat: < 1% of non-synonymous single nucleotide variants in expressed genes result in detectable CD4/CD8 positive T cell reactivity in tumor-infiltrating leukocytes, **would any be predicted in periphery?**, **frameshift mutations much more likely to lead to neoantigens**
 # The relationship between hydrophobicity and drug-protein binding in human serum albumin: a quartz crystal microbalance study
  - positive correlation between drug hydrophobicity and binding strength to human serum albumin, **perhaps in contrast to hypothesis of increased crossreactivity from more hydrophobic TCRs, assuming increased crossreactivity means lower strength binding for each or a lower possible maximum...**
 # The role of metabolic dysfunction in T-cell exhaustion during chronic viral infection
