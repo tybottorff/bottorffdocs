@@ -243,7 +243,7 @@
  - sequencing of TCRβ chains revealed clonal expansion of CD8 T cells in blood samples collected before irAE onset
  - expansion of > 55 CD8 T cell clones preceeded severe irAE onset
 ## Introduction
- - **hypothesis: clonal expansion of T cells in the systemic circulation, which are likely to be reactive against self-antigens, may correlate with irAEs (since clonal expansion of T cells in tumor tissues, which are likely tumor reactive, may predict for clinical benefit with immune checkpoint therapy)**
+ - **hypothesis: clonal expansion of T cells in systemic circulation, which could be reactive against self-antigens, may correlate with irAEs (analogous to clonal expansion of T cells in tumor tissues, which are likely tumor reactive, perhaps predicting clinical benefit with immune checkpoint therapy)**
 ## Results
 ### Evaluation for biomarkers that may correlate with clinical outcomes
  - increased ICOS<sup>+</sup> CD4 T cells biomarker of ICI
@@ -253,6 +253,8 @@
 ### Circulating CD8 T cell clonal expansion precedes the development of grade 2-3
 ## Discussion
  - previous literature has suggested increased T cell clonality in tumor microenvironment correlates with clinical response to PD-1 blockade
+ - **most irAEs are similar irregardless of tumor/blockade type, so perhaps there's a common mechanism underlying irAEs**
+ - immunosuppressive therapies can be used to treat irAEs, shorter course required if used sooner (but early irAE manifestations can be subtle)
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - co-expression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -442,6 +444,14 @@
  - here, they report that patients with low melanoma neoantigen burdens who did respond to ICIs had tumors with higher expression of pigmentation-related genes
  - **expansion of peripheral CD8<sup>+</sup> T cell populations specific for melanocyte antigens observed only in patients who responded to anti-PD-1 therapy, so ICI can promote breakdown of tolerance towards tumor-lineage self-antigens**
  - **mouse model of poorly immunogenic melanomas: skew epitope recognition toward wild type melanocyte antigens associated with improved anti-PD-1 efficacy (can introduce neoantigens with UVB radiation mutagenesis), and got long term protection against engrafted melanomas not sharing neoantigens**
+# Evaluating T-cell cross-reactivity between tumors and immune-related adverse events with TCR sequencing: pitfalls in interpretations of functional relevance
+## Abstract
+ - shared T cell clones between tumor and irAE evidence for crossreactivity **(or shared antigens)** underlying irAEs
+## Introduction
+ - correlation in response rate and irAE development also consistent with crossreactivity hypothesis
+ - **crossreactivity here is shared antigen between tumor and self I believe**
+## Discussion
+ - large number and circulating nature of T cells predispose studies to false positives
 # Expression of MHC class II in T cells is associated with increased HIV-1 expression
  - CD4 primary HIV-1 infection receptor, expressed on T cells, monocytes, macrophages, DCs
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
@@ -843,6 +853,12 @@
 # mTOR regulates T cell exhaustion and PD-1-targeted immunotherapy response during chronic viral infection
  - background: PD-1-blockade enhances T cell response by promoting differentiation of stem-like T cells towards TIM3<sup>+</sup> cells
  - results: blocking mTOR during T cell expansion enhances T cell response (stem-like T cells accumulate), but blocking mTOR after exhaustion has progressed causes immunosuppression (decreased TIM3<sup>+</sup> cells, increased viral load)
+# Multi-omics prediction of immune-related adverse events during checkpoint immunotherapy
+## Introduction
+ - pneumonitis is the most common fatal irAE (10% death rate), myocarditis is the most lethal irAE (~50% mortality)
+ - TCR diversity, CD8<sup>+</sup> T cell clonal expansion, tumor mutational burden predict irAEs
+## Discussion
+ - *LCP1* and *ADPGK* are genes related to T cell activation that predict irAEs
 # Negative binomial additive model for RNA-Seq data analysis
 ## Methods for differential expression analysis
  - DESeq2, edgeR (based on negative binomial regression to model gene counts)
@@ -1156,6 +1172,9 @@
  - double-positive thymocytes expressing TCRs that have no/low affinity for self-peptide-MHC complexes die by neglect
  - double-positive thymocytes expressing TCRs that have intermediate affinity for self-peptide-MHC differentiate to CD4 or CD8 single-positive thymocytes (positive selection) in the cortex, single-positive thymocytes go to the medulla
  - double-positive thymocytes expressing TCRs that have high affinity for self-peptide-MHC pose a threat to self-tolerance, so they undergo clonal deletion, diversion to Treg lineage, anergy, or receptor editing (secondary gene rearrangements of TCRα loci)
+# T cell tolerant fraction as a predictor of immune-related adverse events
+ - tolerant fraction characterized according to productive/non-productive TCRB sequences, **not sure how this relates, I understand their hypothesis that more tolerant T cells would lead to lower irAE risk but I don't understand how tolerant fraction can be estimated from productive fraction, productive just means it can function and bind some antigen not necessarily self/foreign?**
+ - **so they say "In healthy subjects, we considered TRB sequences that are expressed to be tolerant; otherwise, the subject would not be healthy" which does make sense but what about abundance? healthy people have rare self-reactive T cells that's known I think**
 # TCR sequencing and cloning methods for repertoire analysis and isolation of tumor-reactive TCRs
 ## Abstract
  - SEQTR (SEQuencing T cell Receptor): combines *in vitro* transcription and single primer pair TCR amplification, combine with PCR to amplify TCR from bulk population, tumor-specific TCR identification and cloning
