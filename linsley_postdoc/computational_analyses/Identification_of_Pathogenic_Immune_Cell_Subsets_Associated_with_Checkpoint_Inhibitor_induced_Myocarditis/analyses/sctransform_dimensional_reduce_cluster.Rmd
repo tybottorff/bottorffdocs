@@ -45,7 +45,7 @@ heart_t_cells_filtered <- readRDS("../saved_data/qc_filtered.rds")
 
 ```
 
-# Split data by sample before integrating by finding anchors
+# Split data by sample, prepare (normalize, find variable features, etc.) before integrating by finding anchors
 
 ```{r}
 
@@ -54,6 +54,12 @@ heart_t_cells_filtered.list <- SplitObject(heart_t_cells_filtered, split.by = "o
 
 # normalize and identify variable features for each dataset independently
 heart_t_cells_filtered.list <- lapply(X = heart_t_cells_filtered.list, FUN = SCTransform, method = "glmGamPoi")
+
+```
+
+# Find integration features
+
+```{r}
 
 # select features that are repeatedly variable across datasets for integration
 features <- SelectIntegrationFeatures(object.list = heart_t_cells_filtered.list, nfeatures = 3000)
@@ -99,7 +105,7 @@ randomly_selected_seurat
 # first integrates these references, then aligns other samples within each group to that integrated reference
 # this command creates an 'integrated' data assay
 
-immune.anchors <- FindIntegrationAnchors(object.list = heart_t_cells_filtered.list, reference = match(heart_t_cells_filtered.list, randomly_selected_seurat$name), normalization.method = "SCT", anchor.features = features, reduction = "rpca", k.anchor = 10, dims = 1:30)
+immune.anchors <- FindIntegrationAnchors(object.list = heart_t_cells_filtered.list, reference = which(names(heart_t_cells_filtered.list) %in% randomly_selected_seurat$name), normalization.method = "SCT", anchor.features = features, reduction = "rpca", k.anchor = 10, dims = 1:30)
 
 ```
 
