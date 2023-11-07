@@ -261,6 +261,15 @@ stitchr_output$TRB_nt <- sapply(stitchr_output$TRB_nt, as.character)
 stitchr_output$TRB_aa <- sapply(stitchr_output$TRB_aa, as.character)
 stitchr_output$Linked_nt <- sapply(stitchr_output$Linked_nt, as.character)
 
+test <- stitchr_output %>%
+  select(TCR_name, Warnings.Errors, TRA_nt, TRB_nt, TRA_aa, TRB_aa, Linked_nt, Linked_aa)
+  #filter(!(is.na(TRB_nt))) %>%
+  #mutate(leader_error = if_else(str_detect(Warnings.Errors, "User specified leader sequence is not evenly divisible by 3"), "Yes", "No")) %>%
+  #group_by(leader_error) %>%
+  #summarize(count = n())
+
+test
+
 ```
 
 # Analyze stitchr errors. "Unable to locate N terminus of CDR3 in V gene correctly. Please ensure sequence plausibility" is main error for TRA/TRB
@@ -446,17 +455,41 @@ df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
 
 ```
 
+# Analyze IMGT/HighV-Quest output 1: summary
+
+```{r}
+
+imgt_df_1_alpha <- read.csv("../saved_data/myocarditis_alpha/1_Summary.csv")
+  #group_by(V.REGION.potential.ins.del) %>%
+  #summarize(count = n())
+
+imgt_df_1_alpha
+# 7 productive
+# 1762 rearranged but no junction found
+# 4104 + 3602 (stop codons) unproductive
+
+imgt_df_1_beta <- read.csv("../saved_data/myocarditis_beta/1_Summary.csv")
+  #group_by(V.DOMAIN.Functionality) %>%
+  #summarize(count = n())
+
+imgt_df_1_beta
+# 3502 productive
+# 14592 rearranged but no junction found
+# 2621 + 1338 (stop codons) unproductive
+
+```
+
 # Analyze IMGT/HighV-Quest output 8: V region nt mutation statistics
 
 ```{r}
 
-imgt_df_8_alpha <- read.table("../saved_data/myocarditis_dehashed_alpha/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
+imgt_df_8_alpha <- read.table("../saved_data/myocarditis_alpha/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
   select(-Sequence.number) %>%
   rename(Barcode = Sequence.ID)
 
 colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"] <- paste0(colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"], "_alpha")
 
-imgt_df_8_beta <- read.table("../saved_data/myocarditis_dehashed_beta/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
+imgt_df_8_beta <- read.table("../saved_data/myocarditis_beta/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
   select(-Sequence.number) %>%
   rename(Barcode = Sequence.ID)
 
