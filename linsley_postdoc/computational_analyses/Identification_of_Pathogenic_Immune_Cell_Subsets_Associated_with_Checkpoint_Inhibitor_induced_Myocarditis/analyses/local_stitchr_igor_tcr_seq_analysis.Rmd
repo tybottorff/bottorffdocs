@@ -791,6 +791,26 @@ ggplot(plot_df, aes(x = chain, y = value, fill = irAE)) +
 
 ```
 
+# Plot CDR3 hydrophobicity and length by irAE status for public TCRs IGNORING HOW MANY TIMES EACH APPEARS
+
+```{r}
+
+custom_labeller <- as_labeller(c("cdr3_length" = "CDR3\nAA length", "cdr3_hydrophobicity" = "CDR3\nhydrophobicity"))
+
+plot_df <- public_feature_df %>%
+  filter(chain != "Multi") %>%
+  group_by(cdr3, chain, irAE) %>%
+  slice(1) %>%
+  ungroup() %>%
+  pivot_longer(cols = starts_with("cdr3_"), values_to = "value")
+
+ggplot(plot_df, aes(x = chain, y = value, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ name, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Chain", fill = "irAE", y = "Value")
+
+```
+
 # Plot pgen scores by irAE development for public TCRs
 
 ```{r}
@@ -810,25 +830,27 @@ feature_df <- feature_df %>%
   mutate(count = n()) %>%
   ungroup() %>%
   mutate(expansion_degree = case_when(
-    count == 1 ~ "1",
-    count > 1 & count <= 5 ~ "1-5",
-    count > 5 & count <= 20 ~ "5-20",
-    count > 20 & count <= 100 ~ "20-100",
-    count > 100 ~ "> 100"))
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded"))
 
-feature_df$expansion_degree <- factor(feature_df$expansion_degree, levels = c("1", "1-5", "5-20", "20-100", "> 100"))
+feature_df$expansion_degree <- factor(feature_df$expansion_degree, levels = c("Single", "Small", "Medium", "Large", "Hyperexpanded"))
+
+custom_labeller <- as_labeller(c("Single" = "Single", "Small" = "Small", "Medium" = "Medium", "Large" = "Large", "Hyperexpanded" = "Hyper-\nexpanded"))
 
 plot_df <- feature_df %>%
   filter(chain != "Multi")
 
 ggplot(plot_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
-  facet_wrap(~expansion_degree, scales = "free_y") +
+  facet_wrap(~expansion_degree, scales = "free_y", labeller = custom_labeller) +
   labs(x = "Chain", fill = "irAE", y = "CDR3 length (AA)")
 
 ggplot(plot_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
   geom_boxplot() +
-  facet_wrap(~expansion_degree, scales = "free_y") +
+  facet_wrap(~expansion_degree, scales = "free_y", labeller = custom_labeller) +
   labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
 
 igor_combined <- igor_combined %>%
@@ -836,17 +858,115 @@ igor_combined <- igor_combined %>%
   mutate(count = n()) %>%
   ungroup() %>%
   mutate(expansion_degree = case_when(
-    count == 1 ~ "1",
-    count > 1 & count <= 5 ~ "1-5",
-    count > 5 & count <= 20 ~ "5-20",
-    count > 20 & count <= 100 ~ "20-100",
-    count > 100 ~ "> 100"))
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded"))
 
-igor_combined$expansion_degree <- factor(igor_combined$expansion_degree, levels = c("1", "1-5", "5-20", "20-100", "> 100"))
+igor_combined$expansion_degree <- factor(igor_combined$expansion_degree, levels = c("Single", "Small", "Medium", "Large", "Hyperexpanded"))
 
 ggplot(igor_combined, aes(x = chain, y = -log10(pgen), fill = irAE)) +
   geom_boxplot() +
   facet_wrap(~expansion_degree) +
   labs(x = "Chain", y = "-log10(pgen)")
+
+```
+
+# Stratify analysis by expansion degree FOR JUST UNIQUE TCRs
+
+```{r}
+
+feature_df <- feature_df %>%
+  group_by(Patient_ID, cdr3) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  group_by(cdr3, chain, irAE) %>%
+  slice(1) %>%
+  ungroup()
+
+feature_df$expansion_degree <- factor(feature_df$expansion_degree, levels = c("Single", "Small", "Medium", "Large", "Hyperexpanded"))
+
+custom_labeller <- as_labeller(c("Single" = "Single", "Small" = "Small", "Medium" = "Medium", "Large" = "Large", "Hyperexpanded" = "Hyper-\nexpanded"))
+
+plot_df <- feature_df %>%
+  filter(chain != "Multi")
+
+ggplot(plot_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~expansion_degree, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length (AA)")
+
+ggplot(plot_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~expansion_degree, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
+
+igor_combined <- igor_combined %>%
+  group_by(Patient_ID, cdr3) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  slice(1) %>%
+  ungroup()
+
+igor_combined$expansion_degree <- factor(igor_combined$expansion_degree, levels = c("Single", "Small", "Medium", "Large", "Hyperexpanded"))
+
+ggplot(igor_combined, aes(x = chain, y = -log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~expansion_degree) +
+  labs(x = "Chain", y = "-log10(pgen)")
+
+```
+
+# Compare normalized abundances of dual alpha TCRs by irAE development
+
+```{r}
+
+multiple_tra_trb_df <- feature_df %>%
+  filter(chain %in% c("TRA", "TRB")) %>%
+  group_by(barcode, Patient_ID) %>%
+  mutate(alphas_per_cell = sum(chain == "TRA"),
+         betas_per_cell = sum(chain == "TRB")) %>%
+  ungroup() %>%
+  group_by(Patient_ID) %>%
+  mutate(one_one = sum(alphas_per_cell == 1 & betas_per_cell == 1) / n(),
+         alpha_over_one = sum(alphas_per_cell > 1) / n(),
+         beta_over_one = sum(betas_per_cell > 1) / n()) %>%
+  ungroup() %>%
+  select(Patient_ID, irAE, one_one, alpha_over_one, beta_over_one, expansion_degree) %>%
+  group_by(Patient_ID) %>%
+  slice(1) %>%
+  ungroup() %>%
+  pivot_longer(cols = -c(Patient_ID, irAE, expansion_degree), values_to = "value")
+
+multiple_tra_trb_df
+
+ggplot(multiple_tra_trb_df, aes(x = name, y = value, fill = irAE)) +
+  geom_boxplot() +
+  #facet_wrap(~ expansion_degree) +
+  labs(x = "Category", fill = "irAE", y = "Frequency") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Filter the data for statistical test
+test_data <- multiple_tra_trb_df %>%
+  filter(name == "alpha_over_one")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$value ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
 
 ```
