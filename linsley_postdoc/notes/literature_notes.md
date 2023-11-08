@@ -446,6 +446,13 @@
 # Effective use of latent semantic indexing and computational linguistics in biological and biomedical applications
  - LSI = latent semantic indexing, computational linguistics technique, outperforms Boolean text searches and co-occurrence models at information retrieval, dimensional reduction technique used to compare concepts/topics among collection of terms
  - clustering genes/proteins into GO groups/signaling pathways relies on curation of these groups/pathways, could be supplemented by LSI/LSA (latent semantic analysis)
+# Emerging concepts in T cell receptor specificity: rationalizing and (maybe) predicting outcomes
+## Rules are made to be broken and roles are not easily defined
+ - example: A6 TCR recognizes HTLV-1 Tax<sub>11-19</sub> peptide presented by MHCI HLA-A*0201, surprisingly strongest interaction in interface is between CDR3 alpha and HLA-A2 (so peptide not involved surprisingly yet TCR is specific not degenerate)
+## Rationalizing the specificity/cross-reactivity duality of TCRs
+ - a single TCR has been shown to recognize > 1 million peptides
+ - crossreactivity is needed as there are many more potential antigens than TCRs
+ - hotspots/anchors can be important parts of peptides that must remain more constant for TCR binding, other parts of peptide can vary and allow crossreactivity, hotspots/anchors need not only bind CDRs
 # Entropic contributions and the influence of the hydrophobic environment in promiscuous protein-protein association
  - **trying to find evidence for increased hydrophobicity relating to cross-reactivity of TCRs: here they discuss how a particular PKA/AKAP interface demonstrates promiscuity in part due to the number of interactions this hydrophobic interface allows, which allows many alternative contacts (increased entropy, drives forward binding) with other binding partners hence promiscuity**
 # Epigenetic regulation of monoallelic rearrangement (allelic exclusion) of antigen receptor genes
@@ -734,6 +741,11 @@
  - 2 models of effects of CTLA-4 blockade on Teffs: (i) the threshold model whereby CTLA-4 blockade would allow low-avidity T cells to expand and diversity to increase, (ii) the attenuation model whereby CTLA-4 blockade would promote the preferential expansion of high-avidity T cells and narrowing of the repertoire
  - results not really cleanly supporting either model
  - **diverse repertoires are important in limiting the magnitude of immune escape but may also promote self-reactive clones and induce host inflammation**
+# Improvement of PD-1 blockade efficacy and elimination of immune-related gastrointestinal adverse effect by mTOR inhibitor
+ - ICB induces colitis in melanoma patients, promotes infiltration of CD8<sup>+</sup> effector T cells into colitic lesions
+ - see PI3K-AKT-mTOR pathway activated in CD8<sup>+</sup> effector T cells of colitic lesions
+ - CD8<sup>+</sup> T cells may already be present in healthy tissues, perhaps why some tissues get more irAEs (more tissue resident immune cells in skin and colon?)
+ - alternative hypothesis: shared antigens between tumor and self, tumor infiltrating T cells leak into bloodstream and target self-antigens
 # Improving CAR-T immunotherapy: overcoming the challenges of T cell exhaustion
  - **CAR (chimeric antigen receptor) allows modified T cells to mount antigen-specific immune response to cells bearing CAR target antigen independently of MHC**
  - CAR T cell therapy failure often attributed to antigen escape (selection pressure under CAR T surveillance leads to emergence of antigen-negative tumors), but relapse can occur with antigen-positive tumors (can be hard for CAR T cells to access tumor cells for example due to regulatory T cells in tumor secreting inhibitory cytokines)
@@ -1562,5 +1574,14 @@
 ## Discussion
  - model: metastatic disease promotes compartmentalised CMV reactivation in latently infected individuals, possibly triggered by an unknown winter virus infection; in turn, CMV stimulates expansion of CD4<sup>+</sup> T<sub>EM</sub> cells prior to immunotherapy. When αPD-1/αCTLA-4 therapy is given, these T<sub>EM</sub> cells might inflict liver injury directly or promote bystander T cell responses
  - **anti-viral immunity might also explain predisposition to other adverse reactions following αPD-1/αCTLA-4 therapy, such as colitis or pneumonitis**
+# Why must T cells be cross-reactive?
+ - TCR repertoire dwarfed by potential foreign antigens
+ - > 7,000 allelic variants of HLA locus in human population
+ - each person expresses 6 different HLA class I molecules (2 HLA-A, 2 HLA-B, 2 HLA-C) and 6 HLA class II molecules (HLA-DR, HLA-DQ, HLA-DP)
+ - memory T cells can recognize lower concentrations of antigen than naive T cells (> 50 fold lower), perhaps via changes in TCR expression levels, TCR clustering on cell surface, changes in expression of costimulatory molecules, control of T cell signaling, or alterations in TCR glycosylation
+ - heterologous immunity: individual T cell clone can target > 1 infection through different peptides, common between related pathogens (i.e. immunity to cowpox protects against smallpox), different peptides can be dissimilar in sequence
+ - connection to autoimmunity: weakly autoreactive T cells can escape negative selection in thymus and be activated through crossrecognition of foreign antigens (molecular mimicry)
+ - **since memory T cells can be stimulated by peptide concentrations > 50 fold lower than those required to stimulate naive T cells, more likely for memory T cell to be stimulated by crossreactive peptide, pathogen-mediated priming would be required first before crossreactivity (i.e. naive T cell that lead to generation of memory T cell stimulated by pathogen first), this is consistent with infection precipitating autoimmunity**
+ - **any given TCR-pMHC interaction is likely not the best TCR to bind that pMHC (affinity wise), but it's good enough to stimulate a response, this also means that the affinity can be increased for therapeutics**
 # γδ T cell exhaustion: Opportunities for intervention
  - γδ T cells (TCRs with γ and δ chains instead of the usual α and β ones) can respond to varied infections/tumor challenges in a non-MHC-restricted manner, involved in immune surveillance (pleiotropic i.e. more than one effector functions)
