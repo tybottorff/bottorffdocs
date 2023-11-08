@@ -117,6 +117,14 @@ immune.combined <- IntegrateData(anchorset = immune.anchors, normalization.metho
 
 ```
 
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/integrated.rds")
+
+```
+
 # Specify integration, scale data
 
 ```{r}
@@ -159,7 +167,7 @@ immune.combined <- FindClusters(immune.combined, resolution = 3)
 
 ```{r}
 
-DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident")
+DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident", raster=FALSE)
 
 ggsave("../figures/umap_patient_id.svg")
 
@@ -179,6 +187,6 @@ ggsave("../figures/umap_cluster.svg")
 
 ```{r}
 
-saveRDS(immune.combined, "../saved_data/transformed_reduced.rds")
+saveRDS(immune.combined, "../saved_data/integrated_transformed_reduced_clustered.rds")
 
 ```
