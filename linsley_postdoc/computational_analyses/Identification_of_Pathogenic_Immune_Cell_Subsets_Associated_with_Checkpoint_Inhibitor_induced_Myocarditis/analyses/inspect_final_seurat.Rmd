@@ -1,0 +1,69 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SeuratDisk)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RDS
+
+```{r}
+
+immune.combined <- readRDS("../saved_data/final_seurat.rds")
+
+```
+
+# Plot mapping results
+
+```{r}
+
+DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE, raster = FALSE) + NoLegend()
+
+ggsave("../figures/umap_cluster.svg")
+
+DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident", label = TRUE, repel = TRUE, raster = FALSE)
+
+ggsave("../figures/umap_patient_id.svg")
+
+DimPlot(immune.combined, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, repel = TRUE, raster = FALSE)
+
+ggsave(file = "../figures/l1_cell_type_umap.svg")
+
+DimPlot(immune.combined, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, repel = TRUE, raster = FALSE) + NoLegend()
+
+ggsave(file = "../figures/l2_cell_type_umap.svg")
+
+```

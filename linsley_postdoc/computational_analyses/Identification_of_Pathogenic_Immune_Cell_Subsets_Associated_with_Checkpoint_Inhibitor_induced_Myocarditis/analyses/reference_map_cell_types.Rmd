@@ -58,7 +58,7 @@ reference <- LoadH5Seurat("../raw_data/pbmc_multimodal.h5seurat")
 
 ```{r}
 
-DimPlot(object = reference, reduction = "wnn.umap", group.by = "celltype.l2", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+DimPlot(object = reference, reduction = "umap", group.by = "celltype.l2", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
 
 ```
 
@@ -99,10 +99,18 @@ immune.combined <- MapQuery(
 
 ```{r}
 
-p1 = DimPlot(immune.combined, reduction = "ref.umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+p1 = DimPlot(immune.combined, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
 
-p2 = DimPlot(immune.combined, reduction = "ref.umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 ,repel = TRUE) + NoLegend()
+p2 = DimPlot(immune.combined, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
 
 p1 + p2
+
+```
+
+# Save RDS of mapped cell types
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/cell_type_ref_mapped_integrated_transformed_reduced_clustered.rds")
 
 ```

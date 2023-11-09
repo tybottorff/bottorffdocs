@@ -167,7 +167,7 @@ immune.combined <- FindClusters(immune.combined, resolution = 3)
 
 ```{r}
 
-DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident", raster=FALSE)
+DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident")
 
 ggsave("../figures/umap_patient_id.svg")
 

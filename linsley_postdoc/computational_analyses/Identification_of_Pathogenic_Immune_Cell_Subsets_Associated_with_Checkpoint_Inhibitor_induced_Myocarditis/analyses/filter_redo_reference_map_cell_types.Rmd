@@ -1,0 +1,75 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SeuratDisk)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RDS
+
+```{r}
+
+immune.combined <- readRDS("../saved_data/cell_type_ref_mapped_integrated_transformed_reduced_clustered.rds")
+
+```
+
+
+# Filter away irrelevant cells to prepare for re-doing dimensional reduction, clustering, mapping
+
+```{r}
+
+no_platelet_eryth_doublet <- immune.combined[, !(immune.combined$predicted.celltype.l2 %in% c("Platelet", "Eryth", "Doublet"))]
+
+```
+
+# Re-do dimensional reduction, clustering
+
+```{r}
+
+no_platelet_eryth_doublet <- RunPCA(no_platelet_eryth_doublet, npcs = 30, verbose = FALSE)
+no_platelet_eryth_doublet <- RunUMAP(no_platelet_eryth_doublet, reduction = "pca", dims = 1:30)
+no_platelet_eryth_doublet <- FindNeighbors(no_platelet_eryth_doublet, reduction = "pca", dims = 1:30)
+no_platelet_eryth_doublet <- FindClusters(no_platelet_eryth_doublet, resolution = 3)
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(no_platelet_eryth_doublet, "../saved_data/cell_type_filtered_rereduced.rds")
+
+```
