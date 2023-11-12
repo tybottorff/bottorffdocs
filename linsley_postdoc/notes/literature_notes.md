@@ -1,13 +1,26 @@
+# Accumulation of identical T cells in melanoma and vitiligo-like leukoderma
+ - numbers of T cells in small skin samples often insufficient for clonality analysis
+ - **perhaps only well-expressed self proteins are efficient in inducing tolerance, so rare self proteins can induce autoreactivity?**
 # Activation of human T cells by major histocompatability complex class II expressing neutrophils: proliferation in the presence of superantigen, but not tetanus toxoid
  - polymorphonuclear neutrophils (PMNs) function for acute phagocytic clearance of foreign pathogens, release inflammatory mediators, assumed to not express but can express MHC class II molecules after stimulation by interferon γ
  - superantigen refers to antigen binding to MHC class II with high affinity outside antigen binding groove in absence of antigen processing, trigger proliferation of T cells expressing TcR-VB gene products (stimulate T cells in TCR Vβ-specific manner)
 # Advances in immune checkpoint inhibitor combination strategies for microsatellite stable colorectal cancer
  - microsatellite stable (MSS) colorectal tumors are immune-cold
+# Aging-associated and CD4 T cell-dependent ectopic CXCL13 activation predisposes to anti-PD-1 therapy-induced adverse events
+ - mice
+ - ectopic accumulation of T and B cells in damaged organs only in aged mice
+ - CD4 T cell-derived IL-21 upregulated CXCL13 (B cell homing chemokine) in irAE organs in aged mice with ICB
 # Allopeptides and the alloimmune response
  - allorecognition is recognition of non-self
  - main targets of recipient immune response against allograft are donor MHC antigens on allogenic tissue
  - recognition of mismatched MHC antigens leads to allograft rejection
  - allorecognition can occur directly and/or indirectly: directly refers to recognition of intact donor MHC molecules on donor cells (APC)s, indirectly refers to presentation of processed antigens by recipient APCs to recipient T cells
+# Amino acid similarity accounts for T cell crossreactivity and for "holes" in the T cell repertoire
+ - analyze HIV epitope SLFNTVATL (SFL9)
+ - biochemically similar amino acid substitutions in peptide don't drastically alter TCR-pMHC recognition
+ - crossreactive TCRs target peptides with similar biochemistry despite potentially dissimilar sequence
+ - estimate TCRs to be able to bind ~10<sup>5</sup> to 10<sup>6</sup> peptides
+ - **around half of foreign pMHCs don't induce T cell response, perhaps because T cells with TCRs specific for those pMHCs are deleted in thymus (i.e. those foreign pMHCs look like self ones)**
 # An anti-CD3 antibody, teplizumab, in relatives at risk for type 1 diabetes
  - teplizumab delays progression of type 1 diabetes in high risk participants
  - KLRG1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells more common in teplizumab group than placebo
@@ -146,6 +159,8 @@
  - **baseline markers: peripheral blood lymphocyte counts > 2,000, lower % PD-1 expression on T cells, lower % Tregs, lower IL-6/8 levels, higher IL-17 levels, autoantibodies, some HLA alleles, among other things all associated with more irAEs**
  - **on treatment markers: increased leukocyte count, clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality, increased IL-6 levels, among other things all associated with more irAEs**
  - **takehome for me: on treatment markers including clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality all very interestingly associated with more irAEs**
+# Broad TCR repertoire and diverse structural solutions for recognition of an immunodominant CD8<sup>+</sup> T cell epitope
+ - many distinct TCRs recognizing HLA-A2-M1 (pMHC) here, solution to specifically recognizing a relatively featureless peptide antigen
 # Cancer immunotherapy based on mutation-speciifc CD4<sup>+</sup> T cells in a patient with epithelial cancer
  - find TILs from patient with metastatic cholangiocarcinoma had CD4<sup>+</sup> T<sub>H</sub>1 cells recognizing mutation in ERBB2IP expressed by cancer (neoantigen)
 # Canonical correlation analysis for multi-omics: application to cross-cohort analysis
@@ -193,6 +208,9 @@
  - following activation, T cells increase CTLA-4 expression (outcompetes CD28 for CD80/86 and regulates extent and duration of T cell activation to prevent excessive immunopathology), other negative signals include PD-1, LAG-3, 2B4, TIGIT, TIM-3
 ### Signal 3: Cytokines
  - IL-12, type I IFN, also IL-1/6/10/18/27/33 and TGFβ, among others
+# CD8 T cell function and crossreactivity explored by stepwise increased peptide-HLA versus TCR affinity
+ - vaccines with native tumor epitope (vs. HLA affinity-optimized epitope) generated T cells eith better functionality and enhanced crossreactivity against potential low affinity escape epitopes
+ - cumulative impact of peptide:HLA and TCR-peptide:HLA affinity on T cell responses
 # Cellular and molecular waypoints along the path of T cell exhaustion
 # Changes of peripheral T cell subsets in melanoma patients with immune-related adverse events
 ## T cell changes in patients with severe irAEs receiving anti-PD-1 monotherapy
@@ -248,6 +266,10 @@
  - phenotype of effector seems less important than number and repertoire of T cells responding to treatment
  - patients with more CD8 T cells in tumor exhibit better survival, better infiltration also not surprising here to help out
  - hypothesis for **model: pool of tumor-specific TCF-1<sup>+</sup> stem-like CD8 T cells that aren't proliferating or generating antitumor effector cells that are a reservoir unleashed by ICB, seen by large burst of HLA-DR<sup>+</sup> CD38<sup+</sup> CD8 T cells after ICB and new repertoire**
+# Clonal dynamics of alloreactive T cells in kidney allograft rejection after anti-PD-1 therapy
+## Discussion
+ - alloreactive CD8<sup>+</sup> T cells clonally expanded after ICI, acquired distinctive transcriptomic signature, accumulated in transplanted kidney during ICB-mediated allograft rejection
+ - despite 10 years of stable allograft function, alloreactive T cells remained present in kidney transplant recipient (unleashed by ICB), so didn't see clonal deletion
 # Clonal exhaustion as a mechanism to protect against severe immunopathology and death from an overwhelming CD8 T cell response
  - possible evolutionary reason for T cell exhaustion
 # Clonal expansion of CD8 T cells in the systemic circulation precedes development of ipilimumab-induced toxicities
@@ -270,6 +292,10 @@
  - previous literature has suggested increased T cell clonality in tumor microenvironment correlates with clinical response to PD-1 blockade
  - **most irAEs are similar irregardless of tumor/blockade type, so perhaps there's a common mechanism underlying irAEs**
  - immunosuppressive therapies can be used to treat irAEs, shorter course required if used sooner (but early irAE manifestations can be subtle)
+# Clonal expansion of resident memory T cells in peripheral blood of patients with non-small cell lung cancer durine immune checkpoint inhibitor treatment
+ - among T cell subtypes, effector memory CD8<sup>+</sup> T cells (CD8<sup>+</sup> TEM GZMK PDCD1) were increased after ICI treatment in both DCB and NCB
+ - effector memory CD8<sup>+</sup> T cells resided at the bifurcation point, which has the potential to differentiate into lineages with precursor exhausted CD8<sup>+</sup> T cells (CD8<sup>+</sup> TCM cells) assumed to be related to the ICI response
+ - effector memory CD8<sup>+</sup> T cells along with T cells recognizing unknown antigen expanded and composed of novel clones skewed toward dysfunctional status, especially in on-treatment samples of the durable clinical benefit group. 
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - co-expression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -427,6 +453,10 @@
  - enhanced macrophage abundance and TNF signaling in on-treatment tumors and organs developing irAEs
  - increased circulating TNF protein in plasma/serum of irAE patients but not ICI responders
  - Th17 abundance didn't change in irAE group, nor was Th17 identified in CD4<sup>+</sup> T cells in tumors 
+# Dynamics and survival associations of T cell receptor clusters in patients with pleural mesothelioma treated with immunotherapy
+## Abstract
+ - ICI-enhanced T-cell infiltration and expanded T cell diversity in tumors
+ - high number of shared TCR clones between pretreatment tissue and in circulation was associated with improved survival
 # Dynamic single-cell mapping unveils Epstein-Barr virus-imprinted T cell exhaustion and on-treatment response
 ## Abstract
  - Epstein-Barr virus associated gastric cancer exhibits an inflammed-immune phenotype, increased T and B cell infiltration
@@ -478,6 +508,11 @@
  - here, they report that patients with low melanoma neoantigen burdens who did respond to ICIs had tumors with higher expression of pigmentation-related genes
  - **expansion of peripheral CD8<sup>+</sup> T cell populations specific for melanocyte antigens observed only in patients who responded to anti-PD-1 therapy, so ICI can promote breakdown of tolerance towards tumor-lineage self-antigens**
  - **mouse model of poorly immunogenic melanomas: skew epitope recognition toward wild type melanocyte antigens associated with improved anti-PD-1 efficacy (can introduce neoantigens with UVB radiation mutagenesis), and got long term protection against engrafted melanomas not sharing neoantigens**
+## Results
+### Recognition of wild type melanocyte antigens following immune checkpoint blockade in patients with melanoma
+ - **immune activity against wild type melanocyte antigens in melanoma may contribute to ICB efficacy despite low neoantigen burden (i.e. perhaps in responders with low neoantigen tumors more often will see irAEs given necessity for immune activity against tumor associated antigens shared between tumor and self)**
+## Discussion
+ - **neoantigens may contribute to breaking of self-tolerance (toward wild type melanocyte self-antigens) in ICB**
 # Evaluating T cell cross-reactivity between tumors and immune-related adverse events with TCR sequencing: pitfalls in interpretations of functional relevance
 ## Abstract
  - shared T cell clones between tumor and irAE evidence for crossreactivity **(or shared antigens)** underlying irAEs
@@ -595,6 +630,8 @@
  - **shared antigens between tumor and peripheral normal tissue may drive both antitumor responses and organ-specific autoimmunity, activating tumor/auto-reactive T cells**
  - organ-specific autoantibodies can predict organ-specific irAEs
  - baseline immune cell profiles are being studied as predictors of irAEs: high CD2<sup>low</sup> PD-1<sup>+</sup> B cells, high eosinophil count, high proliferation of control memory CD8<sup>+</sup> T cells, higher expression of CD27/28 on CD4/8 effector T cells, increased activated CD4 memory T cells and TCR diversity
+# Host-specific differences in top-expanded TCR clonotypes correlate with divergent outcomes of anti-PD-L1 treatment in responders versus non-responders
+ - murine
 # Identification of neoantigens for individualized cancer immunotherapy
  - neoepitopes are attractive targets for therapeutic cancer vaccines, **but most cancer mutations are unique for individual patients (neoantigenome), requiring individualized treatment**
  - **not all tumor mutations give rise to neoantigens, neoepitope-specific T cells reflect only 1-2% of mutations in an individual tumor, this could be due to not all tumor mutations giving rise to neoantigens and from T cell repertoire not recognizing all neoantigens perhaps as well**
@@ -676,6 +713,19 @@
  - study patients with various cancers treated with PD-1 blockade
  - **identify 23 immune-related genes/signatures linked to response and progression-free survival**
  - **PD1 gene expression along with 12 signatures tracking CD8 and CD4 T cell activation, natural killer cells, and IFN activation associated significantly with non-progressive disease and progression free survival**
+# Immune responses in checkpoint myocarditis across heart, blood, and tumor
+## Abstract
+ - presence of cardiac-expanded TCRs in a circulating, cycling CD8 T cell population as a novel peripheral biomarker of fatality
+## Introduction
+ - irAE myocarditis histology: heterogeneous lymphocyte infiltration into myocardium, both CD4<sup>+</sup> and CD8<sup>+</sup> T cells
+## Results
+### Activated CD8 T cells and CD4 T cells are increased in irMyocarditis
+### Immunosuppression alters T cell gene expression but not TCR repertoire in an irMyocarditis case with matched pre- and post-corticosteroid heart samples
+### TCR clones enriched in irMyocarditis hearts are distinct from those enriched in tumor
+ - across all irMyocarditis patients, five clones were enriched in both heart and tumor (18% of tumor-enriched TCR-βs, 26% of heart-enriched TCR-βs), but in each irMyocarditis patients, the TCR-β clones most expanded in heart tissue compared to control tissue were not enriched in the tumor relative to control tissue
+ - **modest overlap of TCR beta clones between heart and tumor but majority of enriched/most expanded clones in each tissue are distnct**
+## Discussion
+ - arguing against shared antigens between heart and tumor, cardiac protein alpha-myosin autoantigen in mouse models of irMyocarditis but healthy controls here have T cell clones reactive for this antigen in blood (also these were not most expanded clones in irMyocarditis tissue in cancer patients)
 # Immune signatures predict development of autoimmune toxicity in patients with cancer treated with immune checkpoint inhibitors
 ## Highlights
  - systemic immune signatures shortly after ICI start linked to irAEs
@@ -775,14 +825,50 @@
  - ILCs enriched at mucosal barriers, activated by stress signals and epithelial/myeloid-derived cytokines, respond by secreting effector cytokines to maintain survival and mucosal integrity
  - ILCs do not possess rearranged antigen-specific cell receptors (TCR/BCR) but they mirror T helper cell diversity regarding cytokine secretion and transcription factors regulating differentiation
  - ILCs express cytokine receptor γ chain with IL-7 receptor(R)α (CD127)
+# Insight into immune profile associated with vitiligo onset and anti-tumoral response in melanoma patients receiving anti-PD-1 immunotherapy
+## Abstract
+ - **they usually find different TCR sequences in vitiligo and primary melanoma lesions, so T cell response against normal melanocytes leading to vitiligo is not usually mediated by reactivation of T cell clones infiltrating/specific to primary melanoma but rather perhaps by T cells targeting metastatic tissues, so kind of different from my thinking of usually crossreactivity between primary tumor and irAE site but could also be crossreactivity between metastases and irAE sites**
+## Introduction
+ - vitiligo irAE really better called a leukoderma lesion but very similar to spontaneous vitiligo (histology ~same)
+## Results
+### Patients who developed vitiligo during immunotherapy have a diverse frequency of circulating immune cells
+ - 12 ICB responder patients
+ - reduction of circulating CD8-mucosal associated invariant T (MAIT), T helper (Th)-17, and T-reg cells associated with vitiligo onset
+ - reduction in natural killer (NK) CD56<sup>bright</sup> cell frequency was detected during treatment in both patient groups, suggesting an association with a positive clinical response
+ - reduction in frequency of PD-1 expressing CD3<sup>+</sup>, CD4<sup>+</sup>, CD8<sup>+</sup>, Th1, Th1/17 cells in all patients, moreso for those not developing vitiligo
+### T cells infiltrating immunotherapy-induced vitiligo share V(D)J rearrangements with T cells infiltrating metastasis lesions and primary melanomas
+ - TRB CD3 sequencing on vitiligo biopsies, also do TCR-seq on PBMCs
+ - **metastasis and vitiligo sample TCRs more similar than primary melanoma and vitiligo TCRs**
+ - see shared TCR clonotypes betwen melanoma and metastasis
+ - metastasis TCRs most diverse, followed by PBCMs, then vitiligo, then lastly primary tumor (most clonal TCRs)
+## Discussion
+ - vitiligo caused by oxidative stress of melanocytes (ROS release by stressed melanocytes), leading to innate immune activation (DCs recognize damage-associated molecules) which stimulates anti-melanocyte adaptive immunity (autoreactive T cells, enhanced by impaired Tregs)
+ - TCRs generally different in vitiligo lesions and primary melanoma, **TCRs more often shared between vitiligo and metastases vs. vitiligo and primary tumor**
+ - **"beneficial autoimmunity": shared TCRs recognizing tumor-associated antigens in vitiligo and metastatic lesions of positive responders**
 # Integrated analysis of multimodal single-cell data
  - weighted nearest neighbor analysis integrates multimodal single cell data in an unsupervised manner by learning relative utility of each data type in each cell
 # Integrated NY-ESO-1 antibody and CD8<sup>+</sup> T cell responses correlate with clinical benefit in advanced melanoma patients treated with ipilimumab
  - isotype control: primary antibody that lacks specificity to target but matches class/type of primary antibody used, negative control to see non-specific background signal
  - CTLA-4 blockade improves survival in patients with advanced melanoma, also enhances immunity to NY-ESO-1 (cancer-testis antigen expressed in some melanoma patients)
  - see increase (16% to 22%) in seropositivity for NY-ESO-1 antibody after CTLA-4 blockade, seropositive individuals more likely to experience clinical benefit (seropositive individuals who didn't experience clinical benefit more likely didn't have associated CD8<sup>+</sup> T cells)
+# Interpreting T cell crossreactivity through structure: implications for TCR-based cancer immunotherapy
+## Abstract
+ - melanoma-specific T cells crossreacting with healthy heart/nervous tissue, crossreactivity
+ - **crossreactivity driven by structural similarities of seemingly unrelated pMHCs (by sequence)**
+ - **"hot-spots" for crossreactivity, some residues more important than others for allowing/triggering crossreactivity**
+## Hypothesis and theory
+ - **there are biases in somatic recombination process, so some TCRs are produced more often than others (leading to public TCRs)**
+ - **it's uncommon for two different MHCs to be able to bind a given peptide, but crossreactivity involving different MHCs has been reported**
+ - **MHC binding importance in TCR-pMHC interaction is one of causes of allogenic transplant rejection**
+ - **TCR has flexible loops (including CDRs) that interact with pMHC**
+ - **alpha CDRs usually bind N-terminus of peptide, beta CDRs bind C-terminus**
+ - **TCR footprint: general docking mode of TCR to cognate pMHC, germline bias i.e. TCR recognizes conserved MHC residues**
 # Interesting possibilities to improve the safety and efficacy of ipilimumab (Yervoy)
  - target ICI to tumor with streptavidin-biotin technology (anti-tumor antibody conjugated to streptavidin and biotin-labeled anti-CTLA-4 antibody for example)
+# Intratumoral expression levels of *PD-L1*, *GZMA*, and *HLA-A* along with oligoclonal T cell expansion associate with response to nivolumab in metastatic melanoma
+ - *PD-L2* expression levels also correlate with response to nivolumab
+ - Th1 response dominance in responders (higher *TBX21/GATA3* ratio)
+ - see oligoclonal T cell expansion in responders' TILs
 # Intratumoral heterogeneity and T cell exhaustion in primary CNS lymphoma
 # Inverse vaccination, the opposite of Jenner's concept, for therapy of autoimmunity
  - Jenner invented vaccination in 1796
@@ -829,6 +915,11 @@
  - MHC binding platform composed of 2 domains from single heavy α-chain (HC) for MHCI and from two chains for MHCII (α-chain and β-chain), 2 domains form β-sheet as base and 2 α-helices on top that have space between them to accommodate a peptide chain
  - 2 membrane-proximal immunoglobulin domains support peptide-binding unit
  - MHCI binding groove can accomodate ~8-10 residue peptide, ~13-25 residue peptide for MHCII
+# Mechanisms and biomarkers of immune-related adverse events in gastric cancer
+ - blocking CTLA-4 can induce activation of autoreactive T ells via depletion of Tregs (express CTLA-4), stimulation of B cells to produce autoantibodies
+ - blocking CTLA-4/PD-1 may lead to expansion and activation of pre-existing tissue-resident memory T cells
+ - irAE biomarkers in gastric cancer: HLA-DR15 (higher with irAEs, perhaps via IL-17), neutrophil/platelet to lymphocyte ratios (NLR, PLR, inflammatory markers of poor prognosis and irAE development)
+ - managing irAEs: corticosteroids/immunosuppression
 # Mechanisms of immune-related adverse events during the treatment of cancer with immune checkpoint inhibitors
 ## Abstract
  - mechanisms leading to irAEs are likely similar to those promoting anti-tumor responses (expansion of T cell repertoire)
@@ -1140,8 +1231,6 @@
  - example cross-reactive T cell here recognized 3 peptides: EAAGIGILTV from Melan A,  LLLGIGILVL from tetherin/CD317/BST2, and NLSALGIFST from IMP2
  - they use term "multipronged" whereas I've been reading/using cross-reactive, **these are different terms, multipronged for antigens on same cell and crossreactive for different antigens on different cells**
  - multipronged recognition resulted in superior recognition of cancer cells vs. recognition by single TAA
-## Results
-### Patient MM909.24 TIL infusion product responds to widely shared HLA A*02:01-restricted antigens
 ## Discussion
  - goal: what do cancer-specific T cells respond to following successful TIL therapy for stage IV melanoma
  - TIL infusion used to induce a complete response responded to a range of different cancer cell lines from different tissues, suggesting that the majority of the anticancer response in these TILs acted to target widely shared antigens rather than patient-specific, mutation-derived neoantigens
@@ -1401,6 +1490,18 @@
  - PD1 can increase expression of transcription factors like BATF to counteract T cell activation transcriptional program
  - PDL1 can also bind CD80
  - after T cell activation, if antigen is cleared, memory T cells form and PD1 expression levels decrease (PD1 expression remains high if antigen persists and T cell exhaustion can develop)
+# The good and the bad of T cell crossreactivity: challenges and opportunities for novel therapeutics in autoimmunity and cancer
+ - each T cell expresses ~10,000 copies of TCR on cell surface
+ - **peptide binding to MHC allelic products subject to specific rules, i.e. anchor/preferred residues in peptide for specific MHC alleles just like anchor/prefered peptide residues for specific TCRs**
+ - **modes of crossreactivity: induced fit (change in CDR3 loop conformation), differential TCR docking (different docking orientation), structural degeneracy (weak TCR-pMHC interaction), molecular mimicry (similar structural/chemical features), antigen-dependent tuning of pMHC flexibility (ligand freedom on MHC)**
+ - crossreactivity common for very similar peptides (1-2 residue changes)
+ - crossreactivity likely tuned by coreceptors (inhibitory/activating) and adhesion molecules expressed by T cell at given time
+ - **TCR conceivably could recognize ~ 1 million peptides, crossreactive peptides likely often better agonists than original one that activated T cell, but few (~1%) of peptides are actually presented on MHC, so probably crossreactivity estimate closer to 1 in ~10,000**
+ - **molecular mimicry: weakly crossreactive T cells activated through recognition of infection pathogens and then crossreact with self antigens, memory T cells can be stimulated by lower concentrations of peptides than naive T cells, related to fact that infections often precipitate autoimmunity**
+ - tumor-associated antigens (i.e. not neoantigens) are poorly immunogenic due to thymic negative selection of highly self-reactive T cells
+ - antigen-reactive T cell fraction in peripheral immune naive repertoire very low, ~ 1 in 100,000 T cells
+ - **interest in designing peptides that can activate T cells to be crossreactive against tumor associated antigens to improve immunogenicity (usually weak to tumor associated antigens)**
+ - **some parts of body are immune privileged and lack HLA expression, like placenta and testis**
 # The graft-versus-leukemia effect in AML
  - allogenic hematopoietic stem cell transplantation (allo-SCT) commonly used in cancer care, most potent anti-leukemic therapy in AML (acute myeloid leukemia) patients
  - donor T cells (and maybe other immune cells) eliminate residual leukemia cells after radio/chemotherapy = graft-versus-leukemia response
@@ -1528,6 +1629,10 @@
 ### Broadening checkpoint blockade antibody strategies
  - perhaps try dual immunodulatory antibodies (bispecific or antibody-based alternative structures), for example targeting PD-1/PD-L1 in combination with LAG-3/TIM-3 (perhaps promotes retention in tumor microenvironment over healthy tissue)
  - perhaps modify anti-CTLA-4 antibodies to permit expression of CTLA-4 on Tregs (CTLA-4 required for Treg inhibitory function)
+# Unraveling age-specific complexity in the human T cell compartment
+ - TEA-seq to investigste transcriptomics, epitopes, and chromatin accessibility of single cells
+ - compare children and older adult immune profiles
+ - CD8alpha alpha T cells in children lost in older adults
 # Using surface hydrophobicity together with empirical potentials to identify protein-protein binding sites. Application to the interactions of E-cadherins
  - **not sure why yet and surprising to me, but apparently hydrophobic interactions are generally the strongest for protein binding BUT don't necessarily provide specificity that comes from other residues**
  - **idea is that hydrophobic residues provide affinity and polar/charged ones provide specificity via a more limited set of specific favorable structures**
@@ -1574,6 +1679,12 @@
 ## Discussion
  - model: metastatic disease promotes compartmentalised CMV reactivation in latently infected individuals, possibly triggered by an unknown winter virus infection; in turn, CMV stimulates expansion of CD4<sup>+</sup> T<sub>EM</sub> cells prior to immunotherapy. When αPD-1/αCTLA-4 therapy is given, these T<sub>EM</sub> cells might inflict liver injury directly or promote bystander T cell responses
  - **anti-viral immunity might also explain predisposition to other adverse reactions following αPD-1/αCTLA-4 therapy, such as colitis or pneumonitis**
+# Vitiligo-specific soluble biomarkers as early indicators of response to immune checkpoint inhibitors in metastatic melanoma patients
+## Abstract
+ - basal CD25 serum levels were higher in stable and responding patients and remained higher during the first 3 months of CPI therapy compared to non-responders
+ - CXCL9 was absent in non-responding patients before therapy
+ - increase of CXCL9 levels was observed at 1 and 3 months of therapy for all patients, although higher CXCL9 amounts were present in stable and responding compared to non-responding patients
+ - reduced number of regulatory T lymphocytes in responding patients
 # Why must T cells be cross-reactive?
  - TCR repertoire dwarfed by potential foreign antigens
  - > 7,000 allelic variants of HLA locus in human population
