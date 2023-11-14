@@ -1,0 +1,211 @@
+---
+title: "Distinct molecular and immune hallmarks of inflammatory arthritis induced by immune checkpoint inhibitor therapy"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9005525/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(readxl)
+library(Matrix)
+library(stringr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+test1 <- read_tsv("../raw_data/GSE173303_subT_data_metadata.tsv")
+
+test1
+
+test2 <- read_tsv("../raw_data/GSE173303_whole_data_metadata.tsv")
+
+test2
+
+test3 <- read_tsv("../raw_data/GSE173303_barcodes.tsv")
+
+test3
+
+test4 <- read_tsv("../raw_data/GSE173303_features.tsv")
+
+test4
+
+```
+
+# Prep stitchr df
+
+```{r}
+
+stitchr_data <- merged_df %>%
+  filter(chain %in% c("TRA", "TRB")) %>%
+  group_by(barcode, chain) %>%
+  arrange(-umis) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(barcode, v_gene, d_gene, j_gene, c_gene, chain, cdr3_nt) %>%
+  rename(TCR_name = barcode,
+         CDR3 = `cdr3_nt`,
+         V = `v_gene`,
+         J = `j_gene`,
+         C = `c_gene`) %>%
+  pivot_wider(names_from = chain, values_from = c(V, J, C, CDR3)) %>%
+  # rename, reorder, create cols for stitchr
+  rename(TRAV = V_TRA, TRAJ = J_TRA, TRBV = V_TRB, TRBJ = J_TRB, TRAC = C_TRA, TRBC = C_TRB, TRA_CDR3 = CDR3_TRA, TRB_CDR3 = CDR3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter_all(all_vars(!is.na(.))) %>%
+  filter_all(all_vars(. != "None")) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_data
+
+# 130,006 rows
+
+write.table(stitchr_data, file = "../saved_data/tcrseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+
+```
+
+# Read in stitchr output
+
+```{r}
+
+stitchr_output <- read.delim("../saved_data/stitchr_out.tsv", header = TRUE, sep = "\t")
+
+# Columns that need further separation by space
+columns_to_split_by_space <- c("TRA_nt", "TRA_aa", "TRB_nt", "TRB_aa", "Linked_nt")
+
+# Split the specified columns by space
+for (col_name in columns_to_split_by_space) {
+  stitchr_output[[col_name]] <- sapply(stitchr_output[[col_name]], function(x) unlist(strsplit(x, " ")))
+}
+
+# Assign the column names
+colnames(stitchr_output) <- c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ",
+                    "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", 
+                    "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", 
+                    "Linked_aa", "Warnings.Errors")
+
+# Define a function to replace with NA if length is 0
+replace_empty_with_na <- function(x) {
+  if (length(x) == 0) {
+    return(NA)
+  } else {
+    return(x)
+  }
+}
+
+# Replace values in the specified columns with real NA
+cols_to_update <- c("TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "Linked_nt")
+
+for (col_name in cols_to_update) {
+  stitchr_output[[col_name]] <- lapply(stitchr_output[[col_name]], replace_empty_with_na)
+}
+
+stitchr_output$TRA_nt <- sapply(stitchr_output$TRA_nt, as.character)
+stitchr_output$TRA_aa <- sapply(stitchr_output$TRA_aa, as.character)
+stitchr_output$TRB_nt <- sapply(stitchr_output$TRB_nt, as.character)
+stitchr_output$TRB_aa <- sapply(stitchr_output$TRB_aa, as.character)
+stitchr_output$Linked_nt <- sapply(stitchr_output$Linked_nt, as.character)
+
+```
+
+# Prep IMGT/HighV-Quest input
+
+```{r}
+
+fasta_prep <- stitchr_output %>%
+  rename(barcode = TCR_name) %>%
+  left_join(merged_df, by = "barcode")
+
+fasta_df_alpha <- fasta_prep %>%
+  filter(!(is.na(TRA_nt)),
+         chain == "TRA") %>%
+  ungroup()
+
+# Function to convert a data frame to FASTA format
+df_to_fasta_alpha <- function(df, output_file) {
+  # Open/create the output file for writing
+  fasta_file <- file(output_file, "w")
+  
+  # Iterate through rows of the data frame
+  for (i in 1:nrow(df)) {
+    # Combine name columns and add a suffix numbering
+    label <- df$barcode[i]
+
+    # Write the sequence and label to the FASTA file
+    writeLines(paste(">", label), con = fasta_file)
+    writeLines(df$TRA_nt[i], con = fasta_file)
+  }
+  
+  # Close the output file
+  close(fasta_file)
+}
+
+# Call the function to convert the data frame to FASTA format
+df_to_fasta_alpha(fasta_df_alpha, "../saved_data/vdjseq_alpha.fasta")
+
+fasta_df_beta <- fasta_prep %>%
+  filter(!(is.na(TRB_nt)),
+         chain == "TRB") %>%
+  ungroup()
+
+# Function to convert a data frame to FASTA format
+df_to_fasta_beta <- function(df, output_file) {
+  # Open/create the output file for writing
+  fasta_file <- file(output_file, "w")
+  
+  # Iterate through rows of the data frame
+  for (i in 1:nrow(df)) {
+    # Combine name columns and add a suffix numbering
+    label <- df$barcode[i]
+
+    # Write the sequence and label to the FASTA file
+    writeLines(paste(">", label), con = fasta_file)
+    writeLines(df$TRB_nt[i], con = fasta_file)
+  }
+  
+  # Close the output file
+  close(fasta_file)
+}
+
+# Call the function to convert the data frame to FASTA format
+df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
+
+```

@@ -1,0 +1,324 @@
+---
+title: "Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade"
+output: pdf_document
+---
+
+ - data reproduction of https://www.sciencedirect.com/science/article/pii/S153561082300082X
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(readxl)
+library(Matrix)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+# List of sample names
+sample_names <- c(
+  "GSM5608032_MSK1263_A1",
+  "GSM5608033_MSK1263_A3",
+  "GSM5608034_MSK1263_A4",
+  "GSM5608035_MSK1263_LN",
+  "GSM5608036_MSK1263_Normal",
+  "GSM5608037_MSK1263_R1",
+  "GSM5608038_MSK1263_R2",
+  "GSM5608039_MSK1263_R3",
+  "GSM5608040_MSK1263_R4",
+  "GSM5608041_MSK1263_R5",
+  "GSM5608042_MSK1263_R6",
+  "GSM5608043_MSK1263_R7",
+  "GSM5608044_MSK1263_R8",
+  "GSM5608045_MSK1302_LN",
+  "GSM5608046_MSK1302_Normal",
+  "GSM5608047_MSK1302_R1",
+  "GSM5608048_MSK1302_R2",
+  "GSM5608049_MSK1302_R3",
+  "GSM5608050_MSK1302_R4",
+  "GSM5608051_MSK1302_R5",
+  "GSM5608052_MSK1302_R6",
+  "GSM5608053_MSK1302_R7",
+  "GSM5608054_MSK1302_R8",
+  "GSM5608055_MSK1344_Normal",
+  "GSM5608056_MSK1344_R1",
+  "GSM5608057_MSK1344_R2",
+  "GSM5608058_MSK1344_R3",
+  "GSM5608059_MSK1344_R4",
+  "GSM5608060_MSK1344_R5",
+  "GSM5608061_MSK1344_R6",
+  "GSM5608062_MSK1344_R7",
+  "GSM5608063_MSK1344_R8"
+)
+
+# Set your data directory
+data_dir <- '../raw_data/rna/'
+
+# Initialize an empty list to store Seurat objects
+seurat_objects <- list()
+
+# Loop through the sample names and create Seurat objects for each sample
+for (sample_name in sample_names) {
+  # Construct file paths
+  counts_file <- paste0(data_dir, sample_name, "_RNA_matrix.mtx")
+  barcodes_file <- paste0(data_dir, sample_name, "_RNA_barcodes.tsv")
+  genes_file <- paste0(data_dir, sample_name, "_RNA_features.tsv")
+  
+  # Read data files
+  counts <- readMM(counts_file)
+  barcodes <- read.table(barcodes_file, stringsAsFactors = FALSE)[, 1]
+  features <- read.csv(genes_file, stringsAsFactors = FALSE, sep = "\t", header = FALSE)
+  rownames(counts) <- make.unique(features[, 2])
+  colnames(counts) <- barcodes
+  
+  # Create Seurat object
+  seurat_object <- CreateSeuratObject(counts = counts)
+  
+  # Store sample name as metadata
+  seurat_object$sample_name <- sample_name
+  
+  # Store Seurat object in the list
+  seurat_objects[[sample_name]] <- seurat_object
+}
+
+```
+
+# Merge Seurat objects from all samples
+
+```{r}
+
+# Merge the first element with a sublist of the rest excluding the first element
+merged_seurats <- merge(seurat_objects[[1]], y = seurat_objects[-1])
+
+```
+
+# Calculate percent mitochondrial, ribosomal, hemoglobin features
+
+```{r}
+
+merged_seurats[["percent_mito"]] <- PercentageFeatureSet(merged_seurats, pattern = "^MT-")
+merged_seurats[["percent_ribo"]] <- PercentageFeatureSet(merged_seurats, pattern = "^RP[SL]")
+merged_seurats[["percent_hb"]] <- PercentageFeatureSet(merged_seurats, pattern = "HB[^(P)]")
+
+```
+
+# Count number of cells from all samples
+
+```{r}
+
+length(colnames(merged_seurats)) # 217101 cells
+
+```
+
+# Count cells per each of the 32 samples
+
+```{r}
+
+cell_capture <- merged_seurats@meta.data %>%
+  group_by(sample_name) %>%
+  dplyr::count()
+
+cell_capture %>% arrange(n)
+
+```
+
+# Visualize QC metrics across all patient samples
+
+```{r}
+
+vln_plot <- VlnPlot(merged_seurats, features = c("nFeature_RNA", "nCount_RNA", "percent_mito", "percent_ribo"), ncol = 4, pt.size=0)
+
+vln_plot
+
+ggsave(vln_plot, file = "../figures/vln_plot_qc.svg")
+
+```
+
+# Set author QC metric thresholds
+
+```{r}
+
+qcMetricsThresholds <-
+  c(
+    "nFeature_RNA_min" = 450,
+    
+    "nCount_RNA_max" = 15000,
+
+    "percent_mito" = 15
+  )
+
+```
+
+# Plot distributions of nFeature_RNA across samples with nFeature_RNA_min cutoff of 450
+
+```{r}
+
+nFeature_RNA_QC <- ggplot(merged_seurats@meta.data, mapping = aes(x = nFeature_RNA)) +
+  geom_density(mapping = aes(color = sample_name), size = 0.5) +
+  scale_x_log10() +
+  geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_min"],
+             color = "red", linetype = "dashed") +
+  theme(legend.position = "none")
+ggsave(nFeature_RNA_QC, file = "../figures/nFeature_RNA.svg")
+
+nFeature_RNA_QC
+
+```
+
+# Plot distributions of nCount_RNA across samples
+
+```{r}
+
+nCount_RNA_QC <- ggplot(merged_seurats@meta.data, mapping = aes(x = nCount_RNA)) +
+  geom_density(mapping = aes(color = sample_name), size = 0.5) +
+  scale_x_log10() +
+  geom_vline(xintercept = qcMetricsThresholds["nCount_RNA_max"],
+             color = "red", linetype = "dashed") +
+  theme(legend.position = "none")
+ggsave(nCount_RNA_QC, file = "../figures/nCount_RNA.svg")
+
+nCount_RNA_QC
+
+```
+
+# Plot distributions of percent mito across samples
+
+```{r}
+
+percent_mt_QC <- ggplot(merged_seurats@meta.data, mapping = aes(x = percent_mito + 1/length(colnames(merged_seurats)))) +
+  geom_density(mapping = aes(color = sample_name), size = 0.5) +
+  scale_x_log10() +
+  geom_vline(xintercept = qcMetricsThresholds["percent_mito"],
+             color = "red", linetype = "dashed") +
+  xlab("percent_mito (with pseudocount)") +
+  theme(legend.position = "none")
+ggsave(percent_mt_QC, file = "../figures/percent_mt.svg")
+
+percent_mt_QC
+
+```
+
+# Plot distributions of percent ribo across samples
+
+```{r}
+
+percent_rb_QC <- ggplot(merged_seurats@meta.data, mapping = aes(x = percent_ribo + 1/length(colnames(merged_seurats)))) +
+  geom_density(mapping = aes(color = sample_name), size = 0.5) +
+  scale_x_log10() +
+  xlab("percent_ribo (with pseudocount)") +
+  theme(legend.position = "none")
+ggsave(percent_rb_QC, file = "../figures/percent_rb.svg")
+
+percent_rb_QC
+
+```
+
+# Plot distributions of percent hemoglobin across samples
+
+```{r}
+
+percent_hb_QC <- ggplot(merged_seurats@meta.data, mapping = aes(x = percent_hb + 1/length(colnames(merged_seurats)))) +
+  geom_density(mapping = aes(color = sample_name), size = 0.5) +
+  scale_x_log10() +
+  xlab("percent_hb (with pseudocount)") +
+  theme(legend.position = "none")
+
+ggsave(percent_hb_QC, file = "../figures/percent_hb.svg")
+
+percent_hb_QC
+
+# authors didn't mention cutoff for this
+
+```
+
+#Sequencing data from 31 of 32 regional samples passed initial quality control (Figure S2A, Table S1, STAR Methods). After removing the single region that did not pass QC, 63.5–89.9% of the individual cells per region (Figure S2B, Table S1) passed QC filtering, retaining 162,062 high-quality T cells for downstream analyses.
+
+# Filter based on sample-specific QC metrics, track how many drop out
+
+```{r}
+
+# remove 1 problematic sample (GSM5608056_MSK1344_R1)
+merged_seurats_filtered_1 <- subset(merged_seurats, sample_name != "GSM5608056_MSK1344_R1")
+
+cellsKeep <-
+  WhichCells(
+    merged_seurats_filtered_1, expression = nFeature_RNA >= qcMetricsThresholds["nFeature_RNA_min"]) %>%
+  intersect(
+    WhichCells(
+      merged_seurats_filtered_1, expression = nCount_RNA <= qcMetricsThresholds["nCount_RNA_max"])) %>%
+  intersect(
+    WhichCells(
+      merged_seurats_filtered_1, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
+cellsDrop <-
+  setdiff(colnames(merged_seurats_filtered_1), cellsKeep)
+length(cellsDrop) # 17,968 cells dropped from analysis
+
+# 11,313 cells dropped due to nFeature_RNA_min threshold
+cellsDropped_nFeature <- sum(
+  merged_seurats_filtered_1$nFeature_RNA < qcMetricsThresholds["nFeature_RNA_min"]
+)
+
+# 1,289 cells dropped due to nCount_RNA_max threshold
+cellsDropped_nCount <- sum(
+  merged_seurats_filtered_1$nCount_RNA > qcMetricsThresholds["nCount_RNA_max"]
+)
+
+# 13,473 cells dropped due to percent_mito threshold
+cellsDropped_percentMito <- sum(
+  merged_seurats_filtered_1$percent_mito > qcMetricsThresholds["percent_mito"]
+)
+
+merged_seurats_filtered_2 <-
+  subset(merged_seurats_filtered_1, cells = cellsKeep)
+
+length(colnames(merged_seurats_filtered_2)) # 187,077 cells left behind in filtered data
+
+```
+
+# Count cells by sample after QC filtering
+
+```{r}
+
+cell_capture <- merged_seurats_filtered_2@meta.data %>%
+  group_by(sample_name) %>%
+  dplyr::count()
+
+cell_capture %>% arrange(n)
+
+```
+
+# Save the resulting QC filtered Seurat object
+
+```{r}
+
+saveRDS(merged_seurats_filtered_2, file="../saved_data/merged_seurats_filtered.rds")
+
+```

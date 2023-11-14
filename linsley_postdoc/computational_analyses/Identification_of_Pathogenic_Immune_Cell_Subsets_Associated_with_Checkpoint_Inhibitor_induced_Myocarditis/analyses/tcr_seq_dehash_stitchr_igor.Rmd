@@ -189,7 +189,7 @@ write.csv(dehashed_combined_tcr_seq, "../saved_data/dehashed_tcr_seq.csv")
 
 ```{r}
 
-#dehashed_combined_tcr_seq_with_rna <- as_tibble(readRDS("../saved_data/final_seurat_T_cells.rds")@meta.data)
+dehashed_combined_tcr_seq_with_rna <- as_tibble(readRDS("../saved_data/final_seurat_T_cells.rds")@meta.data)
 
 dehashed_combined_tcr_seq_with_rna$TCR_name <- as.integer(rownames(dehashed_combined_tcr_seq_with_rna))
 
@@ -219,7 +219,9 @@ stitchr_data$TCR_name <- rownames(stitchr_data)
 
 stitchr_data <- stitchr_data[, c("TCR_name", setdiff(names(stitchr_data), "TCR_name"))]
 
-# 32,089 rows
+stitchr_data
+
+# 30,239 rows
 
 write.table(stitchr_data, file = "../saved_data/tcrseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
 

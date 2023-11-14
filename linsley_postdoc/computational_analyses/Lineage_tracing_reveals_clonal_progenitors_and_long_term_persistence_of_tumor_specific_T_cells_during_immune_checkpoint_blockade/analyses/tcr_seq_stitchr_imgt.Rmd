@@ -1,0 +1,261 @@
+---
+title: "Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade"
+output: pdf_document
+---
+
+ - data reproduction of https://www.sciencedirect.com/science/article/pii/S153561082300082X
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(readxl)
+library(Matrix)
+library(stringr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# List relevant files
+
+```{r}
+
+# Set the path to the directory
+directory_path <- "../raw_data"
+
+# List the files in the directory
+files <- list.files(directory_path, full.names = TRUE)
+
+# Use grep to filter files containing "TCR"
+tcr_files <- grep("TCR_filtered_contig_annotations", files, value = TRUE)
+
+# Print the list of files containing "TCR"
+print(tcr_files)
+
+```
+
+# Read in TCRseq data
+
+```{r}
+
+# Create an empty list to store data frames
+dfs <- list()
+
+# Loop through each file path, read the CSV, and add a new column with the file path
+for (file_path in tcr_files) {
+  # Read CSV
+  df <- read.csv(file_path)
+  
+  # Add a new column with the file path
+  df$file_path <- file_path
+  
+  # Append the data frame to the list
+  dfs <- append(dfs, list(df))
+}
+
+# Merge all data frames into a single data frame
+merged_df <- do.call(rbind, dfs) %>%
+  filter(high_confidence == "True",
+         full_length == "True",
+         productive == "True") %>%
+  mutate(barcode = paste(barcode, gsub(".$", "", str_extract(file_path, "(?<=MSK).*?(?=TCR)")), sep = "_"))
+
+merged_df
+
+```
+
+# Prep stitchr df
+
+```{r}
+
+stitchr_data <- merged_df %>%
+  filter(chain %in% c("TRA", "TRB")) %>%
+  group_by(barcode, chain) %>%
+  arrange(-umis) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(barcode, v_gene, d_gene, j_gene, c_gene, chain, cdr3_nt) %>%
+  rename(TCR_name = barcode,
+         CDR3 = `cdr3_nt`,
+         V = `v_gene`,
+         J = `j_gene`,
+         C = `c_gene`) %>%
+  pivot_wider(names_from = chain, values_from = c(V, J, C, CDR3)) %>%
+  # rename, reorder, create cols for stitchr
+  rename(TRAV = V_TRA, TRAJ = J_TRA, TRBV = V_TRB, TRBJ = J_TRB, TRAC = C_TRA, TRBC = C_TRB, TRA_CDR3 = CDR3_TRA, TRB_CDR3 = CDR3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter_all(all_vars(!is.na(.))) %>%
+  filter_all(all_vars(. != "None")) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_data
+
+# 130,006 rows
+
+write.table(stitchr_data, file = "../saved_data/tcrseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+
+```
+
+# Read in stitchr output
+
+```{r}
+
+stitchr_output <- read.delim("../saved_data/stitchr_out.tsv", header = TRUE, sep = "\t")
+
+# Columns that need further separation by space
+columns_to_split_by_space <- c("TRA_nt", "TRA_aa", "TRB_nt", "TRB_aa", "Linked_nt")
+
+# Split the specified columns by space
+for (col_name in columns_to_split_by_space) {
+  stitchr_output[[col_name]] <- sapply(stitchr_output[[col_name]], function(x) unlist(strsplit(x, " ")))
+}
+
+# Assign the column names
+colnames(stitchr_output) <- c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ",
+                    "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", 
+                    "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", 
+                    "Linked_aa", "Warnings.Errors")
+
+# Define a function to replace with NA if length is 0
+replace_empty_with_na <- function(x) {
+  if (length(x) == 0) {
+    return(NA)
+  } else {
+    return(x)
+  }
+}
+
+# Replace values in the specified columns with real NA
+cols_to_update <- c("TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "Linked_nt")
+
+for (col_name in cols_to_update) {
+  stitchr_output[[col_name]] <- lapply(stitchr_output[[col_name]], replace_empty_with_na)
+}
+
+stitchr_output$TRA_nt <- sapply(stitchr_output$TRA_nt, as.character)
+stitchr_output$TRA_aa <- sapply(stitchr_output$TRA_aa, as.character)
+stitchr_output$TRB_nt <- sapply(stitchr_output$TRB_nt, as.character)
+stitchr_output$TRB_aa <- sapply(stitchr_output$TRB_aa, as.character)
+stitchr_output$Linked_nt <- sapply(stitchr_output$Linked_nt, as.character)
+
+```
+
+# Prep IMGT/HighV-Quest input
+
+```{r}
+
+fasta_prep <- stitchr_output %>%
+  rename(barcode = TCR_name) %>%
+  left_join(merged_df, by = "barcode")
+
+fasta_df_alpha <- fasta_prep %>%
+  filter(!(is.na(TRA_nt)),
+         chain == "TRA") %>%
+  ungroup()
+
+# Function to convert a data frame to FASTA format
+df_to_fasta_alpha <- function(df, output_file) {
+  # Open/create the output file for writing
+  fasta_file <- file(output_file, "w")
+  
+  # Iterate through rows of the data frame
+  for (i in 1:nrow(df)) {
+    # Combine name columns and add a suffix numbering
+    label <- df$barcode[i]
+
+    # Write the sequence and label to the FASTA file
+    writeLines(paste(">", label), con = fasta_file)
+    writeLines(df$TRA_nt[i], con = fasta_file)
+  }
+  
+  # Close the output file
+  close(fasta_file)
+}
+
+# Call the function to convert the data frame to FASTA format
+df_to_fasta_alpha(fasta_df_alpha, "../saved_data/vdjseq_alpha.fasta")
+
+fasta_df_beta <- fasta_prep %>%
+  filter(!(is.na(TRB_nt)),
+         chain == "TRB") %>%
+  ungroup()
+
+# Function to convert a data frame to FASTA format
+df_to_fasta_beta <- function(df, output_file) {
+  # Open/create the output file for writing
+  fasta_file <- file(output_file, "w")
+  
+  # Iterate through rows of the data frame
+  for (i in 1:nrow(df)) {
+    # Combine name columns and add a suffix numbering
+    label <- df$barcode[i]
+
+    # Write the sequence and label to the FASTA file
+    writeLines(paste(">", label), con = fasta_file)
+    writeLines(df$TRB_nt[i], con = fasta_file)
+  }
+  
+  # Close the output file
+  close(fasta_file)
+}
+
+# Call the function to convert the data frame to FASTA format
+df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
+
+```
+
+# Analyze IMGT/HighV-Quest output 1: summary
+
+```{r}
+
+imgt_df_1_alpha <- read.csv("../saved_data/lineage_tracing_tra/1_Summary.csv") %>%
+  group_by(V.DOMAIN.Functionality) %>%
+  summarize(count = n())
+
+imgt_df_1_alpha
+# 11 productive
+# 10,836 rearranged but no junction found
+# 6,942 + 9,726 (stop codons) unproductive
+
+imgt_df_1_beta <- read.csv("../saved_data/lineage_tracing_trb/1_Summary.csv") %>%
+  group_by(V.DOMAIN.Functionality) %>%
+  summarize(count = n())
+
+imgt_df_1_beta
+# 9824 productive
+# 72,184 rearranged but no junction found
+# 6,329 + 6,899 (stop codons) unproductive
+
+```
