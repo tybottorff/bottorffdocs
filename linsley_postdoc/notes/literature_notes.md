@@ -1051,6 +1051,10 @@
  - TCR diversity, CD8<sup>+</sup> T cell clonal expansion, tumor mutational burden predict irAEs
 ## Discussion
  - *LCP1* and *ADPGK* are genes related to T cell activation that predict irAEs
+# Multiple rearrangements in T cell receptor alpha chain genes maximize the production of useful thymocytes
+ - allelic exclusion conventional for TCR beta
+ - TCR alpha expression less strictly regulated, endogenous TCR alpha chains often found in association with transgenic TCR beta chains in transgenic mice
+ - TCR alpha may make multiple rearrangements on each chromosome
 # Negative binomial additive model for RNA-Seq data analysis
 ## Methods for differential expression analysis
  - DESeq2, edgeR (based on negative binomial regression to model gene counts)
@@ -1186,6 +1190,8 @@
 ### Somatic hypermutation (SHM)
  - random genetic mutations in B cells (not T cells) at certain hotspots in antigen-binding regions following antigen encounter, increases affinity of antibodies for antigen (cells secreting antibodies that increase affinity expand)
  - within V region of heavy and light chains
+# Role of the multiple T cell receptor (TCR)-ζ chain signaling motifs in selection of the T cell repertoire
+ - TCR is composed of four distinct signal transducing subunits (CD3-γ, -δ, -ε, and ζ) that contain either one (CD3-γ, -δ, -ε) or three (-ζ) signaling motifs (ITAMs) within their intracytoplasmic domains
 # Sequence count data are poorly fit by the negative binomial distribution
 # Simultaneous epitope and transcriptome measurement in single cells
  - cellular indexing of transcriptomes and epitopes by sequencing (CITE-seq), oligonucleotide-labeled antibodies are used to integrate cellular protein and transcriptome measurements into a single cell readout
@@ -1246,6 +1252,11 @@
  - PD-1 PD-L1 interaction promotes TE cell exhaustion, supports conversion of TE cells into suppressive T<sub>reg</sub> cells
  - irAEs are frequent in patients treated with ICIs (~90% of patients treated with PD-1 blockade and/or CTLA-4 blockade), severe/life threatening (grades 3/4, respectively) irAEs in fewer but still many patients
  - at baseline, patients with arthritis had less cells with features of CD8 T<sub>CM</sub> cells, patients with pneumonitis had more CD4 T<sub>H2</sub> cells, patients with thyroiditis had more CD4 T<sub>H17</sub> cells, so **different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers**
+# Single cell T cell receptor sequencing: techniques and future challenges
+ - alpha beta T cells are > 90% of T cell population; gamma delta T cells are less diverse and aren't MHC-restricted and are involved in innate-like responses instead
+ - D-J joining happens first, then V-D-J joining for TCR beta
+ - CDR1-2 in V gene, CDR3 at junction of V, (D), and J
+ - first sequencing-based techniques to look at CDR3 looked at CDR3 length distributions (electrophoresis of PCR fragments from amplifying across CDR3), Gaussian (normal) distribution with polyclonal TCRs and skewed with clonal enrichment
 # Single-gene negative binomial regression models for RNA-Seq data with higher-order asymptotic inference
 # SLC7A7 is a prognostic biomarker correlated with immune infiltrates in non-small cell lung cancer
  - SLC7A7 expression associated with poor overall survival in lung cancer patients, positively correlated with immune cell infiltration
