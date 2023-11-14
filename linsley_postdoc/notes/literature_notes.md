@@ -295,7 +295,14 @@
 # Clonal expansion of resident memory T cells in peripheral blood of patients with non-small cell lung cancer durine immune checkpoint inhibitor treatment
  - among T cell subtypes, effector memory CD8<sup>+</sup> T cells (CD8<sup>+</sup> TEM GZMK PDCD1) were increased after ICI treatment in both DCB and NCB
  - effector memory CD8<sup>+</sup> T cells resided at the bifurcation point, which has the potential to differentiate into lineages with precursor exhausted CD8<sup>+</sup> T cells (CD8<sup>+</sup> TCM cells) assumed to be related to the ICI response
- - effector memory CD8<sup>+</sup> T cells along with T cells recognizing unknown antigen expanded and composed of novel clones skewed toward dysfunctional status, especially in on-treatment samples of the durable clinical benefit group. 
+ - effector memory CD8<sup>+</sup> T cells along with T cells recognizing unknown antigen expanded and composed of novel clones skewed toward dysfunctional status, especially in on-treatment samples of the durable clinical benefit group
+# Clonal replacement of tumor-specific T cells following PD-1 blockade
+## Abstract
+ - unclear if ICB relies/works on reinvigoration of pre-existing tumor infiltrating T cells or on recruitment of novel T cells
+ - clonally-expanded cells were highly enriched in exhausted CD8<sup>+</sup> T cells and expressed markers of tumor specificity, including CD39 and CD103
+ - expansion didn't derive from pre-existing TIL clones but rather from novel clonotypes not previously observed in the same tumor (clonal replacement)
+ - pre-existing tumor-specific T cells may have limited reinvigoration capacity due to chronic activation/exhaustion (epigenetic remodeling); the T cell response to checkpoint blockade derives from a distinct repertoire of T cell clones that may have just recently entered the tumor
+ - **novel T cell clones could derive from lymphoid organs or rare unexpanded clones within TME/tumor periphery that weren't exhausted**
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - co-expression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -865,6 +872,17 @@
  - **TCR footprint: general docking mode of TCR to cognate pMHC, germline bias i.e. TCR recognizes conserved MHC residues**
 # Interesting possibilities to improve the safety and efficacy of ipilimumab (Yervoy)
  - target ICI to tumor with streptavidin-biotin technology (anti-tumor antibody conjugated to streptavidin and biotin-labeled anti-CTLA-4 antibody for example)
+# Intratumoral CD4<sup>+</sup> T cells mediate anti-tumor cytotoxicity in human bladder cancer
+## Abstract
+ - scRNAseq and paired TCRseq of 7 patients, bladder tumor and non-malignant tissue
+ - CD8<sup>+</sup> T cells similar in tumors and non-malignant tissue, but CD4<sup>+</sup> T cells have tumor-specific states (including Tregs)
+ - **find cytotoxic CD4<sup>+</sup> T cells expanded, can kill tumors in MHC class-II dependent fashion and are suppressed by Tregs**
+## Results
+### Tregs are clonally expanded in bladder tumors
+ - CD4<sup>+</sup> TCR repertoire more restricted (less diverse) in TME (~11% unique clonotypes shared by > 1 cell) than in adjacent non-malignant tissue (~5% unique clonotypes shared by > 1 cell)
+ - **restricted repertoire in TME due to expansion of Tregs**
+## Discussion
+ - origin of cytotoxic CD4<sup>+</sup> T cells: doesn't seem to arise from Tregs (no clonotype sharing), perhaps from other CD4<sup>+</sup> T cells (shared clones)
 # Intratumoral expression levels of *PD-L1*, *GZMA*, and *HLA-A* along with oligoclonal T cell expansion associate with response to nivolumab in metastatic melanoma
  - *PD-L2* expression levels also correlate with response to nivolumab
  - Th1 response dominance in responders (higher *TBX21/GATA3* ratio)
@@ -1096,6 +1114,14 @@
  - CD8<sup>+</sup>CD38<sup>+</sup>T cell associated with irAEs
 # Peripheral CD8<sup>+</sup>CD28<sup>+</sup> T lymphocytes predict the efficacy and safety of PD-1/PD-L1 inhibitors in cancer patients
  - CD8<sup>+</sup>CD28<sup>+</sup> T cell level associated with ICI efficacy but also irAE development
+# Peripheral T cell expansion predicts tumor infiltration and clinical response
+## Abstract
+ - clonotypic expansion of effector-like T cells within tumor and in normal adjacent tissue, associated with ICB response
+ - expanded clonotypes in tumor and normal adjacent tissue can be detected in peripheral blood
+ - intratumoral T cells are replaced with fresh, non-exhausted cells from outside the tumor, especially in responsive patients
+ - **non-exhausted T cells from periphery may be key in explaining ICB response**
+## Main
+ - parallel expansion in tumor and normal adjacent tissue may be from infiltration of T cells from periphery (extravasating into both tumor and normal adjacent tissue from blood)
 # Potentiating local and abscopal antitumor efficacy through radiation with FAP-CD40 DARPin and anti-PD1 therapy
  - ~70% of patients develop resistance to ICI
  - CD40: costimulatory molecule that drives DCs and TAMs (tumor associated macrophages) to prime T cells
@@ -1169,6 +1195,18 @@
  - incubate antibody-oligo complexes with single-cell suspensions, then wash cells to remove unbound antibodies and perform scRNA-seq (of both cellular mRNAs and antibody-derived oligos that both anneal to polyT-containing microparticles via 3' polyA tails)
  - unique barcode sequence on oligos attached to microparticles indexes cDNA of mRNAs and antibody-oligos of each cell in RT reaction
  - amplified antibody-derived tags and cDNA molecules separated by size
+# Single-cell analyses identify circulating anti-tumor CD8 T cells and markers for their enrichment
+## Abstract
+ - shared CD8<sup>+</sup> T cell clones between blood and tumor in melanoma patients, blood clones less dysfunctional than matched T cells in tumor and more activated than non-matching T cells in blood
+ - PD-1 poor sensitivity for identifying matched tumor cells in blood, perhaps because PD-1 also an activation marker and activated T cells in blood may not be tumor-specific
+## Results
+### Activated TM CD8<sup>+</sup> T cells can be detected in the blood of melanoma patients
+ - 4 patients, no ICB
+### TM CD8<sup>+</sup> T cells can be tracked longitudinally in patient blood and show a temporal increase in exhaustion despite anti-PD-1 treatment
+ - 2 followup samples
+ - higher exhaustion signature than initial sample, but still lower exhaustion than tumor
+## Discussion
+ - majority of tumor matched cells in blood in melanoma patients show effector or effector memory-like phenotype, contrary to exhausted-like profile prediction
 # Single-cell RNA-seq reveals expanded clones of islet antigen-reactive CD4<sup>+</sup> T cells in peripheral blood of subjects with type 1 diabetes
  - unclear significance of islet antigen reactive T cells in peripheral blood of T1D patients (similar cells in healthy control subjects)
  - hypothesis: key disease associated cells show evidence of prior antigen exposure, inferred from expanded TCR clonotypes and essential phenotypic properties in their transcriptomes
@@ -1219,6 +1257,20 @@
  - ICI-induced inflammatory arthritis has been reported
  - corticosteroids can treat mild irAEs, TNFα inhibitors reserved for severe cases (prolonged TNFα inhibitor use can negatively impact antitumor effect of ICI)
  - here, they try instead to use the anti IL6 receptor antibody (FDA approved to treat RA) for ICI-induced arthritis
+# Targeted reconstruction of T cell receptor sequence from single cell RNA-seq links CDR3 length to T cell differentiation status
+## Abstract
+ - TRAPeS tool to extract TCRseq from short read scRNAseq libraries (previous methods needed long sequencing reads)
+ - **'naive-like' memory CD8<sup>+</sup> T cells have longer and less germline-like CDR3s than effector-memory CD8<sup>+</sup> T cells**
+## Introduction
+ - some antigen-experienced CD8<sup>+</sup> T cells have naive-like phenotype (can respond to antigen but show transcriptome/surface markers like antigen-naive T cell)
+ - several dozen V and J loci for selection pool for V(D)J recombination
+ - **public CDR3s often shorter, perhaps more efficient recombination**
+## Methods
+ - TRAPeS: identify putative pairs of V and J segments, collect putative CDR3-originating reads, reconstruct CDR3, separate similar TCRs and determine chain productivity
+## Results
+### Combined TCR-transcriptome analysis reveals longer CDR3 regions for naive-like YFV-specific cells
+ - **they calculate germline score as ratio between number of nucleotides in CDR3 that originate from germline V(D)J segments to total number of nucleotides in CDR3, need stitching and IMGT/HighV-QUEST for this**
+ - **naive-like cells have longer CDR3s and lower germline scores for both alpha and beta chains than effector memory-like cells**
 # Targeting of multiple tumor-associated antigens by individual T cell receptors during successful cancer immunotherapy
 ## Highlights
  - individual T cells can recognize multiple, different tumor-associated antigens
@@ -1453,6 +1505,18 @@
  - advanced melanoma, non small cell lung cancer are immunologically hot
  - repertoire of antigens driving responses for cancer, autoimmunity, irAEs largely unknown, major challenge
  - many autoimmune diseases feature risk polymorphisms in *HLA* genes that constrain TCR repertoire during thymic selection
+# Temporal single-cell tracing reveals clonal revival and expansion of precursor exhausted T cells during anti-PD-1 therapy in lung cancer
+## Abstract
+ - **increased levels of precursor exhausted T cells (Texp) in responsive tumors after treatment**, low expression of coinhibitory molecules and high expression of *GZMK*
+ - nonresponsive tumors failed to accumulate Texp cells
+ - **Texp cells unlikely to be derived from reinvigoration of terminally exhausted cells but rather accumulate by local expansion and/or replenishment by peripheral T cells with new and pre-existing clonotypes, clonal revival**
+## Main
+### Characterization of T cells pre- and post-PD-1 blockade by scRNA-seq
+ - 36 patients with NSCLC
+ - increase in expanded Th1-like cells in responsive tumor
+ - Tex importance depends on pre-treatment terminal Tex infiltration: low terminal Tex baseline infiltration responsive tumors had PD-1 blockade increasing these cells (increased infiltration or expansion of these cells, consistent with increased exhausted-like T cells with ICB), but high terminal Tex baseline infiltration responsive tumors had opposite pattern (decreased frequency with ICB)
+### Local expansion of pre-existing Texp cells
+ - local expansion of pre-existing Texp cells drives Texp accumulation, as does clonal revival (from periphery)
 # The altertions in peripheral lymphocyte subsets predict the efficacy and prognosis of immune checkpoint inhibitors in hepatocellular carcinoma
  - CD3<sup>+</sup>CD8<sup>+</sup> T cell percentage increases after ICI, B cell percentage decreases
 # The cancer-immunity cycle: indication, genotype, and immunotype
