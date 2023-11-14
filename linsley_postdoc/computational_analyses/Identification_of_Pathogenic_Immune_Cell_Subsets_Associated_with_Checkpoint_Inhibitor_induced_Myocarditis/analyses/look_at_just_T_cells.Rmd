@@ -1,0 +1,216 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SeuratDisk)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in scRNAseq RDS
+
+```{r}
+
+immune.combined <- readRDS("../saved_data/final_seurat.rds")
+
+```
+
+# Read in scTCRseq, process to be added as metadata to scRNAseq
+
+```{r}
+
+dehashed_combined_tcr_seq <- read.csv("../saved_data/dehashed_tcr_seq.csv")
+  
+suffix_lookup <- tibble(
+  Patient_ID = c("B1", "A10", "MCE12", "B10", "MCE13", "B12", "MCE7", "MCE6", "A8", "B11", "A9", "A6", "B9", "B13", "A5", "B14", "B2", "A1", "B3", "A2", "A3", "MCE1", "MCE2", "MCL1", "MCL3"),
+  suffix = c("10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+)
+
+# Merge the lookup table to add the suffix column to the main data frame
+dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
+  left_join(suffix_lookup, by = "Patient_ID") %>%
+  mutate(barcode = paste(barcode, suffix, sep = "_")) %>%
+  filter(chain != "Multi") %>%
+  # pivot to combine 1 alpha and 1 beta (or 0 and 1) barcodes together
+  select(-X) %>%
+    # if a cell had two or more qualified chains of the same type, only that chain with the highest UMI count was qualified and retained
+  group_by(barcode, chain) %>%
+  arrange(-umis) %>%
+  slice(1) %>%
+  ungroup() %>%
+  pivot_wider(id_cols = c(barcode, Patient_ID, irAE, suffix), names_from = chain, values_from = -c(barcode, Patient_ID, irAE, suffix))
+
+dehashed_combined_tcr_seq <- as.data.frame(dehashed_combined_tcr_seq)
+
+# Set row names based on the "Barcode" column
+rownames(dehashed_combined_tcr_seq) <- dehashed_combined_tcr_seq$barcode
+
+dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>% select(-barcode)
+
+dehashed_combined_tcr_seq
+
+```
+
+# Add TCRseq metadata to RNAseq
+
+```{r}
+
+rna_and_tcr <- AddMetaData(object = immune.combined, metadata = dehashed_combined_tcr_seq)
+
+```
+
+# Look at just T cells
+
+```{r}
+
+T_cells <- rna_and_tcr[, !(is.na(rna_and_tcr@meta.data$cdr3_TRA) | is.na(rna_and_tcr@meta.data$cdr3_TRB)) & rna_and_tcr@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & rna_and_tcr@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL", "gdT")]
+
+```
+
+# Re-do dimensional reduction, clustering
+
+```{r}
+
+T_cells <- RunPCA(T_cells, npcs = 30, verbose = FALSE)
+T_cells <- RunUMAP(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindNeighbors(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindClusters(T_cells, resolution = 3)
+
+```
+
+# Read in reference to use for mapping
+
+```{r}
+
+reference <- LoadH5Seurat("../raw_data/pbmc_multimodal.h5seurat")
+
+```
+
+# Find reference transfer anchors
+
+```{r}
+
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50
+)
+
+```
+
+# Map reference onto my object
+
+```{r}
+
+T_cells <- MapQuery(
+  anchorset = anchors,
+  query = T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca", 
+  reduction.model = "wnn.umap"
+)
+
+```
+
+# Plot mapping results
+
+```{r}
+
+p1 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
+
+```
+
+# Relook just at T cells again
+
+```{r}
+
+just_T_cells <- T_cells[, !(is.na(T_cells@meta.data$cdr3_TRA) | is.na(T_cells@meta.data$cdr3_TRB)) & T_cells@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL", "gdT")]
+
+just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
+just_T_cells <- RunUMAP(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindNeighbors(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindClusters(just_T_cells, resolution = 3)
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = just_T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50
+)
+T_cells <- MapQuery(
+  anchorset = anchors,
+  query = just_T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca", 
+  reduction.model = "wnn.umap"
+)
+
+```
+
+# Plot cell type assignments
+
+```{r}
+
+p1 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(just_T_cells, "../saved_data/final_seurat_T_cells.rds")
+
+```

@@ -48,6 +48,44 @@ dehashed_combined_tcr_seq <- read.csv("../saved_data/dehashed_tcr_seq.csv")
 
 ```
 
+# Prep public dfs
+
+```{r}
+
+alpha_public_df <- dehashed_combined_tcr_seq %>%
+  select(barcode, cdr3, chain, Patient_ID) %>%
+  filter(cdr3 != "None",
+         chain == "TRA") %>%
+  group_by(cdr3, Patient_ID) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  mutate(presence = if_else(count > 0, 1, 0)) %>%
+  # 1 for yes, 0 for no for presence, then later filter for sum across rows > 1 look for public TCRs
+  select(-count) %>%
+  pivot_wider(names_from = c(Patient_ID), values_from = presence, values_fill = 0) %>%
+  rowwise() %>%
+  filter(sum(c_across(-cdr3)) > 1)
+
+alpha_public_df
+
+beta_public_df <- dehashed_combined_tcr_seq %>%
+  select(barcode, cdr3, chain, Patient_ID) %>%
+  filter(cdr3 != "None",
+         chain == "TRB") %>%
+  group_by(cdr3, Patient_ID) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  mutate(presence = if_else(count > 0, 1, 0)) %>%
+  # 1 for yes, 0 for no for presence, then later filter for sum across rows > 1 look for public TCRs
+  select(-count) %>%
+  pivot_wider(names_from = c(Patient_ID), values_from = presence, values_fill = 0) %>%
+  rowwise() %>%
+  filter(sum(c_across(-cdr3)) > 1)
+
+beta_public_df
+
+```
+
 # Prep dfs for circle plot of TCR CDR3 AA matches across patients
 
 ```{r}
@@ -64,7 +102,7 @@ circle_df <- dehashed_combined_tcr_seq %>%
 tcr_cells <- circle_df %>%
   rename(tcr1 = identifier) %>%
   distinct() %>%
-  head(100)
+  head(5000)
 
 tcr_cells
 
@@ -83,6 +121,18 @@ for (i in 1:(nrow(tcr_links_raw) - 1)) {
 }
 
 tcr_links
+
+
+# alternative approach?
+#tcr_links_raw %>%
+#  filter(public == "yes") %>%
+#  slice(1:1000) %>%
+#  group_by(cdr3) %>%
+#  filter(n() > 1) %>%
+#  distinct(Patient_ID, .keep_all = TRUE) %>%
+#  ungroup() %>%
+#  select(tcr1 = identifier, tcr2 = identifier) %>%
+#  distinct()
 
 # want tcr_links df with 2 cols named tcr1 and tcr2, each row is a linkages (values are barcodes)
 
@@ -226,6 +276,12 @@ plot_TCR_circos <-
           i <- match(tcr_links$tcr1[k], tcr_cells$tcr1)
           j <- match(tcr_links$tcr2[k], tcr_cells$tcr1)
 
+          # Check for missing values in point1 and point2
+          if (any(is.na(c(tcr_cells$sum[i], tcr_cells$sum[j])))) {
+          warning("Skipping link ", k, " due to missing values in point1 or point2.")
+          next  # Skip to the next iteration
+          }
+          
           # draw links, colored by selected variable
           circlize::circos.link(
             sector.index1=tcr_cells$tcr1[i], point1=c(tcr_cells$sum[i]),

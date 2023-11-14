@@ -1,0 +1,152 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SeuratDisk)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in scRNAseq RDS
+
+```{r}
+
+immune.combined <- readRDS("../saved_data/final_seurat.rds")
+
+```
+
+# Read in scTCRseq, process to be added as metadata to scRNAseq
+
+```{r}
+
+dehashed_combined_tcr_seq <- read.csv("../saved_data/dehashed_tcr_seq.csv")
+  
+suffix_lookup <- tibble(
+  Patient_ID = c("B1", "A10", "MCE12", "B10", "MCE13", "B12", "MCE7", "MCE6", "A8", "B11", "A9", "A6", "B9", "B13", "A5", "B14", "B2", "A1", "B3", "A2", "A3", "MCE1", "MCE2", "MCL1", "MCL3"),
+  suffix = c("10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+)
+
+# Merge the lookup table to add the suffix column to the main data frame
+dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
+  left_join(suffix_lookup, by = "Patient_ID") %>%
+  mutate(barcode = paste(barcode, suffix, sep = "_")) %>%
+  filter(chain != "Multi") %>%
+  # pivot to combine 1 alpha and 1 beta (or 0 and 1) barcodes together
+  select(-X) %>%
+  group_by(barcode) %>%
+  filter(sum(chain == "TRA") < 2 & sum(chain == "TRB") < 2) %>%
+  pivot_wider(id_cols = c(barcode, Patient_ID, irAE, suffix), names_from = chain, values_from = -c(barcode, Patient_ID, irAE, suffix))
+    
+# remove duplicate barcode values from more than 1 alpha or beta
+#dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
+#  distinct(barcode, .keep_all = TRUE)
+
+dehashed_combined_tcr_seq <- as.data.frame(dehashed_combined_tcr_seq)
+
+# Set row names based on the "Barcode" column
+rownames(dehashed_combined_tcr_seq) <- dehashed_combined_tcr_seq$barcode
+
+dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>% select(-barcode)
+
+dehashed_combined_tcr_seq
+
+```
+
+# Add TCRseq metadata to RNAseq
+
+```{r}
+
+rna_and_tcr <- AddMetaData(object = immune.combined, metadata = dehashed_combined_tcr_seq)
+
+```
+
+# Assess aberrant TCR expression
+
+```{r}
+
+# subset Seurat for containing TCR seq data
+
+tcr_subset <- rna_and_tcr[, !(is.na(rna_and_tcr@meta.data$cdr3_TRA) | is.na(rna_and_tcr@meta.data$cdr3_TRB))]
+
+# create df
+tcr_df <- tibble(cellID = colnames(tcr_subset), cell_type = tcr_subset@meta.data$predicted.celltype.l1)
+
+summary_tcr <- tcr_df %>%
+  group_by(cell_type) %>%
+  summarize(count = n()) %>%
+  arrange(-count)
+
+print(summary_tcr)
+
+# non-T cells with "TCRs": 2954 monocytes, 1239 NKs, 615 B cells, 238 DCs, 104 other
+# T cells with TCRs: 17273 CD4 T, 10656 CD8 T, 362 other T
+
+```
+
+# Eliminate cells with aberrant "expression" of TCR/BCR clonotypic sequences
+
+```{r}
+
+# Subset Seurat to remove cells aberrantly expressing TCRs
+no_aberrant_rna_and_tcr_seurat <- rna_and_tcr[, !(is.na(rna_and_tcr@meta.data$cdr3_TRA) | is.na(rna_and_tcr@meta.data$cdr3_TRB)) & !(rna_and_tcr@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T")), invert = TRUE]
+
+```
+
+# Compare sizes of Seurat before/after TCR/BCR subsetting, confirm we only lose the expected 5150 cells
+
+```{r}
+
+length(colnames(rna_and_tcr)) - length(colnames(no_aberrant_rna_and_tcr_seurat))
+
+```
+
+# Re-do dimensional reduction, clustering
+
+```{r}
+
+no_aberrant_rna_and_tcr_seurat <- RunPCA(no_aberrant_rna_and_tcr_seurat, npcs = 30, verbose = FALSE)
+no_aberrant_rna_and_tcr_seurat <- RunUMAP(no_aberrant_rna_and_tcr_seurat, reduction = "pca", dims = 1:30)
+no_aberrant_rna_and_tcr_seurat <- FindNeighbors(no_aberrant_rna_and_tcr_seurat, reduction = "pca", dims = 1:30)
+no_aberrant_rna_and_tcr_seurat <- FindClusters(no_aberrant_rna_and_tcr_seurat, resolution = 3)
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(no_aberrant_rna_and_tcr_seurat, "../saved_data/final_seurat_no_aberrant_expressors_not_cell_typed_yet.rds")
+
+```

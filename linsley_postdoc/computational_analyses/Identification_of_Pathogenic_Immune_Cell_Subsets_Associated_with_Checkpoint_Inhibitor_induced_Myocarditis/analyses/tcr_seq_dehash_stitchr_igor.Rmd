@@ -188,21 +188,22 @@ write.csv(dehashed_combined_tcr_seq, "../saved_data/dehashed_tcr_seq.csv")
 # Prep for stitchr
 
 ```{r}
-stitchr_data <- dehashed_combined_tcr_seq %>%
-  filter(chain %in% c("TRA", "TRB")) %>%
-  group_by(barcode) %>%
-  filter(sum(chain == "TRA") == 1 & sum(chain == "TRB") == 1) %>%
-  ungroup() %>%
-  select(barcode, v_gene, d_gene, j_gene, c_gene, chain, cdr3_nt) %>%
-  rename(TCR_name = barcode,
-         CDR3 = `cdr3_nt`,
-         V = `v_gene`,
-         J = `j_gene`,
-         C = `c_gene`) %>%
-  pivot_wider(names_from = chain, values_from = c(V, J, C, CDR3)) %>%
-  # rename, reorder, create cols for stitchr
-  rename(TRAV = V_TRA, TRAJ = J_TRA, TRBV = V_TRB, TRBJ = J_TRB, TRAC = C_TRA, TRBC = C_TRB, TRA_CDR3 = CDR3_TRA, TRB_CDR3 = CDR3_TRB) %>%
-  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+
+#dehashed_combined_tcr_seq_with_rna <- as_tibble(readRDS("../saved_data/final_seurat_T_cells.rds")@meta.data)
+
+dehashed_combined_tcr_seq_with_rna$TCR_name <- as.integer(rownames(dehashed_combined_tcr_seq_with_rna))
+
+dehashed_combined_tcr_seq_with_rna
+
+```
+
+# Prep stitchr df
+
+```{r}
+
+stitchr_data <- dehashed_combined_tcr_seq_with_rna %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
   filter_all(all_vars(!is.na(.))) %>%
   filter_all(all_vars(. != "None")) %>%
   mutate(TRA_leader	= NA,
@@ -214,7 +215,9 @@ stitchr_data <- dehashed_combined_tcr_seq %>%
          TRB_5_prime_seq = NA,
          TRB_3_prime_seq = NA)
 
-stitchr_data
+stitchr_data$TCR_name <- rownames(stitchr_data)
+
+stitchr_data <- stitchr_data[, c("TCR_name", setdiff(names(stitchr_data), "TCR_name"))]
 
 # 32,089 rows
 
@@ -264,6 +267,8 @@ stitchr_output$TRB_nt <- sapply(stitchr_output$TRB_nt, as.character)
 stitchr_output$TRB_aa <- sapply(stitchr_output$TRB_aa, as.character)
 stitchr_output$Linked_nt <- sapply(stitchr_output$Linked_nt, as.character)
 
+stitchr_output
+
 ```
 
 # Analyze stitchr errors. "Unable to locate N terminus of CDR3 in V gene correctly. Please ensure sequence plausibility" is main error for TRA/TRB
@@ -310,7 +315,7 @@ stitchr_output_alpha_df <- stitchr_output %>%
   filter(!(is.na(TRA_nt)))
 
 stitchr_output_alpha_df
-# 9,475 rows
+# 9,044 rows
 
 write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
 
@@ -318,7 +323,7 @@ stitchr_output_beta_df <- stitchr_output %>%
   filter(!(is.na(TRB_nt)))
 
 stitchr_output_beta_df
-# 22,053 rows
+# 20,545 rows
 
 write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
 
@@ -388,13 +393,12 @@ print(wilcox_result)
 ```{r}
 
 fasta_prep <- stitchr_output %>%
-  rename(barcode = TCR_name) %>%
-  left_join(dehashed_combined_tcr_seq, by = "barcode")
+  left_join(dehashed_combined_tcr_seq_with_rna, by = "TCR_name")
 
 fasta_df_alpha <- fasta_prep %>%
   filter(!(is.na(TRA_nt)),
-         chain == "TRA") %>%
-  mutate(barcode = paste(barcode, Patient_ID, sep = "_")) %>%
+         chain_TRA == "TRA") %>%
+  mutate(TCR_name = paste(TCR_name, Patient_ID, sep = "_")) %>%
   ungroup()
 
 # Function to convert a data frame to FASTA format
@@ -405,7 +409,7 @@ df_to_fasta_alpha <- function(df, output_file) {
   # Iterate through rows of the data frame
   for (i in 1:nrow(df)) {
     # Combine name columns and add a suffix numbering
-    label <- df$barcode[i]
+    label <- df$TCR_name[i]
 
     # Write the sequence and label to the FASTA file
     writeLines(paste(">", label), con = fasta_file)
@@ -421,8 +425,8 @@ df_to_fasta_alpha(fasta_df_alpha, "../saved_data/vdjseq_alpha.fasta")
 
 fasta_df_beta <- fasta_prep %>%
   filter(!(is.na(TRB_nt)),
-         chain == "TRB") %>%
-  mutate(barcode = paste(barcode, Patient_ID, sep = "_")) %>%
+         chain_TRB == "TRB") %>%
+  mutate(TCR_name = paste(TCR_name, Patient_ID, sep = "_")) %>%
   ungroup()
 
 # Function to convert a data frame to FASTA format
@@ -433,7 +437,7 @@ df_to_fasta_beta <- function(df, output_file) {
   # Iterate through rows of the data frame
   for (i in 1:nrow(df)) {
     # Combine name columns and add a suffix numbering
-    label <- df$barcode[i]
+    label <- df$TCR_name[i]
 
     # Write the sequence and label to the FASTA file
     writeLines(paste(">", label), con = fasta_file)
@@ -453,23 +457,23 @@ df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
 
 ```{r}
 
-imgt_df_1_alpha <- read.csv("../saved_data/myocarditis_alpha/1_Summary.csv")
-  #group_by(V.REGION.potential.ins.del) %>%
-  #summarize(count = n())
+imgt_df_1_alpha <- read.csv("../saved_data/myocarditis_alpha/1_Summary.csv") %>%
+  group_by(V.DOMAIN.Functionality) %>%
+  summarize(count = n())
 
 imgt_df_1_alpha
-# 7 productive
-# 1762 rearranged but no junction found
-# 4104 + 3602 (stop codons) unproductive
+# 5 productive
+# 1724 rearranged but no junction found
+# 3947 + 3368 (stop codons) unproductive
 
-imgt_df_1_beta <- read.csv("../saved_data/myocarditis_beta/1_Summary.csv")
-  #group_by(V.DOMAIN.Functionality) %>%
-  #summarize(count = n())
+imgt_df_1_beta <- read.csv("../saved_data/myocarditis_beta/1_Summary.csv") %>%
+  group_by(V.DOMAIN.Functionality) %>%
+  summarize(count = n())
 
 imgt_df_1_beta
-# 3502 productive
-# 14592 rearranged but no junction found
-# 2621 + 1338 (stop codons) unproductive
+# 3235 productive
+# 13619 rearranged but no junction found
+# 2394 + 1297 (stop codons) unproductive
 
 ```
 

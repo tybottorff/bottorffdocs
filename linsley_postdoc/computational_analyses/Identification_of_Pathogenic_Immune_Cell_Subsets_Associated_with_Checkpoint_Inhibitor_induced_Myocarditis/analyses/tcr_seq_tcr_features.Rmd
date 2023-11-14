@@ -79,19 +79,12 @@ calculate_hydrophobicity <- function(sequence, hydrophobicity_df) {
 
 ```{r}
 
-dehashed_combined_tcr_seq <- read.csv("../saved_data/dehashed_tcr_seq.csv")
-  
-suffix_lookup <- tibble(
-  Patient_ID = c("B1", "A10", "MCE12", "B10", "MCE13", "B12", "MCE7", "MCE6", "A8", "B11", "A9", "A6", "B9", "B13", "A5", "B14", "B2", "A1", "B3", "A2", "A3", "MCE1", "MCE2", "MCL1", "MCL3"),
-  suffix = c("10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "1", "2", "3", "4", "5", "6", "7", "8", "9")
-)
-
-# Merge the lookup table to add the suffix column to the main data frame
-dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
-  left_join(suffix_lookup, by = "Patient_ID") %>%
-  mutate(barcode = paste(barcode, suffix, sep = "_"))
+dehashed_combined_tcr_seq <- as_tibble(readRDS("../saved_data/final_seurat_T_cells.rds")@meta.data) %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"), names_to = c(".value", "Chain"), names_pattern = "(.*)_([A-Z]+)$")
 
 dehashed_combined_tcr_seq
+
+write.csv(dehashed_combined_tcr_seq, "../saved_data/dehashed_tcr_seq_with_rna.csv")
 
 ```
 
@@ -110,31 +103,83 @@ feature_df
 
 ```
 
-# Plot CDR3 hydrophobicity and length by irAE status
+# Plot CDR3 length and hydrophobicity by irAE status and cell type (l1, l2)
 
 ```{r}
 
-custom_labeller <- as_labeller(c("cdr3_length" = "CDR3\nAA length", "cdr3_hydrophobicity" = "CDR3\nhydrophobicity"))
+feature_df %>%
+  group_by(chain, irAE, predicted.celltype.l1) %>%
+  summarize(count = n()) %>%
+  print()
 
-plot_df <- feature_df %>%
-  pivot_longer(cols = starts_with("cdr3_"), values_to = "value") %>%
-  filter(chain != "Multi")
-
-ggplot(plot_df, aes(x = chain, y = value, fill = irAE)) +
+ggplot(feature_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
-  facet_wrap(~ name, scales = "free_y", labeller = custom_labeller) +
-  labs(x = "Chain", fill = "irAE", y = "Value")
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
+
+ggplot(feature_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
+
+ggplot(feature_df %>% filter(predicted.celltype.l1 != "CD4 T"), aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
+
+ggplot(feature_df %>% filter(predicted.celltype.l1 != "CD4 T"), aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
 
 # Filter the data for statistical test
-test_data <- plot_df %>%
+test_data <- feature_df %>%
   filter(chain == "TRA",
-         name == "cdr3_hydrophobicity")
+         predicted.celltype.l1 == "CD8 T")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$value ~ test_data$irAE)
+wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
 
 # Print the results
 print(wilcox_result)
+
+```
+
+# Plot CDR3 length and hydrophobicity by irAE status and cell type (l1, l2) for most expanded CDR3s
+
+```{r}
+
+expansion_df <- feature_df %>%
+  group_by(Patient_ID, cdr3) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded"))
+
+ggplot(expansion_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
+
+ggplot(expansion_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
+
+ggplot(expansion_df %>% filter(predicted.celltype.l1 != "CD4 T"), aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
+
+ggplot(expansion_df %>% filter(predicted.celltype.l1 != "CD4 T"), aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
 
 ```
 
@@ -462,7 +507,7 @@ unique_feature_df <- feature_df %>%
     count > 5 & count <= 20 ~ "Medium",
     count > 20 & count <= 100 ~ "Large",
     count > 100 ~ "Hyperexpanded")) %>%
-  group_by(cdr3, chain, irAE) %>%
+  group_by(cdr3, chain, Patient_ID) %>%
   slice(1) %>%
   ungroup()
 
@@ -554,54 +599,5 @@ wilcox_result <- wilcox.test(test_data$value ~ test_data$irAE)
 
 # Print the results
 print(wilcox_result)
-
-```
-
-# Read in cell type assigned RDS
-
-```{r}
-
-immune.seurat <- readRDS("../saved_data/final_seurat.rds")
-
-```
-
-# Prep df to stratify/facet by cell type
-
-```{r}
-
-rna_seq_data <- as_tibble(immune.seurat@meta.data) %>%
-  rename(Patient_ID = orig.ident)
-
-rna_seq_data$barcode <- colnames(immune.seurat)
-
-feature_df_with_cell_type <- inner_join(rna_seq_data, dehashed_combined_tcr_seq, by = c("barcode", "Patient_ID")) %>%
-  #filter(predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T"),
-  #       predicted.celltype.l2 %in% c("CD4 CTL", "CD4 Naive", "CD4 Proliferating", "CD4 TCM", "CD4 TEM", "CD8 Naive", "CD8 Proliferating", "CD8 TCM", "CD8 TEM", "Treg")) %>%
-  select(barcode, Patient_ID, irAE, chain, predicted.celltype.l1, predicted.celltype.l2, cdr3, cdr3_nt, predicted.celltype.l1.score, predicted.celltype.l2.score) %>%
-  rowwise() %>%
-  mutate(cdr3_length = nchar(cdr3),
-         cdr3_hydrophobicity = calculate_hydrophobicity(cdr3, hydrophobicity_df)) %>%
-  ungroup()
-
-write.csv(feature_df_with_cell_type, "../saved_data/rna_seq_and_tcr_seq.csv")
-
-```
-
-# Plot feature analysis by cell type
-
-```{r}
-
-custom_labeller <- as_labeller(c("cdr3_length" = "CDR3\nAA length", "cdr3_hydrophobicity" = "CDR3\nhydrophobicity"))
-
-plot_df <- feature_df_with_cell_type %>%
-  select(-cdr3_nt) %>%
-  pivot_longer(cols = starts_with("cdr3_"), values_to = "value") %>%
-  filter(chain != "Multi")
-
-ggplot(plot_df, aes(x = chain, y = value, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ name + predicted.celltype.l1, scales = "free_y") +
-  labs(x = "Chain", fill = "irAE", y = "Value")
-
 
 ```
