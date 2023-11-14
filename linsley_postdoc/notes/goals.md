@@ -6,12 +6,16 @@
  - no irAE data (emailed for it 10.24.23)
 ### Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis
  - no paired same patient data (different people got no ICI vs. yes ICI)
+ - TCRseq quality seems low by stitching and IMGT/HighV-Quest
 ### Distinct molecular and immune hallmarks of inflammatory arthritis induced by immune checkpoint inhibitors for cancer therapy
  - data only after ICB
+ - can't find TCRseq data
 ### Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
  - only 3 patients and data only after ICB
+ - TCRseq quality also seems low (at least by stitching)
 ### Lung tumor–infiltrating Treg have divergent transcriptional profiles and function linked to checkpoint blockade response
  - in humans but with a focus for murine comparison
+ - got security error going to data availability website (European Genome-Phenome Archive with accession number EGAS00001005343)
 ### Dynamic single-cell mapping unveils Epstein‒Barr virus-imprinted T-cell exhaustion and on-treatment response
  - can't find their data accessibility statement & no irAE data (emailed for both 10.23.23)
 ### https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE220313
