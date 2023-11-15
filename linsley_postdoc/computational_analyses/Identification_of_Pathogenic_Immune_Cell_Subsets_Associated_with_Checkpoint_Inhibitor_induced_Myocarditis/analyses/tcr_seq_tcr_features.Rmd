@@ -99,7 +99,10 @@ feature_df <- dehashed_combined_tcr_seq %>%
          cdr3_hydrophobicity = calculate_hydrophobicity(cdr3, hydrophobicity_df)) %>%
   ungroup()
 
-feature_df
+feature_df_doubled <- feature_df %>%
+  bind_rows(mutate(feature_df, predicted.celltype.l1 = "All T cells"))
+
+feature_df_doubled
 
 ```
 
@@ -107,12 +110,12 @@ feature_df
 
 ```{r}
 
-feature_df %>%
+feature_df_doubled %>%
   group_by(chain, irAE, predicted.celltype.l1) %>%
   summarize(count = n()) %>%
   print()
 
-ggplot(feature_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
+ggplot(feature_df_doubled, aes(x = chain, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
   facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain", fill = "irAE", y = "CDR3 length")
@@ -133,9 +136,9 @@ ggplot(feature_df %>% filter(predicted.celltype.l1 != "CD4 T"), aes(x = chain, y
   labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
 
 # Filter the data for statistical test
-test_data <- feature_df %>%
-  filter(chain == "TRA",
-         predicted.celltype.l1 == "CD8 T")
+test_data <- feature_df_doubled %>%
+  filter(chain == "TRB",
+         predicted.celltype.l1 == "other T")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
