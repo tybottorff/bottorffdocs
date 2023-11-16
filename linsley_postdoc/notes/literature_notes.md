@@ -4,6 +4,8 @@
 # Activation of human T cells by major histocompatability complex class II expressing neutrophils: proliferation in the presence of superantigen, but not tetanus toxoid
  - polymorphonuclear neutrophils (PMNs) function for acute phagocytic clearance of foreign pathogens, release inflammatory mediators, assumed to not express but can express MHC class II molecules after stimulation by interferon γ
  - superantigen refers to antigen binding to MHC class II with high affinity outside antigen binding groove in absence of antigen processing, trigger proliferation of T cells expressing TcR-VB gene products (stimulate T cells in TCR Vβ-specific manner)
+# Adoptive T cell therapy targeting Epstein-Barr virus as a treatment for multiple sclerosis
+ - there's a causative link between EBV and MS, want to target EBV-infected B cells (EBV transforms B cells for life upon infection)
 # Advances in immune checkpoint inhibitor combination strategies for microsatellite stable colorectal cancer
  - microsatellite stable (MSS) colorectal tumors are immune-cold
 # Aging-associated and CD4 T cell-dependent ectopic CXCL13 activation predisposes to anti-PD-1 therapy-induced adverse events
@@ -43,7 +45,7 @@
 ## Cancers evade and inhibit immune responses
  - cytokines (like IL-12) also help effective T cell stimulation
  - immunoediting: selection of clones able to avoid immune system leading to tumor establishment
- - evasion mechanisms: downregulation of tumor antigens or MHC class I, use of inhibitory cytokines (IL-10, TGF-beta), use of inhibitory Tregs, Bregs, or myeloid-derived suppressor cells, or inhibitory receptors (PD-1, CTLA-4)
+ - evasion mechanisms: downregulation of tumor antigens or MHC class I, use of inhibitory cytokines (IL-10, TGF-β), use of inhibitory Tregs, Bregs, or myeloid-derived suppressor cells, or inhibitory receptors (PD-1, CTLA-4)
 ## Immune exhaustion contributes to immune dysfunction in cancer
  - exhaustion can lead to deletion (following progressive loss of proliferative potential and effector functions)
 ## The immune checkpoint receptor CTLA-4
@@ -52,14 +54,14 @@
  - CTLA-4 increases activation threshold of T cells (limits CD28-mediated signaling during antigen presentation to reduce immune responses to weak antigens like self/tumor antigens)
 ## The immune checkpoint receptor PD-1
  - follicular helper T cells constitutively express PD-1
- - PD-1 expressed by activated/induced T cells (TCR stimulation or cytokines like IL-2/7/15/21 or TGF-beta)
- - IFN-gamma upregulates PD-L1/2
+ - PD-1 expressed by activated/induced T cells (TCR stimulation or cytokines like IL-2/7/15/21 or TGF-β)
+ - IFN-γ upregulates PD-L1/2
 ## CTLA-4, PD-1, and their ligands in cancer
  - CTLA-4 expression on tumors associated with decreased survival in nasopharyngeal carcinoma but increased survival in NSCLC
  - CTLA-4 blockade likely mostly impacts T cell activation in draining lymph node when CTLA-4 expressing Tregs remove CD80/86 from surface of APCs (reducing their ability to stimulate tumor-specific T cells), possibly also at tumor site as exhauted CTLA-4 expressing T cells and Tregs accumulate in tumor microenvironment
  - PD-1 blockade thought to act mainly at effector stage of immune response
 ## Limitations of immune checkpoint inhibitors
- - selection for tumor cells that can evade immune system (perhaps they lose MHC class I or IFN-gamma response elements)
+ - selection for tumor cells that can evade immune system (perhaps they lose MHC class I or IFN-γ response elements)
  - ICB can induce upregulation of other inhibitory receptors
 # Antiplatelet drugs may increase the risk for checkpoint inhibitor-related pneumonitis in advanced cancer patients
  - mechanism: changed immune landscape within tumor microenvironemnt, platelets' role in circulation and immune system being disturbed
@@ -177,7 +179,7 @@
 # CD4<sup>+</sup> T cells are essential for the development of destructive thyroiditis induced by anti-PD-1 antibody in thyroglobulin-immunized mice
 ## Abstract
  - PD-1 blockade in thyroglobulin-immunized mice induces destructive thyroiditis, prevented by previous depletion of CD4<sup>+</sup> T cells and partially prevented by previous depletion of CD8<sup>+</sup> T cells
- - CD4<sup>+</sup> T cell subsets (central and effector memory) frequencies and interferon gamma production after stimulation with thyroglobulin increased in lymph nodes of mice with thyroid irAE over controls
+ - CD4<sup>+</sup> T cell subsets (central and effector memory) frequencies and interferon γ production after stimulation with thyroglobulin increased in lymph nodes of mice with thyroid irAE over controls
  - infiltration of CD4<sup>+</sup> T cells expressing granzyme B in thyroid glands and MHC class II expression on thyrocytes in mice with thyroid irAE
  - adoptive transfer of CD4<sup>+</sup> T cells from lymph nodes in mice with thyroid irAE destroys thryoid follicular architecture in irradiated recipient mice
  - frequencies of central and effector memory CD4<sup>+</sup> T cells expressing CD27 (CD4<sup>+</sup> T cell cytotoxic marker) higher in PBMCs from human patients with thyroid irAE induced by PD-1 blockade than those without (also higher CD4<sup>+</sup> T cell frequencies in general), similar CD8<sup>+</sup> T cell frequencies
@@ -311,6 +313,14 @@
  - some propose correlation between vitiligo occurrence and clinical response in melanoma patients receiving immunotherapy, but most studies have included heterogeneous patient and treatment settings
  - goal: investigate correlation between vitiligo occurrence and clinical benefit of immunotherapy
  - results: vitiligo occurrence correlated with favorable clinical outcome
+# Crossreactivity of SARS-CoV-2 and influenza A-specific T cells in individuals exposed to SARS-CoV-2
+## Abstract
+ - geographical association between high influenza vaccination rates and lower incidences of SARS-CoV-2 infection (crossreactive T cells)
+ - heterologous immunity
+ - use artificial APCs and RT-qPCR to screen for antigen-specific T cell responses, see correlation between responses to SARS-CoV-2 epitope and IAV dominant epitope
+ - TCR repertoires of crossreactive and IAV-specific T cells reveals similarities
+## Discussion
+ - **heterologous immunity may be beneficial in short run (crossreactive memory T cells primed to quickly respond to new antigen) but may be detrimental in long run (narrows TCR diversity, promotes development of viral escape variants)**
 # CTLA-4 blockade enhances polyfunctional NY-ESO-1 specific T cell responses in metastatic melanoma patients with clinical benefit
  - 5/8 of patients with clinical benefit to CTLA-4 blockade had NY-ESO-1 antibody (and CD4<sup>+</sup> and CD8<sup>+</sup> T cells against NY-ESO-1), 0/7 of clinical non-responders had NY-ESO-1 antibody
  - NY-ESO-1 is a cancer antigen
@@ -342,7 +352,7 @@
  - result: GAD65-specific T cells crossreact with peptide of hCMV major DNA binding protein, hCMV-derived epitope can be processed by DCs and recognized by GAD65-reactive T cells
  - **takehome: hCMV may be involved in loss of T cell tolerance to autoantigen GAD65 by a mechanism of molecular mimicry leading to autoimmunity, perhaps analogous to loss of tolerance to autoantigens by mechanism of molecular mimicry between tumor antigen and self antigen leading to irAEs**
 ## Introduction
- - GAD65 (glutamic acid decarboxylase) neuroenzyme expressed in neurons and beta cells
+ - GAD65 (glutamic acid decarboxylase) neuroenzyme expressed in neurons and β cells
 ## Discussion
  - clonal T cells recognizing GAD65 339-352 crossreact with hCMV major DNA-binding protein pUL57 peptide 674-687, peptide efficiently processed for presentation by HLA-DR3
  - crossreactive response may be polyclonal, so T cells recognizing hCMV peptide more efficiently than GAD65 peptide may exist
@@ -485,7 +495,7 @@
  - clustering genes/proteins into GO groups/signaling pathways relies on curation of these groups/pathways, could be supplemented by LSI/LSA (latent semantic analysis)
 # Emerging concepts in T cell receptor specificity: rationalizing and (maybe) predicting outcomes
 ## Rules are made to be broken and roles are not easily defined
- - example: A6 TCR recognizes HTLV-1 Tax<sub>11-19</sub> peptide presented by MHCI HLA-A*0201, surprisingly strongest interaction in interface is between CDR3 alpha and HLA-A2 (so peptide not involved surprisingly yet TCR is specific not degenerate)
+ - example: A6 TCR recognizes HTLV-1 Tax<sub>11-19</sub> peptide presented by MHCI HLA-A*0201, surprisingly strongest interaction in interface is between CDR3α and HLA-A2 (so peptide not involved surprisingly yet TCR is specific not degenerate)
 ## Rationalizing the specificity/cross-reactivity duality of TCRs
  - a single TCR has been shown to recognize > 1 million peptides
  - crossreactivity is needed as there are many more potential antigens than TCRs
@@ -533,7 +543,7 @@
  - **identical CD8<sup>+</sup> T cell clone found in 4 tissues in a patient with widespread irAEs (duodenum for enteritis irAE, PBMCs, original tumor and liver metastasis responses as well), evidence for crossreactivity underlying irAEs OR common antigen between tumor and self underlying irAEs**
 ## Discussion
  - tissue-resident memory T cells may underlie irAEs (common in barrier tissue)
- - **duodenitis blocked by antibody to integrin alpha 4 beta 7 (LPAM-1) which blocks T cell infiltraton into GI tract, suggesting that GI toxicity resulted from circulating T cells trafficked to GI tract following expansion elsewhere i.e. in the tumor perhaps**
+ - **duodenitis blocked by antibody to integrin α 4 β 7 (LPAM-1) which blocks T cell infiltraton into GI tract, suggesting that GI toxicity resulted from circulating T cells trafficked to GI tract following expansion elsewhere i.e. in the tumor perhaps**
 # Expression of MHC class II in T cells is associated with increased HIV-1 expression
  - CD4 primary HIV-1 infection receptor, expressed on T cells, monocytes, macrophages, DCs
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
@@ -549,7 +559,7 @@
  - HLA genes highly polymorphic, variants associated with many traits, like most autoimmune diseases
  - perhaps different disease risk conferred by particular MHC alleles is due to differences in presented peptides or differences in stabilities of MHC molecules
  - **1-5% of T cells have γ (*TRG*) and δ (*TRD*) chains instead of α (*TRA*) and β (*TRB*) ones, only β and δ chains also have diversity (D) genes recombined in VDJ recombination (α and γ just have VJ recombination)**
- - **during V(D)J recombination, joints between segments are partially digested and nucleotides are randomly added to form highly variable and non-germline-encoded complementarity-determining regions 3 (CDR3) loop that recognizes peptides, CDR1/2 loops of TCR form contacts with MHC and are encoded by V genes**
+ - **during V(D)J recombination, joints between segments are partially digested and nucleotides are randomly added (i.e. N region) to form highly variable and non-germline-encoded complementarity-determining regions 3 (CDR3) loop that recognizes peptides, CDR1/2 loops of TCR form contacts with MHC and are encoded by V genes**
 # Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
  - chronic stimulation assay
  - *in vivo* validation of screen results (perturbation of INO80 and BAF chromatin remodeling complexes improves T cell persistence in tumors)
@@ -590,7 +600,7 @@
 ## Feature selection and dimension reduction
  - identify few latent variables that explain the most variance in data
 # FDA approves anti-CD3 antibody to delay type 1 diabetes onset
- - T1D: autoreactive T cells destroy insulin secreting beta cells
+ - T1D: autoreactive T cells destroy insulin secreting β cells
 # Fulminant myocarditis with combination immune checkpoint blockade
 ## Abstract
  - myocarditis with robust T cell and macrophage infiltrates
@@ -598,6 +608,8 @@
 ## Discussion
  - possible mechanisms: T cells targeting shared antigen, T cells targeting homologous antigens (different but similar?), T cells targeting dissimilar antigens (what I'm thinking of as crossreactivity)
  - evidence for shared antigen mechanism: high levels of muscle-specific antigens (desmin and troponin) in both patient tumors
+# Functionally specialized human CD4<sup>+</sup> T cell subsets express physiochemically distinct TCRs
+ - **CDR3s of effector/memory Tregs had most hydrophobic and strongly interacting residues which might promote crossreactivity, recapitulated features in naive Tregs suggesting lineage fate predetermined by selection events in thymus, also short CDR3s which might limit crossreactivity**
 # Hallmarks of response, resistance, and toxicity to immune checkpoint blockade
 ## Other immune checkpoints: positive immune regulation
  - ICOS (immune co-stimulator) expressed on T cells, enhances function/expansion of CD8<sup>+</sup> T cells and Tregs
@@ -627,6 +639,16 @@
  - HLA class I and II genes code for cell surface glycoproteins important for antigen presentation and self-recognition by immune cells
  - HLA class I heterodimers consist of α-heavy chain (encoded by *HLA-A/B/C*) and small β-microglobulin
  - HLA class II heterodimers (α and β chains) specified by genes in HLA-D region (*DPA/B1*, *DQA/B1*, *DRB1/A*)
+# HLA-dependent variation in SARS-CoV-2 CD8<sup>+</sup> T cell crossreactivity with human coronaviruses
+## Abstract - human coronaviruses (HCoVs) cause common cold
+ - public TCR repertoires dominated by TCRs cognate to non-homologous SARS-CoV-2 peptides
+ - skewed distribution of TCRs cognate to homologous or non-homologous peptides in COVID-19 patients likely HLA-dependent
+## Discussion
+ - T cells specific to SARS-CoV-2 peptides with high similarity to human CoV predicted pMHC can be expanded from naive indivduals, cognate public TCRs observed in some COVID-19 recovered patients
+ - SARS-CoV-2 unexposed individuals can mount T cell responses to HCoVs that, due to peptide similarity, can be crossreactive with SARS-CoV-2 antigens
+ - **certain HLA alleles (HLA‐B*07:02, ‐C*07:02, ‐A*03:01) predispose to SARS‐CoV‐2‐HCoV cross‐reactive CD8<sup>+</sup> T cells**
+ - non-specific antiviral immune responses can lead to the release of self-antigens from damaged cells, resulting in bystander activation of autoreactive T cells
+ - immunogenic SARS-CoV-2 peptides similar to self antigens may be candidates for autoimmune associations
 # HLA-DRB alleles are differentially expressed by tumor cells in breast carcinoma
 # Holistic approach to immune checkpoint inhibitor-related adverse events
  - irAEs usually occur within the first months after ICI treatment but can develop as early as after the first dose or as late as years after ICI treatment
@@ -639,6 +661,18 @@
  - baseline immune cell profiles are being studied as predictors of irAEs: high CD2<sup>low</sup> PD-1<sup>+</sup> B cells, high eosinophil count, high proliferation of control memory CD8<sup>+</sup> T cells, higher expression of CD27/28 on CD4/8 effector T cells, increased activated CD4 memory T cells and TCR diversity
 # Host-specific differences in top-expanded TCR clonotypes correlate with divergent outcomes of anti-PD-L1 treatment in responders versus non-responders
  - murine
+# How the thymus designs antigen-specific and self-tolerant T cell receptor sequences
+## Introduction
+ - **TCRs recognize antigens via multiple modest interactions, so mutations to most amino acids abrogate recognition (conferring specificity)**
+ - positive selection is important for MHC restriction but not antigen specificity
+ - **past studies: negative selection reduces TCR crossreactivity**
+## Results
+### Selection against many endogenous pMHC molecules is required for antigen-specific TCR sequences
+ - as previously seen
+### Negative selection against many peptides results in TCR sequences with peptide contact residues enriched in weakly interacting amino acids
+ - when there are many peptides in thymus, CDR3s of TCRs enriched in amino acids that interact weakly with other amino acids, strong interactions in the case where there are few peptides in thymus
+# Hydrophobic CDR3 residues promote the development of self-reactive T cells
+ - **hydrophobicity at positions 6 and 7 of CDR3 β promote development of self-reactive T cells**
 # Identification of neoantigens for individualized cancer immunotherapy
  - neoepitopes are attractive targets for therapeutic cancer vaccines, **but most cancer mutations are unique for individual patients (neoantigenome), requiring individualized treatment**
  - **not all tumor mutations give rise to neoantigens, neoepitope-specific T cells reflect only 1-2% of mutations in an individual tumor, this could be due to not all tumor mutations giving rise to neoantigens and from T cell repertoire not recognizing all neoantigens perhaps as well**
@@ -661,7 +695,7 @@
  - these Temra CD8<sup>+</sup> cells expressed high levels of cytotoxicity/activation genes like granzyme B (GZMB), IL-32, CCL5 (chemokine), so they seem cytotoxic
  - don't see unique CD4<sup>+</sup> subpopulation differences
 ### Single-cell TCR sequencing reveals myocarditis-associated clonal expansion of cytotoxic Temra CD8<sup>+</sup> cell clusters
- - 83% of CD3<sup>+</sup> cells express alpha beta TCRs, **not sure what the normal/expected frequency is**
+ - 83% of CD3<sup>+</sup> cells express α β TCRs, **not sure what the normal/expected frequency is**
  - identify top 50 clonotypes for each patient
  - find expansion of top 50 clonotypes in ICI myocarditis group relative to no ICI and non-myocarditis irAEs (i.e. for myocarditis group the top 50 clonotypes constitute a higher percentage of the CD3<sup>+</sup> cells so they're more expanded)
  - myocarditis expansion mostly in Temra CD8<sup>+</sup> cells
@@ -702,7 +736,7 @@
 ## The roles of CTLA-4
  - CTLA-4 expressed on activated T cells, some CD25<sup>+</sup>CD4<sup>+</sup> Treg cells, **CTLA-4 blockade can interfere with T cell differentiation and eliminate Tregs peripherally and in TME**
 ## The roles of PD-1
- - PD-L1/2 expressed on APCs and in peripheral tissue (PD-L1 expression enhanced with activation stimuli like IFN-gamma or IL-17A, PD-L2 mostly induced on APCs by IL-4, higher affinity for receptor than PD-L1)
+ - PD-L1/2 expressed on APCs and in peripheral tissue (PD-L1 expression enhanced with activation stimuli like IFN-γ or IL-17A, PD-L2 mostly induced on APCs by IL-4, higher affinity for receptor than PD-L1)
  - **no antibodies for PD-L2, only PD-L1, in clinical use**
  - PD-L2 has stimulatory and inhibitory effects depending on context
 ## Differences between CTLA-4 and PD-1
@@ -730,9 +764,9 @@
 ### Immunosuppression alters T cell gene expression but not TCR repertoire in an irMyocarditis case with matched pre- and post-corticosteroid heart samples
 ### TCR clones enriched in irMyocarditis hearts are distinct from those enriched in tumor
  - across all irMyocarditis patients, five clones were enriched in both heart and tumor (18% of tumor-enriched TCR-βs, 26% of heart-enriched TCR-βs), but in each irMyocarditis patients, the TCR-β clones most expanded in heart tissue compared to control tissue were not enriched in the tumor relative to control tissue
- - **modest overlap of TCR beta clones between heart and tumor but majority of enriched/most expanded clones in each tissue are distnct**
+ - **modest overlap of TCR β clones between heart and tumor but majority of enriched/most expanded clones in each tissue are distnct**
 ## Discussion
- - arguing against shared antigens between heart and tumor, cardiac protein alpha-myosin autoantigen in mouse models of irMyocarditis but healthy controls here have T cell clones reactive for this antigen in blood (also these were not most expanded clones in irMyocarditis tissue in cancer patients)
+ - arguing against shared antigens between heart and tumor, cardiac protein α-myosin autoantigen in mouse models of irMyocarditis but healthy controls here have T cell clones reactive for this antigen in blood (also these were not most expanded clones in irMyocarditis tissue in cancer patients)
 # Immune signatures predict development of autoimmune toxicity in patients with cancer treated with immune checkpoint inhibitors
 ## Highlights
  - systemic immune signatures shortly after ICI start linked to irAEs
@@ -868,7 +902,7 @@
  - **it's uncommon for two different MHCs to be able to bind a given peptide, but crossreactivity involving different MHCs has been reported**
  - **MHC binding importance in TCR-pMHC interaction is one of causes of allogenic transplant rejection**
  - **TCR has flexible loops (including CDRs) that interact with pMHC**
- - **alpha CDRs usually bind N-terminus of peptide, beta CDRs bind C-terminus**
+ - **α CDRs usually bind N-terminus of peptide, β CDRs bind C-terminus**
  - **TCR footprint: general docking mode of TCR to cognate pMHC, germline bias i.e. TCR recognizes conserved MHC residues**
 # Interesting possibilities to improve the safety and efficacy of ipilimumab (Yervoy)
  - target ICI to tumor with streptavidin-biotin technology (anti-tumor antibody conjugated to streptavidin and biotin-labeled anti-CTLA-4 antibody for example)
@@ -976,7 +1010,8 @@
  - path to exhaustion is a continuum, some precursor exhausted T cells can self-renew, TCF1<sup>+</sup> (express TCF7)
  - most CAR T cell protocols use a heterogeneous starting population of bulk CD4 and CD8 T cells spanning developmental potential range, but more plastic memory T cells (T<sub>cm</sub> i.e. central memory T cells and T<sub>scm</sub> i.e. stem cell memory T cells) possess greater effector/proliferative capacities and better eradicate tumors when used as CAR T cell starting populations
  - patients eligible for CAR T cell therapy usually have relapsed/refractory (treatment-resistant), so their T cells have likely been chronically antigen exposed, as well as exposed to chemotherapy (skews T cells towards more terminally differentiated effector memory i.e. T<sub>em</sub> cells), and this all makes the CAR T therapy less effective (than if it had been used at the beginning)
-# Mechanisms of tumor resistance to immune checkpoint blockade and combination strategies to overcome resistance
+# MHC-II alleles shape the CDR3 repertoires of conventional and regulatory naive CD4<sup>+</sup> T cells
+ - **H2-A<sup>j</sup> favors selection of narrower and more hydrophobic CDR3 repertoire compared to H2-A<sup>b</sub> in mice**
 # MHC class II (DRB) promoter polymorphism and its role in parasite control among malaria patients
 # MHC class II tetramers
  - can interrogate CD4 T cells using soluble MHC II tetramers
@@ -1041,7 +1076,11 @@
  - cross-reactivity was at first expected to be low, but **only a small portion of an antigen is needed to be recognized by a TCR (8-10 amino acids for MHCI, 14-18 for MHCII, does this mean that CD8<sup>+</sup> T cells might be more cross-reactive?**)
  - TCRs have specificity for MHC bearing peptide (MHC restriction)
  - there are anchor residues (critical residues of peptide required to bind specific MHC), but there are plastic residues as well, leading to polyspecificity
- - **chimera TCRs with 2 beta or 2 alpha (and 1 of the other) could also lead to cross-reactivity with different specificities (perhaps different alpha-beta pairs on same T cell have different specificities)**
+ - **chimera TCRs with 2 β or 2 α (and 1 of the other) could also lead to cross-reactivity with different specificities (perhaps different α-β pairs on same T cell have different specificities)**
+# Molecular mimicry between tumor associated antigens and microbiota-derived epitopes
+ - three cases of 100% homology between tumor associated antigens and microbiota-derived antigens of the Firmicutes and Bacteroidetes phyla (> 90% of gut microbiota)
+ - likely induction of crossreactive T CD8<sup>+</sup> T cells, so anti-microbiota T cell memory could serve as anti-cancer T cell memory
+ - **biological significance may depend on when individuals encounter microbiota species with antigens similar to tumor: early in life would mean that immune system could recognize antigens as self and that specific T cell clones would be removed (s tumor presenting homologous TAA would have an advantage), but if microbiota colonizes gut later in life the immune system could recognize peptide as non-self and then tumor would be exposed to specific memory T cells**
 # mTOR regulates T cell exhaustion and PD-1-targeted immunotherapy response during chronic viral infection
  - background: PD-1-blockade enhances T cell response by promoting differentiation of stem-like T cells towards TIM3<sup>+</sup> cells
  - results: blocking mTOR during T cell expansion enhances T cell response (stem-like T cells accumulate), but blocking mTOR after exhaustion has progressed causes immunosuppression (decreased TIM3<sup>+</sup> cells, increased viral load)
@@ -1051,10 +1090,13 @@
  - TCR diversity, CD8<sup>+</sup> T cell clonal expansion, tumor mutational burden predict irAEs
 ## Discussion
  - *LCP1* and *ADPGK* are genes related to T cell activation that predict irAEs
-# Multiple rearrangements in T cell receptor alpha chain genes maximize the production of useful thymocytes
- - allelic exclusion conventional for TCR beta
- - TCR alpha expression less strictly regulated, endogenous TCR alpha chains often found in association with transgenic TCR beta chains in transgenic mice
- - TCR alpha may make multiple rearrangements on each chromosome
+# Multiple instance learning to predict immune checkpoint blockade efficacy using neoantigen candidates
+ - predict ICB efficacy using neoantigen features (machine learning) to improve general imperfect prediction of ICB response from neoantigen load
+ - SNV-derived neoantigens better predictor perhaps, not those from fusion genes, also those from indels seems to predict ICB response perhaps
+# Multiple rearrangements in T cell receptor α chain genes maximize the production of useful thymocytes
+ - allelic exclusion conventional for TCR β
+ - TCR α expression less strictly regulated, endogenous TCR α chains often found in association with transgenic TCR β chains in transgenic mice
+ - TCR α may make multiple rearrangements on each chromosome
 # Negative binomial additive model for RNA-Seq data analysis
 ## Methods for differential expression analysis
  - DESeq2, edgeR (based on negative binomial regression to model gene counts)
@@ -1156,6 +1198,10 @@
  - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
  - organ-specific irAEs associated with pre-existing organ dysfunction
  - high pre-treatment soluble CTLA4 associated with irAEs
+# Role of B cells as antigen presenting cells
+ - B2s: conventional B cells
+ - Bregs: suppress inflammation, < 1% of peripheral blood mononuclear cells
+ - activation of B cells as APCs occurs via BCR (T-cell dependent) or via germline encoded PAMP receptors (T cell independent)
 # Role of recombination activating genes in the generation of antigen receptor diversity and beyond
 ## Abstract
  - V(D)J recombination: antigen receptor gene segments cleaved, rejoined by NHEJ
@@ -1165,11 +1211,11 @@
 ## Antigen receptors of lymphoid system
  - antibodies/immunoglobulins are glycoproteins composed of 4 polypeptides (2 identical heavy chains and 2 identical light chains held together by disulfide bonds)
  - N-terminal sequences of antibodies (variable region, 110-130 residues) vary greatly and gives antigen specificity, C-terminal seqences more constant (constant region)
- - exon encoding variable region (N-terminus of antibodies) assembled from 2 or 3 gene segments: V (variable), D (diversity, only for immunoglobulin heavy chains, TCR-beta, and TCR-delta), J (joining)
+ - exon encoding variable region (N-terminus of antibodies) assembled from 2 or 3 gene segments: V (variable), D (diversity, only for immunoglobulin heavy chains, TCR-β, and TCR-δ), J (joining)
  - recombination between D and J occurs to yield DJ segment, and recombination between V and DJ occurs to yield VDJ segment
  - TCR structure similar to antigen-binding fragment (F(ab)) of antibody, also has 2 glycoprotein subunits each encoded by rearranged gene, also has interchain disulfide bonds
- - TCRs are α beta or gamma delta pairs
- - heavy chain recombination occurs before light chain recombination (strict order, same as D-J before V-DJ and TCR-beta before TCR-α), cell cycle restricted expression of enzymes helps enforce order
+ - TCRs are αβ or γδ pairs
+ - heavy chain recombination occurs before light chain recombination (strict order, same as D-J before V-DJ and TCR-β before TCR-α), cell cycle restricted expression of enzymes helps enforce order
  - rearrangements restricted to early developmental stage
  - allelic exclusion: process by which specificity is acquired for mature lymphocytes to only express a single species of antibody/BCR/TCR in spite of having multiple allelic loci for different options
 ## Antigen receptor loci
@@ -1253,8 +1299,8 @@
  - irAEs are frequent in patients treated with ICIs (~90% of patients treated with PD-1 blockade and/or CTLA-4 blockade), severe/life threatening (grades 3/4, respectively) irAEs in fewer but still many patients
  - at baseline, patients with arthritis had less cells with features of CD8 T<sub>CM</sub> cells, patients with pneumonitis had more CD4 T<sub>H2</sub> cells, patients with thyroiditis had more CD4 T<sub>H17</sub> cells, so **different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers**
 # Single cell T cell receptor sequencing: techniques and future challenges
- - alpha beta T cells are > 90% of T cell population; gamma delta T cells are less diverse and aren't MHC-restricted and are involved in innate-like responses instead
- - D-J joining happens first, then V-D-J joining for TCR beta
+ - αβ T cells are > 90% of T cell population; γδ T cells are less diverse and aren't MHC-restricted and are involved in innate-like responses instead
+ - D-J joining happens first, then V-D-J joining for TCR β
  - CDR1-2 in V gene, CDR3 at junction of V, (D), and J
  - first sequencing-based techniques to look at CDR3 looked at CDR3 length distributions (electrophoresis of PCR fragments from amplifying across CDR3), Gaussian (normal) distribution with polyclonal TCRs and skewed with clonal enrichment
 # Single-gene negative binomial regression models for RNA-Seq data with higher-order asymptotic inference
@@ -1263,6 +1309,9 @@
 # Specificity of T cell alloreactivity
  - many alloreactive T cells are much more peptide specific than previously thought, few if any recognize only the MHC molecule
  - alloreactive T cells are polyspecific, able to recognize multiple distinct peptide-MHC complexes (perhaps why there's a high frequency of allorecognition)
+# Specificity, privacy, and degeneracy in the CD4 T cell receptor repertoire following immunization
+ - math to back up hundreds to thousands of TCRs for any given antigen in a repertoire
+ - mice
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
  - ICI-induced inflammatory arthritis has been reported
@@ -1281,7 +1330,7 @@
 ## Results
 ### Combined TCR-transcriptome analysis reveals longer CDR3 regions for naive-like YFV-specific cells
  - **they calculate germline score as ratio between number of nucleotides in CDR3 that originate from germline V(D)J segments to total number of nucleotides in CDR3, need stitching and IMGT/HighV-QUEST for this**
- - **naive-like cells have longer CDR3s and lower germline scores for both alpha and beta chains than effector memory-like cells**
+ - **naive-like cells have longer CDR3s and lower germline scores for both α and β chains than effector memory-like cells**
 # Targeting of multiple tumor-associated antigens by individual T cell receptors during successful cancer immunotherapy
 ## Highlights
  - individual T cells can recognize multiple, different tumor-associated antigens
@@ -1396,7 +1445,7 @@
  - crossreactivity due to structural mimicry of binding hotspot shared by self and microbial antigens rather than degenerate TCR recognition
  - autoreactive TCR binding affinity much lower than affinity for microbial (mimic) peptide
 ## Introduction
- - MS associated with 3 different MHCII alleles of HLA-DR2 haplotype in northern Europeans: DRB1*1501, DRB5*0101 (encode beta chains of DR2b and DR2a molecules, respectively), DQB1*0602 (encodes beta chain of HLA-DQ6.2)
+ - MS associated with 3 different MHCII alleles of HLA-DR2 haplotype in northern Europeans: DRB1*1501, DRB5*0101 (encode β chains of DR2b and DR2a molecules, respectively), DQB1*0602 (encodes β chain of HLA-DQ6.2)
  - HLA-DR, not HLA-DQ, implicated in MS susceptibility, HLA-DR restricted T cell mediated autoimmunity to myelin antigens
  - **mechanism: self-reactive TCRs require affinity low enough to escape negative selection in thymus but high enough for activation in periphery**
  - molecular mimicry hypothesis: some T cells respond to epitope derived from infectious agent can crossreact with self antigen that shares sequence/structural homology with microbial peptide
@@ -1549,6 +1598,11 @@
  - exhausted T cells accumulate when amount of antigen exceeds ability for clearance by antigen-specific T cells
  - characterized by increased expression of coinhibitory receptors (PD-1, LAG-3, TIM-3, TIGIT), these receptors also mark T cell activation
  - blocking coinhibitory receptors (i.e. ICB) can reinvigorate exhausted T cells but exhaustion is a difficult to reverse, altered epigenetic state
+# The changing landscape of naive T cell receptor repertoire with human aging
+ - aging associated with loss of thymus productivity, yet naive T cells still maintain abundance by division in periphery for many years
+ - **shorter CDR3 β, less added N nucleotides within CDR3 β with aging**
+ - **increase in publicness of CD4 but not CD8 naive T cell repertoires with aging**
+ - **increased clonality with aging, as expected with clonal expansion over time**
 # The diverse functions of the PD1 inhibitory pathway
 ## Key points
  - PD1: inhibitory receptor expressed by all T cells during activation (also B cells, NKs, some myeloid cells), regulates effector functions, often high and sustained expression in persistent antigen exposure (chronic infections, cancer) and can limit protective immunity in these cases, limits autoreactive T cells
@@ -1611,7 +1665,7 @@
  - > 80% of tumor infiltrating leukocytes in ovarian tumors are bystanders, perhaps related to the lethality and ICB resistance of ovarian cancer
  - **CD8<sup>+</sup> T cell subsets: naive (not yet exposed to antigenic stimulation, CCR7, LEF1, IL7R, TCF7, SELL), effector (stimulated by antigens, acquired cytotoxicity, perforin 1, granzymes, NK cell granule 7, CX3CR1, KLRG1, FCGR3A), memory (subset of Teff convert into resting memory that can generate many Teff cells upon restimulation by cognate antigens)**
  - **central memory vs. effector memory CD8<sup>+</sup> T cells: Tcm abundant in spleen, blood, lymph, highly proliferative upon reactivation, lymphatic homing markers (CD62L, CCR7, GPR183, CD27/28), Tem abundant in spleen and blood, highly cytotoxic upon reactivation, granzymes, KLRG1, CXCR4, GCGR3A, lack CD62L, there's also tissue resident memory T cells (Trm) that are CD103<sup>+</sup>CD69<sup>+</sup> and excluded from circulation**
- - tumor-reactive cytotoxic T cells eventually become exhausted due to chronic antigen stimulation, increased inhibitory receptors (PD-1, CTLA-4, LAG3, TIM-3), reduced effector functions (reduced IL-2, TNF, IFN-gamma production)
+ - tumor-reactive cytotoxic T cells eventually become exhausted due to chronic antigen stimulation, increased inhibitory receptors (PD-1, CTLA-4, LAG3, TIM-3), reduced effector functions (reduced IL-2, TNF, IFN-γ production)
 ### CD8<sup>+</sup> T cell dysfunction is a progressive state within tumor microenvironment
  - earlier stage tumors likely have T cells on path to terminal exhaustion, late stage tumors likely have terminally exhausted T cells
  - no drugs to reverse cellular state of terminally exhausted Tex cells, need to manipulate epigenetics/metabolism
@@ -1637,6 +1691,18 @@
 # The role of type-2 conventional dendritic cells in the regulation of tumor immunity
  - cDC1s dedicated to activate CD8<sup>+</sup> T cells, cross-present tumor-derived antigens for priming of CD8<sup>+</sup> T cells
  - cDC2s heterogeneous, present exogenous antigens to CD4<sup>+</sup> T cells for initiation of T helper cell differentiation
+# The somatically generated portion of T cell receptor CDR3α contributes to the MHC allele specificity of the T cell receptor
+ - mice
+ - **positive selection-induced MHC bias of TCRs affected both by germline encoded elements of TCRα and β chain, also affected by non-germline encoded portions of CDR3α**
+ - **positive selection: bias of TCRs towards peptides bound to allele of MHC to which T cells were exposed to in thymus**
+ - **peptides presented to T cells in thymus also controlled by MHC allele, so MHC allele specificity of positive selection might be dictated by peptide as well rather than just the MHC protein**
+# The structural basis of T cell receptor (TCR) activation: an enduring enigma
+ - the T-cell receptor (TCR)–CD3 complex is composed of a diverse αβ TCR heterodimer noncovalently associated with the invariant CD3 dimers CD3ϵγ, CD3ϵδ, and CD3ζζ
+ - the TCR mediates the recognition of pMHC, whereas the CD3 molecules transduce activation signals to the T cell
+ - early T cell activation (how TCR engagement by pMHC is communicated to CD3) process remains a mystery
+ - **there can be 100,000 pMHCs on an APC**
+ - **CDR1/2 are encoded within the TCR V segments, whereas CDR3 is formed by DNA recombination involving juxtaposition of Vα and Jα segments for α chain genes and Vβ, D, and Jβ segments for β chain genes**
+ - early T cell activation model mechanisms: aggregation (of TCR-CD3 complexes), segregation (of inhibitory phosphatase CD45 from TCR-CD3), mechanosensing (TCR converts mechanical energy from T cell scanning of APCs into biochemical signal upon engaging pMHC), ligand-induced conformational change (allostery)
 # The yin and yang of co-inhibitory receptors: towards anti-tumor immunity without autoimmunity
  - co-inhibitory receptors: PD-1 (CD279), CTLA-4 (cytotoxic T lymphocyte-associated antigen-4, CD152, high sequence similarity to co-stimulatory CD28 that it outcompetes for ligands B7-1/2), TIGIT (T cell immunoglobulin and ITIM domain, in CD28 protein family), TIM-3 (T cell immunoglobulin and mucin-domain containing protein-3), LAG-3 (lymphocyte activation gene-3)
  - central tolerance in the thymus acts as the first control during T cell development to eliminate autoreactive clones
@@ -1704,10 +1770,14 @@
 ### Broadening checkpoint blockade antibody strategies
  - perhaps try dual immunodulatory antibodies (bispecific or antibody-based alternative structures), for example targeting PD-1/PD-L1 in combination with LAG-3/TIM-3 (perhaps promotes retention in tumor microenvironment over healthy tissue)
  - perhaps modify anti-CTLA-4 antibodies to permit expression of CTLA-4 on Tregs (CTLA-4 required for Treg inhibitory function)
+# Unique features of the TCR repertoire of reactivated memory T cells in the experimental mouse tumor model
+## Abstract
+ - after cognate antigen reencounter, memory T cells enriched with clonotypes that express α chain TCRs with high potential crossreactivity and enhanced strength of interaction with pMHC
+ - no changes observed in TCR β characteristics of reactivated memory clonotypes
 # Unraveling age-specific complexity in the human T cell compartment
  - TEA-seq to investigste transcriptomics, epitopes, and chromatin accessibility of single cells
  - compare children and older adult immune profiles
- - CD8alpha alpha T cells in children lost in older adults
+ - CD8αα T cells in children lost in older adults
 # Using surface hydrophobicity together with empirical potentials to identify protein-protein binding sites. Application to the interactions of E-cadherins
  - **not sure why yet and surprising to me, but apparently hydrophobic interactions are generally the strongest for protein binding BUT don't necessarily provide specificity that comes from other residues**
  - **idea is that hydrophobic residues provide affinity and polar/charged ones provide specificity via a more limited set of specific favorable structures**
