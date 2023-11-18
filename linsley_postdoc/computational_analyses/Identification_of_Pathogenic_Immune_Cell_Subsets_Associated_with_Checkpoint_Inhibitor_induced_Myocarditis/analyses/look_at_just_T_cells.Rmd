@@ -95,7 +95,7 @@ rna_and_tcr <- AddMetaData(object = immune.combined, metadata = dehashed_combine
 
 ```{r}
 
-T_cells <- rna_and_tcr[, !(is.na(rna_and_tcr@meta.data$cdr3_TRA) | is.na(rna_and_tcr@meta.data$cdr3_TRB)) & rna_and_tcr@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & rna_and_tcr@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL", "gdT")]
+T_cells <- rna_and_tcr[, !(is.na(rna_and_tcr@meta.data$cdr3_TRA) | is.na(rna_and_tcr@meta.data$cdr3_TRB)) & rna_and_tcr@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & rna_and_tcr@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
 
 ```
 
@@ -167,7 +167,7 @@ p1 + p2
 
 ```{r}
 
-just_T_cells <- T_cells[, !(is.na(T_cells@meta.data$cdr3_TRA) | is.na(T_cells@meta.data$cdr3_TRB)) & T_cells@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL", "gdT")]
+just_T_cells <- T_cells[, !(is.na(T_cells@meta.data$cdr3_TRA) | is.na(T_cells@meta.data$cdr3_TRB)) & T_cells@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
 
 just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
 just_T_cells <- RunUMAP(just_T_cells, reduction = "pca", dims = 1:30)

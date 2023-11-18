@@ -47,7 +47,8 @@ theme_set(
 
 dehashed_combined_tcr_seq <- read.csv("../saved_data/dehashed_tcr_seq_with_rna.csv")
   
-dehashed_combined_tcr_seq
+dehashed_combined_tcr_seq_doubled <- dehashed_combined_tcr_seq %>%
+  bind_rows(mutate(dehashed_combined_tcr_seq, predicted.celltype.l1 = "All T cells"))
 
 ```
 
@@ -55,7 +56,7 @@ dehashed_combined_tcr_seq
 
 ```{r}
 
-cdr3_amino_acid_diversity_df <- dehashed_combined_tcr_seq %>%
+cdr3_amino_acid_diversity_df <- dehashed_combined_tcr_seq_doubled %>%
   filter(!(is.na(cdr3)),
          chain != "Multi") %>%
   group_by(cdr3, chain, Patient_ID, irAE, predicted.celltype.l1) %>%
@@ -64,11 +65,10 @@ cdr3_amino_acid_diversity_df <- dehashed_combined_tcr_seq %>%
   group_by(Patient_ID, chain, predicted.celltype.l1) %>%
   # Calculate Shannon diversity index (H)
   mutate(shannon = diversity(cdr3_amino_acid_count)) %>%
-  slice(1) %>%
   ungroup() %>%
   select(chain, irAE, Patient_ID, shannon, predicted.celltype.l1)
 
-cdr3_amino_acid_diversity_df
+cdr3_amino_acid_diversity_df %>%
 
 ggplot(cdr3_amino_acid_diversity_df, aes(x = chain, y = shannon, fill = irAE)) +
   geom_boxplot() +
@@ -80,8 +80,8 @@ ggplot(cdr3_amino_acid_diversity_df, aes(x = chain, y = shannon, fill = irAE)) +
 
 # Filter the data for statistical test
 test_data <- cdr3_amino_acid_diversity_df %>%
-  filter(chain == "TRB",
-         predicted.celltype.l1 == "CD4 T")
+  filter(chain == "TRA",
+         predicted.celltype.l1 == "All T cells")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$shannon ~ test_data$irAE)

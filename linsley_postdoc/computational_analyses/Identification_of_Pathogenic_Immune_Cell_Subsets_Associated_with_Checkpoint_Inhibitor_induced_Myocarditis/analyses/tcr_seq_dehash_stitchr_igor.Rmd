@@ -185,27 +185,39 @@ write.csv(dehashed_combined_tcr_seq, "../saved_data/dehashed_tcr_seq.csv")
 
 ```
 
-# Prep for stitchr
+# Read in final RNA T cell Seurat with TCR metadata
 
 ```{r}
 
-dehashed_combined_tcr_seq_with_rna <- as_tibble(readRDS("../saved_data/final_seurat_T_cells.rds")@meta.data)
+tcr_rna <- readRDS("../saved_data/final_seurat_T_cells.rds")
 
-dehashed_combined_tcr_seq_with_rna$TCR_name <- as.integer(rownames(dehashed_combined_tcr_seq_with_rna))
+```
+
+# Tibble metadata, add rownames
+
+```{r}
+
+dehashed_combined_tcr_seq_with_rna <- as_tibble(tcr_rna@meta.data)
+
+dehashed_combined_tcr_seq_with_rna$TCR_name <- colnames(tcr_rna)
 
 dehashed_combined_tcr_seq_with_rna
 
 ```
 
-# Prep stitchr df
+# Prep TRA stitchr df
 
 ```{r}
 
-stitchr_data <- dehashed_combined_tcr_seq_with_rna %>%
+bad_alpha <- dehashed_combined_tcr_seq_with_rna %>%
   rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
-  select(TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
-  filter_all(all_vars(!is.na(.))) %>%
-  filter_all(all_vars(. != "None")) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter_at(vars(starts_with("TRA")), any_vars(. == "None"))
+
+stitchr_alpha_data <- dehashed_combined_tcr_seq_with_rna %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_alpha$TCR_name)) %>%
   mutate(TRA_leader	= NA,
          TRB_leader = NA,
          Linker = NA,
@@ -215,15 +227,35 @@ stitchr_data <- dehashed_combined_tcr_seq_with_rna %>%
          TRB_5_prime_seq = NA,
          TRB_3_prime_seq = NA)
 
-stitchr_data$TCR_name <- rownames(stitchr_data)
+stitchr_alpha_data
 
-stitchr_data <- stitchr_data[, c("TCR_name", setdiff(names(stitchr_data), "TCR_name"))]
+# 30,279 rows
 
-stitchr_data
+write.table(stitchr_alpha_data, file = "../saved_data/tcrseq_tra_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
 
-# 30,239 rows
+bad_beta <- dehashed_combined_tcr_seq_with_rna %>%
+    rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter_at(vars(starts_with("TRB")), any_vars(. == "None"))
 
-write.table(stitchr_data, file = "../saved_data/tcrseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+stitchr_beta_data <- dehashed_combined_tcr_seq_with_rna %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_beta$TCR_name)) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_beta_data
+
+# 30,313 rows
+
+write.table(stitchr_beta_data, file = "../saved_data/tcrseq_trb_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
 
 ```
 
@@ -231,81 +263,18 @@ write.table(stitchr_data, file = "../saved_data/tcrseq_for_stitchr.tsv", sep = "
 
 ```{r}
 
-stitchr_output <- read.delim("../saved_data/stitchr_out.tsv", header = TRUE, sep = "\t")
+stitchr_alpha_output <- read.delim("../saved_data/stitchr_tra_out.tsv", header = TRUE, sep = "\t")
 
-# Columns that need further separation by space
-columns_to_split_by_space <- c("TRA_nt", "TRA_aa", "TRB_nt", "TRB_aa", "Linked_nt")
+stitchr_alpha_output
 
-# Split the specified columns by space
-for (col_name in columns_to_split_by_space) {
-  stitchr_output[[col_name]] <- sapply(stitchr_output[[col_name]], function(x) unlist(strsplit(x, " ")))
-}
+stitchr_beta_output <- read.delim("../saved_data/stitchr_trb_out.tsv", header = TRUE, sep = "\t")
 
-# Assign the column names
-colnames(stitchr_output) <- c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ",
-                    "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", 
-                    "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", 
-                    "Linked_aa", "Warnings.Errors")
+stitchr_beta_output
 
-# Define a function to replace with NA if length is 0
-replace_empty_with_na <- function(x) {
-  if (length(x) == 0) {
-    return(NA)
-  } else {
-    return(x)
-  }
-}
-
-# Replace values in the specified columns with real NA
-cols_to_update <- c("TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "Linked_nt")
-
-for (col_name in cols_to_update) {
-  stitchr_output[[col_name]] <- lapply(stitchr_output[[col_name]], replace_empty_with_na)
-}
-
-stitchr_output$TRA_nt <- sapply(stitchr_output$TRA_nt, as.character)
-stitchr_output$TRA_aa <- sapply(stitchr_output$TRA_aa, as.character)
-stitchr_output$TRB_nt <- sapply(stitchr_output$TRB_nt, as.character)
-stitchr_output$TRB_aa <- sapply(stitchr_output$TRB_aa, as.character)
-stitchr_output$Linked_nt <- sapply(stitchr_output$Linked_nt, as.character)
+stitchr_output <- stitchr_alpha_output %>%
+  full_join(stitchr_beta_output, by = colnames(stitchr_alpha_output))
 
 stitchr_output
-
-```
-
-# Analyze stitchr errors. "Unable to locate N terminus of CDR3 in V gene correctly. Please ensure sequence plausibility" is main error for TRA/TRB
-
-```{r}
-
-filtered_results_list <- list()
-
-for (i in 1:nrow(stitchr_output)) {
-  # Split the row using the specified pattern and extract the relevant elements
-  split_result <- strsplit(stitchr_output$Warnings.Errors[i], "\\(TRA\\)|\\(TRB\\)")[[1]]
-  filtered_list <- split_result[grep("Cannot stitch", split_result)]
-  
-  # Store the filtered list for this row in the results list
-  filtered_results_list[[i]] <- filtered_list
-}
-
-your_df <- data.frame(Column1 = unlist(unlist(filtered_results_list)))
-
-# Optionally, rename the column
-colnames(your_df) <- c("errors")
-
-count_df <- your_df %>%
-  group_by(errors) %>%
-  summarize(count = n()) %>%
-  arrange(-count)
-
-count_df
-
-# try to see if there are commonalities to V genes/CDR3s for issue-causing rows
-
-errors <- stitchr_output %>%
-  mutate(common_error = if_else(str_detect(Warnings.Errors, "Unable to locate N terminus of CDR3 in V gene correctly"), "Yes", "No")) %>%
-  arrange(common_error) %>%
-  select(TRA_CDR3, TRAV, TRB_CDR3, TRBV, common_error)
 
 ```
 
@@ -314,18 +283,20 @@ errors <- stitchr_output %>%
 ```{r}
 
 stitchr_output_alpha_df <- stitchr_output %>%
-  filter(!(is.na(TRA_nt)))
+  filter(!(is.na(TRA_nt)),
+         nchar(TRA_nt) > 1)
 
 stitchr_output_alpha_df
-# 9,044 rows
+# 30,277 rows
 
 write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
 
 stitchr_output_beta_df <- stitchr_output %>%
-  filter(!(is.na(TRB_nt)))
+  filter(!(is.na(TRB_nt)),
+         nchar(TRB_nt) > 1)
 
 stitchr_output_beta_df
-# 20,545 rows
+# 30,263 rows
 
 write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
 
@@ -370,38 +341,15 @@ igor_combined
 
 ```
 
-# Plot pgen scores across all TCRs by irAE development
-
-```{r}
-
-ggplot(igor_combined, aes(x = chain, y = -log10(pgen), fill = irAE)) +
-  geom_boxplot() +
-  labs(x = "Chain", y = "-log10(pgen)")
-
-# Filter the data for statistical test
-test_data <- igor_combined %>%
-  filter(chain == "TRA")
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
-
-# Print the results
-print(wilcox_result)
-
-```
-
 # Prep IMGT/HighV-Quest input
 
 ```{r}
 
-fasta_prep <- stitchr_output %>%
-  left_join(dehashed_combined_tcr_seq_with_rna, by = "TCR_name")
-
-fasta_df_alpha <- fasta_prep %>%
+fasta_df_alpha <- stitchr_output %>%
   filter(!(is.na(TRA_nt)),
-         chain_TRA == "TRA") %>%
-  mutate(TCR_name = paste(TCR_name, Patient_ID, sep = "_")) %>%
-  ungroup()
+         nchar(TRA_nt) > 1)
+
+fasta_df_alpha
 
 # Function to convert a data frame to FASTA format
 df_to_fasta_alpha <- function(df, output_file) {
@@ -425,11 +373,11 @@ df_to_fasta_alpha <- function(df, output_file) {
 # Call the function to convert the data frame to FASTA format
 df_to_fasta_alpha(fasta_df_alpha, "../saved_data/vdjseq_alpha.fasta")
 
-fasta_df_beta <- fasta_prep %>%
-  filter(!(is.na(TRB_nt)),
-         chain_TRB == "TRB") %>%
-  mutate(TCR_name = paste(TCR_name, Patient_ID, sep = "_")) %>%
-  ungroup()
+fasta_df_beta <- stitchr_output %>%
+  filter(!(is.na(TRA_nt)),
+         nchar(TRB_nt) > 1)
+
+fasta_df_beta
 
 # Function to convert a data frame to FASTA format
 df_to_fasta_beta <- function(df, output_file) {
@@ -459,23 +407,19 @@ df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
 
 ```{r}
 
-imgt_df_1_alpha <- read.csv("../saved_data/myocarditis_alpha/1_Summary.csv") %>%
+imgt_df_1_alpha <- read.csv("../saved_data/myocarditis_fixed_tra/1_Summary.csv") %>%
   group_by(V.DOMAIN.Functionality) %>%
   summarize(count = n())
 
 imgt_df_1_alpha
-# 5 productive
-# 1724 rearranged but no junction found
-# 3947 + 3368 (stop codons) unproductive
+# 100% productive
 
-imgt_df_1_beta <- read.csv("../saved_data/myocarditis_beta/1_Summary.csv") %>%
+imgt_df_1_beta <- read.csv("../saved_data/myocarditis_fixed_trb/1_Summary.csv") %>%
   group_by(V.DOMAIN.Functionality) %>%
   summarize(count = n())
 
 imgt_df_1_beta
-# 3235 productive
-# 13619 rearranged but no junction found
-# 2394 + 1297 (stop codons) unproductive
+# 100% productive
 
 ```
 
