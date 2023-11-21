@@ -423,6 +423,33 @@ imgt_df_1_beta
 
 ```
 
+# Analyze IMGT/HighV-Quest output 3: N(1) region lengths
+
+```{r}
+
+imgt_df_3_alpha <- read.csv("../saved_data/myocarditis_fixed_tra/3_Nt-sequences.csv") %>%
+  select(Sequence.ID, N.REGION, N1.REGION, N2.REGION, N3.REGION) %>%
+  rename(barcode = Sequence.ID,
+         N.REGION_TRA = N.REGION,
+         N1.REGION_TRA = N1.REGION,
+         N2.REGION_TRA = N2.REGION,
+         N3.REGION_TRA = N3.REGION)
+
+imgt_df_3_alpha
+
+imgt_df_3 <- read.csv("../saved_data/myocarditis_fixed_trb/3_Nt-sequences.csv") %>%
+  select(Sequence.ID, N.REGION, N1.REGION, N2.REGION, N3.REGION) %>%
+  rename(barcode = Sequence.ID,
+         N.REGION_TRB = N.REGION,
+         N1.REGION_TRB = N1.REGION,
+         N2.REGION_TRB = N2.REGION,
+         N3.REGION_TRB = N3.REGION) %>%
+  full_join(imgt_df_3_alpha, by = "barcode")
+
+imgt_df_3
+
+```
+
 # Analyze IMGT/HighV-Quest output 8: V region nt mutation statistics
 
 ```{r}

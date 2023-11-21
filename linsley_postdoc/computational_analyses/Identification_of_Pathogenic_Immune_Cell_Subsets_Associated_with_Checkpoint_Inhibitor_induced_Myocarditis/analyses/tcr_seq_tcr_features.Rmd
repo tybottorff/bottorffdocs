@@ -129,13 +129,27 @@ feature_df <- dehashed_combined_tcr_seq %>%
   select(-cdr3_nt) %>%
   rowwise() %>%
   mutate(cdr3_length = nchar(cdr3),
+         middle_5_cdr3 = substr(cdr3, ((nchar(cdr3) - 4) %/% 2 + 1), ((nchar(cdr3) - 4) %/% 2 + 1) + 4),
          cdr3_hydrophobicity = calculate_hydrophobicity(cdr3, hydrophobicity_df)) %>%
+  mutate(middle_5_cdr3_hydrophobicity = calculate_hydrophobicity(middle_5_cdr3, hydrophobicity_df)) %>%
   ungroup()
 
 feature_df_doubled <- feature_df %>%
   bind_rows(mutate(feature_df, predicted.celltype.l1 = "All T cells"))
 
 feature_df_doubled
+
+```
+
+# Compare CDR3 hydrophobicitiy overall vs. middle 5 AAs
+
+```{r}
+
+ggplot(feature_df, aes(x = cdr3_hydrophobicity, y = middle_5_cdr3_hydrophobicity)) +
+  geom_point(size = 0.1, alpha = 0.1) +
+  labs(x = "CDR3 hydrophobicity\n(all AAs)",
+       y = "CDR3 hydrophobicity\n(middle 5 AAs)") +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red")
 
 ```
 
@@ -159,23 +173,49 @@ ggplot(feature_df_doubled, aes(x = chain, y = cdr3_length, fill = irAE)) +
   facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain", fill = "irAE", y = "CDR3 length")
 
-ggplot(feature_df_doubled, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
-  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
-
 ggplot(feature_df %>% filter(str_detect(predicted.celltype.l2, "CD8")), aes(x = chain, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
   facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
   labs(x = "Chain", fill = "irAE", y = "CDR3 length")
 
+ggplot(feature_df_doubled, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity\n(all AAs)")
+
+ggplot(feature_df_doubled, aes(x = chain, y = middle_5_cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity\n(middle 5 AAs)")
+
+ggplot(feature_df_doubled %>% filter(predicted.celltype.l1 == "other T"), aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity\n(all As)")
+
+ggplot(feature_df_doubled %>% filter(predicted.celltype.l1 == "other T"), aes(x = chain, y = middle_5_cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity\n(middle 5 AAs)")
+
+ggplot(feature_df_doubled %>% filter(predicted.celltype.l1 == "CD8 T"), aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity\n(all As)")
+
+ggplot(feature_df_doubled %>% filter(predicted.celltype.l1 == "CD8 T"), aes(x = chain, y = middle_5_cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity\n(middle 5 AAs)")
+
 # Filter the data for statistical test
 test_data <- feature_df_doubled %>%
-  filter(chain == "TRB",
-         predicted.celltype.l1 == "CD4 T")
+  filter(chain == "TRA",
+         predicted.celltype.l1 == "other T",
+         predicted.celltype.l2 == "MAIT")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
+wilcox_result <- wilcox.test(test_data$cdr3_hydrophobicity ~ test_data$irAE)
 
 # Print the results
 print(wilcox_result)
@@ -247,6 +287,52 @@ print(wilcox_result)
 
 ```
 
+# Plot CD8 TEM CDR3 length by irAE status and expansion degree
+
+```{r}
+
+expansion_df <- feature_df %>%
+  group_by(Patient_ID, cdr3, chain) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded"))
+
+expansion_df$expansion_degree <- factor(expansion_df$expansion_degree, levels = c("Single", "Small", "Medium", "Large", "Hyperexpanded"))
+
+custom_labeller <- as_labeller(c("Single" = "Single", "Small" = "Small", "Medium" = "Medium", "Large" = "Large", "Hyperexpanded" = "Hyper\nexpanded"))
+
+ggplot(expansion_df %>% filter(predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 == "CD8 TEM"), aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ expansion_degree, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Chain", fill = "irAE", y = "CD8 TEM CDR3 length")
+
+expansion_df %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM") %>%
+  group_by(expansion_degree, irAE, chain) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- expansion_df %>%
+  filter(chain == "TRB",
+         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         expansion_degree == "Hyperexpanded")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+```
+
 # Plot CDR3 length and hydrophobicity by irAE status and cell type (l1, l2) for most expanded, unique CDR3s
 
 ```{r}
@@ -281,10 +367,47 @@ ggplot(expansion_df_unique, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)
   facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
 
+```
+
+# Plot CD8 TEM CDR3 length by irAE status and expansion degree for unique TCRs
+
+```{r}
+
+expansion_df_unique <- feature_df %>%
+  group_by(Patient_ID, cdr3, chain) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  group_by(cdr3, Patient_ID, chain) %>%
+  slice(1)
+
+expansion_df_unique$expansion_degree <- factor(expansion_df_unique$expansion_degree, levels = c("Single", "Small", "Medium", "Large", "Hyperexpanded"))
+
+custom_labeller <- as_labeller(c("Single" = "Single", "Small" = "Small", "Medium" = "Medium", "Large" = "Large", "Hyperexpanded" = "Hyper\nexpanded"))
+
+expansion_df_unique %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM") %>%
+  group_by(expansion_degree, irAE, chain) %>%
+  summarize(count = n()) %>%
+  print()
+
+ggplot(expansion_df_unique %>% filter(predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 == "CD8 TEM"), aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ expansion_degree, scales = "free_y", labeller = custom_labeller) +
+  labs(x = "Chain", fill = "irAE", y = "CD8 TEM CDR3 length")
+
 # Filter the data for statistical test
 test_data <- expansion_df_unique %>%
   filter(chain == "TRB",
-         predicted.celltype.l1 == "CD8 T")
+         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         expansion_degree == "Large")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
@@ -509,5 +632,135 @@ ggplot(plot_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
   geom_boxplot() +
   facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
+
+```
+
+# Import pgen data
+
+```{r}
+
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  rename(TRA_pgen = pgen) %>%
+  filter(!(is.na(TRA_pgen)),
+         TRA_pgen != "NaN")
+
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(TRB_pgen = pgen) %>%
+  filter(!(is.na(TRB_pgen)),
+         TRB_pgen != "NaN") %>%
+  full_join(igor_alpha, by = c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ", "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", "Linked_aa", "Warnings.Errors")) %>%
+  select(TCR_name, TRA_CDR3, TRB_CDR3, TRA_pgen, TRB_pgen) %>%
+  mutate(TRA_pgen = as.character(TRA_pgen),
+         TRB_pgen = as.character(TRB_pgen))
+
+igor_combined <- igor_combined %>%
+  pivot_longer(cols = matches("^(TRA|TRB)"),
+               names_to = c("Chain", ".value"),
+               names_pattern = "^(TRA|TRB)_(.*)$") %>%
+  rename(barcode = TCR_name,
+         cdr3 = CDR3) %>%
+  mutate(pgen = as.numeric(pgen)) %>%
+  full_join(feature_df, by = c("barcode", "Chain", "cdr3"))
+
+igor_combined
+
+```
+
+# Plot pgen scores by cell type for all TCRs
+
+```{r}
+
+plot_df <- igor_combined %>%
+  filter(!(is.na(predicted.celltype.l1))) %>%
+  group_by(chain, irAE, predicted.celltype.l1) %>%
+  summarize(count = n()) %>%
+  print()
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+# Filter the data for statistical test
+test_data <- igor_combined %>%
+  filter(!(is.na(predicted.celltype.l1))) %>%
+  filter(chain == "TRA",
+         predicted.celltype.l1 == "other T")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+plot_df <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T")
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+# Filter the data for statistical test
+test_data <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T") %>%
+  filter(chain == "TRA",
+         predicted.celltype.l2 == "CD8 TEM")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+# Higher log10(pgen) means lower pgen which means less germline-like
+# lower log10(pgen) means higher pgen which means more germline-like
+
+```
+
+# Plot pgen scores by cell type for highly expanded T cells
+
+```{r}
+
+plot_df <- igor_combined %>%
+  group_by(Patient_ID, cdr3, chain) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  filter(expansion_degree %in% c("Large", "Hyperexpanded"),
+         predicted.celltype.l1 %in% c("CD4 T", "CD8 T"))
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+plot_df <- igor_combined %>%
+  group_by(Patient_ID, cdr3, chain) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  filter(expansion_degree %in% c("Large", "Hyperexpanded"),
+         predicted.celltype.l1 %in% c("CD4 T", "CD8 T")) %>%
+  group_by(Patient_ID, cdr3, chain) %>%
+  slice(1)
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+# Higher log10(pgen) means lower pgen which means less germline-like
+# lower log10(pgen) means higher pgen which means more germline-like
 
 ```
