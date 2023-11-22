@@ -1,0 +1,91 @@
+# Look at public TCRs only
+
+```{r}
+
+alpha_public_df <- feature_df %>%
+  select(cdr3, chain, Patient_ID) %>%
+  filter(cdr3 != "None",
+         chain == "TRA") %>%
+  group_by(cdr3, Patient_ID) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  mutate(presence = if_else(count > 0, 1, 0)) %>%
+  # 1 for yes, 0 for no for presence, then later filter for sum across rows > 1 look for public TCRs
+  select(-count) %>%
+  pivot_wider(names_from = c(Patient_ID), values_from = presence, values_fill = 0) %>%
+  rowwise() %>%
+  filter(sum(c_across(-cdr3)) > 1)
+
+alpha_public_df
+
+beta_public_df <- feature_df %>%
+  select(cdr3, chain, Patient_ID) %>%
+  filter(cdr3 != "None",
+         chain == "TRB") %>%
+  group_by(cdr3, Patient_ID) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  mutate(presence = if_else(count > 0, 1, 0)) %>%
+  # 1 for yes, 0 for no for presence, then later filter for sum across rows > 1 look for public TCRs
+  select(-count) %>%
+  pivot_wider(names_from = c(Patient_ID), values_from = presence, values_fill = 0) %>%
+  rowwise() %>%
+  filter(sum(c_across(-cdr3)) > 1)
+
+beta_public_df
+
+public_feature_df <- feature_df %>%
+  filter(cdr3 %in% alpha_public_df$cdr3 & chain == "TRA" | cdr3 %in% beta_public_df$cdr3 & chain == "TRB")
+
+```
+
+# Plot CDR3 hydrophobicity and length by irAE status for public TCRs
+
+```{r}
+
+plot_df <- public_feature_df %>%
+  filter(predicted.celltype.l1 != "other T")
+
+plot_df %>%
+  group_by(predicted.celltype.l1, irAE, chain) %>%
+  summarize(count = n()) %>%
+  print()
+
+ggplot(plot_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
+
+ggplot(plot_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
+
+```
+
+# Plot CDR3 hydrophobicity and length by irAE status for UNIQUE public TCRs
+
+```{r}
+
+plot_df <- public_feature_df %>%
+  filter(predicted.celltype.l1 != "other T") %>%
+  group_by(cdr3, chain, Patient_ID) %>%
+  slice(1) %>%
+  ungroup()
+
+plot_df %>%
+  group_by(predicted.celltype.l1, irAE, chain) %>%
+  summarize(count = n()) %>%
+  print()
+
+ggplot(plot_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
+
+ggplot(plot_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
+
+```

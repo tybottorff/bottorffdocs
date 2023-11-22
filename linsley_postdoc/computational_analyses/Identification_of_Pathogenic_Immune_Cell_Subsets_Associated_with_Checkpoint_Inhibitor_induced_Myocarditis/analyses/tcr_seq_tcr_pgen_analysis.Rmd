@@ -1,0 +1,129 @@
+# Import pgen data
+
+```{r}
+
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  rename(TRA_pgen = pgen) %>%
+  filter(!(is.na(TRA_pgen)),
+         TRA_pgen != "NaN")
+
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(TRB_pgen = pgen) %>%
+  filter(!(is.na(TRB_pgen)),
+         TRB_pgen != "NaN") %>%
+  full_join(igor_alpha, by = c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ", "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", "Linked_aa", "Warnings.Errors")) %>%
+  select(TCR_name, TRA_CDR3, TRB_CDR3, TRA_pgen, TRB_pgen) %>%
+  mutate(TRA_pgen = as.character(TRA_pgen),
+         TRB_pgen = as.character(TRB_pgen))
+
+igor_combined <- igor_combined %>%
+  pivot_longer(cols = matches("^(TRA|TRB)"),
+               names_to = c("Chain", ".value"),
+               names_pattern = "^(TRA|TRB)_(.*)$") %>%
+  rename(barcode = TCR_name,
+         cdr3 = CDR3) %>%
+  mutate(pgen = as.numeric(pgen)) %>%
+  full_join(feature_df, by = c("barcode", "Chain", "cdr3"))
+
+igor_combined
+
+```
+
+# Plot pgen scores by cell type for all TCRs
+
+```{r}
+
+plot_df <- igor_combined %>%
+  filter(!(is.na(predicted.celltype.l1))) %>%
+  group_by(chain, irAE, predicted.celltype.l1) %>%
+  summarize(count = n()) %>%
+  print()
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+# Filter the data for statistical test
+test_data <- igor_combined %>%
+  filter(!(is.na(predicted.celltype.l1))) %>%
+  filter(chain == "TRA",
+         predicted.celltype.l1 == "other T")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+plot_df <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T")
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+# Filter the data for statistical test
+test_data <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T") %>%
+  filter(chain == "TRA",
+         predicted.celltype.l2 == "CD8 TEM")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+# Higher log10(pgen) means lower pgen which means less germline-like
+# lower log10(pgen) means higher pgen which means more germline-like
+
+```
+
+# Plot pgen scores by cell type for highly expanded T cells
+
+```{r}
+
+plot_df <- igor_combined %>%
+  group_by(Patient_ID, cdr3, chain) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  filter(expansion_degree %in% c("Large", "Hyperexpanded"),
+         predicted.celltype.l1 %in% c("CD4 T", "CD8 T"))
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+plot_df <- igor_combined %>%
+  group_by(Patient_ID, cdr3, chain) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  filter(expansion_degree %in% c("Large", "Hyperexpanded"),
+         predicted.celltype.l1 %in% c("CD4 T", "CD8 T")) %>%
+  group_by(Patient_ID, cdr3, chain) %>%
+  slice(1)
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+# Higher log10(pgen) means lower pgen which means less germline-like
+# lower log10(pgen) means higher pgen which means more germline-like
+
+```
