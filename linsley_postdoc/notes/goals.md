@@ -29,6 +29,9 @@
  - idea is that checkpoint inhibition could have been inhibiting proliferation of (exhausted) T cells, so ICB releases 'brake' on T cells and allows proliferation in response to tumor/self antigens
 ## If ICB does induce expansion, do the TCR repertoires before and after ICB have distinct TCR features (as a proxy for cross-reactivity) that can allow prediction of irAE development?
  - public TCRs junctions are shorter (less N additions) and more germline-like (higher pgen), so more crossreactive and a good stratification for my feature analysis
+ - perhaps wont see big CDR3 hydrophobic effect because hydrophobic CDR3 T cells were already shunted to Treg fate and there are less hydrophobic & crossreactive CD4/8s around still to induce irAEs? would argue for another mechanism besides crossreactivity I'd think then
+ - TRB apparently more variable than TRA and more expected to mediate antigen specificity, so we mighg expect bigger differences for TRB than TRA
+ - N region insertions ~correlate with CDR3 length so no need to look at both too much
  - CDR2 in V gene binds MHC, CDR1/3 bind peptide, so good to focus on CDR1/3
  - C-terminus of peptide interacts with beta chain, alpha chain for N-terminus, so good to focus on alpha and beta and separate analysis is ok
  - what happens to expanded cells after treatment? do they persist? keep expanding? move to a specific tissue?
