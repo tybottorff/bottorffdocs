@@ -1,0 +1,64 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in VDJdb & TCRseq data
+
+```{r}
+ 
+vdjdb <- read.csv("../../vdjdb_11_21_23.tsv", sep = "\t") %>%
+  select(-Reference, -Method, -Meta, -CDR3fix) %>%
+  rename(Chain = Gene,
+         cdr3 = CDR3,
+         v_gene = V,
+         j_gene = J)
+
+vdjdb
+
+tcr_seq <- read.csv("../saved_data/tcr_seq_features.csv") %>%
+  left_join(vdjdb, by = c("Chain", "v_gene", "j_gene", "cdr3")) %>%
+  group_by(Epitope.species) %>%
+  summarize(count = n())
+
+tcr_seq
+
+```
+

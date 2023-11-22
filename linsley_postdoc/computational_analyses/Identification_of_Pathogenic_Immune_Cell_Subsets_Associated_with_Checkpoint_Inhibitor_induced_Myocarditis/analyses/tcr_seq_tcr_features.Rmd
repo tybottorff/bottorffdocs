@@ -134,6 +134,8 @@ feature_df <- dehashed_combined_tcr_seq %>%
   mutate(middle_5_cdr3_hydrophobicity = calculate_hydrophobicity(middle_5_cdr3, hydrophobicity_df)) %>%
   ungroup()
 
+write.csv(feature_df, "../saved_data/tcr_seq_features.csv")
+
 feature_df_doubled <- feature_df %>%
   bind_rows(mutate(feature_df, predicted.celltype.l1 = "All T cells"))
 
