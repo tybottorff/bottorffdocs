@@ -171,6 +171,9 @@
 # Cardiac myosin-specific autoimmune T cells contribute to immune-checkpoint-inhibitor-associated myocarditis
  - cardiac myosin-specific autoreactive T cells drive pathogenesis of PD-1 inhibitor-induced myocarditis in mice
  - PD-1 expressing cardiac myosin-specific autoimmune T cells are present in heart during naive conditions
+# CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cells accumulate in tumors of anti-PD-1-responder lung cancer patients and are tumor-reactive lymphocytes enriched with Tc17
+ - accumulation of CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cells in human lung tumors associated with good prognosis
+ - CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cell density increases in ICB with responders only
 # CD28/PD1 co-expression: dual impact on CD8<sup>+</sup> T cells in peripheral blood and tumor tissue, and its significance in NSCLC patients' survival and ICB response
 ## Background
  - exhaustion is now recognized to have a dynamic progression from a long-lived "pre-exhausted stem-like progenitor" (more responsive likely to re-invigoration by ICB) to a "terminally exhausted" state
@@ -229,6 +232,9 @@
 # Characterization of Thyroid Disorders in Patients Receiving Immune Checkpoint Inhibition Therapy
  - thyroid disorders are a common irAE following ICI
 # Checkpoint blockade cancer immunotherapy targets tumor-specific mutant antigens
+# Checkpoint blockade-induced CD8<sup>+</sup> T cell differentiation in head and neck cancer responders
+ - ICB response in recurrent/metastatic head and neck squamos cell carcinoma (HNSCC) limited to 15-20% of patients
+ - mice
 # Checkpoint-blocker-induced autoimmunity is associated with favorable outcome in metastatic melanoma and distinct T cell expression profiles
 ## Abstract
  - pre-treatment monocyte and neutrophil counts also predicted clinical outcome (negatively prognostic)
@@ -547,6 +553,8 @@
 ## Discussion
  - tissue-resident memory T cells may underlie irAEs (common in barrier tissue)
  - **duodenitis blocked by antibody to integrin α 4 β 7 (LPAM-1) which blocks T cell infiltraton into GI tract, suggesting that GI toxicity resulted from circulating T cells trafficked to GI tract following expansion elsewhere i.e. in the tumor perhaps**
+# Exhaust the exhausters: targeting regulatory T cells in the tumor microenvironment
+ - Tregs can suppress anti-tumor immunity
 # Expression of MHC class II in T cells is associated with increased HIV-1 expression
  - CD4 primary HIV-1 infection receptor, expressed on T cells, monocytes, macrophages, DCs
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
@@ -737,11 +745,18 @@
  - TCR sequences are diverse
  - here, they define the minimal requirements for TCR antigen specificity through analysis of TCR sequences using a panel of pMHC tetramer sorted cells and structural data
  - GLIPH algorithm: grouping of lymphocyte interactions by paratrope hotspots, clusters TCRs with high probability of sharing specificity owing to conserved motifs and similarity of CDR3 sequences
+# IL7 genetic variation and toxicity to immune checkpoint blockade in patients with melanoma
+ - minor allele carries of *Il7* intron have increased severe irAE risk
 # Immune dysfunction revealed by digital spatial profiling of immuno-oncology markers in progressive states of renal cell carcinoma and in brain metastases
  - lower immune checkpoint inhibitor (TIM-3, CTLA-4), cytolytic (GZMA, GZMB), and T cell activation (CD25) protein expression in metastases compared with primary tumors
  - metastases macrophages less M1-like, inflammatory markers (HLA-DR, CD127)
 # Immune-Related Adverse Events and Their Association With the Effectiveness of PD-1/PD-L1 Inhibitors in Non-Small Cell Lung Cancer: A Real-World Study From China
  - see more antitumor response in irAE group compared to non-irAE group, irAE associated with progression-free survival but not with overall survival
+# Immune-related adverse events in checkpoint blockade: observations from human tissue and therapeutic considerations
+ - dysregulated cytokines (IFNgamma and TNF) in irAE tissue
+ - high T cell infiltration in irAE tissue
+ - **PD-1 blockade more CD8 effect, CD4 effect more for CTLA-4 blockade**
+ - CD8<sup>+</sup>CXCR3<sup>+</sup> T cells elevated in gastrointestinal, dermatological, and musculoskeletal irAEs
 # Immune-related adverse events in various organs caused by checkpoint inhibitors
 ## Abstract
  - PD-1 receptor on T and B cells, binds PD-L1/2 ligands
@@ -1340,6 +1355,10 @@
  - PD-1 PD-L1 interaction promotes TE cell exhaustion, supports conversion of TE cells into suppressive T<sub>reg</sub> cells
  - irAEs are frequent in patients treated with ICIs (~90% of patients treated with PD-1 blockade and/or CTLA-4 blockade), severe/life threatening (grades 3/4, respectively) irAEs in fewer but still many patients
  - at baseline, patients with arthritis had less cells with features of CD8 T<sub>CM</sub> cells, patients with pneumonitis had more CD4 T<sub>H2</sub> cells, patients with thyroiditis had more CD4 T<sub>H17</sub> cells, so **different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers**
+# Single cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy
+ - clear cell renal cell carcinoma (ccRCC) highly immune infiltrated
+ - only n = 2 per group (untreat, resistant, responsive)
+ - enriched CD8A<sup>+</sup> tissue-resident T cells in patient responder to ICB, tumor-associated macrophages in resistant patient
 # Single cell T cell receptor sequencing: techniques and future challenges
  - αβ T cells are > 90% of T cell population; γδ T cells are less diverse and aren't MHC-restricted and are involved in innate-like responses instead
  - D-J joining happens first, then V-D-J joining for TCR β
@@ -1424,6 +1443,8 @@
  - previous studies had linked activated T cells and clonally expanded TCRs to severe irAEs but this study was uniquely looking at pre-treatment T cell characteristics
  - unanswered question: do circulating activated CD4 TM cells (their abundance here found to correlate with irAE development) exhibit a higher propensity to recognize self-antigens in patients at risk for severe ICI induced irAEs?
  - limitations: retrospective, different ICIs studied at same time here (each with different irAE risks), most irAEs occur within first 3 months but some can occur later (which would have been missed here, median time to severe irAE here was ~6 weeks with no irAEs after 3 months)
+# T cell immune awakening in response to immunotherapy is age-dependent
+ - patients > 70 have more clonal TCRs after ICB, younger show more diverse TCRs with ICB
 # T cell invigoration to tumour burden ratio associated with anti-PD-1 response
 ## Abstract
 ### Background
@@ -1493,6 +1514,9 @@
  - molecular mimicry hypothesis: some T cells respond to epitope derived from infectious agent can crossreact with self antigen that shares sequence/structural homology with microbial peptide
 ## Discussion
  - **does molecular mimicry result from inherent degeneracy in TCR binding mode (promiscuity) or a structural equivalence between pMHC surfaces presented for TCR recognition? kind of both but seems to lean towards structural equivalence with hotspot mimicry (small number of key residues in TCR binding site rather than high-affinity structural affinity inwhich all binding features would need to be replicated)**, perhaps helps explain why it has been difficult to incriminate specific individual infections in autoimmune disease development (degeneracy in crossreactivity?)
+# T cell receptor beta variable gene polymorphism predicts immune-related adverse events during checkpoint blockade immunotherapy
+ - TCRB and TRBV gene polymorphisms implicated in autoimmunity, perhaps irAEs too
+ - find TRBV allele haplotype protective against severe irAEs
 # T cell repertoire analysis and metrics of diversity and clonality
  - **TCRαβ heterodimer disulfide linked, each chain has constant and variable domain, 3 CDRs per chain so CDR1-3 α and β**
  - **CDR3 product of junctional diversity, most variable**
