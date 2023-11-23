@@ -408,22 +408,28 @@ df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
 ```{r}
 
 imgt_df_1_alpha <- read.csv("../saved_data/myocarditis_fixed_tra/1_Summary.csv") %>%
-  group_by(V.DOMAIN.Functionality) %>%
+  mutate(J_allele = str_extract(J.GENE.and.allele, "\\*([0-9]{2})")) %>%
+  group_by(J_allele) %>%
   summarize(count = n())
+  #group_by(V.DOMAIN.Functionality) %>%
+  #summarize(count = n())
 
 imgt_df_1_alpha
-# 100% productive
+# 100% productive, V alleles all *01, J alleles mostly *01 but some *02/*03
 
 imgt_df_1_beta <- read.csv("../saved_data/myocarditis_fixed_trb/1_Summary.csv") %>%
-  group_by(V.DOMAIN.Functionality) %>%
+  mutate(J_allele = str_extract(J.GENE.and.allele, "\\*([0-9]{2})")) %>%
+  group_by(J_allele) %>%
   summarize(count = n())
+  #group_by(V.DOMAIN.Functionality) %>%
+  #summarize(count = n())
 
 imgt_df_1_beta
-# 100% productive
+# 100% productive, V and J alleles all *01
 
 ```
 
-# Analyze IMGT/HighV-Quest output 3: N(1) region lengths
+# Analyze IMGT/HighV-Quest output 3: CDR1/2 and N region lengths
 
 ```{r}
 
@@ -438,41 +444,37 @@ imgt_df_3_alpha <- read.csv("../saved_data/myocarditis_fixed_tra/3_Nt-sequences.
 imgt_df_3_alpha
 
 imgt_df_3 <- read.csv("../saved_data/myocarditis_fixed_trb/3_Nt-sequences.csv") %>%
-  select(Sequence.ID, N.REGION, N1.REGION, N2.REGION, N3.REGION) %>%
+  select(Sequence.ID, N.REGION, N1.REGION, N2.REGION, N3.REGION, CDR1.IMGT, CDR2.IMGT) %>%
   rename(barcode = Sequence.ID,
          N.REGION_TRB = N.REGION,
          N1.REGION_TRB = N1.REGION,
          N2.REGION_TRB = N2.REGION,
-         N3.REGION_TRB = N3.REGION) %>%
+         N3.REGION_TRB = N3.REGION,
+         cdr1 = as.character(translate(DNAString(DR1.IMGT))),
+         cdr2 = as.character(translate(DNAString(CDR2.IMGT)))) %>%
   full_join(imgt_df_3_alpha, by = "barcode")
 
 imgt_df_3
 
+write.csv(imgt_df_3, "../saved_data/imgt_cdr1_2_n_regions.csv")
+
 ```
 
-# Analyze IMGT/HighV-Quest output 8: V region nt mutation statistics
+# Translate CDR1/2
 
 ```{r}
 
-imgt_df_8_alpha <- read.table("../saved_data/myocarditis_alpha/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
-  select(-Sequence.number) %>%
-  rename(Barcode = Sequence.ID)
+# Install and load the Biostrings package
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#  install.packages("BiocManager")
+#BiocManager::install("Biostrings")
+#library(Biostrings)
 
-colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"] <- paste0(colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"], "_alpha")
+# Example DNA sequence
+dna_sequence <- DNAString("ATG")
 
-imgt_df_8_beta <- read.table("../saved_data/myocarditis_beta/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
-  select(-Sequence.number) %>%
-  rename(Barcode = Sequence.ID)
+x <- as.character(translate(dna_sequence))
 
-colnames(imgt_df_8_beta)[colnames(imgt_df_8_beta) != "Barcode"] <- paste0(colnames(imgt_df_8_beta)[colnames(imgt_df_8_beta) != "Barcode"], "_beta")
-  
-imgt_df_8 <- imgt_df_8_alpha %>%
-  full_join(imgt_df_8_beta, by = "Barcode") %>%
-  # too many columns, focus on CDR3 ones for now
-  select(matches("^CDR3|^Barcode"))
-
-# join with patient ID to get patient group --> plots
-
-imgt_df_8
+x
 
 ```

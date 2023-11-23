@@ -64,27 +64,37 @@ cdr3_amino_acid_diversity_df <- dehashed_combined_tcr_seq_doubled %>%
   ungroup() %>%
   group_by(Patient_ID, chain, predicted.celltype.l1) %>%
   # Calculate Shannon diversity index (H)
-  mutate(shannon = diversity(cdr3_amino_acid_count)) %>%
+  mutate(shannon = diversity(cdr3_amino_acid_count),
+         inv_shannon = 1/diversity(cdr3_amino_acid_count)) %>%
+  slice(1) %>%
   ungroup() %>%
-  select(chain, irAE, Patient_ID, shannon, predicted.celltype.l1)
+  select(chain, irAE, Patient_ID, shannon, inv_shannon, predicted.celltype.l1)
 
-cdr3_amino_acid_diversity_df %>%
+cdr3_amino_acid_diversity_df
 
 ggplot(cdr3_amino_acid_diversity_df, aes(x = chain, y = shannon, fill = irAE)) +
   geom_boxplot() +
-  facet_wrap(~ predicted.celltype.l1) +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain",
        y = "Shannon entropy")
 
 # Shannon entropy: 0 means monoclonal, higher means polyclonal, weights richness (total # of unique clones) over evenness
 
+ggplot(cdr3_amino_acid_diversity_df, aes(x = chain, y = inv_shannon, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain",
+       y = "Inverse Shannon entropy")
+
+# assuming higher inverse means monoclonal, lower inverse means polyclonal
+
 # Filter the data for statistical test
 test_data <- cdr3_amino_acid_diversity_df %>%
   filter(chain == "TRA",
-         predicted.celltype.l1 == "All T cells")
+         predicted.celltype.l1 == "other T")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$shannon ~ test_data$irAE)
+wilcox_result <- wilcox.test(test_data$inv_shannon ~ test_data$irAE)
 
 # Print the results
 print(wilcox_result)
