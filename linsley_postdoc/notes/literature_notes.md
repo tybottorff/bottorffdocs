@@ -79,6 +79,8 @@
  - grade 3 or higher irAEs (severe irAEs) resulted in better objective response rate but worse overall survival
 ## Introduction
  - ICIs can unleash T cells with subsequent production of pro-inflammatory cytokines like interferon γ, TNF, can result in excessive off-tumor inflammation and autoimmunity
+# Association between T cell repertoire diversificaton and both clinical response as well as toxicity following immune checkpoint blockade in metastatic cancer patients
+ - increase repertoire diversity after ICB correlates with ICB response and irAE development in prostate cancer patients
 # Association of antithyroglobulin antibodies with the development of thyroid dysfunction induced by nivolumab
  - pre-existing thryoglobulin antibodies (TgAb) and elevated TSH (thyroid-stimulating hormone) associated with development of thyroid dysfunction induced by nivolumab
 # Association of checkpoint inhibitor-induced toxic effects with shared cancer and tissue antigens in non-small cell lung cancer
@@ -227,6 +229,11 @@
 # Characterization of antibody repertoires in patients with HPV-related HNSCC undergoing definitive radiation with immunotherapy
  - HNSCC: head and neck squamous cell carcinoma
  - in patients with p16-positive HNSCC, see many antigens against which antibodies were formed during radiation therapy and ICI shared between patients
+# Characterization of anti-cancer immune response associated with immune-related adverse events in patients with kidney cancer
+ - more irAEs in ICB responders, not a new finding
+ - less diverse repertoires in irAE patients 1 month after ICB (expansion of certain T cell clones in PBMCs)
+ - **irAE patients had more peripheral T cell clones shared with TILs**
+ - **some irAE-provoked T cell clones circulate systemically and attack tumor cells leading to ICB response in irAE patients or vice a versa some tumor-provoked T cell clones circulate systemically and attack self leading to irAEs? not sure how they differentiate between the two**
 # Characterization of nivolumab-associated skin reactions in patients with metastatic non-small cell lung cancer
  - skin irAEs correlated with tumor responses in most responders and barely any non-responders
 # Characterization of Thyroid Disorders in Patients Receiving Immune Checkpoint Inhibition Therapy
@@ -307,6 +314,9 @@
  - among T cell subtypes, effector memory CD8<sup>+</sup> T cells (CD8<sup>+</sup> TEM GZMK PDCD1) were increased after ICI treatment in both DCB and NCB
  - effector memory CD8<sup>+</sup> T cells resided at the bifurcation point, which has the potential to differentiate into lineages with precursor exhausted CD8<sup>+</sup> T cells (CD8<sup>+</sup> TCM cells) assumed to be related to the ICI response
  - effector memory CD8<sup>+</sup> T cells along with T cells recognizing unknown antigen expanded and composed of novel clones skewed toward dysfunctional status, especially in on-treatment samples of the durable clinical benefit group
+# Clonality of CD4<sup>+</sup> blood T cells predicts longer survival with CTLA-4 or PD-1 checkpoint inhibition in advanced melanoma
+ - greater diversity of CD4<sup>+</sup> blood T cell clones before ICB correlated with long-term survival with ICB
+ - irAE patients had T cell repertoires restricted during CTLA-4 blockade, so newly expanded oligoclonal T cell responses may contribute to irAEs
 # Clonal replacement of tumor-specific T cells following PD-1 blockade
 ## Abstract
  - unclear if ICB relies/works on reinvigoration of pre-existing tumor infiltrating T cells or on recruitment of novel T cells
@@ -353,6 +363,9 @@
  - high mitochondrial count fraction could also just mean that the cell is very active in cellular respiration though
  - low counts/genes could also just mean quiescent cells
  - high counts/genes could also just mean large cells
+# Cysteine and hydrophobic residues in CDR3 serve as distinct T cell self-reactivity indices
+ - rare thymocytes survive strong self-antigen enagement and differentiate into type A precursors of CD8αα<sup>+</sup> intestinal interepithelial lymphocytes (IELs) or CD4<sup>+</sup> Tregs in thymic medulla
+ - Tregs enriched with hydrophobic amino acids at positions 6 and 7 of CDR3 in TCRβ chain
 # Cytomegalovirus in autoimmunity: T cell crossreactivity to viral antigen and autoantigen glutamic acid decarboxylase
 ## Abstract
  - foreign antigens that mimic autoantigens can trigger autoimmunity, for example viral infections associated with T1D development
@@ -524,6 +537,8 @@
  - hotspots/anchors can be important parts of peptides that must remain more constant for TCR binding, other parts of peptide can vary and allow crossreactivity, hotspots/anchors need not only bind CDRs
 # Entropic contributions and the influence of the hydrophobic environment in promiscuous protein-protein association
  - **trying to find evidence for increased hydrophobicity relating to cross-reactivity of TCRs: here they discuss how a particular PKA/AKAP interface demonstrates promiscuity in part due to the number of interactions this hydrophobic interface allows, which allows many alternative contacts (increased entropy, drives forward binding) with other binding partners hence promiscuity**
+# EP08.01-009 TRBV haplotype profile was related to immune-induced adverse events in Chinese patients with advanced NSCLC
+ - irAEs related to *TRBV* genes and uncommon V alleles
 # Epigenetic regulation of monoallelic rearrangement (allelic exclusion) of antigen receptor genes
 ## Summary
  - ~10% of genes are expressed monoallelically (any given cell expressed only paternal or maternal allele but not both)
@@ -1110,6 +1125,9 @@
  - **many mutant neoantigens in mismatch repair-deficient cancers makes them sensitive to immune checkpoint blockade, regardless of cancer's tissue of origin**
  - show that ICI induces peripheral expansion of tumor-specific T cells and that mismatch repair-deficient tumors harbor functional MANA (mutation-associated neoantigens) specific T cells
  - TCR-seq works by CDR3 sequencing (most variable region of TCRα and β chains, governs interactions with peptide-MHC complexes, junction between V and J or D and J genes)
+# Models for antigen receptor gene rearrangement: CDR3 length
+ - CDR3 length distributions normal-like
+ - specific biases likely govern rearrangement process (relatively narrow set of parameters creates observed shape of CDR3 length distribution)
 # Molecular mechanisms of cutaneous immune-related adverse events (irAEs) induced by immune checkpoint blockade
 ## The biological function of immune checkpoints
 ### CTLA-4
@@ -1565,7 +1583,7 @@
  - molecular mimicry hypothesis: some T cells respond to epitope derived from infectious agent can crossreact with self antigen that shares sequence/structural homology with microbial peptide
 ## Discussion
  - **does molecular mimicry result from inherent degeneracy in TCR binding mode (promiscuity) or a structural equivalence between pMHC surfaces presented for TCR recognition? kind of both but seems to lean towards structural equivalence with hotspot mimicry (small number of key residues in TCR binding site rather than high-affinity structural affinity inwhich all binding features would need to be replicated)**, perhaps helps explain why it has been difficult to incriminate specific individual infections in autoimmune disease development (degeneracy in crossreactivity?)
-# T cell receptor beta variable gene polymorphism predicts immune-related adverse events during checkpoint blockade immunotherapy
+# T cell receptor β variable gene polymorphism predicts immune-related adverse events during checkpoint blockade immunotherapy
  - TCRB and TRBV gene polymorphisms implicated in autoimmunity, perhaps irAEs too
  - find TRBV allele haplotype protective against severe irAEs
 # T cell receptor repertoire as a predictor of immune-related adverse events in renal cell carcinoma
@@ -1587,6 +1605,9 @@
  - **CD3 is signal transducing subunit for TCR**
  - immune changes in aging: fewer naive T cells able to respond to new antigens, higher representation of more differentiated effector/memory T cells
  - **high TCR diversity/richness/evenness (all same here, highly polyclonal synonyms) in blood associted with good ICB outcome**
+# T cell repertoire in peripheral blood as a potential biomarker for predicting response to concurrent cetuximab and nivolumab in head and neck squamous cell carcinoma
+ - TCRB chain profiling
+ - increased baseline TCR sequence diversity associated with ICB response
 # T cell tolerance: central and peripheral
 ## Summary
  - central tolerance: clonal deletion and diversion (Treg differentiation) control self-reactive T cells in the thymus
@@ -1603,6 +1624,11 @@
 # T cell tolerant fraction as a predictor of immune-related adverse events
  - tolerant fraction characterized according to productive/non-productive TCRB sequences, **not sure how this relates, I understand their hypothesis that more tolerant T cells would lead to lower irAE risk but I don't understand how tolerant fraction can be estimated from productive fraction, productive just means it can function and bind some antigen not necessarily self/foreign?**
  - **so they say "In healthy subjects, we considered TRB sequences that are expressed to be tolerant; otherwise, the subject would not be healthy" which does make sense but what about abundance? healthy people have rare self-reactive T cells that's known I think**
+# TCR contact residue hydrophobicity is a hallmark of immunogenic CD8<sup>+</sup> T cell epitopes
+ - relative hydrophobicity of TCR contact residues enriched in immunogenic MHC I epitopes in human and murine MHCs in both self and foreign immunogenic epitopes
+ - **highly polar amino acids underrepresented in immunogenic epitopes vs. non-immunogenic epitopes, hydrophobic amino acids overrepresented**
+ - **most antigens in this immunogenic dataset are from viruses, lower GC genomic content, so more hydrophobic residues come from that, so perhaps TCRs exploit this to generally recognize pathogens by hydrophobic peptides**
+ - **antigen presentation might also favor hydrophobic regions, for example hydrophobic regions enhance degradation and MHC presentation perhaps, immunogenic epitopes biased towards center of antigen where hydrophobic core is for cytosolic proteins**
 # TCR sequencing and cloning methods for repertoire analysis and isolation of tumor-reactive TCRs
 ## Abstract
  - SEQTR (SEQuencing T cell Receptor): combines *in vitro* transcription and single primer pair TCR amplification, combine with PCR to amplify TCR from bulk population, tumor-specific TCR identification and cloning
