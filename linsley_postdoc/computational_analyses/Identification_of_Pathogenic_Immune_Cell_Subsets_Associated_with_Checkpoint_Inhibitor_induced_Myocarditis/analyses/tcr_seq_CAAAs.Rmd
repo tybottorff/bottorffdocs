@@ -1,0 +1,68 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in myocarditis TCRseq data
+
+```{r}
+
+tcr_seq <- read.csv("../saved_data/tcr_seq_features.csv") %>%
+  select(-X) %>%
+  mutate(count_A_first_third = str_count(substr(cdr3, 1, nchar(cdr3) / 4), "A")) %>%
+  group_by(count_A_first_third) %>%
+  summarize(count_distro = n())
+
+tcr_seq
+
+```
+
+# Read in COVID (Shubham) TCRseq data
+
+```{r}
+
+covid_seq <- read.csv("../../../coding_practice/shubham_stitchr/shubham_stitchinput-steph.tsv", sep = "\t") %>%
+  mutate(count_A_first_third = str_count(substr(TRA_CDR3, 1, nchar(TRA_CDR3) / 4), "A")) %>%
+  group_by(count_A_first_third) %>%
+  summarize(count_distro = n())
+
+covid_seq
+
+```

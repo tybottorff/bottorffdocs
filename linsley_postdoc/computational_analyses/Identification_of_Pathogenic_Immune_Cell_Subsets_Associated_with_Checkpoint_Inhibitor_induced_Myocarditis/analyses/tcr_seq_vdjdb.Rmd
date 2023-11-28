@@ -125,26 +125,24 @@ ggplot(plot_df, aes(x = reorder(Epitope.species, -count), y = log10(count))) +
 
 ```{r}
 
+patient_counts <- tcr_seq %>%
+  filter(!(is.na(Patient_ID))) %>%
+  group_by(Patient_ID) %>%
+  summarize(patient_tcr_seq_count = n())
+
 plot_df <- tcr_seq %>%
   filter(Epitope.species == "HomoSapiens",
          Epitope.gene %in% c("BST2", "MLANA")) %>%
-  mutate(patient_group_size = if_else(irAE == "Yes", 17, 8)) %>%
   group_by(Epitope.species, Epitope.gene, irAE, Patient_ID, orig.ident) %>%
-  summarize(count = n() / patient_group_size) %>%
-  arrange(-count) %>%
-  print()
+  summarize(raw_count = n()) %>%
+  left_join(patient_counts, by = "Patient_ID") %>%
+  mutate(count = raw_count / patient_tcr_seq_count)
 
-ggplot(plot_df %>% filter(Epitope.gene %in% c("BST2", "MLANA")), aes(x = irAE, y = count, fill = irAE)) +
+ggplot(plot_df %>% filter(Epitope.gene %in% c("BST2", "MLANA")), aes(x = Patient_ID, y = 100*count, fill = irAE)) +
   geom_bar(stat = "identity") +
-  facet_wrap(~ Epitope.gene) +
+  facet_wrap(~ Epitope.gene, scales = "free_y") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
-  labs(x = "irAE development", y = "Sum of TCR counts\nper patient")
-         
-ggplot(plot_df %>% filter(Epitope.gene %in% c("BST2", "MLANA")), aes(x = Patient_ID, y = count, fill = irAE)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~ Epitope.gene) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
-  labs(x = "Patient ID", y = "TCR count")
+  labs(x = "Patient ID", y = "Antigen-specific TCRs (%)")
 
 # Melanoma patients: 
 # A6, A8, B3-5, B12, MCE12
@@ -153,4 +151,3 @@ ggplot(plot_df %>% filter(Epitope.gene %in% c("BST2", "MLANA")), aes(x = Patient
 # B3
 
 ```
-

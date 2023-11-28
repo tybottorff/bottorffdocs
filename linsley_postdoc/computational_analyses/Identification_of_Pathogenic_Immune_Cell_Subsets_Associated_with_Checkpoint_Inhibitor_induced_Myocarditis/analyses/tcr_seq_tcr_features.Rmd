@@ -137,12 +137,10 @@ feature_df <- dehashed_combined_tcr_seq %>%
 write.csv(feature_df, "../saved_data/tcr_seq_features.csv")
 
 feature_df_doubled <- feature_df %>%
-  bind_rows(mutate(feature_df, predicted.celltype.l1 = "All T cells")) %>%
-  mutate(count_A_first_third = str_count(substr(cdr3, 1, nchar(cdr3) / 4), "A")) %>%
-  select(cdr3, count_A_first_third) %>%
-  arrange(-count_A_first_third)
+  bind_rows(mutate(feature_df, predicted.celltype.l1 = "All T cells"))
 
 feature_df_doubled
+
 ```
 
 # Compare CDR3 hydrophobicitiy overall vs. middle 5 AAs
@@ -177,22 +175,10 @@ ggplot(feature_df_doubled, aes(x = chain, y = cdr3_length, fill = irAE)) +
   facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain", fill = "irAE", y = "CDR3 length")
 
-ggplot(feature_df %>% filter(predicted.celltype.l1 == "CD8 T"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ chain, scales = "free_y") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
-  labs(x = "Chain", fill = "irAE", y = "CD8 CDR3 length")
-
 ggplot(feature_df %>% filter(predicted.celltype.l1 == "CD8 T" & str_detect(predicted.celltype.l2, "CD8")), aes(x = chain, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
   facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
   labs(x = "Chain", fill = "irAE", y = "CDR3 length")
-
-ggplot(feature_df %>% filter(predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 == "CD8 TEM"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ chain, scales = "free_y") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
-  labs(x = "Chain", fill = "irAE", y = "CD8 TEM CDR3 length")
 
 # Filter the data for statistical test
 test_data <- feature_df_doubled %>%
@@ -208,53 +194,159 @@ print(wilcox_result)
 
 ```
 
+# Check for patient bias in CDR3 length conclusion for all TCRs
+
+```{r}
+
+# Calculate mean values for each combination of Patient_ID and chain
+mean_values <- feature_df_doubled %>%
+  filter(!(is.na(Patient_ID)), predicted.celltype.l1 == "CD8 T", chain == "TRA") %>%
+  group_by(Patient_ID) %>%
+  summarize(Mean = mean(cdr3_length)) %>%
+  arrange(Mean) %>%
+  pull(Patient_ID)
+
+# Reorder the levels of the Patient_ID variable based on mean values within each chain
+feature_df_doubled <- feature_df_doubled %>%
+  mutate(Patient_ID = factor(Patient_ID, levels = mean_values))
+
+# Create the boxplot
+ggplot(feature_df_doubled %>% filter(!(is.na(Patient_ID)), predicted.celltype.l1 == "CD8 T", chain == "TRA"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", fill = "irAE", y = "TRA CD8 CDR3 length") +
+  scale_x_discrete(limits = mean_values)
+
+# Calculate mean values for each combination of Patient_ID and chain
+mean_values <- feature_df_doubled %>%
+  filter(!(is.na(Patient_ID)), predicted.celltype.l1 == "CD8 T", chain == "TRB") %>%
+  group_by(Patient_ID) %>%
+  summarize(Mean = mean(cdr3_length)) %>%
+  arrange(Mean) %>%
+  pull(Patient_ID)
+
+# Reorder the levels of the Patient_ID variable based on mean values within each chain
+feature_df_doubled <- feature_df_doubled %>%
+  mutate(Patient_ID = factor(Patient_ID, levels = mean_values))
+
+# Create the boxplot
+ggplot(feature_df_doubled %>% filter(!(is.na(Patient_ID)), predicted.celltype.l1 == "CD8 T", chain == "TRB"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", fill = "irAE", y = "TRB CD8 CDR3 length") +
+  scale_x_discrete(limits = mean_values)
+
+# Calculate mean values for each combination of Patient_ID and chain
+mean_values <- feature_df_doubled %>%
+  filter(predicted.celltype.l1 == "CD8 T", predicted.celltype.l2 == "CD8 Proliferating", chain == "TRA") %>%
+  group_by(Patient_ID) %>%
+  summarize(Mean = mean(cdr3_length)) %>%
+  arrange(Mean) %>%
+  pull(Patient_ID)
+
+# Reorder the levels of the Patient_ID variable based on mean values within each chain
+feature_df_doubled <- feature_df_doubled %>%
+  mutate(Patient_ID = factor(Patient_ID, levels = mean_values))
+
+# Create the boxplot
+ggplot(feature_df_doubled %>% filter(predicted.celltype.l1 == "CD8 T", predicted.celltype.l2 == "CD8 Proliferating", chain == "TRA"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", fill = "irAE", y = "TRA CD8 Proliferating\nCDR3 length") +
+  scale_x_discrete(limits = mean_values)
+
+# Calculate mean values for each combination of Patient_ID and chain
+mean_values <- feature_df_doubled %>%
+  filter(!(is.na(Patient_ID)), predicted.celltype.l1 == "CD8 T", predicted.celltype.l2 == "CD8 TEM", chain == "TRA") %>%
+  group_by(Patient_ID) %>%
+  summarize(Mean = mean(cdr3_length)) %>%
+  arrange(Mean) %>%
+  pull(Patient_ID)
+
+# Reorder the levels of the Patient_ID variable based on mean values within each chain
+feature_df_doubled <- feature_df_doubled %>%
+  mutate(Patient_ID = factor(Patient_ID, levels = mean_values))
+
+# Create the boxplot
+ggplot(feature_df_doubled %>% filter(!(is.na(Patient_ID)), predicted.celltype.l1 == "CD8 T", predicted.celltype.l2 == "CD8 TEM", chain == "TRA"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", fill = "irAE", y = "TRA CD8 TEM\nCDR3 length") +
+  scale_x_discrete(limits = mean_values)
+
+# Calculate mean values for each combination of Patient_ID and chain
+mean_values <- feature_df_doubled %>%
+  filter(!(is.na(Patient_ID)), predicted.celltype.l1 == "CD8 T", predicted.celltype.l2 == "CD8 TEM", chain == "TRB") %>%
+  group_by(Patient_ID) %>%
+  summarize(Mean = mean(cdr3_length)) %>%
+  arrange(Mean) %>%
+  pull(Patient_ID)
+
+# Reorder the levels of the Patient_ID variable based on mean values within each chain
+feature_df_doubled <- feature_df_doubled %>%
+  mutate(Patient_ID = factor(Patient_ID, levels = mean_values))
+
+# Create the boxplot
+ggplot(feature_df_doubled %>% filter(!(is.na(Patient_ID)), predicted.celltype.l1 == "CD8 T", predicted.celltype.l2 == "CD8 TEM", chain == "TRB"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", fill = "irAE", y = "TRB CD8 TEM\nCDR3 length") +
+  scale_x_discrete(limits = mean_values)
+
+```
+
 # Check N region and CDR3 length correlation
 
  - slopes not really close to 1 so... 1 nt longer N region would mean 1 nt longer CDR3 if they tightly correlated I'd think
 
 ```{r}
 
-n_regions <- read.csv("../saved_data/imgt_n_regions.csv")
+n_regions <- read.csv("../saved_data/imgt_n_regions.csv") %>%
+  select(-X) %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "(.*)_(TRA|TRB)$")
 
 n_regions
 
 merged_df <- feature_df %>%
-  full_join(n_regions, by = "barcode") %>%
-  mutate(N.REGION_TRB_length = nchar(N.REGION_TRB),
-         N.REGION_TRA_length = nchar(N.REGION_TRA),
-         N1.REGION_TRB_length = nchar(N1.REGION_TRB),
-         N1.REGION_TRA_length = nchar(N1.REGION_TRA),
-         N2.REGION_TRB_length = nchar(N2.REGION_TRB),
-         N2.REGION_TRA_length = nchar(N2.REGION_TRA),
-         N3.REGION_TRB_length = nchar(N3.REGION_TRB),
-         N3.REGION_TRA_length = nchar(N3.REGION_TRA))
+  full_join(n_regions, by = c("barcode", "Chain")) %>%
+  mutate(N.REGION_length = nchar(N.REGION),
+         N1.REGION_length = nchar(N1.REGION),
+         N2.REGION_length = nchar(N2.REGION),
+         N3.REGION_length = nchar(N3.REGION))
 
 merged_df
 
-# For TRA chain
-ggplot(merged_df %>% filter(Chain == "TRA" & N.REGION_TRA_length != 0), 
-       aes(x = cdr3_length, y = N.REGION_TRA_length)) +
+ggplot(merged_df %>% filter(N.REGION_length != 0), 
+       aes(x = cdr3_length, y = N.REGION_length)) +
   geom_jitter(size = 0.25, alpha = 0.25) +
-  labs(x = "TRA CDR3 length",
-       y = "TRA N region length") +
+  facet_wrap(~ Chain) +
+  labs(x = "CDR3 length",
+       y = "N region length") +
   geom_smooth(method = "lm", se = FALSE, color = "blue")
 
-# For TRB chain
-ggplot(merged_df %>% filter(Chain == "TRB" & N.REGION_TRB_length != 0), 
-       aes(x = cdr3_length, y = N.REGION_TRB_length)) +
-  geom_jitter(size = 0.25) +
-  labs(x = "TRB CDR3 length",
-       y = "TRB N1 region length") +
-  geom_smooth(method = "lm", se = FALSE, color = "blue")
+```
 
-# For TRA chain
-tra_slope <- lm(N.REGION_TRA_length ~ cdr3_length, data = merged_df %>% filter(Chain == "TRA" & N.REGION_TRA_length != 0))$coefficients[2]
+# Plot N region length irAE status and cell type (l1)
 
-# For TRB chain
-trb_slope <- lm(N.REGION_TRB_length ~ cdr3_length, data = merged_df %>% filter(Chain == "TRB" & N.REGION_TRB_length != 0))$coefficients[2]
+```{r}
 
-print(tra_slope)
-print(trb_slope)
+plot_df <- merged_df %>%
+  filter(predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T"))
+
+ggplot(plot_df, aes(x = chain, y = N.REGION_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "N region length (nt)")
+
+plot_df <- merged_df %>%
+  filter(predicted.celltype.l1 == "CD8 T")
+
+ggplot(plot_df, aes(x = chain, y = N.REGION_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "N region length (nt)")
 
 ```
 
@@ -345,11 +437,8 @@ expansion_df <- feature_df %>%
     count > 5 & count <= 20 ~ "Medium",
     count > 20 & count <= 100 ~ "Large",
     count > 100 ~ "Hyperexpanded")) %>%
-  group_by(expansion_degree) %>%
-  summarize(count = n()) %>%
   filter(expansion_degree %in% c("Large", "Hyperexpanded"),
          predicted.celltype.l1 != "other T")
-  print()
 
 expansion_df %>%
   group_by(predicted.celltype.l1, irAE, chain) %>%
@@ -360,12 +449,6 @@ ggplot(expansion_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
   facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain", fill = "irAE", y = "CDR3 length")
-
-ggplot(expansion_df %>% filter(predicted.celltype.l1 == "CD8 T"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ chain, scales = "free_y") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
-  labs(x = "Chain", fill = "irAE", y = "CD8 CDR3 length")
 
 ggplot(expansion_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
   geom_boxplot() +
@@ -431,6 +514,50 @@ print(wilcox_result)
 
 ```
 
+# Check for patient bias in CDR3 length conclusion for highly expanded CD8s
+
+```{r}
+
+# Calculate mean values for each combination of Patient_ID and chain
+mean_values <- expansion_df %>%
+  filter(predicted.celltype.l1 == "CD8 T", expansion_degree %in% c("Large", "Hyperexpanded"), chain == "TRA") %>%
+  group_by(Patient_ID) %>%
+  summarize(Mean = mean(cdr3_length)) %>%
+  arrange(Mean) %>%
+  pull(Patient_ID)
+
+# Reorder the levels of the Patient_ID variable based on mean values within each chain
+expansion_df <- expansion_df %>%
+  mutate(Patient_ID = factor(Patient_ID, levels = mean_values))
+
+# Create the boxplot
+ggplot(expansion_df %>% filter(predicted.celltype.l1 == "CD8 T", expansion_degree %in% c("Large", "Hyperexpanded"), chain == "TRA"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", fill = "irAE", y = "TRA CD8\nCDR3 length") +
+  scale_x_discrete(limits = mean_values)
+
+# Calculate mean values for each combination of Patient_ID and chain
+mean_values <- expansion_df %>%
+  filter(predicted.celltype.l1 == "CD8 T", expansion_degree %in% c("Large", "Hyperexpanded"), chain == "TRB") %>%
+  group_by(Patient_ID) %>%
+  summarize(Mean = mean(cdr3_length)) %>%
+  arrange(Mean) %>%
+  pull(Patient_ID)
+
+# Reorder the levels of the Patient_ID variable based on mean values within each chain
+expansion_df <- expansion_df %>%
+  mutate(Patient_ID = factor(Patient_ID, levels = mean_values))
+
+# Create the boxplot
+ggplot(expansion_df %>% filter(predicted.celltype.l1 == "CD8 T", expansion_degree %in% c("Large", "Hyperexpanded"), chain == "TRB"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", fill = "irAE", y = "TRB CD8\nCDR3 length") +
+  scale_x_discrete(limits = mean_values)
+
+```
+
 # Plot CDR3 length and hydrophobicity by irAE status and cell type (l1, l2) for most expanded, unique CDR3s
 
 ```{r}
@@ -459,12 +586,6 @@ ggplot(expansion_df_unique, aes(x = chain, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
   facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain", fill = "irAE", y = "CDR3 length")
-
-ggplot(expansion_df_unique %>% filter(predicted.celltype.l1 == "CD8 T"), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ chain, scales = "free_y") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
-  labs(x = "Chain", fill = "irAE", y = "CD8 CDR3 length")
 
 ggplot(expansion_df_unique, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
   geom_boxplot() +
@@ -512,132 +633,6 @@ test_data <- expansion_df_unique %>%
          predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          expansion_degree == "Large")
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
-
-# Print the results
-print(wilcox_result)
-
-```
-
-# Find CDR3 sequences differentially encountered in yes/no irAE
-
-```{r}
-
-diff_df <- feature_df %>%
-  select(cdr3, chain, Patient_ID, irAE, predicted.celltype.l1) %>%
-  filter(cdr3 != "None",
-         chain != "Multi") %>%
-  select(-Patient_ID) %>%
-  group_by(cdr3, irAE, chain) %>%
-  summarize(count = n()) %>%
-  ungroup() %>%
-  pivot_wider(names_from = c(irAE, chain), values_from = count, values_fill = 0) %>%
-  rowwise() %>%
-  mutate(tra_diff = abs(No_TRA - Yes_TRA),
-         trb_diff = abs(No_TRB - Yes_TRB)) %>%
-  ungroup()
-
-diff_df_tra <- diff_df %>%
-  select(-No_TRB, -Yes_TRB, -trb_diff) %>%
-  filter(tra_diff > 3) %>%
-  arrange(-tra_diff)
-
-diff_df_tra
-
-diff_df_trb <- diff_df %>%
-  select(-No_TRA, -Yes_TRA, -tra_diff) %>%
-  filter(trb_diff > 3) %>%
-  arrange(-trb_diff)
-
-diff_df_trb
-
-```
-
-# Test patient bias (TRA, expect same for TRB)
-
-```{r}
-
-# looks like most dramatically differentially encountered CDR3 sequences are due to single patient bias
-
-bias_df_tra <- feature_df %>%
-  filter(cdr3 %in% diff_df_tra$cdr3,
-         chain == "TRA") %>%
-  group_by(Patient_ID, cdr3) %>%
-  summarize(count = n()) %>%
-  arrange(cdr3, -count) %>%
-  filter(cdr3 %in% head(diff_df_tra$cdr3))
-
-bias_df_tra
-
-```
-
-# Plot CDR3 hydrophobicity and length by irAE development for differentially encountered CDR3 sequences
-
-```{r}
-
-plot_df <- feature_df %>%
-  filter(cdr3 %in% diff_df_tra$cdr3 & chain == "TRA" | cdr3 %in% diff_df_trb$cdr3 & chain == "TRB",
-         predicted.celltype.l1 != "other T")
-
-plot_df %>%
-  group_by(predicted.celltype.l1, irAE, chain) %>%
-  summarize(count = n()) %>%
-  print()
-
-ggplot(plot_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
-  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
-
-ggplot(plot_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
-  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
-
-# Filter the data for statistical test
-test_data <- plot_df %>%
-  filter(chain == "TRA",
-         predicted.celltype.l1 == "CD8 T")
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
-
-# Print the results
-print(wilcox_result)
-
-```
-
-# Plot CDR3 hydrophobicity and length by irAE development for differentially encountered UNIQUE CDR3 sequences
-
-```{r}
-
-plot_df <- feature_df %>%
-  filter(cdr3 %in% diff_df_tra$cdr3 & chain == "TRA" | cdr3 %in% diff_df_trb$cdr3 & chain == "TRB",
-         predicted.celltype.l1 != "other T") %>%
-  group_by(cdr3, chain, Patient_ID) %>%
-  slice(1)
-
-plot_df %>%
-  group_by(predicted.celltype.l1, irAE, chain) %>%
-  summarize(count = n()) %>%
-  print()
-
-ggplot(plot_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
-  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
-
-ggplot(plot_df, aes(x = chain, y = cdr3_hydrophobicity, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
-  labs(x = "Chain", fill = "irAE", y = "CDR3 hydrophobicity")
-
-# Filter the data for statistical test
-test_data <- plot_df %>%
-  filter(chain == "TRA",
-         predicted.celltype.l1 == "CD4 T")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
@@ -710,12 +705,6 @@ ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
   facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
   labs(x = "Chain", y = "log10(pgen)")
 
-ggplot(plot_df %>% filter(predicted.celltype.l1 == "CD8 T"), aes(x = Patient_ID, y = log10(pgen), fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ chain, scales = "free_y") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
-  labs(x = "Chain", fill = "irAE", y = "CD8 log10(pgen)")
-
 # Filter the data for statistical test
 test_data <- igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T") %>%
@@ -777,5 +766,138 @@ ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
 
 # Higher log10(pgen) means lower pgen which means less germline-like
 # lower log10(pgen) means higher pgen which means more germline-like
+
+```
+
+# Check for patient bias in pgen conclusion
+
+```{r}
+
+# Calculate mean values for each combination of Patient_ID and chain
+mean_values <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T", chain == "TRA", !(is.na(pgen))) %>%
+  group_by(Patient_ID) %>%
+  summarize(Mean = mean(log10(pgen))) %>%
+  arrange(Mean) %>%
+  pull(Patient_ID)
+
+# Reorder the levels of the Patient_ID variable based on mean values within each chain
+igor_combined <- igor_combined %>%
+  mutate(Patient_ID = factor(Patient_ID, levels = mean_values))
+
+# Create the boxplot
+ggplot(igor_combined %>% filter(predicted.celltype.l1 == "CD8 T", chain == "TRA"), aes(x = Patient_ID, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", fill = "irAE", y = "TRA CD8\nlog10(pgen)") +
+  scale_x_discrete(limits = mean_values)
+
+# Calculate mean values for each combination of Patient_ID and chain
+mean_values <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T", chain == "TRB", !(is.na(pgen))) %>%
+  group_by(Patient_ID) %>%
+  summarize(Mean = mean(log10(pgen))) %>%
+  arrange(Mean) %>%
+  pull(Patient_ID)
+
+# Reorder the levels of the Patient_ID variable based on mean values within each chain
+igor_combined <- igor_combined %>%
+  mutate(Patient_ID = factor(Patient_ID, levels = mean_values))
+
+# Create the boxplot
+ggplot(igor_combined %>% filter(predicted.celltype.l1 == "CD8 T", chain == "TRB"), aes(x = Patient_ID, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", fill = "irAE", y = "TRB CD8\nlog10(pgen)") +
+  scale_x_discrete(limits = mean_values)
+
+```
+
+# Check CDR1/2s for length/hydrophobicity trends by irAE development/cell type
+
+```{r}
+
+cdr1_2 <- read.csv("../saved_data/imgt_cdr1_2.csv") %>%
+  select(-X)
+
+new_colnames <- c("barcode", "cdr1", "cdr2", "Chain")
+
+colnames(cdr1_2) <- new_colnames
+
+merged_df <- cdr1_2 %>%
+  left_join(feature_df %>% select(-cdr1, -cdr2), by = c("barcode", "Chain")) %>%
+  rowwise() %>%
+  mutate(cdr1_hydrophobicity = calculate_hydrophobicity(cdr1, hydrophobicity_df),
+         cdr2_hydrophobicity = calculate_hydrophobicity(cdr2, hydrophobicity_df)) %>%
+  ungroup() %>%
+  filter(predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T"),
+         Chain %in% c("TRA", "TRB"))
+
+merged_df
+
+```
+
+# Plot CDR1/2 features by irAE status and cell type (l1, l2)
+
+```{r}
+
+ggplot(merged_df, aes(x = chain, y = nchar(cdr1), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR1 length")
+
+ggplot(merged_df, aes(x = chain, y = nchar(cdr2), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR2 length")
+
+ggplot(merged_df, aes(x = chain, y = cdr1_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR1 hydrophobicity")
+
+ggplot(merged_df, aes(x = chain, y = cdr2_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR2 hydrophobicity")
+
+```
+
+# Plot CDR1/2 features by irAE status and cell type (l1, l2) for most expanded T cells
+
+```{r}
+
+expansion_df <- merged_df %>%
+  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  filter(expansion_degree %in% c("Large", "Hyperexpanded"),
+         predicted.celltype.l1 != "other T")
+
+ggplot(expansion_df, aes(x = chain, y = nchar(cdr1), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR1 length")
+
+ggplot(expansion_df, aes(x = chain, y = nchar(cdr2), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR2 length")
+
+ggplot(expansion_df, aes(x = chain, y = cdr1_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR1 hydrophobicity")
+
+ggplot(expansion_df, aes(x = chain, y = cdr2_hydrophobicity, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR2 hydrophobicity")
 
 ```

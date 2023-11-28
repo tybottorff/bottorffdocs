@@ -20,6 +20,7 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(circlize)
+library(Biostrings)
 
 ```
 
@@ -429,52 +430,31 @@ imgt_df_1_beta
 
 ```
 
-# Analyze IMGT/HighV-Quest output 3: CDR1/2 and N region lengths
+# Extract IMGT/HighV-Quest output 3: CDR1/2s
 
 ```{r}
 
 imgt_df_3_alpha <- read.csv("../saved_data/myocarditis_fixed_tra/3_Nt-sequences.csv") %>%
-  select(Sequence.ID, N.REGION, N1.REGION, N2.REGION, N3.REGION) %>%
-  rename(barcode = Sequence.ID,
-         N.REGION_TRA = N.REGION,
-         N1.REGION_TRA = N1.REGION,
-         N2.REGION_TRA = N2.REGION,
-         N3.REGION_TRA = N3.REGION)
+  filter(!is.na(CDR1.IMGT) & CDR1.IMGT != "",
+         !is.na(CDR2.IMGT) & CDR2.IMGT != "") %>%
+  mutate(cdr1 = as.character(translate(DNAStringSet(CDR1.IMGT))),
+         cdr2 = as.character(translate(DNAStringSet(CDR2.IMGT)))) %>%
+  select(Sequence.ID, cdr1, cdr2) %>%
+  mutate(Chain = "TRA")
 
 imgt_df_3_alpha
 
 imgt_df_3 <- read.csv("../saved_data/myocarditis_fixed_trb/3_Nt-sequences.csv") %>%
-  select(Sequence.ID, N.REGION, N1.REGION, N2.REGION, N3.REGION, CDR1.IMGT, CDR2.IMGT) %>%
-  rename(barcode = Sequence.ID,
-         N.REGION_TRB = N.REGION,
-         N1.REGION_TRB = N1.REGION,
-         N2.REGION_TRB = N2.REGION,
-         N3.REGION_TRB = N3.REGION,
-         cdr1 = as.character(translate(DNAString(DR1.IMGT))),
-         cdr2 = as.character(translate(DNAString(CDR2.IMGT)))) %>%
-  full_join(imgt_df_3_alpha, by = "barcode")
+  filter(!is.na(CDR1.IMGT) & CDR1.IMGT != "",
+         !is.na(CDR2.IMGT) & CDR2.IMGT != "") %>%
+  mutate(cdr1 = as.character(translate(DNAStringSet(CDR1.IMGT))),
+         cdr2 = as.character(translate(DNAStringSet(CDR2.IMGT)))) %>%
+  select(Sequence.ID, cdr1, cdr2) %>%
+  mutate(Chain = "TRB") %>%
+  full_join(imgt_df_3_alpha, by = c("Sequence.ID", "Chain", "cdr1", "cdr2"))
 
 imgt_df_3
 
-write.csv(imgt_df_3, "../saved_data/imgt_cdr1_2_n_regions.csv")
-
-```
-
-# Translate CDR1/2
-
-```{r}
-
-# Install and load the Biostrings package
-#if (!requireNamespace("BiocManager", quietly = TRUE))
-#  install.packages("BiocManager")
-#BiocManager::install("Biostrings")
-#library(Biostrings)
-
-# Example DNA sequence
-dna_sequence <- DNAString("ATG")
-
-x <- as.character(translate(dna_sequence))
-
-x
+write.csv(imgt_df_3, "../saved_data/imgt_cdr1_2.csv")
 
 ```
