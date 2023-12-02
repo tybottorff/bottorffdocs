@@ -1,25 +1,24 @@
 # Find publicly available data (**scRNAseq + TCRseq**, like 10X) to mine
 ## Data shortlist
-### Distinct mechanisms of mismatch repair deficiency delineate two modes of response to PD-1 immunotherapy in endometrial carcinoma
- - no irAE data (emailed for it 10.23.23)
-### Immune checkpoint blockade sensitivity and progression-free survival associates with baseline CD8+ T cell clone size and cytoxicity
- - no irAE data (emailed for it 10.24.23)
 ### Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis
- - no paired same patient data (different people got no ICI vs. yes ICI)
- - TCRseq quality seems low by stitching and IMGT/HighV-Quest
+### Interleukin 21 drives CXCR6+ CD8+ T cell mediators in Autoimmune Checkpoint Inhibitor Thyroiditis
+ - can't find TCRseq data (emailed for help 11.30.23)
 ### Distinct molecular and immune hallmarks of inflammatory arthritis induced by immune checkpoint inhibitors for cancer therapy
- - data only after ICB
- - can't find TCRseq data
+ - can't find TCRseq data, emailed for help 11.30.23
 ### Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
- - only 3 patients and data only after ICB
- - TCRseq quality also seems low (at least by stitching)
+ - only 3 patients
+ - no irAE data (emailed for it 11.30.23)
+### Distinct mechanisms of mismatch repair deficiency delineate two modes of response to PD-1 immunotherapy in endometrial carcinoma
+ - no irAE data (emailed for it many times October-November 2023)
+### Immune checkpoint blockade sensitivity and progression-free survival associates with baseline CD8+ T cell clone size and cytoxicity
+ - no irAE data (emailed for it 10.24.23 and 11.30.23)
 ### Lung tumor–infiltrating Treg have divergent transcriptional profiles and function linked to checkpoint blockade response
  - in humans but with a focus for murine comparison
  - got security error going to data availability website (European Genome-Phenome Archive with accession number EGAS00001005343)
 ### Dynamic single-cell mapping unveils Epstein‒Barr virus-imprinted T-cell exhaustion and on-treatment response
- - can't find their data accessibility statement & no irAE data (emailed for both 10.23.23)
+ - can't find their data accessibility statement & no irAE data (emailed for both 10.23.23 and 11.30.23)
 ### https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE220313
- - not published yet?
+ - not published yet
 
 # Briefly reproduce their findings
  - UMAP of cell (sub)types
