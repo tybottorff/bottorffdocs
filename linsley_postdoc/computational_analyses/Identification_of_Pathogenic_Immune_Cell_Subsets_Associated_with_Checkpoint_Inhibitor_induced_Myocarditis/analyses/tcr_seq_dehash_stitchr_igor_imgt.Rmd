@@ -41,7 +41,7 @@ theme_set(
 
 ```
 
-# Read in non-control TCR-seq data
+# Read in TCR-seq data
 
 ```{r}
 
@@ -178,7 +178,10 @@ dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
   mutate(irAE = case_when(
     startsWith(Patient_ID, "A") ~ "No",
     startsWith(Patient_ID, "B") ~ "Yes",
-    startsWith(Patient_ID, "M") ~ "Yes"))
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  # condense early/late chronology patient into 1 ID, mark Early vs. Late chronology for all Myocarditis patients
+  mutate(time_point = ifelse(grepl("[EL]", Patient_ID), sub(".*([EL]).*", "\\1", Patient_ID), NA),
+         Patient_ID = gsub("[EL]", "", Patient_ID)) %>%
 
 dehashed_combined_tcr_seq
 

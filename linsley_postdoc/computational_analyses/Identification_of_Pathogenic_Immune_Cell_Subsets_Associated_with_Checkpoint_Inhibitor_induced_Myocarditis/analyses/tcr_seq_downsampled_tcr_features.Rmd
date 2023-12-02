@@ -1,0 +1,427 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in final RNA T cell Seurat with TCR metadata
+
+```{r}
+
+tcr_rna <- readRDS("../saved_data/final_seurat_T_cells.rds")
+
+```
+
+# Tibble metadata, add rownames
+
+```{r}
+
+dehashed_combined_tcr_seq <- as_tibble(tcr_rna@meta.data)
+
+dehashed_combined_tcr_seq$barcode <- colnames(tcr_rna)
+
+dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"), names_to = c(".value", "Chain"), names_pattern = "(.*)_([A-Z]+)$") %>%
+  mutate(time_point = ifelse(grepl("[EL]", Patient_ID), sub(".*([EL]).*", "\\1", Patient_ID), NA), Patient_ID = gsub("[EL]", "", Patient_ID))
+
+dehashed_combined_tcr_seq
+
+write.csv(dehashed_combined_tcr_seq, "../saved_data/dehashed_tcr_seq_with_rna.csv")
+
+```
+
+# Assess cell identity confidence
+
+```{r}
+
+cell_confidence_test <- dehashed_combined_tcr_seq %>%
+  select(barcode, chain, cdr3, Patient_ID, irAE, predicted.celltype.l1, predicted.celltype.l1.score, predicted.celltype.l2, predicted.celltype.l2.score) %>%
+  group_by(predicted.celltype.l1, predicted.celltype.l2) %>%
+  summarize(count = n(), score1 = mean(predicted.celltype.l1.score), score2 = mean(predicted.celltype.l2.score))
+
+cell_confidence_test
+
+# unexpected combos have low scores, remove them
+
+```
+
+# Prep feature df
+
+```{r}
+
+feature_df <- dehashed_combined_tcr_seq %>%
+  filter(
+    case_when(
+      predicted.celltype.l1 == "CD4 T" & str_detect(predicted.celltype.l2, "CD4") | predicted.celltype.l2 == "Treg" ~ TRUE,
+      predicted.celltype.l1 == "CD8 T" & str_detect(predicted.celltype.l2, "CD8") ~ TRUE,
+      predicted.celltype.l1 == "other T" & predicted.celltype.l2 %in% c("MAIT", "dnT") ~ TRUE,
+      TRUE ~ FALSE)) %>%
+  select(-cdr3_nt) %>%
+  rowwise() %>%
+  mutate(cdr3_length = nchar(cdr3)) %>%
+  ungroup()
+
+write.csv(feature_df, "../saved_data/tcr_seq_features.csv")
+
+```
+
+# Examine patient sampling depth bias
+
+```{r}
+
+feature_df %>%
+  group_by(Patient_ID, irAE) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  print()
+
+# Choose 328 seqs from non B10 samples to downsample all to 328
+
+```
+
+# Normalize cell numbers across samples
+
+```{r}
+
+desired_rows_per_patient <- 328
+
+set.seed(123)
+
+# Downsample the dataframe
+downsampled_df <- feature_df %>%
+  group_by(Patient_ID) %>%
+  sample_n(desired_rows_per_patient, replace = FALSE) %>%
+  ungroup()
+
+downsampled_df
+
+downsampled_df_doubled <- downsampled_df %>%
+  bind_rows(mutate(downsampled_df, predicted.celltype.l1 = "All T cells"))
+
+downsampled_df_doubled
+
+```
+
+# Plot CDR3 length by irAE status and cell type (l1, l2)
+
+```{r}
+
+ggplot(downsampled_df_doubled, aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
+
+ggplot(downsampled_df %>% filter(predicted.celltype.l1 == "CD8 T" & str_detect(predicted.celltype.l2, "CD8")), aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
+
+downsampled_df %>%
+  filter(predicted.celltype.l1 == "CD8 T", 
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  group_by(irAE, Chain) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- downsampled_df %>%
+  filter(predicted.celltype.l1 == "CD8 T") %>%
+  filter(chain == "TRB")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+```
+
+# Plot CDR3 length by irAE status and cell type (l1, l2) for most expanded CDR3s
+
+```{r}
+
+expansion_df <- downsampled_df %>%
+  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded")) %>%
+  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded"),
+         predicted.celltype.l1 != "other T")
+
+ggplot(expansion_df, aes(x = chain, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "CDR3 length")
+
+expansion_df %>%
+  filter(predicted.celltype.l1 == "CD8 T", 
+         Chain == "TRB") %>%
+  group_by(irAE, Chain) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- expansion_df %>%
+  filter(predicted.celltype.l1 == "CD8 T") %>%
+  filter(chain == "TRB")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+```
+
+# Create plot of just solid conclusions for CD8 TEM CDR3B length
+
+```{r}
+
+cd8_tems <- downsampled_df %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  mutate(label = "All CD8 TEMs")
+
+expanded_cd8_tems <- expansion_df %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded")) %>%
+  mutate(label = "Highly expanded\nCD8 TEMs")
+
+joined_df <- cd8_tems %>%
+  full_join(expanded_cd8_tems)
+
+ggplot(joined_df, aes(x = label, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "", fill = "irAE", y = "CDR3β length") +
+  scale_x_discrete(limits = c("All CD8 TEMs", "Highly expanded\nCD8 TEMs"))
+
+joined_df %>%
+  group_by(label, irAE) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- joined_df %>%
+  filter(label == "Highly expanded\nCD8 TEMs")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+```
+
+# Import pgen data
+
+```{r}
+
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  rename(TRA_pgen = pgen) %>%
+  filter(!(is.na(TRA_pgen)),
+         TRA_pgen != "NaN")
+
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(TRB_pgen = pgen) %>%
+  filter(!(is.na(TRB_pgen)),
+         TRB_pgen != "NaN") %>%
+  full_join(igor_alpha, by = c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ", "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", "Linked_aa", "Warnings.Errors")) %>%
+  select(TCR_name, TRA_CDR3, TRB_CDR3, TRA_pgen, TRB_pgen) %>%
+  mutate(TRA_pgen = as.character(TRA_pgen),
+         TRB_pgen = as.character(TRB_pgen))
+
+igor_combined <- igor_combined %>%
+  pivot_longer(cols = matches("^(TRA|TRB)"),
+               names_to = c("Chain", ".value"),
+               names_pattern = "^(TRA|TRB)_(.*)$") %>%
+  rename(barcode = TCR_name,
+         cdr3 = CDR3) %>%
+  mutate(pgen = as.numeric(pgen)) %>%
+  right_join(downsampled_df, by = c("barcode", "Chain", "cdr3")) %>%
+  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded"))
+
+igor_combined
+
+```
+
+# Plot pgen scores by cell type for all TCRs
+
+```{r}
+
+plot_df <- igor_combined %>%
+  filter(!(is.na(predicted.celltype.l1)))
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+plot_df <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T")
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+plot_df %>%
+  filter(predicted.celltype.l1 == "CD8 T", 
+         predicted.celltype.l2 == "CD8 TCM",
+         Chain == "TRB") %>%
+  group_by(irAE, Chain) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM") %>%
+  filter(chain == "TRA")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+# Higher log10(pgen) means lower pgen which means less germline-like
+# lower log10(pgen) means higher pgen which means more germline-like
+
+```
+
+# Plot pgen scores by cell type for highly expanded TCRs
+
+```{r}
+
+plot_df <- igor_combined %>%
+  filter(!(is.na(predicted.celltype.l1))) %>%
+  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded"),
+         predicted.celltype.l1 != "other T")
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
+  labs(x = "Chain", y = "log10(pgen)")
+
+plot_df %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         Chain == "TRB") %>%
+  group_by(irAE) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- plot_df %>%
+  filter(predicted.celltype.l1 == "CD8 T") %>%
+  filter(chain == "TRB")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+# Higher log10(pgen) means lower pgen which means less germline-like
+# lower log10(pgen) means higher pgen which means more germline-like
+
+```
+
+# Create plot of just solid conclusions for pgen
+
+```{r}
+
+cd8_tems <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  mutate(label = "All CD8 TEMs")
+
+expanded_cd8_tems <- igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded")) %>%
+  mutate(label = "Highly expanded\nCD8 TEMs")
+
+joined_df <- cd8_tems %>%
+  full_join(expanded_cd8_tems)
+
+ggplot(joined_df, aes(x = label, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "", fill = "irAE", y = "CDR3β pgen(log10)") +
+  scale_x_discrete(limits = c("All CD8 TEMs", "Highly expanded\nCD8 TEMs"))
+
+joined_df %>%
+  group_by(label, irAE) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- joined_df %>%
+  filter(label == "All CD8 TEMs")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+```

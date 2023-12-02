@@ -109,21 +109,63 @@ tcr_seq
 ```{r}
 
 plot_df <- tcr_seq %>%
-  group_by(Epitope.species) %>%
+  filter(!(is.na(irAE))) %>%
+  group_by(Epitope.species, irAE, Chain) %>%
   summarize(count = n()) %>%
+  mutate(test = log10(count)) %>%
   arrange(-count) %>%
   print()
 
-ggplot(plot_df, aes(x = reorder(Epitope.species, -count), y = log10(count))) +
-  geom_bar(stat = "identity") +
+ggplot(plot_df, aes(x = reorder(Epitope.species, -count), y = log10(count), fill = irAE)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  facet_wrap(~Chain) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
   labs(x = "Epitope species", y = "TCR count (log10)")
+
+```
+
+# Inspect TRB CMV and EBV taking into account different patients have different numbers of TCRs sampled
+
+```{r}
+
+patient_counts <- tcr_seq %>%
+  filter(!(is.na(Patient_ID))) %>%
+  group_by(Patient_ID) %>%
+  summarize(patient_tcr_seq_count = n())
+
+plot_df <- tcr_seq %>%
+  filter(Epitope.species %in% c("CMV", "EBV"),
+         Chain == "TRB") %>%
+  group_by(Epitope.species, irAE, Patient_ID) %>%
+  summarize(raw_count = n()) %>%
+  left_join(patient_counts, by = "Patient_ID") %>%
+  mutate(count = raw_count / patient_tcr_seq_count)
+
+ggplot(plot_df, aes(x = Patient_ID, y = 100*count, fill = irAE)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ Epitope.species, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Patient ID", y = "Antigen-specific TRBs (%)")
 
 ```
 
 # Inspect human specific TCRs
 
 ```{r}
+
+plot_df <- tcr_seq %>%
+  filter(!(is.na(irAE)),
+         Epitope.species == "HomoSapiens") %>%
+  group_by(Epitope.gene, irAE, Chain) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  print()
+
+ggplot(plot_df, aes(x = reorder(Epitope.gene, -count), y = log10(count), fill = irAE)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  facet_wrap(~Chain) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) +
+  labs(x = "Epitope gene", y = "TCR count (log10)")
 
 patient_counts <- tcr_seq %>%
   filter(!(is.na(Patient_ID))) %>%
