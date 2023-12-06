@@ -228,7 +228,7 @@ print(wilcox_result)
 
 feature_df_doubled_unique <- feature_df_doubled %>%
   group_by(cdr3, chain, Patient_ID) %>%
-  slice(1)
+  dplyr::slice(1)
 
 ggplot(feature_df_doubled_unique, aes(x = chain, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
@@ -350,7 +350,7 @@ expansion_df_unique <- feature_df %>%
   filter(expansion_degree %in% c("Large", "Hyperexpanded"),
          predicted.celltype.l1 != "other T") %>%
   group_by(cdr3, Patient_ID, chain) %>%
-  slice(1)
+  dplyr::slice(1)
 
 expansion_df_unique %>%
   group_by(predicted.celltype.l1, irAE, chain) %>%
@@ -384,7 +384,7 @@ expansion_df_unique <- feature_df %>%
     count > 20 & count <= 100 ~ "Large",
     count > 100 ~ "Hyperexpanded")) %>%
   group_by(cdr3, Patient_ID, chain) %>%
-  slice(1)
+  dplyr::slice(1)
 
 expansion_df_unique$expansion_degree <- factor(expansion_df_unique$expansion_degree, levels = c("Single", "Small", "Medium", "Large", "Hyperexpanded"))
 
@@ -414,5 +414,27 @@ wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
 
 # Print the results
 print(wilcox_result)
+
+```
+
+# Investigate Gly and Ala usage
+
+```{r}
+
+feature_df <- feature_df %>%
+  mutate(Gly_num = sapply(strsplit(as.character(cdr3), ""), function(x) sum(x == "G")),
+         Ala_num = sapply(strsplit(as.character(cdr3), ""), function(x) sum(x == "A")),
+         Gly_perc = Gly_num / cdr3_length,
+         Ala_perc = Ala_num / cdr3_length)
+
+ggplot(feature_df, aes(x = chain, y = Gly_perc, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "Glycine usage in CDR3 (%)")
+
+ggplot(feature_df, aes(x = chain, y = Ala_perc, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "Alanine usage in CDR3 (%)")
 
 ```

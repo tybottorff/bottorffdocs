@@ -1,0 +1,216 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+library(Biostrings)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RNA data
+
+```{r}
+
+seurat_obj <- readRDS("../saved_data/final_seurat_T_cells.rds")
+
+```
+
+# Find shortest and longest CD8 TRB junction barcodes
+
+```{r}
+
+longest_beta_junctions <- read.csv("../saved_data/dehashed_tcr_seq_with_rna.csv") %>%
+  filter(barcode %in% colnames(seurat_obj)) %>%
+  select(barcode, Patient_ID, Chain, predicted.celltype.l1, predicted.celltype.l2, cdr3) %>%
+  filter(Chain == "TRB",
+         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 %in% c("CD8 TEM", "CD8 TCM", "CD8 Naive", "CD8 Proliferating")) %>%
+  mutate(cdr3_length = nchar(cdr3)) %>%
+  group_by(Patient_ID) %>%
+  arrange(desc(cdr3_length)) %>%
+  slice_head(n = 50) %>%
+  mutate(cdr3_length_category = "long")
+
+longest_beta_junctions
+
+shortest_and_longest_beta_junctions <- read.csv("../saved_data/dehashed_tcr_seq_with_rna.csv") %>%
+  filter(barcode %in% colnames(seurat_obj)) %>%
+  select(barcode, Patient_ID, Chain, predicted.celltype.l1, predicted.celltype.l2, cdr3) %>%
+  filter(Chain == "TRB",
+         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 %in% c("CD8 TEM", "CD8 TCM", "CD8 Naive", "CD8 Proliferating")) %>%
+  mutate(cdr3_length = nchar(cdr3)) %>%
+  group_by(Patient_ID) %>%
+  arrange(cdr3_length) %>%
+  slice_head(n = 50) %>%
+  mutate(cdr3_length_category = "short") %>%
+  full_join(longest_beta_junctions)
+
+shortest_and_longest_beta_junctions
+
+```
+
+# Get Seurat objects of cells with longest and shortest CD8 TRB junctions
+
+```{r}
+
+shortest_and_longest_beta_junctions_with_rna <- subset(seurat_obj, cells = shortest_and_longest_beta_junctions$barcode)
+
+shortest_and_longest_beta_junctions_with_rna_metadata <- shortest_and_longest_beta_junctions_with_rna@meta.data
+
+shortest_and_longest_beta_junctions_with_rna_metadata$barcode <- rownames(shortest_and_longest_beta_junctions_with_rna_metadata)
+
+shortest_and_longest_beta_junctions_with_rna_metadata <- shortest_and_longest_beta_junctions_with_rna_metadata %>%
+  mutate(cdr3_length_category = if_else(barcode %in% longest_beta_junctions$barcode, "long", "short")) %>%
+  select(-barcode)
+
+shortest_and_longest_beta_junctions_with_rna <- AddMetaData(shortest_and_longest_beta_junctions_with_rna, metadata = shortest_and_longest_beta_junctions_with_rna_metadata)
+
+```
+
+# Analyze transcriptomes of longest and shortest CD8 TRB junction cells
+
+```{r}
+
+# Set Seurat idents based on metadata value
+Idents(shortest_and_longest_beta_junctions_with_rna) <- shortest_and_longest_beta_junctions_with_rna$cdr3_length_category
+
+shortest_and_longest_beta_junctions_with_rna <- PrepSCTFindMarkers(shortest_and_longest_beta_junctions_with_rna)
+
+# Find differential markers
+de_markers <- FindMarkers(
+  shortest_and_longest_beta_junctions_with_rna,
+  ident.1 = "long",
+  ident.2 = "short",
+  assay = "SCT"
+)
+
+# View the differential markers
+print(de_markers %>% filter(p_val_adj < 0.05))
+
+```
+
+# Look at top/bot TRB pgen as well
+
+```{r}
+
+highest_pgen_beta <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  dplyr::rename(TRB_pgen = pgen) %>%
+  filter(!(is.na(TRB_pgen)),
+         TRB_pgen != "NaN") %>%
+  select(TCR_name, TRB_CDR3, TRB_pgen) %>%
+  mutate(TRB_pgen = as.character(TRB_pgen)) %>%
+  pivot_longer(cols = matches("^(TRA|TRB)"),
+               names_to = c("Chain", ".value"),
+               names_pattern = "^(TRA|TRB)_(.*)$") %>%
+  dplyr::rename(barcode = TCR_name,
+         cdr3 = CDR3) %>%
+  mutate(pgen = as.numeric(pgen)) %>%
+  inner_join(feature_df, by = c("barcode", "Chain", "cdr3")) %>%
+    filter(Chain == "TRB",
+         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 %in% c("CD8 TEM", "CD8 TCM", "CD8 Naive", "CD8 Proliferating")) %>%
+  group_by(Patient_ID) %>%
+  arrange(desc(pgen)) %>%
+  slice_head(n = 50) %>%
+  mutate(pgen_category = "high pgen")
+
+highest_and_lowest_pgen_beta <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  dplyr::rename(TRB_pgen = pgen) %>%
+  filter(!(is.na(TRB_pgen)),
+         TRB_pgen != "NaN") %>%
+  select(TCR_name, TRB_CDR3, TRB_pgen) %>%
+  mutate(TRB_pgen = as.character(TRB_pgen)) %>%
+  pivot_longer(cols = matches("^(TRA|TRB)"),
+               names_to = c("Chain", ".value"),
+               names_pattern = "^(TRA|TRB)_(.*)$") %>%
+  dplyr::rename(barcode = TCR_name,
+         cdr3 = CDR3) %>%
+  mutate(pgen = as.numeric(pgen)) %>%
+  inner_join(feature_df, by = c("barcode", "Chain", "cdr3")) %>%
+    filter(Chain == "TRB",
+         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 %in% c("CD8 TEM", "CD8 TCM", "CD8 Naive", "CD8 Proliferating")) %>%
+  group_by(Patient_ID) %>%
+  arrange(pgen) %>%
+  slice_head(n = 50) %>%
+  mutate(pgen_category = "low pgen") %>%
+  full_join(highest_pgen_beta)
+
+highest_and_lowest_pgen_beta
+
+```
+
+# Get Seurat objects of cells with highest/lowest pgen TRBs
+
+```{r}
+
+shortest_and_longest_beta_junctions_with_pgen <- subset(seurat_obj, cells = highest_and_lowest_pgen_beta$barcode)
+
+shortest_and_longest_beta_junctions_with_pgen_metadata <- shortest_and_longest_beta_junctions_with_pgen@meta.data
+
+shortest_and_longest_beta_junctions_with_pgen_metadata$barcode <- rownames(shortest_and_longest_beta_junctions_with_pgen_metadata)
+
+shortest_and_longest_beta_junctions_with_pgen_metadata <- shortest_and_longest_beta_junctions_with_pgen_metadata %>%
+  mutate(pgen_category = if_else(barcode %in% highest_pgen_beta$barcode, "high", "low")) %>%
+  select(-barcode)
+
+shortest_and_longest_beta_junctions_with_pgen <- AddMetaData(shortest_and_longest_beta_junctions_with_pgen, metadata = shortest_and_longest_beta_junctions_with_pgen_metadata)
+
+```
+
+# Analyze transcriptomes of highest/lowest pgen TRBs cells
+
+```{r}
+
+# Set Seurat idents based on metadata value
+Idents(shortest_and_longest_beta_junctions_with_pgen) <- shortest_and_longest_beta_junctions_with_pgen$pgen_category
+
+shortest_and_longest_beta_junctions_with_pgen <- PrepSCTFindMarkers(shortest_and_longest_beta_junctions_with_pgen)
+
+# Find differential markers
+de_markers <- FindMarkers(
+  shortest_and_longest_beta_junctions_with_pgen,
+  ident.1 = "high",
+  ident.2 = "low",
+  assay = "SCT"
+)
+
+# View the differential markers
+print(de_markers %>% filter(p_val_adj < 0.05))
+
+```

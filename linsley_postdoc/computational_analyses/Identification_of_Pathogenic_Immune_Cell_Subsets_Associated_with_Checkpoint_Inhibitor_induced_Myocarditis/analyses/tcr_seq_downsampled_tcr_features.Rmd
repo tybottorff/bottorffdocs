@@ -95,7 +95,13 @@ feature_df <- dehashed_combined_tcr_seq %>%
   select(-cdr3_nt) %>%
   rowwise() %>%
   mutate(cdr3_length = nchar(cdr3)) %>%
-  ungroup()
+  ungroup() %>%
+  mutate(group = case_when(
+    startsWith(Patient_ID, "B") ~ "non-myocarditis irAE",
+    startsWith(Patient_ID, "M") ~ "myocarditis irAE",
+    startsWith(Patient_ID, "A") ~ "no irAE",
+    TRUE ~ "other"  # Add a default condition if none of the above match
+  ))
 
 write.csv(feature_df, "../saved_data/tcr_seq_features.csv")
 
@@ -256,6 +262,7 @@ wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
 print(wilcox_result)
 
 ```
+
 
 # Import pgen data
 
@@ -423,5 +430,34 @@ wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
 
 # Print the results
 print(wilcox_result)
+
+```
+
+# Investigate Gly, Ala, Cys usage
+
+```{r}
+
+downsampled_df <- downsampled_df %>%
+  mutate(Gly_num = sapply(strsplit(as.character(cdr3), ""), function(x) sum(x == "G")),
+         Ala_num = sapply(strsplit(as.character(cdr3), ""), function(x) sum(x == "A")),
+         Cys_num = sapply(strsplit(as.character(cdr3), ""), function(x) sum(x == "C")),
+         Gly_perc = Gly_num / cdr3_length,
+         Ala_perc = Ala_num / cdr3_length,
+         Cys_perc = Cys_num / cdr3_length)
+
+ggplot(downsampled_df, aes(x = chain, y = Gly_perc, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "Glycine usage in CDR3 (%)")
+
+ggplot(downsampled_df, aes(x = chain, y = Ala_perc, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "Alanine usage in CDR3 (%)")
+
+ggplot(downsampled_df, aes(x = chain, y = Cys_perc, fill = irAE)) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  labs(x = "Chain", fill = "irAE", y = "Cysteine usage in CDR3 (%)")
 
 ```
