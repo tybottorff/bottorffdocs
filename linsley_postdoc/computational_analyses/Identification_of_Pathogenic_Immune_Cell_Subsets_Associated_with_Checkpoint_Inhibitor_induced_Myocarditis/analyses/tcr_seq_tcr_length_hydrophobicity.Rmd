@@ -347,10 +347,10 @@ expansion_df_unique <- feature_df %>%
     count > 5 & count <= 20 ~ "Medium",
     count > 20 & count <= 100 ~ "Large",
     count > 100 ~ "Hyperexpanded")) %>%
-  filter(expansion_degree %in% c("Large", "Hyperexpanded"),
-         predicted.celltype.l1 != "other T") %>%
   group_by(cdr3, Patient_ID, chain) %>%
-  dplyr::slice(1)
+  dplyr::slice(1) %>%
+  filter(expansion_degree %in% c("Large", "Hyperexpanded"),
+         predicted.celltype.l1 != "other T")
 
 expansion_df_unique %>%
   group_by(predicted.celltype.l1, irAE, chain) %>%
@@ -392,14 +392,15 @@ custom_labeller <- as_labeller(c("Single" = "Single", "Small" = "Small", "Medium
 
 expansion_df_unique %>%
   filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM") %>%
+         predicted.celltype.l2 == "CD8 TEM",
+         expansion_degree %in% c("Large", "Hyperexpanded")) %>%
   group_by(expansion_degree, irAE, chain) %>%
   summarize(count = n()) %>%
   print()
 
-ggplot(expansion_df_unique %>% filter(predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 == "CD8 TEM"), aes(x = chain, y = cdr3_length, fill = irAE)) +
+ggplot(expansion_df_unique %>% filter(predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 == "CD8 TEM" & expansion_degree %in% c("Large", "Hyperexpanded")), aes(x = chain, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
-  facet_wrap(~ expansion_degree, scales = "free_y", labeller = custom_labeller) +
+  #facet_wrap(~ expansion_degree, scales = "free_y", labeller = custom_labeller) +
   labs(x = "Chain", fill = "irAE", y = "CD8 TEM CDR3 length")
 
 # Filter the data for statistical test
@@ -407,7 +408,7 @@ test_data <- expansion_df_unique %>%
   filter(chain == "TRB",
          predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
-         expansion_degree == "Large")
+         expansion_degree %in% c("Large", "Hyperexpanded"))
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)

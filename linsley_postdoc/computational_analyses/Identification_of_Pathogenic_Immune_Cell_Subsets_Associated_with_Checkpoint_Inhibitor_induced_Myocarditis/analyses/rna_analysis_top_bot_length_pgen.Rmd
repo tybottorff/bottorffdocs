@@ -102,6 +102,14 @@ shortest_and_longest_beta_junctions_with_rna <- AddMetaData(shortest_and_longest
 
 ```
 
+# UMAP with longest/shortest overlayed
+
+```{r}
+
+DimPlot(shortest_and_longest_beta_junctions_with_rna, reduction = "umap", group.by = "cdr3_length_category", label = FALSE, repel = TRUE)
+
+```
+
 # Analyze transcriptomes of longest and shortest CD8 TRB junction cells
 
 ```{r}
@@ -190,6 +198,14 @@ shortest_and_longest_beta_junctions_with_pgen_metadata <- shortest_and_longest_b
   select(-barcode)
 
 shortest_and_longest_beta_junctions_with_pgen <- AddMetaData(shortest_and_longest_beta_junctions_with_pgen, metadata = shortest_and_longest_beta_junctions_with_pgen_metadata)
+
+```
+
+# UMAP with highest/lowest overlayed
+
+```{r}
+
+DimPlot(shortest_and_longest_beta_junctions_with_pgen, reduction = "umap", group.by = "pgen_category", label = FALSE, repel = TRUE)
 
 ```
 

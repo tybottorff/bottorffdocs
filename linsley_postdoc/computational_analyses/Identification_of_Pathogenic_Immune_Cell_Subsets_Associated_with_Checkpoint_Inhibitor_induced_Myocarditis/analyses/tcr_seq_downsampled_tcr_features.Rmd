@@ -106,6 +106,8 @@ feature_df <- dehashed_combined_tcr_seq %>%
 
 write.csv(feature_df, "../saved_data/tcr_seq_features.csv")
 
+feature_df
+
 ```
 
 # Examine patient sampling depth bias
@@ -126,13 +128,14 @@ feature_df %>%
 
 ```{r}
 
-desired_rows_per_patient <- 328
+desired_rows_per_patient <- 328/2
+# /2 to get equal numbers of each chain (TRA and TRB)
 
 set.seed(123)
 
 # Downsample the dataframe
 downsampled_df <- feature_df %>%
-  group_by(Patient_ID) %>%
+  group_by(Patient_ID, Chain) %>%
   sample_n(desired_rows_per_patient, replace = FALSE) %>%
   ungroup()
 
@@ -149,7 +152,21 @@ downsampled_df_doubled
 
 ```{r}
 
-public_df <- downsampled_df %>%
+downsampled_public_df <- downsampled_df %>%
+  group_by(cdr3, v_gene, j_gene, c_gene) %>%
+  filter(n_distinct(Patient_ID) > 1) %>%
+  select(Patient_ID, cdr3) %>%
+  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
+
+downsampled_public_df
+
+downsampled_df <- downsampled_df %>%
+  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
+  mutate(publicness = if_else(clonotype %in% downsampled_public_df$clonotype, "public", "private"))
+
+downsampled_df
+
+public_df <- feature_df %>%
   group_by(cdr3, v_gene, j_gene, c_gene) %>%
   filter(n_distinct(Patient_ID) > 1) %>%
   select(Patient_ID, cdr3) %>%
@@ -157,11 +174,11 @@ public_df <- downsampled_df %>%
 
 public_df
 
-downsampled_df <- downsampled_df %>%
+feature_df <- feature_df %>%
   mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
   mutate(publicness = if_else(clonotype %in% public_df$clonotype, "public", "private"))
 
-downsampled_df
+feature_df
   
 ```
 
@@ -242,148 +259,6 @@ print(wilcox_result)
 
 ```
 
-# Create df for just solid conclusions for CD8 TEM CDR3B length
-
-```{r}
-
-cd8_tems <- downsampled_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
-  mutate(specific_label = "All",
-         label = "All")
-  
-unique_cd8_tems <- downsampled_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
-  mutate(label = "All",
-         specific_label = "Unique") %>%
-  group_by(cdr3, Patient_ID, chain) %>%
-  dplyr::slice(1)
-
-public_cd8_tems <- downsampled_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         publicness == "public",
-         Chain == "TRB") %>%
-  mutate(label = "Public",
-         specific_label = "All")
-
-unique_public_cd8_tems <- downsampled_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         publicness == "public",
-         Chain == "TRB") %>%
-  mutate(label = "Public",
-         specific_label = "Unique") %>%
-  group_by(cdr3, Patient_ID, chain) %>%
-  dplyr::slice(1)
-
-private_cd8_tems <- downsampled_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         publicness == "private",
-         Chain == "TRB") %>%
-  mutate(label = "Private",
-         specific_label = "All")
-
-unique_private_cd8_tems <- downsampled_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         publicness == "private",
-         Chain == "TRB") %>%
-  mutate(label = "Private",
-         specific_label = "Unique") %>%
-  group_by(cdr3, Patient_ID, chain) %>%
-  dplyr::slice(1)
-
-expanded_cd8_tems <- expansion_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
-  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded")) %>%
-  mutate(label = "Highly expanded",
-         specific_label = "All")
-
-unique_expanded_cd8_tems <- expansion_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
-  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded")) %>%
-  mutate(label = "Highly expanded",
-         specific_label = "Unique") %>%
-  group_by(cdr3, Patient_ID, chain) %>%
-  dplyr::slice(1)
-
-joined_df <- cd8_tems %>%
-  full_join(expanded_cd8_tems) %>%
-  full_join(unique_cd8_tems) %>%
-  full_join(unique_expanded_cd8_tems) %>%
-  full_join(public_cd8_tems) %>%
-  full_join(unique_public_cd8_tems) %>%
-  full_join(private_cd8_tems) %>%
-  full_join(unique_private_cd8_tems)
-
-```
-
-# Plot solid length conclusions
-
-```{r}
-
-p <- ggplot(joined_df, aes(x = specific_label, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "CD8 TEM CDR3β\nlength (AAs)") +
-  facet_wrap(~label, scales = "free_y") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
-
-# Adjust y-axis scales with a specified number of ticks
-p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
-
-joined_df %>%
-  group_by(label, irAE, specific_label) %>%
-  summarize(count = n()) %>%
-  print()
-
-# Filter the data for statistical test
-test_data <- joined_df %>%
-  filter(label == "Private CD8 TEMs",
-         Chain == "TRB")
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
-
-# Print the results
-print(wilcox_result)
-
-p_values <- c(0.0001699, 0.1711, 4.004e-05, 0.0001699)
-
-# Adjust p-values using the Benjamini-Hochberg method (default method)
-adjusted_p_values <- p.adjust(p_values, method = "BH")
-
-# Print the adjusted p-values
-print(adjusted_p_values)
-
-```
-
-# Create plot of just solid conclusions for CD8 TCM CDR3B length
-
-```{r}
-
-cd8_tcms <- downsampled_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TCM",
-         Chain == "TRB") %>%
-  mutate(label = "All CD8 TCMs")
-
-ggplot(cd8_tcms, aes(x = label, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "CDR3β length (AAs)") +
-  scale_x_discrete(limits = c("All CD8 TCMs"))
-
-```
-
-
 # Import pgen data
 
 ```{r}
@@ -402,7 +277,7 @@ igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
   mutate(TRA_pgen = as.character(TRA_pgen),
          TRB_pgen = as.character(TRB_pgen))
 
-igor_combined <- igor_combined %>%
+downsampled_igor_combined <- igor_combined %>%
   pivot_longer(cols = matches("^(TRA|TRB)"),
                names_to = c("Chain", ".value"),
                names_pattern = "^(TRA|TRB)_(.*)$") %>%
@@ -420,7 +295,27 @@ igor_combined <- igor_combined %>%
     count > 20 & count <= 100 ~ "Large",
     count > 100 ~ "Hyperexpanded"))
 
-igor_combined
+downsampled_igor_combined
+
+full_igor_combined <- igor_combined %>%
+  pivot_longer(cols = matches("^(TRA|TRB)"),
+               names_to = c("Chain", ".value"),
+               names_pattern = "^(TRA|TRB)_(.*)$") %>%
+  rename(barcode = TCR_name,
+         cdr3 = CDR3) %>%
+  mutate(pgen = as.numeric(pgen)) %>%
+  right_join(feature_df, by = c("barcode", "Chain", "cdr3")) %>%
+  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_degree = case_when(
+    count == 1 ~ "Single",
+    count > 1 & count <= 5 ~ "Small",
+    count > 5 & count <= 20 ~ "Medium",
+    count > 20 & count <= 100 ~ "Large",
+    count > 100 ~ "Hyperexpanded"))
+
+full_igor_combined
 
 ```
 
@@ -428,7 +323,7 @@ igor_combined
 
 ```{r}
 
-plot_df <- igor_combined %>%
+plot_df <- downsampled_igor_combined %>%
   filter(!(is.na(predicted.celltype.l1)))
 
 ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
@@ -436,7 +331,7 @@ ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
   facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain", y = "log10(pgen)")
 
-plot_df <- igor_combined %>%
+plot_df <- downsampled_igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T")
 
 ggplot(plot_df, aes(x = Chain, y = log10(pgen), fill = irAE)) +
@@ -453,7 +348,7 @@ plot_df %>%
   print()
 
 # Filter the data for statistical test
-test_data <- igor_combined %>%
+test_data <- downsampled_igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM") %>%
   filter(chain == "TRA")
@@ -473,7 +368,7 @@ print(wilcox_result)
 
 ```{r}
 
-plot_df <- igor_combined %>%
+plot_df <- downsampled_igor_combined %>%
   filter(!(is.na(predicted.celltype.l1))) %>%
   filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded"),
          predicted.celltype.l1 != "other T")
@@ -511,85 +406,203 @@ print(wilcox_result)
 
 ```
 
-# Create plot of just solid conclusions for pgen
+```{r}
+
+downsampled_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         Chain == "TRB") %>%
+  group_by(predicted.celltype.l2) %>%
+  summarize(count = n())
+
+```
+
+# Create df of just solid conclusions +/- downsampling
 
 ```{r}
 
-cd8_tems <- igor_combined %>%
+downsampled_cd8_tems <- downsampled_igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          Chain == "TRB") %>%
-  mutate(label = "All CD8 TEMs")
-
-unique_cd8_tems <- igor_combined %>%
+  mutate(specific_label = "All",
+         label = "All")
+  
+downsampled_unique_cd8_tems <- downsampled_igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          Chain == "TRB") %>%
-  mutate(label = "Unique CD8 TEMs") %>%
+  mutate(label = "All",
+         specific_label = "Unique") %>%
   group_by(cdr3, Patient_ID, chain) %>%
   dplyr::slice(1)
 
-public_cd8_tems <- igor_combined %>%
+downsampled_public_cd8_tems <- downsampled_igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          publicness == "public",
          Chain == "TRB") %>%
-  mutate(label = "Public CD8 TEMs")
+  mutate(label = "Public",
+         specific_label = "All")
 
-private_cd8_tems <- igor_combined %>%
+downsampled_unique_public_cd8_tems <- downsampled_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         publicness == "public",
+         Chain == "TRB") %>%
+  mutate(label = "Public",
+         specific_label = "Unique") %>%
+  group_by(cdr3, Patient_ID, chain) %>%
+  dplyr::slice(1)
+
+downsampled_private_cd8_tems <- downsampled_igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          publicness == "private",
          Chain == "TRB") %>%
-  mutate(label = "Private CD8 TEMs")
+  mutate(label = "Private",
+         specific_label = "All")
 
-unique_public_cd8_tems <- igor_combined %>%
+downsampled_unique_private_cd8_tems <- downsampled_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         publicness == "private",
+         Chain == "TRB") %>%
+  mutate(label = "Private",
+         specific_label = "Unique") %>%
+  group_by(cdr3, Patient_ID, chain) %>%
+  dplyr::slice(1)
+
+downsampled_expanded_cd8_tems <- downsampled_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded")) %>%
+  mutate(label = "Highly expanded",
+         specific_label = "All")
+
+downsampled_unique_expanded_cd8_tems <- downsampled_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded")) %>%
+  mutate(label = "Highly expanded",
+         specific_label = "Unique") %>%
+  group_by(cdr3, Patient_ID, chain) %>%
+  dplyr::slice(1)
+
+downsampled_joined_df <- downsampled_cd8_tems %>%
+  full_join(downsampled_expanded_cd8_tems) %>%
+  full_join(downsampled_unique_cd8_tems) %>%
+  full_join(downsampled_unique_expanded_cd8_tems) %>%
+  full_join(downsampled_public_cd8_tems) %>%
+  full_join(downsampled_unique_public_cd8_tems) %>%
+  full_join(downsampled_private_cd8_tems) %>%
+  full_join(downsampled_unique_private_cd8_tems)
+
+cd8_tems <- full_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  mutate(specific_label = "All",
+         label = "All")
+  
+unique_cd8_tems <- full_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  mutate(label = "All",
+         specific_label = "Unique") %>%
+  group_by(cdr3, Patient_ID, chain) %>%
+  dplyr::slice(1)
+
+public_cd8_tems <- full_igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          publicness == "public",
          Chain == "TRB") %>%
-  mutate(label = "Unique public CD8 TEMs") %>%
+  mutate(label = "Public",
+         specific_label = "All")
+
+unique_public_cd8_tems <- full_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         publicness == "public",
+         Chain == "TRB") %>%
+  mutate(label = "Public",
+         specific_label = "Unique") %>%
   group_by(cdr3, Patient_ID, chain) %>%
   dplyr::slice(1)
 
-expanded_cd8_tems <- igor_combined %>%
+private_cd8_tems <- full_igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
+         publicness == "private",
          Chain == "TRB") %>%
-  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded")) %>%
-  mutate(label = "Highly expanded\nCD8 TEMs")
+  mutate(label = "Private",
+         specific_label = "All")
 
-unique_expanded_cd8_tems <- igor_combined %>%
+unique_private_cd8_tems <- full_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         publicness == "private",
+         Chain == "TRB") %>%
+  mutate(label = "Private",
+         specific_label = "Unique") %>%
+  group_by(cdr3, Patient_ID, chain) %>%
+  dplyr::slice(1)
+
+expanded_cd8_tems <- full_igor_combined %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          Chain == "TRB") %>%
-  filter(expansion_degree %in% c("Medium", "Large", "Hyperexpanded")) %>%
-  mutate(label = "Unique highly\nexpanded\nCD8 TEMs") %>%
+  filter(expansion_degree %in% c("Large", "Hyperexpanded")) %>%
+  mutate(label = "Highly expanded",
+         specific_label = "All")
+
+unique_expanded_cd8_tems <- full_igor_combined %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  filter(expansion_degree %in% c("Large", "Hyperexpanded")) %>%
+  mutate(label = "Highly expanded",
+         specific_label = "Unique") %>%
   group_by(cdr3, Patient_ID, chain) %>%
   dplyr::slice(1)
 
 joined_df <- cd8_tems %>%
   full_join(expanded_cd8_tems) %>%
-  #full_join(unique_cd8_tems) %>%
-  #full_join(unique_expanded_cd8_tems) %>%
+  full_join(unique_cd8_tems) %>%
+  full_join(unique_expanded_cd8_tems) %>%
   full_join(public_cd8_tems) %>%
-  #full_join(unique_public_cd8_tems)
-  full_join(private_cd8_tems)
+  full_join(unique_public_cd8_tems) %>%
+  full_join(private_cd8_tems) %>%
+  full_join(unique_private_cd8_tems)
 
-ggplot(joined_df, aes(x = label, y = log10(pgen), fill = irAE)) +
+```
+
+# Plot pgen solid conclusions for downsampling
+
+```{r}
+
+p <- ggplot(downsampled_joined_df, aes(x = specific_label, y = log10(pgen), fill = irAE)) +
   geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "TRB pgen\n(log10)") +
-  scale_x_discrete(limits = c("All CD8 TEMs", "Public CD8 TEMs", "Private CD8 TEMs", "Highly expanded\nCD8 TEMs")) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  labs(x = "", fill = "irAE", y = "TRB pgen (log10)") +
+  facet_wrap(~label, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
 
-joined_df %>%
-  group_by(label, irAE) %>%
+# Adjust y-axis scales with a specified number of ticks
+p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+downsampled_joined_df %>%
+  group_by(label, specific_label, irAE) %>%
   summarize(count = n()) %>%
   print()
 
 # Filter the data for statistical test
-test_data <- joined_df %>%
-  filter(label == "Highly expanded\nCD8 TEMs")
+test_data <- downsampled_joined_df %>%
+  filter(label == "Highly expanded",
+         specific_label == "All",
+         Chain == "TRB")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
@@ -597,13 +610,194 @@ wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
 # Print the results
 print(wilcox_result)
 
-p_values <- c(1.499e-07, 0.1412, 8.354e-09, 3.987e-09)
+# all all 8.19e-06
+# all unique 0.06779
+# private all 0.0001067
+# private unique 0.05831
+# public all 0.1512
+# public unique 0.7392
+# highly exp all 0.006624
+# highly exp unique 0.7781
+
+# adj: 0.00006552 0.10846400 0.00042680 0.10846400 0.20160000 0.77810000 0.01766400 0.77810000
+
+p_values <- c(8.19e-06, 0.06779, 0.0001067, 0.05831, 0.1512, 0.7392, 0.006624, 0.7781)
 
 # Adjust p-values using the Benjamini-Hochberg method (default method)
 adjusted_p_values <- p.adjust(p_values, method = "BH")
 
 # Print the adjusted p-values
 print(adjusted_p_values)
+
+```
+
+# Plot pgen solid conclusions without downsampling
+
+```{r}
+
+p <- ggplot(joined_df, aes(x = specific_label, y = log10(pgen), fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "", fill = "irAE", y = "TRB pgen (log10)") +
+  facet_wrap(~label, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
+
+# Adjust y-axis scales with a specified number of ticks
+p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+joined_df %>%
+  group_by(label, specific_label, irAE) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- joined_df %>%
+  filter(label == "Highly expanded",
+         specific_label == "All",
+         Chain == "TRB")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+# all all 2.2e-16
+# all unique 0.1088
+# private all 2.2e-16
+# private unique 0.07769
+# public all 2.2e-16
+# public unique 0.6044
+# highly exp all 2.2e-16
+# highly exp unique 0.0926
+
+# adj: 4.400000e-16 1.243429e-01 4.400000e-16 1.234667e-01 4.400000e-16 6.044000e-01 4.400000e-16 1.234667e-01
+
+p_values <- c(2.2e-16, 0.1088, 2.2e-16, 0.07769, 2.2e-16, 0.6044, 2.2e-16, 0.0926)
+
+# Adjust p-values using the Benjamini-Hochberg method (default method)
+adjusted_p_values <- p.adjust(p_values, method = "BH")
+
+# Print the adjusted p-values
+print(adjusted_p_values)
+
+```
+
+# Plot solid length conclusions for downsampling
+
+```{r}
+
+p <- ggplot(downsampled_joined_df, aes(x = specific_label, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "", fill = "irAE", y = "CD8 TEM CDR3β\nlength (AAs)") +
+  facet_wrap(~label, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
+
+# Adjust y-axis scales with a specified number of ticks
+p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+downsampled_joined_df %>%
+  group_by(label, irAE, specific_label) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- downsampled_joined_df %>%
+  filter(label == "Private",
+         specific_label == "All",
+         Chain == "TRB")
+
+# all all 4.066e-05
+# all unique 0.2831
+# private all 0.002032
+# private unique 0.3092
+# public all 0.008271
+# public unique 0.5981
+# highly exp all 0.00163
+# highly exp unique 0.3534
+
+#adj: 0.000325280 0.403885714 0.005418667 0.403885714 0.016542000 0.598100000 0.005418667 0.403885714
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+p_values <- c(4.066e-05, 0.2831, 0.002032, 0.3092, 0.008271, 0.5981, 0.00163, 0.3534)
+
+# Adjust p-values using the Benjamini-Hochberg method (default method)
+adjusted_p_values <- p.adjust(p_values, method = "BH")
+
+# Print the adjusted p-values
+print(adjusted_p_values)
+
+```
+
+# Plot solid length conclusions without downsampling
+
+```{r}
+
+p <- ggplot(joined_df, aes(x = specific_label, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "", fill = "irAE", y = "CD8 TEM CDR3β\nlength (AAs)") +
+  facet_wrap(~label, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
+
+# Adjust y-axis scales with a specified number of ticks
+p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+joined_df %>%
+  group_by(label, irAE, specific_label) %>%
+  summarize(count = n()) %>%
+  print()
+
+# Filter the data for statistical test
+test_data <- joined_df %>%
+  filter(label == "Highly expanded",
+         specific_label == "All",
+         Chain == "TRB")
+
+# all all 2.2e-16
+# all unique 0.9836
+# private all 9.978e-11
+# private unique 0.8949
+# public all 2.2e-16
+# public unique 0.7737
+# highly exp all 2.2e-16
+# highly exp unique 0.5077
+
+# adj: 5.866667e-16 9.836000e-01 1.995600e-10 9.836000e-01 5.866667e-16 9.836000e-01 5.866667e-16 8.123200e-01
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
+
+# Print the results
+print(wilcox_result)
+
+p_values <- c(2.2e-16, 0.9836, 9.978e-11, 0.8949, 2.2e-16, 0.7737, 2.2e-16, 0.5077)
+
+# Adjust p-values using the Benjamini-Hochberg method (default method)
+adjusted_p_values <- p.adjust(p_values, method = "BH")
+
+# Print the adjusted p-values
+print(adjusted_p_values)
+
+```
+
+# Create plot of just solid conclusions for CD8 TCM CDR3B length
+
+```{r}
+
+cd8_tcms <- downsampled_df %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TCM",
+         Chain == "TRB") %>%
+  mutate(label = "All CD8 TCMs")
+
+ggplot(cd8_tcms, aes(x = label, y = cdr3_length, fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "", fill = "irAE", y = "CDR3β length (AAs)") +
+  scale_x_discrete(limits = c("All CD8 TCMs"))
 
 ```
 
