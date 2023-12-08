@@ -23,6 +23,8 @@
  - crossreactive TCRs target peptides with similar biochemistry despite potentially dissimilar sequence
  - estimate TCRs to be able to bind ~10<sup>5</sup> to 10<sup>6</sup> peptides
  - **around half of foreign pMHCs don't induce T cell response, perhaps because T cells with TCRs specific for those pMHCs are deleted in thymus (i.e. those foreign pMHCs look like self ones)**
+# A multi-omic single cell sequencing approach to develop a CD8 T cell specific gene signature for anti-PD1 response in solid tumors
+ - **neither pre-treatment TCR clonality nor changes in clonality after ICB correlate with response**
 # Analysis of immune resistance mechanisms in TNBC: dual effects inside and outside the tumor
 ## TNBC review
  - triple negative breast cancer
@@ -30,6 +32,11 @@
  - aggressive and metastatic
  - ~10-15% of breast cancer cases
  - high degree of immune infiltration
+# Analysis of the CDR3 length repertoire and the diversity of T cell receptor α and β chains in swine CD4<sup>+</sup> and CD8<sup>+</sup> T lymphocytes
+ - porcine T cells
+ - standard Gaussian distribution with > 8 peaks for length distribution
+# Analysis of the CDR3 length repertoire and the diversity of TCRα chain in human peripheral blood T lymphocytes
+ - standard Gaussian distribution of CDR3 length
 # An anti-CD3 antibody, teplizumab, in relatives at risk for type 1 diabetes
  - teplizumab delays progression of type 1 diabetes in high risk participants
  - KLRG1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells more common in teplizumab group than placebo
@@ -182,6 +189,8 @@
 # Cardiac myosin-specific autoimmune T cells contribute to immune-checkpoint-inhibitor-associated myocarditis
  - cardiac myosin-specific autoreactive T cells drive pathogenesis of PD-1 inhibitor-induced myocarditis in mice
  - PD-1 expressing cardiac myosin-specific autoimmune T cells are present in heart during naive conditions
+# CD103 and CD39 coexpression identifies neoantigen-specific cytotoxic T cells in colorectal cancers with low mutational burden
+ - CD39 may mean exhausted/dysfunctional but not yet determined
 # CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cells accumulate in tumors of anti-PD-1-responder lung cancer patients and are tumor-reactive lymphocytes enriched with Tc17
  - accumulation of CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cells in human lung tumors associated with good prognosis
  - CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cell density increases in ICB with responders only
@@ -227,7 +236,11 @@
 # CD8 T cell function and crossreactivity explored by stepwise increased peptide-HLA versus TCR affinity
  - vaccines with native tumor epitope (vs. HLA affinity-optimized epitope) generated T cells eith better functionality and enhanced crossreactivity against potential low affinity escape epitopes
  - cumulative impact of peptide:HLA and TCR-peptide:HLA affinity on T cell responses
-# Cellular and molecular waypoints along the path of T cell exhaustion
+# CDR3 length in antigen-specific immune receptors
+ - TCR α and β chain distributions are highly constrained, with nearly identical average CDR3 lengths, and their length distributions are not altered by thymic selection
+ - CDR3 length distributions do not correlate with genetic variability of the CDR3 region; the most constrained CDR3 length distributions are those of the α and β chains, yet they are highly variable genetically
+# CDR3 sequences in IgA nephropathy are shorter and exhibit reduced diversity
+ - B cells
 # Changes of peripheral T cell subsets in melanoma patients with immune-related adverse events
 ## T cell changes in patients with severe irAEs receiving anti-PD-1 monotherapy
  - no clear differences
@@ -338,6 +351,13 @@
  - expansion didn't derive from pre-existing TIL clones but rather from novel clonotypes not previously observed in the same tumor (clonal replacement)
  - pre-existing tumor-specific T cells may have limited reinvigoration capacity due to chronic activation/exhaustion (epigenetic remodeling); the T cell response to checkpoint blockade derives from a distinct repertoire of T cell clones that may have just recently entered the tumor
  - **novel T cell clones could derive from lymphoid organs or rare unexpanded clones within TME/tumor periphery that weren't exhausted**
+# Comparative analyses of CDR3 regions in paired human αβ CD8 T cells
+ - CDR3 length among paired αβ TCRs had a fairly narrow distribution due to random assortment of CDR3 length in alpha and beta chains
+ - nucleotide deletions among CDR3 regions were positively correlated with insertions in both α and β TCRs
+ - CDR3 loops of both α and β chains contained an abundance of charged/polar residues and the CDR3 base regions contained a conserved motif
+ - the occurrence of Gly was CDR3 length‐ and position‐dependent in both chains, whereas the frequency of Ser at positions 106 and 107 was positively correlated with CDR3 length in TCR β
+ - the amino acids in CDR3 loop regions were significantly different between TCR α and β, which suggests a distinct role for each chain in the recognition of antigen–MHC complexes
+ - **see length-dependent increase in glycine usage, may confer cross-reactivity with glycine's small size**
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - co-expression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -392,6 +412,10 @@
 ## Discussion
  - clonal T cells recognizing GAD65 339-352 crossreact with hCMV major DNA-binding protein pUL57 peptide 674-687, peptide efficiently processed for presentation by HLA-DR3
  - crossreactive response may be polyclonal, so T cells recognizing hCMV peptide more efficiently than GAD65 peptide may exist
+# Deconstructing the peptide-MHC specificity of T cell recognition
+ - identify MHC-presented peptide ligands by combining TCR selection of highly diverse yeast-displayed peptide-MHC libraries with deep sequencing
+ - structural conservation of the TCR interaction surface, not surprising
+ - alloreactivity: ability of TCR to bind multiple MHCs
 # Defining the memory CD8 T cell
  - effector (T<sub>em</sub>, CD62L<sup>low</sup>CCR7<sup>low</sup>) and central (T<sub>cm</sub>, CD62L<sup>high</sup>CCR7<sup>high</sup>) memory T cells
  - CCR7/CD62L expression on T<sub>cm</sub> cells facilitates homing to secondary lymph organs, while T<sub>em</sub> cells are more cytolytic and express integrins and chemokine receptors to localize to inflamed tissue
@@ -404,9 +428,16 @@
 # Depletion of exhausted alloreactive T cells enables targeting of stem-like memory T cells to generate tumor-specific immunity
  - alloreactivity refers to ability of T cells to recognize peptide-allogenic-MHC complexes not encountered during thymic development (HLA/MHC-mismatch recognition, manifestation of transplant rejection and graft-versus-host disease)
  - find that CD8<sup>+</sup> T cell exhaustion in bone marrow was primarily alloantigen-driven
+# Development of TCRB CDR3 length repertoire of human T lymphocytes
+ - previous literature: CDR3s of CD4 thymocytes become shorter during thymic development, i.e. thymocytes with longer CDR3s are more likely to be deleted
+ -repertoire distribution patterns depend on use of the BV gene; BV‐dependent patterns were shaped during thymic selections and maintained in the peripheral blood
 # Different associations between organ-specific immune-related adverse event and survival in non-small cell lung cancer patients treated with programmed death-1 inhibitors-based combination therapy
  - NSCLC PD-1 blockade plus chemotherapy patients have longer progression free survival (but not necessarily overall survival) with irAEs
  - skin irAE associated with better prognosis, pneumonitis severe irAE and high steroid compromise survival
+# Differential requirements for CD4<sup>+</sup> T cells in the efficacy of the anti-PD-1<sup>+</sup> LAG-3 and anti-PD-1<sup>+</sup> CTLA-4 combinations in melanoma flank and brain metastases models
+ - mouse melanoma models
+ - anti-PD-1<sup>+</sup> CTLA-4 associated with FOXP3<sup>+</sup> CD4<sup>+</sup> T cells (Tregs) infiltrating, fewer activated CD4<sup>+</sup> T cells, accumulation of CD8<sup>+</sup> T cells secreting IFN gamma
+ - anti-PD-1<sup>+</sup> LAG-3 associated with CD4<sup>+</sup> T cells expressing CXCF4, TNFSF8, IL21R accumulating
 # Differentiation and homeostasis of effector Treg cells are regulated by inositol polyphosphates modulating Ca<sup>2+</sup> influx
  - subclass of Tregs express Foxp3, activated Foxp3<sup>+</sup> Tregs differentiate into effector Treg (eTreg) cells to maintain peripheral immune homeostasis and tolerance
 # Digital spatial profiling of melanoma shows CD95 expression in immune cells is associated with resistance to immunotherapy
@@ -695,8 +726,8 @@
 ## Factors impacting response and resistance to ICB
 ### Host-intrinsic factors
  - tumor mutational burden (total number of distinct mutations per coding area of tumor genome) helps explain ICB response (higher burden for example in environmental DNA damage associated melanoma, lung/bladder cancer better response with more neoantigens)
-## Factors impacting toxcitiy to ICB
-### Characteristics of irAEs
+# Hierarchical transcriptional network governing heterogeneous T cell exhaustion and its implications for immune checkpoint blockade
+ - PD-1 stabilizes TCF-1<sup>+</sup> Tex precursor pool (that maintains a chronically stimulated Tex pool)
 # High-throughput and single cell T cell receptor sequencing technologies
 ## Introduction
  - diversity (D) gene segment only contributes to TCRβ
@@ -713,6 +744,11 @@
  - reverse transcribe RNA with enzyme with terminal transferase activity to add untemplated C nucleotides to 3' end of cDNA
  - template switch oligonucleotide (TSO) containing complementary poly(G) stretch anchors to this untemplated region of C nucleotides and allows reverse transcriptase to switch templates and extend cDNA to end of TSO which includes a common adaptor sequence
  - result is that one pair of primers targeting 5' adaptor and constant region is able to amplify all TCR rearrangements
+# High-throughput immune repertoire analysis with IGoR
+ - IGoR (Inference and Generation Of Repertoires)
+ - quantitative characterization of the statistics of receptor generation
+ - each receptor sequence can be generated in a large number of ways, which they call “scenarios,”: recombination of germline segments, insertions and deletions, and hypermutations (BCRs)
+ - different germline segments can recombine with each other with different frequencies, and the number of insertions and deletions is random, so the overall receptor generation process cannot be described deterministically
 # *HLA-DQA1* and *HLA-DQB1* in Celiac disease predisposition: practical implications of the HLA molecular typing
  - HLA class I and II genes code for cell surface glycoproteins important for antigen presentation and self-recognition by immune cells
  - HLA class I heterodimers consist of α-heavy chain (encoded by *HLA-A/B/C*) and small β-microglobulin
@@ -812,6 +848,11 @@
  - **shared clonal origin among CD8<sup>+</sup> T cells at site of colitis with gut T<sub>RM</sub> cells, suggesting clonal expansion from T<sub>RM</sub> population being responsible for irAEs, distinct from autoimmunity it seems**
  - arthritis irAE: shared clonality between CD8<sup>+</sup> CX3CR1<sup>high</sup> effector phenotype in peripheral blood and CXCR3<sup>+</sup> CXCR6<sup>high/low</sup> effector memory or terminally differentiated effector memory CD8<sup>+</sup> in synovial fluid, implying active tracking and differentiation from peripheral blood to synovial fluid, also evidence for expansion of T<sub>RM</sub> cells in mice joints
  - **for tissues that lack T<sub>RM</sub> cells, like the synovium, trafficking of T cells from the periphery may be important for irAEs**
+# Immune checkpoints are predominantly co-expressed by clonally expanded CD4<sup>+</sup> FoxP3<sup>+</sup> intratumoral T cells in primary human cancers
+ - CD8<sup>+</sup> T cells (~40%), CD4<sup>+</sup> FoxP3<sup>-</sup> T cells (~40%), and CD4<sup>+</sup> FoxP3<sup>+</sup> T cells (~10%) proprtions consistent across patients in tumors
+ - stimulatory (CD25, CD28, 4-1BB, ICOS, OX40) and inhibitory (PD-1, CTLA-4, PD-L1, CD39, TIGIT) checkpoints coexpressed by intratumoral CD4<sup>+</sup> FoxP3<sup>+</sup> T cells
+ - FoxP3<sup>+</sup> CD4<sup>+</sup> T cells highly clonal, high inhibitory checkpoint expression
+ - **perhaps other ICBs fail because they aren't inhibiting Tregs?**
 # Immune dysfunction revealed by digital spatial profiling of immuno-oncology markers in progressive states of renal cell carcinoma and in brain metastases
  - lower immune checkpoint inhibitor (TIM-3, CTLA-4), cytolytic (GZMA, GZMB), and T cell activation (CD25) protein expression in metastases compared with primary tumors
  - metastases macrophages less M1-like, inflammatory markers (HLA-DR, CD127)
@@ -1073,6 +1114,9 @@
  - MHC binding platform composed of 2 domains from single heavy α-chain (HC) for MHCI and from two chains for MHCII (α-chain and β-chain), 2 domains form β-sheet as base and 2 α-helices on top that have space between them to accommodate a peptide chain
  - 2 membrane-proximal immunoglobulin domains support peptide-binding unit
  - MHCI binding groove can accomodate ~8-10 residue peptide, ~13-25 residue peptide for MHCII
+# Measuring CDR3 length variability in individuals during ontogeny
+ - *Xenopus laevis* analysis of Ig CDR3s
+ - adult CDR3s longer
 # Mechanisms and biomarkers of immune-related adverse events in gastric cancer
  - blocking CTLA-4 can induce activation of autoreactive T ells via depletion of Tregs (express CTLA-4), stimulation of B cells to produce autoantibodies
  - blocking CTLA-4/PD-1 may lead to expansion and activation of pre-existing tissue-resident memory T cells
@@ -1230,6 +1274,8 @@
  - results: rare long-term survivors of pancreatic cancer who have stronger T cell activity in primary tumors develop genetically less heterogeneous recurrent tumors with fewer immunogenic mutations (neoantigens) despite having more time to accumulate mutations
  - neoantigen high immunogenicity (i.e. quality) inference: non-selfness (different from known antigens) and selfness (still able to bind MHC and activate T cell), so high quality/immunogenicity neoantigens are distinct from known antigens but still similar enough to bind MHC and activate T cells
  - long-term survivors of pancreatic cancer develop recurrent tumors with fewer high-quality neoantigens (natural immunoediting of neoantigens)
+# Neoantigen specific CD4<sup>+</sup> T cells in human melanoma have diverse differentiation states and correlate with CD8<sup>+</sup> T cell, macrophage, and B cell function
+ - CD4<sup>+</sup> T cells that recognize neoantigens express *CXCL13* and are subdivided into clusters expressing memory and T follicular helper markers, cytolytic markers, inhibitory receptors, and IFN-gamma
 # Network-based machine learning approach to predict immunotherapy response in cancer patients
  - tumor mutation burden improves model
 # New biomarkers exploration and nomogram construction of prognostic and immune-related adverse events of advanced non-small cell lung cancer patients receiving immune checkpoint inhibitors
@@ -1259,12 +1305,16 @@
  - they suggest irAEs can be broken into 2 categories: true irAEs (T cells activated against tumor and normal cells, theoretically this wanes after ICBs are stopped) and induction/exacerbation of paraneoplastic syndromes triggered by ICB (remote effects of cancer not caused by tumor/metastases, like immune response against tumor with cross-reaction of antibodies between tumor and self), **I don't really understand the difference between these two types here**
 # On the specificity of protein-protein interactions in the context of disorder
  - **trying to find evidence for relation between hydrophobicity and cross-reactivity: bring up idea of transcriptional (co)activators being non-specific due to hydrophobicity, and negative charge (perhaps unhelpful with negatively charged DNA)**
+# Overcoming immune checkpoint blockade resistance in solid tumors with intermittent ITK inhibition
+ - dampening TCR signaling with ITK inhibitor can confer ICB sensitivity to ICB resistant solid tumors
 # Patient HLA class I genotype influences cancer response to checkpoint blockade immunotherapy
 ## Abstract
  - HLA-I loci heterozygosity associated with better survival (3 major HLA-I genes: A-C)
  - HLA-B44 supertype also associated with better survival, HLA-B62 supertype associated with worse survival
 ## Main
  - **each HLA-I variant binds a select repertoire of peptide ligands, so HLA-I heterozygosity may increase diversity of peptides presented to T cells**
+# PD-1 and ICOS coexpression identifies tumor-reactive CD4<sup>+</sup> T cells in human solid tumors
+ - identify subset of CD4<sup>+</sup> Th cells distinct from FOXP3<sup>+</sup> Tregs that coexpress PD-1 and ICOS, Trm phenotype, expansion in tumor but rare in periphery, recognize both neoantigens and tumor-associated antigens
 # PD-1 blockade induces responses by inhibiting adaptive immune resistance
  - adaptive immune resistance: upregulation of PD-L1 on cancer tissues, interaction with PD-1 on antigen-specific CD8 T cells
  - here, show that pre-existing CD8 T cells on tumor margin associated with expression of PD-1/PD-L1 and may predict response to therapy
@@ -1475,6 +1525,8 @@
 # Specificity, privacy, and degeneracy in the CD4 T cell receptor repertoire following immunization
  - math to back up hundreds to thousands of TCRs for any given antigen in a repertoire
  - mice
+# Statistical analysis of CDR3 length distributions for the assessment of T and B cell repertoire biases
+ - Gaussian-like distribution in length pattern, given large number of small effects (random mechanism of junction diversity) acting additively and independently on CDR3 length
 # Structural basis for T cell recognition of cancer neoantigens and implications for predicting neoepitope immunogenicity
  - oncogenic mutations can improve antigen presentation by strengthening pMHC binding, mutation can also be detected by direct interactions with TCR
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
@@ -1964,6 +2016,9 @@
  - neoantigen-specific clones from non-responding tumors express TCRs with lower ligand-dependent signaling
 ## Discussion
  - one hypothesis for the lack of ICB response in some patients is that tumour-specific T cells exhibit low activity owing to poor avidity or affinity of their TCR for its cognate peptide MHC, **not sure what this means exactly**
+# Transcriptomic profiling of human effector and regulatory T cell subsets identifies predictive population signatures
+ - Tregs less transcriptionally diverse than Th cells, likely reflects dominant role of Foxp3 on Treg transcriptome
+ - most Tregs develop in thymus upon encountering self-antigen, some Tregs may also develop at barrier sites upon encountering harmless environmental antigens (like skin/intestinal microbiome components)
 # Treg heterogeneity, function, and homeostasis
  - Tregs ensure tolerance to autoantigens, antigens of commensal microflora, limit excess immune responses, induce tolerance to food antigens
  - IL-10 and TGF-β are primary suppressive cytokines
