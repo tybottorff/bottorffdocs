@@ -1,0 +1,165 @@
+---
+title: "Pgen score generation for Peter"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+library(Biostrings)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in TCR-seq data, make unique identifier
+
+```{r}
+
+peter_tcr <- read.csv("../raw_data/pgen_for_Peter_Table_S2_Compiled_and_filtered_TCR_sequences_used_in_this_study.csv") %>%
+  mutate(TCR_name = paste(libid, v_gene, j_gene, junction, sep = "_")) %>%
+  group_by(TCR_name) %>%
+  mutate(row_id = row_number()) %>%
+  ungroup() %>%
+  mutate(TCR_name = paste(TCR_name, "_", row_id, sep = "")) %>%
+  select(-row_id)
+
+peter_tcr
+
+```
+
+# Prep stitchr dfs, there are 33 rows of delta/gamma v/j genes, not sure how to stitch...
+
+```{r}
+
+stitchr_alpha_data <- peter_tcr %>%
+  filter(grepl("^TRA", v_gene) & grepl("^TRA", j_gene)) %>%
+  dplyr::rename(TRAV = v_gene, TRAJ = j_gene, TRA_CDR3 = junction) %>%
+  mutate(TRAC = NA,
+         TRBV = NA,
+         TRBJ = NA,
+         TRB_CDR3 = NA,
+         TRBC = NA,
+         TRA_leader = NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC, TRA_leader, TRB_leader, Linker, Link_order, TRA_5_prime_seq, TRA_3_prime_seq, TRB_5_prime_seq, TRB_3_prime_seq)
+
+stitchr_alpha_data
+
+# 3,960 rows
+
+write.table(stitchr_alpha_data, file = "../saved_data/tcrseq_tra_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+stitchr_beta_data <- peter_tcr %>%
+  filter(grepl("^TRB", v_gene) & grepl("^TRB", j_gene)) %>%
+  dplyr::rename(TRBV = v_gene, TRBJ = j_gene, TRB_CDR3 = junction) %>%
+  mutate(TRBC = NA,
+         TRAV = NA,
+         TRAJ = NA,
+         TRA_CDR3 = NA,
+         TRAC = NA,
+         TRA_leader = NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC, TRA_leader, TRB_leader, Linker, Link_order, TRA_5_prime_seq, TRA_3_prime_seq, TRB_5_prime_seq, TRB_3_prime_seq)
+
+stitchr_beta_data
+
+# 3,734 rows
+
+write.table(stitchr_beta_data, file = "../saved_data/tcrseq_trb_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+```
+
+# Read in stitchr output, 634 failed to stitch (621 have error "(TRA) Error: a LEADER sequence region has not been found for gene in the IMGT data for this chain/species. Please check your TCR and species data. Cannot stitch a sequence for TRA")
+
+```{r}
+
+stitchr_alpha_output <- read.delim("../saved_data/stitchr_tra_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_beta_output <- read.delim("../saved_data/stitchr_trb_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_output <- stitchr_alpha_output %>%
+  full_join(stitchr_beta_output, by = colnames(stitchr_alpha_output)) %>%
+  filter(!(grepl("Cannot stitch", Warnings.Errors)))
+
+stitchr_output
+
+```
+
+# Prep IGoR input
+
+```{r}
+
+stitchr_output_alpha_df <- stitchr_output %>%
+  filter(!(is.na(TRA_nt)),
+         nchar(TRA_nt) > 1)
+
+stitchr_output_alpha_df
+# 3,335 rows
+
+write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
+
+stitchr_output_beta_df <- stitchr_output %>%
+  filter(!(is.na(TRB_nt)),
+         nchar(TRB_nt) > 1)
+
+stitchr_output_beta_df
+# 3,725 rows
+
+write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
+
+```
+
+# Read in IGoR output
+
+```{r}
+
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  left_join(peter_tcr, by = "TCR_name")
+
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  left_join(peter_tcr, by = "TCR_name") %>%
+  full_join(igor_alpha, by = c("TCR_name", "libid", "v_gene", "j_gene", "project", "donor_id", "set", "study_group", "hla", "studyGroup", "TCR_name"))
+
+igor_combined
+
+```
