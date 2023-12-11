@@ -441,6 +441,9 @@
 # Differentiation and homeostasis of effector Treg cells are regulated by inositol polyphosphates modulating Ca<sup>2+</sup> influx
  - subclass of Tregs express Foxp3, activated Foxp3<sup>+</sup> Tregs differentiate into effector Treg (eTreg) cells to maintain peripheral immune homeostasis and tolerance
 # Digital spatial profiling of melanoma shows CD95 expression in immune cells is associated with resistance to immunotherapy
+# Dissecting the tumor microenvironment in response to immune checkpoint inhibitors via single cell and spatial transcriptomics
+ - good summary of cancer immunity cycle for me: cancer cells generate neoantigens, present on MHC, APCs sample antigens and present fragments via MHCI/II, APCs traffic to lymph nodes (due to signals from proinflammatory cytokines) and induce expansion and differentiation of naive T cells into cytotoxic effector T cells that migrate to tumor, recognize cancer cells via TCR-pMHCI docking, kill cancer cells, release more neoantigens
+ - programs that promote response/resistance to immunotherapy: cell cycle genes (CDK4/6) repress resistance to ICB and sensitize tumors (in mice), TCF7 (transcription factor involved in T cell differentiation) levels higher in responders
 # Distinct cellular mechanisms underlie anti-CTLA-4 and anti-PD-1 checkpoint blockade
  - goal: elucidate mechanism by which ICI (immune checkpoint inhibitors) induce tumor rejection
  - mass cytometry approach to profile effects of ICI on tumor immune infiltrates in human melanoma and murine tumor models
@@ -749,6 +752,8 @@
  - quantitative characterization of the statistics of receptor generation
  - each receptor sequence can be generated in a large number of ways, which they call “scenarios,”: recombination of germline segments, insertions and deletions, and hypermutations (BCRs)
  - different germline segments can recombine with each other with different frequencies, and the number of insertions and deletions is random, so the overall receptor generation process cannot be described deterministically
+ - IGoR starts by listing the possible recombination and hypermutation scenarios leading to an observed sequence in the data set, then assigns probability weights reflecting the likelihood of these scenarios, IGoR restricts its exploration to the reasonably likely ones to save on computational cost
+ - computational pipeline: V(D)J recombination proceeds by joining randomly selected segments (V, D, and J segments in the case of TRB and IGH), each segment gets trimmed at its ends (hashed areas), and a varying number of non-templated insertions are added between them, IGoR lists putative recombination scenarios consistent with the observed sequence, and weighs them according to their likelihood, the likelihood of each scenario is computed using a Bayesian network of dependencies between the recombination features (V, D, J segment choices, insertions, and deletions)
 # *HLA-DQA1* and *HLA-DQB1* in Celiac disease predisposition: practical implications of the HLA molecular typing
  - HLA class I and II genes code for cell surface glycoproteins important for antigen presentation and self-recognition by immune cells
  - HLA class I heterodimers consist of α-heavy chain (encoded by *HLA-A/B/C*) and small β-microglobulin
@@ -848,6 +853,9 @@
  - **shared clonal origin among CD8<sup>+</sup> T cells at site of colitis with gut T<sub>RM</sub> cells, suggesting clonal expansion from T<sub>RM</sub> population being responsible for irAEs, distinct from autoimmunity it seems**
  - arthritis irAE: shared clonality between CD8<sup>+</sup> CX3CR1<sup>high</sup> effector phenotype in peripheral blood and CXCR3<sup>+</sup> CXCR6<sup>high/low</sup> effector memory or terminally differentiated effector memory CD8<sup>+</sup> in synovial fluid, implying active tracking and differentiation from peripheral blood to synovial fluid, also evidence for expansion of T<sub>RM</sub> cells in mice joints
  - **for tissues that lack T<sub>RM</sub> cells, like the synovium, trafficking of T cells from the periphery may be important for irAEs**
+# Immune checkpoint status and exhaustion-related phenotypes of CD8<sup>+</sup> T cells from the tumor-draining regional lymph nodes in breast cancer
+ - regional lymph node subpopulation expressing PD-1, CXCR5, TIM-3, ICOS, reduced IFN-gamma production, perhaps able to be rejuvenated by ICI
+ - CXCR5 and ICOS mark CD4<sup>+</sup> T cell subset (Tfh), involved in formation of germinal centers, help B cells produce antibodies
 # Immune checkpoints are predominantly co-expressed by clonally expanded CD4<sup>+</sup> FoxP3<sup>+</sup> intratumoral T cells in primary human cancers
  - CD8<sup>+</sup> T cells (~40%), CD4<sup>+</sup> FoxP3<sup>-</sup> T cells (~40%), and CD4<sup>+</sup> FoxP3<sup>+</sup> T cells (~10%) proprtions consistent across patients in tumors
  - stimulatory (CD25, CD28, 4-1BB, ICOS, OX40) and inhibitory (PD-1, CTLA-4, PD-L1, CD39, TIGIT) checkpoints coexpressed by intratumoral CD4<sup>+</sup> FoxP3<sup>+</sup> T cells
@@ -1104,6 +1112,12 @@
  - hypothesis: reduce irAEs with hyperthermia to increase numbers of effector lymphocytes
  - irAEs similar to an auto-graft vs. host disease reactions following allogenic bone marrow transplantation
  - perhaps try lower dose of ICIs
+# Machine learning analysis of the T cell receptor repertoire identifies sequence features of self-reactivity
+ - train model on mice data
+ - TRBs
+ - CD5 surface expression correlates with strength of self-pMHC signal
+ - CD5<sup>low</sup> (less self-reactive?) TRB CDR3s longer and more acidic, CD5<sup>high</sup> (more self-reactive?) TRB CDR3s shorter and more hydrophobic
+ - experimentally confirm predictions
 # Major histocompatibility complex (MHC) class I and MHC class II proteins: conformational plasticity in antigen presentation
  - APC presented peptides are generated from proteins produced by cell's own translational machinery or from proteins funneled into endo-lysosomal vesicular system
  - peptide repertoire presented by MHC proteins largely depends on structural features of binding groove of each particular MHC allelic variant
