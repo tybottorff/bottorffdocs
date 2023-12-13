@@ -1,0 +1,183 @@
+---
+title: "Clonally-Expanded, Thyrotoxic Effector CD8+ T cells Driven by IL-21 Contribute to Checkpoint Inhibitor Thyroiditis"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10227862/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SeuratDisk)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RDS
+
+```{r}
+
+immune.combined <- readRDS("../saved_data/cell_type_ref_mapped_integrated_transformed_reduced_clustered.rds")
+
+```
+
+# Remind myself of cell type plots
+
+```{r}
+
+p1 = DimPlot(immune.combined, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(immune.combined, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
+
+```
+
+# Look at just T cells
+
+```{r}
+
+T_cells <- immune.combined[, immune.combined@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & immune.combined@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
+
+```
+
+# Re-do dimensional reduction, clustering
+
+```{r}
+
+T_cells <- RunPCA(T_cells, npcs = 30, verbose = FALSE)
+T_cells <- RunUMAP(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindNeighbors(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindClusters(T_cells, resolution = 3)
+
+```
+
+# Read in reference to use for mapping
+
+```{r}
+
+reference <- LoadH5Seurat("../raw_data/pbmc_multimodal.h5seurat")
+
+```
+
+# Find reference transfer anchors
+
+```{r}
+
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50
+)
+
+```
+
+# Map reference onto my object
+
+```{r}
+
+T_cells <- MapQuery(
+  anchorset = anchors,
+  query = T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca", 
+  reduction.model = "wnn.umap"
+)
+
+```
+
+# Plot mapping results
+
+```{r}
+
+p1 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
+
+```
+
+# Relook just at T cells again
+
+```{r}
+
+just_T_cells <- T_cells[, T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
+
+just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
+just_T_cells <- RunUMAP(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindNeighbors(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindClusters(just_T_cells, resolution = 3)
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = just_T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50
+)
+T_cells <- MapQuery(
+  anchorset = anchors,
+  query = just_T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca", 
+  reduction.model = "wnn.umap"
+)
+
+```
+
+# Plot cell type assignments
+
+```{r}
+
+p1 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(just_T_cells, "../saved_data/final_seurat_T_cells.rds")
+
+```

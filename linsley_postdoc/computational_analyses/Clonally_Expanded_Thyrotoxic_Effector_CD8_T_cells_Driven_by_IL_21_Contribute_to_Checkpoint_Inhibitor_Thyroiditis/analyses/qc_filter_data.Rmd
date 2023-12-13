@@ -1,0 +1,311 @@
+---
+title: "Clonally-Expanded, Thyrotoxic Effector CD8+ T cells Driven by IL-21 Contribute to Checkpoint Inhibitor Thyroiditis"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10227862/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(xml2)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in TCR data
+
+```{r}
+
+# samples H9 and IR8 have more capture/better data
+
+setwd("../raw_data/tcr/")
+
+# List all CSV files in the directory
+csv_files <- list.files(pattern = "\\.csv$")
+
+# Function to read and process a CSV file
+read_and_process_csv <- function(file_path) {
+  df <- read.csv(file_path)
+  file_name <- tools::file_path_sans_ext(basename(file_path))
+  df$file_name <- file_name
+  return(df)
+}
+
+# Read and process all CSV files
+all_data <- lapply(csv_files, read_and_process_csv)
+
+# Combine the data frames into one
+combined_tcr_data <- bind_rows(all_data)
+
+combined_tcr_data <- combined_tcr_data %>%
+  filter(high_confidence == "true",
+         is_cell == "true",
+         full_length == "true",
+         productive == "true") %>%
+  mutate(
+    sample = gsub("VDJ-", "", substr(file_name, 29, nchar(file_name))),
+    condition = case_when(
+      grepl("thyroid", sample, ignore.case = TRUE) ~ "IRAE",
+      grepl("HT", sample, ignore.case = TRUE) ~ "HT",
+      grepl("HC", sample, ignore.case = TRUE) ~ "Normal",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  mutate(
+    sample = gsub("-thyroid", "", sample),
+    sample = gsub("-HT", "", sample),
+    sample = gsub("-HC", "", sample)
+  ) %>%
+  group_by(barcode) %>%
+  filter(sum(chain == "TRA") < 2 & sum(chain == "TRB") < 2) %>%
+  ungroup() %>%
+    pivot_wider(
+    id_cols = c(barcode, sample, condition),
+    names_from = chain,
+    values_from = c(v_gene, d_gene, j_gene, c_gene, fwr1, fwr1_nt, fwr2, fwr2_nt, fwr3, fwr3_nt, fwr4, fwr4_nt, cdr1, cdr1_nt, cdr2, cdr2_nt, cdr3, cdr3_nt)) %>%
+  mutate(suffix = case_when(
+    sample == "H3" ~ "_1",
+    sample == "H4" ~ "_2",
+    sample == "H5" ~ "_3",
+    sample == "H7" ~ "_4",
+    sample == "H8" ~ "_5",
+    sample == "H9" ~ "_6",
+    sample == "IR8" ~ "_7",
+    sample == "USC005" ~ "_8",
+    sample == "USC006" ~ "_9",
+    sample == "USCpooled" ~ "_10",
+    TRUE ~ ""  # Default to an empty suffix if none of the conditions are met
+  )) %>%
+  mutate(barcode = paste(barcode, suffix, sep = "")) %>%
+  select(-suffix)
+  
+combined_tcr_data
+
+```
+
+# Combine TCR data with RNA metadata
+
+```{r}
+
+rna_metadata <- read.csv("../raw_data/rna/GSE218743_irae_ht_integrated_metadata.csv") %>%
+  mutate(barcode = X,
+         sample = toupper(sample)) %>%
+  select(-X)
+
+rna_metadata
+
+full_metadata <- rna_metadata %>%
+  left_join(combined_tcr_data, by = c("barcode", "sample", "condition"))
+
+rownames(full_metadata) <- full_metadata$barcode
+
+full_metadata <- full_metadata %>%
+  select(-barcode)
+
+full_metadata
+
+```
+
+# Read in RNA data
+
+```{r}
+
+rna_data <- read.csv("../raw_data/rna/GSE218743_irae_ht_integrated_counts.csv", header = TRUE, row.names = 1)
+
+rna_data
+
+```
+
+# Create Seurat object
+
+```{r}
+
+rna <- CreateSeuratObject(counts = rna_data)
+
+rna
+
+```
+
+# Add RNA metadata, TCRseq as well
+
+```{r}
+
+rna <- AddMetaData(object = rna, metadata = full_metadata)
+
+```
+
+# Calculate percent mitochondrial, ribosomal, hemoglobin features
+
+```{r}
+
+rna[["percent_mito"]] <- PercentageFeatureSet(rna, pattern = "^MT-")
+rna[["percent_ribo"]] <- PercentageFeatureSet(rna, pattern = "^RP[SL]")
+rna[["percent_hb"]] <- PercentageFeatureSet(rna, pattern = "HB[^(P)]")
+
+```
+
+# Visualize QC metrics across all patient samples
+
+```{r}
+
+vln_plot <- VlnPlot(rna, features = c("nFeature_RNA", "nCount_RNA", "percent_mito", "percent_ribo"), ncol = 4, pt.size=0)
+
+vln_plot
+
+```
+
+# Set QC metric thresholds
+
+```{r}
+
+qcMetricsThresholds <-
+  c(
+    "nFeature_RNA_min" = 200,
+    
+    "percent_mito" = 30
+  )
+
+# "Only cells with a mitochondrial gene percentage less than 30% and 200 features were included in downstream analysis"
+
+```
+
+
+# Plot distributions of nFeature_RNA across samples
+
+```{r}
+
+nFeature_RNA_QC <- ggplot(rna@meta.data, mapping = aes(x = nFeature_RNA)) +
+  geom_density(mapping = aes(color = sample), size = 0.5) +
+  scale_x_log10() +
+  geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_min"],
+             color = "red", linetype = "dashed")
+ggsave(nFeature_RNA_QC, file = "../figures/nFeature_RNA.svg")
+
+nFeature_RNA_QC
+
+```
+
+# Plot distributions of nCount_RNA across samples
+
+```{r}
+
+nCount_RNA_QC <- ggplot(rna@meta.data, mapping = aes(x = nCount_RNA)) +
+  geom_density(mapping = aes(color = sample), size = 0.5) +
+  scale_x_log10()
+ggsave(nCount_RNA_QC, file = "../figures/nCount_RNA.svg")
+
+nCount_RNA_QC
+
+```
+
+# Plot distributions of percent mito across samples
+
+```{r}
+
+percent_mt_QC <- ggplot(rna@meta.data, mapping = aes(x = percent_mito + 1/length(colnames(rna)))) +
+  geom_density(mapping = aes(color = sample), size = 0.5) +
+  scale_x_log10() +
+  geom_vline(xintercept = qcMetricsThresholds["percent_mito"],
+             color = "red", linetype = "dashed") +
+  xlab("percent_mito (with pseudocount)")
+ggsave(percent_mt_QC, file = "../figures/percent_mt.svg")
+
+percent_mt_QC
+
+```
+
+# Plot distributions of percent ribo across samples
+
+```{r}
+
+percent_rb_QC <- ggplot(rna@meta.data, mapping = aes(x = percent_ribo + 1/length(colnames(rna)))) +
+  geom_density(mapping = aes(color = sample), size = 0.5) +
+  scale_x_log10() +
+  xlab("percent_ribo (with pseudocount)")
+ggsave(percent_rb_QC, file = "../figures/percent_rb.svg")
+
+percent_rb_QC
+
+```
+
+# Plot distributions of percent hemoglobin across samples
+
+```{r}
+
+percent_hb_QC <- ggplot(rna@meta.data, mapping = aes(x = percent_hb + 1/length(colnames(rna)))) +
+  geom_density(mapping = aes(color = sample), size = 0.5) +
+  scale_x_log10() +
+  xlab("percent_hb (with pseudocount)")
+
+ggsave(percent_hb_QC, file = "../figures/percent_hb.svg")
+
+percent_hb_QC
+
+```
+
+# Filter cells based on QC metrics, track how many drop out
+
+```{r}
+
+cellsKeep <-
+  WhichCells(
+    rna, expression = nFeature_RNA >= qcMetricsThresholds["nFeature_RNA_min"]) %>%
+  intersect(
+    WhichCells(
+      rna, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
+cellsDrop <-
+  setdiff(colnames(rna), cellsKeep)
+length(cellsDrop) # 920 cells dropped from analysis
+
+rna_filtered <-
+  subset(rna, cells = cellsKeep)
+
+length(colnames(rna_filtered)) # 13921 cells left behind in filtered data
+
+```
+
+# Count cells by sample after QC filtering
+
+```{r}
+
+cell_capture <- rna_filtered@meta.data %>%
+  group_by(sample) %>%
+  dplyr::count()
+
+cell_capture %>% arrange(n)
+
+```
+
+# Save RDS file
+
+```{r}
+
+saveRDS(rna_filtered, "../saved_data/qc_filtered.rds")
+
+```

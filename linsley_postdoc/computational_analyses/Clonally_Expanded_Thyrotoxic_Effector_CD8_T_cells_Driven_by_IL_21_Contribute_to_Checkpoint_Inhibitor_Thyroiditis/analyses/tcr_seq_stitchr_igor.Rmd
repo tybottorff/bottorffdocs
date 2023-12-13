@@ -1,0 +1,200 @@
+---
+title: "Clonally-Expanded, Thyrotoxic Effector CD8+ T cells Driven by IL-21 Contribute to Checkpoint Inhibitor Thyroiditis"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10227862/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+library(Biostrings)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in final RNA T cell Seurat with TCR metadata
+
+```{r}
+
+tcr_rna <- readRDS("../saved_data/final_seurat_T_cells.rds")
+
+```
+
+# Tibble metadata, add rownames
+
+```{r}
+
+tcr_seq_with_rna <- as_tibble(tcr_rna@meta.data)
+
+tcr_seq_with_rna$TCR_name <- colnames(tcr_rna)
+
+unique(tcr_seq_with_rna$condition)
+
+write.csv(tcr_seq_with_rna, "../saved_data/rna_tcr.csv")
+
+```
+
+# Prep TRA stitchr df
+
+```{r}
+
+bad_alpha <- tcr_seq_with_rna %>%
+  dplyr::rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(is.na(TRAV) | is.na(TRAJ) | is.na(TRA_CDR3))
+
+stitchr_alpha_data <- tcr_seq_with_rna %>%
+  dplyr::rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_alpha$TCR_name)) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_alpha_data
+
+# 30,279 rows
+
+write.table(stitchr_alpha_data, file = "../saved_data/tcrseq_tra_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+bad_beta <- tcr_seq_with_rna %>%
+  dplyr::rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(is.na(TRBV) | is.na(TRBJ) | is.na(TRB_CDR3))
+
+stitchr_beta_data <- tcr_seq_with_rna %>%
+  dplyr::rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_beta$TCR_name)) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_beta_data
+
+# 30,313 rows
+
+write.table(stitchr_beta_data, file = "../saved_data/tcrseq_trb_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+```
+
+# Read in stitchr output
+
+```{r}
+
+stitchr_alpha_output <- read.delim("../saved_data/stitchr_tra_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_alpha_output
+
+stitchr_beta_output <- read.delim("../saved_data/stitchr_trb_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_beta_output
+
+stitchr_output <- stitchr_alpha_output %>%
+  full_join(stitchr_beta_output, by = colnames(stitchr_alpha_output))
+
+stitchr_output
+
+```
+
+# Prep IGoR input
+
+```{r}
+
+stitchr_output_alpha_df <- stitchr_output %>%
+  filter(!(is.na(TRA_nt)),
+         nchar(TRA_nt) > 1)
+
+stitchr_output_alpha_df
+# 3,750 rows
+
+write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
+
+stitchr_output_beta_df <- stitchr_output %>%
+  filter(!(is.na(TRB_nt)),
+         nchar(TRB_nt) > 1)
+
+stitchr_output_beta_df
+# 4,376 rows
+
+write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
+
+```
+
+# Read in IGoR output
+
+```{r}
+
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
+  mutate(patient_group = case_when(
+    startsWith(Patient_ID, "A") ~ "ici_no_irae",
+    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(patient_group, irAE, chain, pgen, barcode, cdr3) %>%
+  filter(chain == "TRA",
+         pgen != "NaN")
+
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
+  mutate(patient_group = case_when(
+    startsWith(Patient_ID, "A") ~ "ici_no_irae",
+    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(Patient_ID, patient_group, irAE, chain, pgen, barcode, cdr3) %>%
+  filter(chain == "TRB",
+         pgen != "NaN") %>%
+  full_join(igor_alpha, by = c("barcode", "chain", "patient_group", "pgen", "cdr3", "irAE"))
+
+igor_combined
+
+```

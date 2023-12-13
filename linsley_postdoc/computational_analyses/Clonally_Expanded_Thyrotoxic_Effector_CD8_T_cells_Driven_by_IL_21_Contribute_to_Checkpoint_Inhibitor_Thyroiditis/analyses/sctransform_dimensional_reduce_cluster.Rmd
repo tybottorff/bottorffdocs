@@ -1,0 +1,146 @@
+---
+title: "Clonally-Expanded, Thyrotoxic Effector CD8+ T cells Driven by IL-21 Contribute to Checkpoint Inhibitor Thyroiditis"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10227862/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RDS of QC filtered data
+
+```{r}
+
+thyroid_t_cells_filtered <- readRDS("../saved_data/qc_filtered.rds")
+
+```
+
+# Split data by sample before integrating by finding anchors
+
+```{r}
+
+# split the dataset into a list of seurat objects (for each patient sample)
+thyroid_t_cells_filtered.list <- SplitObject(thyroid_t_cells_filtered, split.by = "sample")
+
+# normalize and identify variable features for each dataset independently
+thyroid_t_cells_filtered.list <- lapply(X = thyroid_t_cells_filtered.list, FUN = function(x) {
+    x <- SCTransform(x, variable.features.n = 2000)
+})
+
+# select features that are repeatedly variable across datasets for integration
+features <- SelectIntegrationFeatures(object.list = thyroid_t_cells_filtered.list)
+
+# prep step
+thyroid_t_cells_filtered.list <- PrepSCTIntegration(
+  thyroid_t_cells_filtered.list,
+  anchor.features = features
+)
+
+```
+
+# Integrate via anchors
+
+```{r}
+
+immune.anchors <- FindIntegrationAnchors(object.list = thyroid_t_cells_filtered.list, normalization.method = "SCT", anchor.features = features)
+
+# this command creates an 'integrated' data assay
+immune.combined <- IntegrateData(anchorset = immune.anchors, normalization.method = "SCT")
+
+```
+
+# Specify integration, scale data
+
+```{r}
+
+# specify that we will perform downstream analysis on the corrected data note that the
+# original unmodified data still resides in the 'RNA' assay
+DefaultAssay(immune.combined) <- "integrated"
+
+# scale data
+immune.combined <- ScaleData(immune.combined, verbose = FALSE)
+
+```
+
+# PCA using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined <- RunPCA(immune.combined, npcs = 30, verbose = FALSE)
+
+```
+
+# UMAP using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined <- RunUMAP(immune.combined, reduction = "pca", dims = 1:30)
+
+```
+
+# Find clusters
+
+```{r}
+
+immune.combined <- FindNeighbors(immune.combined, reduction = "pca", dims = 1:30)
+immune.combined <- FindClusters(immune.combined, resolution = 3)
+
+```
+
+# Visualize UMAP by patient ID
+
+```{r}
+
+DimPlot(immune.combined, reduction = "umap", group.by = "sample")
+
+ggsave("../figures/umap_patient_id.svg")
+
+```
+
+# Visualize UMAP by cluster
+
+```{r}
+
+DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/umap_cluster.svg")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/integrated_transformed_reduced_clustered.rds")
+
+```

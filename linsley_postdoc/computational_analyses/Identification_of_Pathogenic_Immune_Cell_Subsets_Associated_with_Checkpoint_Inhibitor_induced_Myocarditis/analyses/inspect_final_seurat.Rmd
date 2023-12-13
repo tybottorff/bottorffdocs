@@ -3,7 +3,7 @@ title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpo
 output: pdf_document
 ---
 
- - data reproduction of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

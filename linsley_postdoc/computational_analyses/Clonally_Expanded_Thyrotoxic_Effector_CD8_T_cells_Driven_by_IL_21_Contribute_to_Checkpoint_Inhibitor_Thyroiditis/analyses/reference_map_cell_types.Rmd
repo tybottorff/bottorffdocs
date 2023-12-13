@@ -1,9 +1,9 @@
 ---
-title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+title: "Clonally-Expanded, Thyrotoxic Effector CD8+ T cells Driven by IL-21 Contribute to Checkpoint Inhibitor Thyroiditis"
 output: pdf_document
 ---
 
- - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10227862/
  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
