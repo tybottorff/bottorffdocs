@@ -11,14 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
-library(Seurat)
-library(Matrix)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(stringr)
-library(circlize)
-library(Biostrings)
+library(ggpubr)
 
 ```
 
@@ -39,7 +35,7 @@ theme_set(
 
 ```
 
-# Read in TCR-seq data, make unique identifier
+# Read in TCR-seq data (no nt seq), make unique identifier
 
 ```{r}
 
@@ -156,10 +152,127 @@ write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", ro
 igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
   left_join(peter_tcr, by = "TCR_name")
 
+igor_alpha
+
+# 139 NA pgen for alpha, 76 NA pgen for beta
+
 igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
   left_join(peter_tcr, by = "TCR_name") %>%
-  full_join(igor_alpha, by = c("TCR_name", "libid", "v_gene", "j_gene", "project", "donor_id", "set", "study_group", "hla", "studyGroup", "TCR_name"))
+  full_join(igor_alpha) %>%
+  select(-TCR_name, -TRA_nt, -TRB_nt, -TRA_aa, -TRB_aa, -TRAV, -TRAJ, -TRA_CDR3, -TRBV, -TRBJ, -TRB_CDR3, -TRAC, -TRBC, -TRA_leader, -TRB_leader, -Linker, -Link_order, -TRA_5_prime_seq, -TRA_3_prime_seq, -TRB_5_prime_seq, -TRB_3_prime_seq, -Linked_nt, -Linked_aa, -Warnings.Errors)
 
 igor_combined
+
+write.csv(igor_combined, "../saved_data/Table_S2_Compiled_and_filtered_TCR_sequences_used_in_this_study_with_pgen.csv")
+
+```
+
+# Read in TCR-seq data (with nt seq), make unique identifier
+
+```{r}
+
+peter_tcr_with_nt <- read.csv("../raw_data/Table_S4_Compiled_and_filtered_TCR_sequences_used_in_this_study_w_nucleotide.csv") %>%
+  mutate(TCR_name = paste(libid, v_gene, j_gene, junction, sep = "_")) %>%
+  group_by(TCR_name) %>%
+  mutate(row_id = row_number()) %>%
+  ungroup() %>%
+  mutate(TCR_name = paste(TCR_name, "_", row_id, sep = "")) %>%
+  select(-row_id, -X)
+
+peter_tcr_with_nt
+
+```
+
+# Prep IGoR input from data with TCRseq (not stitched)
+
+ - these seqs are ~300 nt while stitched TCRs were longer (~800-900), if pgen different this may be why
+
+```{r}
+
+alpha_tcrs_with_nt <- peter_tcr_with_nt %>%
+  filter(grepl("^TRA", v_gene) & grepl("^TRA", j_gene)) %>%
+  select(TCR_name, full_nt_sequence)
+  # placing nt seq at 2nd col to keep script same
+
+alpha_tcrs_with_nt
+
+# 5544 alpha TCRs
+
+write.csv(alpha_tcrs_with_nt, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
+
+beta_tcrs_with_nt <- peter_tcr_with_nt %>%
+  filter(grepl("^TRB", v_gene) & grepl("^TRB", j_gene)) %>%
+  select(TCR_name, libid, full_nt_sequence)
+  # placing nt seq at 3rd col to keep script same
+
+beta_tcrs_with_nt
+
+# 5244 beta TCRs
+
+write.csv(beta_tcrs_with_nt, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
+
+```
+
+# Read in IGoR output from data with TCRseq (not stitched)
+
+```{r}
+
+igor_alpha_with_nt <- read.csv("../saved_data/igor_output_alpha_no_stitchr.csv") %>%
+  left_join(peter_tcr_with_nt, by = c("TCR_name", "full_nt_sequence"))
+
+igor_alpha_with_nt
+
+# 294 NaN pgens for TRA
+
+igor_combined_with_nt <- read.csv("../saved_data/igor_output_beta_no_stitchr.csv") %>%
+  select(-libid) %>%
+  left_join(peter_tcr_with_nt, by = c("TCR_name", "full_nt_sequence")) %>%
+  full_join(igor_alpha_with_nt) %>%
+  select(-TCR_name)
+
+# 152 NaN pgens for TRA
+
+igor_combined_with_nt
+
+write.csv(igor_combined_with_nt, "../saved_data/Table_S4_Compiled_and_filtered_TCR_sequences_used_in_this_study_w_nucleotide_with_pgen.csv")
+
+```
+
+# Test correlation between +/- stitchr pgen
+
+```{r}
+
+both_igors <- igor_combined %>%
+  dplyr::rename(pgen_stitched = pgen) %>%
+  full_join(igor_combined_with_nt, by = c("v_gene", "j_gene", "junction", "libid", "project", "donor_id", "set", "study_group", "studyGroup")) %>%
+  filter(!(is.na(pgen)),
+         !(is.na(pgen_stitched)),
+         pgen != "NaN",
+         pgen_stitched != "NaN")
+
+both_igors
+
+ggplot(both_igors, aes(x = log10(pgen), y = log10(pgen_stitched))) +
+  geom_point(alpha = 0.2) +
+  labs(x = "log10(pgen, not stitched)", y = "log10(pgen, stitched)") +
+  stat_cor(method = "pearson") +
+  
+  # Add the best-fit line with equation
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  annotate("text", x = 1.5, y = 3, label = "y = 1.1*x - 0.09", color = "red", hjust = 0.8)
+
+# Perform linear regression
+model <- lm(log10(pgen_stitched) ~ log10(pgen), data = both_igors)
+
+# Get the coefficients
+coefficients <- coef(model)
+
+# Extract m (slope) and b (intercept)
+m <- coefficients["log10(pgen)"]
+b <- coefficients["(Intercept)"]
+
+# Print the values of m and b
+cat("Slope (m):", m, "\n")
+cat("Intercept (b):", b, "\n")
 
 ```

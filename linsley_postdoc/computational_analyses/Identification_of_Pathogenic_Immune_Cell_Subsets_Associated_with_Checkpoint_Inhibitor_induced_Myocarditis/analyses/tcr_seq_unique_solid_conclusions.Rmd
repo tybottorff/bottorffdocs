@@ -223,7 +223,12 @@ unique_downsampled_igor_combined_cd8_tems <- igor_combined %>%
   dplyr::slice(1) %>%
   arrange(-count) %>%
   ungroup() %>%
-  mutate(clonotype_order = min_rank(dplyr::desc(count)))
+  #mutate(clonotype_order = min_rank(dplyr::desc(count)))
+  group_by(Patient_ID) %>%
+  filter(row_number() <= 2)
+  #mutate(clonotype_order = min_rank(dplyr::desc(count)))
+
+#A1, B11, B3 only have 1 count max in downsampled df
 
 unique_downsampled_igor_combined_cd8_tems
 
@@ -243,57 +248,41 @@ unique_full_igor_combined_cd8_tems <- igor_combined %>%
   dplyr::slice(1) %>%
   arrange(-count) %>%
   ungroup() %>%
-  mutate(clonotype_order = min_rank(dplyr::desc(count)))
+  mutate(clonotype_rank = "All")
+  #mutate(clonotype_order = min_rank(dplyr::desc(count)))
+  #group_by(Patient_ID) %>%
+  #filter(row_number() <= 2)
+  #mutate(clonotype_order = min_rank(dplyr::desc(count))) 
+
+# likely there are ties issues but whatever for now, considering that then raises issue of > 2 per patient (or > n/patient)
 
 unique_full_igor_combined_cd8_tems
 
 ```
 
-# Create df of just solid conclusions +/- downsampling
+# Create df of just solid conclusions
 
 ```{r}
 
-unique_downsampled_cd8_tems_top_100 <- unique_downsampled_igor_combined %>%
-  filter(clonotype_order <= 100) %>%
-  mutate(clonotype_rank = "Top 100")
+top_3_per_patient_full <- unique_full_igor_combined_cd8_tems %>%
+  group_by(Patient_ID) %>%
+  filter(row_number() <= 3) %>%
+  mutate(clonotype_rank = "Top 3\nper patient")
 
-unique_downsampled_cd8_tems_top_20 <- unique_downsampled_igor_combined %>%
-  filter(clonotype_order <= 20) %>%
-  mutate(clonotype_rank = "Top 20")
+top_4_per_patient_full <- unique_full_igor_combined_cd8_tems %>%
+  group_by(Patient_ID) %>%
+  filter(row_number() <= 4) %>%
+  mutate(clonotype_rank = "Top 4\nper patient")
 
-unique_downsampled_cd8_tems_top_50 <- unique_downsampled_igor_combined %>%
-  filter(clonotype_order <= 50) %>%
-  mutate(clonotype_rank = "Top 50")
+top_5_per_patient_full <- unique_full_igor_combined_cd8_tems %>%
+  group_by(Patient_ID) %>%
+  filter(row_number() <= 5) %>%
+  mutate(clonotype_rank = "Top 5\nper patient")
 
-unique_downsampled_cd8_tems_all <- unique_downsampled_igor_combined %>%
-  mutate(clonotype_rank = "All")
-
-unique_downsampled_cd8_tems <- unique_downsampled_cd8_tems_top_100 %>%
-  full_join(unique_downsampled_cd8_tems_top_20) %>%
-  full_join(unique_downsampled_cd8_tems_top_50) %>%
-  full_join(unique_downsampled_cd8_tems_all)
-
-unique_downsampled_cd8_tems
-
-unique_full_cd8_tems_top_20 <- unique_full_igor_combined_cd8_tems %>%
-  filter(clonotype_order <= 20) %>%
-  mutate(clonotype_rank = "Top 20")
-
-unique_full_cd8_tems_top_30 <- unique_full_igor_combined_cd8_tems %>%
-  filter(clonotype_order <= 30) %>%
-  mutate(clonotype_rank = "Top 30")
-
-unique_full_cd8_tems_top_50 <- unique_full_igor_combined_cd8_tems %>%
-  filter(clonotype_order <= 50) %>%
-  mutate(clonotype_rank = "Top 50")
-
-unique_full_cd8_tems_all <- unique_full_igor_combined_cd8_tems %>%
-  mutate(clonotype_rank = "All")
-
-unique_full_cd8_tems <- unique_full_cd8_tems_top_20 %>%
-  full_join(unique_full_cd8_tems_top_30) %>%
-  full_join(unique_full_cd8_tems_top_50) %>%
-  full_join(unique_full_cd8_tems_all)
+unique_full_cd8_tems <- unique_full_igor_combined_cd8_tems %>%
+  full_join(top_3_per_patient_full) %>%
+  full_join(top_4_per_patient_full) %>%
+  full_join(top_5_per_patient_full)
 
 unique_full_cd8_tems
 
@@ -336,7 +325,7 @@ print(wilcox_result)
 
 ```{r}
 
-unique_full_cd8_tems$clonotype_rank <- factor(unique_full_cd8_tems$clonotype_rank, levels = c("Top 20", "Top 30", "Top 50", "All"))
+unique_full_cd8_tems$clonotype_rank <- factor(unique_full_cd8_tems$clonotype_rank, levels = c("Top 3\nper patient", "Top 4\nper patient", "Top 5\nper patient", "All"))
 
 p <- ggplot(unique_full_cd8_tems, aes(x = clonotype_rank, y = log10(pgen), fill = irAE)) +
   geom_boxplot() +
@@ -360,14 +349,14 @@ wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
 # Print the results
 print(wilcox_result)
 
-# top 20: 0.02002
-# top 30: 0.004194
-# top 50: 0.03725
+# top 3: 0.009639
+# top 4: 0.009833
+# top 5: 0.03519
 # All: 0.1051
 
-# adj: 0.04004000 0.01677600 0.04966667 0.10510000
+# adj: 0.019666 0.019666 0.046920 0.105100
 
-p_values <- c(0.02002, 0.004194, 0.03725, 0.1051)
+p_values <- c(0.009639, 0.009833, 0.03519, 0.1051)
 
 # Adjust p-values using the Benjamini-Hochberg method (default method)
 adjusted_p_values <- p.adjust(p_values, method = "BH")
@@ -377,60 +366,11 @@ print(adjusted_p_values)
 
 ```
 
-# Plot solid pgen conclusions without downsampling, patient bias
-
-```{r}
-
-p <- ggplot(unique_full_cd8_tems, aes(x = Patient_ID, y = log10(pgen), fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~clonotype_rank) +
-    labs(x = "Patient ID", fill = "irAE", y = "TRB pgen (log10)") +
-  theme(axis.text.x = element_blank())
-
-# Adjust y-axis scales with a specified number of ticks
-p + scale_y_continuous(breaks = pretty_breaks(n = 3))
-
-```
-
-# Plot solid length conclusions for downsampling
-
-```{r}
-
-p <- ggplot(unique_downsampled_cd8_tems, aes(x = clonotype_rank, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "CD8 TEM CDR3β\nlength (AAs)") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
-
-# Adjust y-axis scales with a specified number of ticks
-p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
-
-unique_downsampled_cd8_tems %>%
-  group_by(clonotype_rank, irAE) %>%
-  summarize(count = n()) %>%
-  print()
-
-# Filter the data for statistical test
-test_data <- unique_downsampled_cd8_tems %>%
-  filter(clonotype_rank == "Top 100")
-
-# top 20: 0.2888
-# top 100: 0.2735
-
-#adj: 
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
-
-# Print the results
-print(wilcox_result)
-
-```
-
 # Plot solid length conclusions without downsampling
 
 ```{r}
 
-p <- ggplot(unique_full_cd8_tems %>% filter(clonotype_rank %in% c("Top 20", "Top 30", "All")), aes(x = clonotype_rank, y = cdr3_length, fill = irAE)) +
+p <- ggplot(unique_full_cd8_tems, aes(x = clonotype_rank, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
   labs(x = "Clonotype rank", fill = "irAE", y = "CD8 TEM CDR3β\nlength (AAs)")
 
