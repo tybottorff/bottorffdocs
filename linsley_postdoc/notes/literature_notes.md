@@ -88,6 +88,10 @@
  - here, they describe a subset of human memory T<sub>H2</sub> cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific T<sub>H2</sub> cells, denoted as T<sub>H2A</sub> cells, characterized by co-expression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional T<sub>H2</sub> cells
  - transcriptome analysis reveals distinct pathway in initiation of pathogenic responses to allergen
  - elimination of these cells is indicative of clinical responses induced by immunotherapy
+# Association between immune-related adverse events and clinical outcomes to programmed cell death protein 1/programmed death ligand 1 blockade in SCLC
+ - ~40% of 183 patients with ICB had irAE(s)
+ - median time of onset to first irAE: 24 days (IQR 14-55 days)
+ - median progression free and overall survivals longer in iraE group than non-irAE group
 # Association between immune-related side effects and efficacy and benefit of immune checkpoint inhibitors - a systemic review and meta-analysis
 ## Highlights
  - association between irAEs and clinical benefit across all solid tumors regardless of ICI type
@@ -95,6 +99,11 @@
  - grade 3 or higher irAEs (severe irAEs) resulted in better objective response rate but worse overall survival
 ## Introduction
  - ICIs can unleash T cells with subsequent production of pro-inflammatory cytokines like interferon γ, TNF, can result in excessive off-tumor inflammation and autoimmunity
+# Association between immune-related adverse events and efficacy and changes in the relative eosinophil count among patients with advanced urothelial carcinoma treated by pembrolizumab
+ - irAEs associated with higher objective response rate, longer survival
+# Association between immune-related thyroid dysfunction and efficacy of immune checkpoint inhibitors - a systematic review and meta analysis
+ - 47 studies
+ - thyroid irAE during ICI associated with improved anti tumor response despite tumor origin heterogeneity
 # Association between T cell repertoire diversificaton and both clinical response as well as toxicity following immune checkpoint blockade in metastatic cancer patients
  - increase repertoire diversity after ICB correlates with ICB response and irAE development in prostate cancer patients
 # Association of antithyroglobulin antibodies with the development of thyroid dysfunction induced by nivolumab
@@ -179,6 +188,8 @@
  - **baseline markers: peripheral blood lymphocyte counts > 2,000, lower % PD-1 expression on T cells, lower % Tregs, lower IL-6/8 levels, higher IL-17 levels, autoantibodies, some HLA alleles, among other things all associated with more irAEs**
  - **on treatment markers: increased leukocyte count, clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality, increased IL-6 levels, among other things all associated with more irAEs**
  - **takehome for me: on treatment markers including clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality all very interestingly associated with more irAEs**
+# Biomarkers for immune checkpoint inhibitor-mediated tumor response and adverse events
+ - **irAE incidence does depend on tumor type, melanoma has higher frequency of skin and gastrointestinal irAEs but lower frequency of pneumonia compared to NSCLC patients, dermatitis, arthritis, and myalgia more common in melanoma patients than renal cell carcinoma patients, pneumonitis and dyspnea less common in melanoma**
 # Broad TCR repertoire and diverse structural solutions for recognition of an immunodominant CD8<sup>+</sup> T cell epitope
  - many distinct TCRs recognizing HLA-A2-M1 (pMHC) here, solution to specifically recognizing a relatively featureless peptide antigen
 # Cancer immunotherapy based on mutation-speciifc CD4<sup>+</sup> T cells in a patient with epithelial cancer
@@ -343,7 +354,9 @@
 # Clonally-expanded, thyrotoxic effector CD8<sup>+</sup> T cells driven by *IL-21* contribute to checkpoint inhibitor thyroiditis
 ## Abstract
  - clonally expanded population of thyroid-infiltrating cytotoxic CXCR6<sup>+</sup> CD8<sup>+</sup> (effector) T cells in ICI-thyroiditis but not Hashimoto/HC
- - Il-21 drives these thyrotoxic effector CD8<sup>+</sup> T cells (upregulated cytotoxic molecules), Il-21 secreted by intrathyroidal T follicular and T peripheral helper cells
+ - IL-21 drives these thyrotoxic effector CD8<sup>+</sup> T cells (upregulated cytotoxic molecules), IL-21 secreted by intrathyroidal T follicular and T peripheral helper cells
+## Results
+ - thyroid-infiltrating immune cells in ICI-thyroiditis and HT (autoimmune) mostly CD4 and CD8 T cells, IL-21<sup>+</sup> CD4<sup>+</sup> Tfh and Tph cells specifically for CD4s, **more CD8s in ICI-thyroiditis than HT**
 # Clonal replacement of tumor-specific T cells following PD-1 blockade
 ## Abstract
  - unclear if ICB relies/works on reinvigoration of pre-existing tumor infiltrating T cells or on recruitment of novel T cells
@@ -379,6 +392,9 @@
  - NY-ESO-1 is a cancer antigen
  - T cell responses were polyfunctional (IFN-γ, MIP-1β, TNF-α)
  - all 8 patients with clinical benefit had at least 1 irAE, but 87% of all patients had at least one irAE, so it doesn't seem like there was a huge difference in irAE incidence between those with clinical benefit and those without
+# CTLA-4 blockade increases Th17 cells in patients with metastatic melanoma
+ - Th17 CD4<sup>+</sup> T cells produce IL-17, potent inducers of tissue inflammation and autoimmunity
+ - activated PBMCs (*in vitro*) show higher IL-17 production post CTLA-4 blockade
 # Current best practices in single cell RNA-seq analysis: a tutorial
 ## Data production
  - single cell suspension generated by dissociating tissue
@@ -895,6 +911,8 @@
 ## B cell reactivity in irAEs
  - **ICB induces reduction in circulating B cells, increase in CD21<sup>low</sup>PD-1<sup>+</sup> memory B cells and plasmablasts that precede and correlate with irAEs**
  - **autoantibodies present ~50% of time for irAEs**
+# Immune-related adverse events (irAE) in cancer immune checkpoint inhibitors (ICI) and survival outcomes correlation: to rechallenge or not?
+ - no difference in outcome whether or not ICI resumed after irAE-related treatment interruption
 # Immune-related adverse events of anti-PD-1 immune checkpoint inhibitors: a single center experience
  - patients who developed irAEs were younger
 # Immune-Related Gene Expression Profiling After PD-1 Blockade in Non–Small Cell Lung Carcinoma, Head and Neck Squamous Cell Carcinoma, and Melanoma
@@ -998,6 +1016,9 @@
 # Improving T cell recpetor on-target specificity via structure-guided design
 # Incidence of Endocrine Dysfunction Following the Use of Different Immune Checkpoint Inhibitor Regimens
  - high incidence of endocrine dysfunction (hypo/hyper-thyroidism) in patients receiving ICI (immune checkpoint inhibitor) regimens, higher with combination therapy
+# Incidence of immune-related adverse events and its association with treatment outcomes: the MD Anderson Cancer Center experience
+ - 34% of 290 patients had irAEs
+ - severe irAEs associated with improved overall survival
 # Induction of neoantigen-specific cytotoxic T cells and construction of T cell receptor co-engineered T cells for ovarian cancer
 ## Abstract
  - neoantigens implicated as major target of anticancer cytotoxic T cells
@@ -1248,6 +1269,12 @@
  - three cases of 100% homology between tumor associated antigens and microbiota-derived antigens of the Firmicutes and Bacteroidetes phyla (> 90% of gut microbiota)
  - likely induction of crossreactive T CD8<sup>+</sup> T cells, so anti-microbiota T cell memory could serve as anti-cancer T cell memory
  - **biological significance may depend on when individuals encounter microbiota species with antigens similar to tumor: early in life would mean that immune system could recognize antigens as self and that specific T cell clones would be removed (as tumor presenting homologous TAA would have an advantage), but if microbiota colonizes gut later in life the immune system could recognize peptide as non-self and then tumor would be exposed to specific memory T cells**
+# Molecular pathways of colon inflammation induced by cancer immunotherapy
+ - CD8 T cells underlie colitis irAEs, substantial fraction of colitis-associated CD8 T cels originate from Trm populations explaining the frequent early onset of colitis symptoms following ICB
+ - **n = 8 (melanoma ICB colitis), n = 8 (HC), n = 6 (melanoma ICB no irAE), looks like a good dataset! TCR and RNA!**
+# Molecular signatures of antitumor neoantigen-reactive T cells from metastatic human cancers
+ - neoantigen-specific TILs exhibited tumor-specific expansion with dysfunctional phenotypes, distinct from blood-emigrant bystanders and regulatory TILs
+ - neoantigen-specific TILs largely exhibited tumor-specific clonal expansion, with only limited overlap with dually expanded TILs found in the peripheral blood, possible caveat to any PBMC-based TCR feature analysis is that we don't know if they are tumor-specific or not, although here this is just neoantigen, so perhaps there is more sharing betweeen PBMC and TILs targeting tumor-associated antigens
 # mTOR regulates T cell exhaustion and PD-1-targeted immunotherapy response during chronic viral infection
  - background: PD-1-blockade enhances T cell response by promoting differentiation of stem-like T cells towards TIM3<sup>+</sup> cells
  - results: blocking mTOR during T cell expansion enhances T cell response (stem-like T cells accumulate), but blocking mTOR after exhaustion has progressed causes immunosuppression (decreased TIM3<sup>+</sup> cells, increased viral load)
@@ -1340,6 +1367,9 @@
 # PD-1 maintains CD8 T cell tolerance towards cutaneous neoantigens
  - mouse model, skin-specific expression of T cell antigens in epidermis
  - PD-1 maintains skin tolerance by preventing tissue-infiltrating antigen-specific CD8 T cells from becoming fully functional and gaining acess to epidermal APCs
+# PD-L1 inhibitor-induced thyroiditis is associated with better overall survival in cancer patients
+ - 21% of 91 patients with PD-1 blockade developed thyroid irAE
+ - irAE associated with anti tumor response
 # Peripheral blood lymphocyte subsets predict the efficacy of immune checkpoint inhibitors in non-small cell lung cancer
  - high CD4<sup>+<sup>CD45RA<sup>-</sup> T cell and low CD8<sup>+</sup> T lymphocyte associated with better ICI prognosis
  - CD4<sup>+</sup> T cells higher in patients with irAEs
@@ -1360,11 +1390,18 @@
 # Phenotypic signatures of circulating neoantigen-reactive CD8<sup>+</sup> T cells in patients with metastatic cancers
 ## Abstract
  - circulating antitumor T cells are rarer and less dysfunctional than neoantigen TILs but target same neoantigens, only partially share TCR repertoire with TILs
+## Introduction
+ - **apparently possible to identify antitumor TCRs from TIL transcriptomic state, and here they extend that to PBMCs?**
+## Results
+ - circulating tumor reactive T cells: lower expression of cytotoxic molecules, higher expression of T cell activation genes, memory quiescence, tissue residency, inhibitory markers
 # Potentiating local and abscopal antitumor efficacy through radiation with FAP-CD40 DARPin and anti-PD1 therapy
  - ~70% of patients develop resistance to ICI
  - CD40: costimulatory molecule that drives DCs and TAMs (tumor associated macrophages) to prime T cells
  - FAP: fibroblast activation protein, upregulated in tumor in response to radiation (which can be taken advantage of for drug delivery to TME via FAP-CD40 DARPin)
  - FAP-CD40 DARPin: uses FAP and CD40 binding domains to cross-link and activate CD40 specifically in tumor
+# Prevalence of immune-related adverse events and anti-tumor efficacy following immune checkpoint inhibitor therapy in Japanese patients with various solid tumors
+ - combination ICB increases irAE risk
+ - baseline eosinophil count predicts liver-irAE
 # Prior imune checkpoint inhibitor (ICI) therapy is associated with decreased COVID-19-related hospitalizations and complications in patients with cancer: results of a propensity-matched analysis of the OnCovid registry
  - COVID-19 pathology/mortality related to overactive immune response, so perhaps surprising for ICI (augmenting immune response) to help with COVID-19
 # Quantifiable predictive features define epitope-specific T cell receptor repertoires
@@ -1541,6 +1578,8 @@
  - mice
 # Statistical analysis of CDR3 length distributions for the assessment of T and B cell repertoire biases
  - Gaussian-like distribution in length pattern, given large number of small effects (random mechanism of junction diversity) acting additively and independently on CDR3 length
+# Stitchr: stitching coding TCR nucleotide sequences from V/J/CDR3 information
+ - leader sequence/signal peptide just refers to signal for TCR to be trafficked to cell membrane
 # Structural basis for T cell recognition of cancer neoantigens and implications for predicting neoepitope immunogenicity
  - oncogenic mutations can improve antigen presentation by strengthening pMHC binding, mutation can also be detected by direct interactions with TCR
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
@@ -1709,6 +1748,11 @@
 # T cell repertoire in peripheral blood as a potential biomarker for predicting response to concurrent cetuximab and nivolumab in head and neck squamous cell carcinoma
  - TCRB chain profiling
  - increased baseline TCR sequence diversity associated with ICB response
+# T cells specific for alpha-myosin drive immunotherapy related myocarditis
+ - mice
+ - CD8<sup>+</sup> dominant cell population in immune infiltrate in heart and drive myocarditis (anti-CD8 antibody rescues mice)
+ - alpha-myosin antigen source for three MHCI restricted TCRs from mice with myocarditis
+ - **peripheral blood from three humans with ICI-myocarditis were expanded by alpha-myosin peptides, these alpha-myosin expanded T cells shared TCR clonotypes with diseased heart and skeletal muscle infiltrates**
 # T cell tolerance: central and peripheral
 ## Summary
  - central tolerance: clonal deletion and diversion (Treg differentiation) control self-reactive T cells in the thymus
