@@ -231,7 +231,9 @@ unique_downsampled_igor_combined_cd8_tems <- igor_combined %>%
 #A1, B11, B3 only have 1 count max in downsampled df
 
 unique_downsampled_igor_combined_cd8_tems
+```
 
+```{r}
 unique_full_igor_combined_cd8_tems <- igor_combined %>%
   pivot_longer(cols = matches("^(TRA|TRB)"),
                names_to = c("Chain", ".value"),

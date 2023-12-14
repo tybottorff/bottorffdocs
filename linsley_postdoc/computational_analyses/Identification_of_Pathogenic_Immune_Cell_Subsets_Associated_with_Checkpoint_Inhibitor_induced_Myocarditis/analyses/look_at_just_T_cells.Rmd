@@ -114,7 +114,7 @@ T_cells <- FindClusters(T_cells, resolution = 3)
 
 ```{r}
 
-reference <- LoadH5Seurat("../raw_data/pbmc_multimodal.h5seurat")
+reference <- LoadH5Seurat("../../pbmc_multimodal.h5seurat")
 
 ```
 
@@ -145,7 +145,7 @@ T_cells <- MapQuery(
     celltype.l2 = "celltype.l2",
     predicted_ADT = "ADT"
   ),
-  reference.reduction = "pca", 
+  reference.reduction = "pca",
   reduction.model = "wnn.umap"
 )
 
@@ -180,7 +180,7 @@ anchors <- FindTransferAnchors(
   reference.reduction = "pca",
   dims = 1:50
 )
-T_cells <- MapQuery(
+just_T_cells <- MapQuery(
   anchorset = anchors,
   query = just_T_cells,
   reference = reference,
@@ -215,223 +215,139 @@ saveRDS(just_T_cells, "../saved_data/final_seurat_T_cells.rds")
 
 ```
 
-# Map clonal relations
+# Compare clusters when excluding TCR genes
 
 ```{r}
 
-public_df <- just_T_cells@meta.data %>%
-  group_by(cdr3, v_gene, j_gene, c_gene) %>%
-  filter(n_distinct(Patient_ID) > 1) %>%
-  # need to fix early/late patient still
-  mutate(joined_cdr3 = paste(cdr3_TRA, cdr3_TRB, sep = ""))
-  
-public_df
+# Example regex to match TCR gene names
+tcr_gene_regex <- "^TR[ABCDG][VDJC]"
 
-clonal_relations <- just_T_cells@meta.data %>%
-  mutate(joined_cdr3 = paste(cdr3_TRA, cdr3_TRB, sep = "")) %>%
-  mutate(public = if_else(joined_cdr3 %in% public_df$joined_cdr3, "public", "private"))
+# Extract TCR genes using the regex
+tcr_genes <- grep(tcr_gene_regex, rownames(just_T_cells), value = TRUE)
 
-clonal_relations
+# Print or use the resulting TCR gene list
+print(tcr_genes)
 
-# Add metadata of publicness back
-
-just_T_cells <- AddMetaData(object = just_T_cells, metadata = clonal_relations)
+# Filter out TCR genes from the Seurat object
+just_T_cells_filtered <- subset(just_T_cells, features = !rownames(just_T_cells) %in% tcr_genes)
 
 ```
-
-# Airline plot
 
 ```{r}
 
-# Subset public cells
-public_cells <- subset(just_T_cells, subset = public == "public")
+#just_T_cells_filtered <- RunPCA(just_T_cells_filtered, npcs = 30, verbose = FALSE)
+#just_T_cells_filtered <- RunUMAP(just_T_cells_filtered, reduction = "pca", dims = 1:30)
+#just_T_cells_filtered <- FindNeighbors(just_T_cells_filtered, reduction = "pca", dims = 1:30)
+#just_T_cells_filtered <- FindClusters(just_T_cells_filtered, resolution = 3)
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = just_T_cells_filtered,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50,
+  recompute.residuals = FALSE
+)
+just_T_cells_filtered <- MapQuery(
+  anchorset = anchors,
+  query = just_T_cells_filtered,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca", 
+  reduction.model = "wnn.umap"
+)
 
-# Extract UMAP coordinates for public cells
-umap_coordinates <- Embeddings(public_cells, "umap")
+p1 = DimPlot(just_T_cells_filtered, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
 
-# Plot UMAP
-p2 <- DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+p2 = DimPlot(just_T_cells_filtered, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
 
-# Loop through unique flavors
-for (flavor in unique(clonal_relations$joined_cdr3)) {
-  # Subset public cells of the current flavor
-  flavor_cells <- WhichCells(public_cells, cells = row.names(public_cells)[public_cells$joined_cdr3 == flavor])
-
-  # Extract UMAP coordinates for cells of the current flavor
-  flavor_umap_coords <- umap_coordinates[row.names(flavor_cells), ]
-  
-  # Add lines connecting cells of the same flavor
-  if (nrow(flavor_umap_coords) > 1) {
-    lines_data <- data.frame(
-      x = flavor_umap_coords[1:(nrow(flavor_umap_coords) - 1), 1],
-      y = flavor_umap_coords[1:(nrow(flavor_umap_coords) - 1), 2],
-      xend = flavor_umap_coords[2:nrow(flavor_umap_coords), 1],
-      yend = flavor_umap_coords[2:nrow(flavor_umap_coords), 2]
-    )
-    
-    p2 <- p2 + geom_segment(data = lines_data, aes(x = x, y = y, xend = xend, yend = yend), color = "black", size = 0.5)
-  }
-}
-
-# Display the plot
-print(p2)
+p1 + p2
 
 ```
 
+```{r}
 
+#just_T_cells <- just_T_cells_filtered[, !(is.na(just_T_cells_filtered@meta.data$cdr3_TRA) | is.na(just_T_cells_filtered@meta.data$cdr3_TRB)) & just_T_cells_filtered@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & just_T_cells_filtered@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
 
+#just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
+#just_T_cells <- RunUMAP(just_T_cells, reduction = "pca", dims = 1:30)
+#just_T_cells <- FindNeighbors(just_T_cells, reduction = "pca", dims = 1:30)
+#just_T_cells <- FindClusters(just_T_cells, resolution = 3)
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = just_T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50,
+  recompute.residuals = FALSE
+)
+just_T_cells <- MapQuery(
+  anchorset = anchors,
+  query = just_T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca", 
+  reduction.model = "wnn.umap"
+)
 
+```
 
+```{r}
 
-rm(list = ls())
-library(plyr)
-library(edgeR)
-library(compareGroups)
-library(dbscan)
-library(MAST)
-library(ggsignif)
-library(monocle3)
-library(dplyr)
-library(geosphere)
+p1 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
 
-library(ggplot2); library(reshape2); theme_set(theme_bw(26) + theme(panel.grid.major = element_blank(), 
-                                                 panel.grid.minor = element_blank()) +
-                              theme(legend.key = element_blank()))
-update_geom_defaults("point", aes(size = 4))
+p2 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
 
-## load files
-setwd("~/Dropbox/RNAseq/Trinity/CD45/P91_Karen_junbao/Monocle_clone_linking/")
+p1 + p2
 
-tcrs = readRDS("cds_scanorama_batch4_tcrs.rds") # use cds object as source of TCRs
+```
 
-tcrs = tcrs[c("libid", "v_gene", "j_gene", "junction")]
-colnames(tcrs) = c("libID", "V.gene", "J.gene", "junction") # 1413
-#tcrs = tcrs[!duplicated(tcrs[,]),] #1406
+```{r}
 
-anno.tcrs = readRDS("cds_scanorama_batch4_tcrs.rds")
-colnames(anno.tcrs) = gsub("v_gene", "V.gene", colnames(anno.tcrs))
-colnames(anno.tcrs) = gsub("j_gene", "J.gene", colnames(anno.tcrs))
-colnames(anno.tcrs) = gsub("junction", "junction", colnames(anno.tcrs))
-colnames(anno.tcrs) = gsub("libid", "libID", colnames(anno.tcrs))
+just_T_cells <- just_T_cells[, !(is.na(just_T_cells@meta.data$cdr3_TRA) | is.na(just_T_cells@meta.data$cdr3_TRB)) & just_T_cells@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & just_T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
 
-cds = readRDS("cds_structure_scanorama_batch4.rds")
+just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
+just_T_cells <- RunUMAP(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindNeighbors(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindClusters(just_T_cells, resolution = 3)
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = just_T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50,
+  recompute.residuals = FALSE
+)
+just_T_cells <- MapQuery(
+  anchorset = anchors,
+  query = just_T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca", 
+  reduction.model = "wnn.umap"
+)
 
-cds$libID = cds$libId
+p1 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
 
-## read cds object
+p2 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
 
-p = readRDS("cds_scanorama_batch4.rds")
+p1 + p2
 
-anno.tcrs = subset(anno.tcrs, libID %in% cds$libID) # subset tcrs to libs in cds object
+```
 
-## look at TCR expansion in clusters
+```{r}
 
-cut <- 2
-no = ddply(anno.tcrs,.(V.gene, J.gene,junction), plyr::summarize, sum = length(junction))
-no.sub = subset(no, sum>=cut)
-no.not.sub = subset(no, sum<cut)
+saveRDS(just_T_cells, "../saved_data/final_seurat_T_cells.rds")
 
-E = subset(anno.tcrs, junction %in% no.sub$junction) # 1490
-NE = subset(anno.tcrs, !junction %in% E$junction) # 4232
-E.cell = subset(anno, anno$libID %in% E$libID) # 844
-NE.cell = subset(anno, !anno$libID %in% E$libID) # 2203
-
-E.cell.u = E.cell[!duplicated(E.cell$libID),] # 844
-NE.cell.u = NE.cell[!duplicated(NE.cell$libID),] # 2203
-
-## calculate overlap using circos code
-
-sub = E
-
-##### trim TCR sequences
-melt.tcrs = sub[,]
-melt.tcrs = melt.tcrs[c("libID", "V.gene", "junction")]
-melt.tcrs$junction = as.character(melt.tcrs$junction)
-
-###### combine TRAV as origing and TRBV as deistination using junction as key
-melt.join = merge(melt.tcrs, melt.tcrs, by = "junction", stringsAsFactors = F)
-melt.join$junction = as.character(melt.join$junction)
-
-#melt.join = subset(melt.join, !melt.join$libID.x== melt.join$libID.y)
-
-##### limit variables
-
-melt.join = melt.join[c(1,2,4)]
-colnames(melt.join) = c("junction", "orig", "dest")
-
-##### remove duplicated TCR records including libID
-#melt.join = subset(melt.join, !orig == dest)
-mju = melt.join # 3386
-mju = mju[!duplicated(mju[,]),] # 3770
-
-#### tabulate repeated pairings without libID and create df2
-#table.mju= aggregate(list(numdup=rep(1,nrow(mju[2:ncol(mju)]))), mju[2:ncol(mju)], length)
-table.mju = ddply(mju,.(orig, dest), plyr::summarize, numdup = length(orig))
-
-table.mju$orig = as.character(table.mju$orig)
-table.mju$dest = as.character(table.mju$dest)
-table.set = subset(table.mju, table.mju$orig %in% sub$libID)
-
-## remove duplicated combinations of orig and dest http://stackoverflow.com/questions/24194879/all-combinations-of-two-and-remove-if-they-are-same-in-r
-
-library(data.table)
-library(igraph)
-g <-graph_from_data_frame(table.set[, 1:2], directed = F)
-g <- simplify(g, remove.multiple = T, remove.loops = T)
-zz = data.frame(get.edgelist(g))
-colnames(zz) = c("orig", "dest")
-
-temp = get.data.frame(g)
-colnames(temp) = c("orig", "dest")
-tempa = data.frame(orig = temp$dest, dest = temp$orig) # 730
-#tempc = rbind(temp, tempa)
-#tempc = tempc[!duplicated(tempc[,]),]
-
-#temp$merge = paste(temp$orig, temp$dest)
-
-t.sub = subset(table.set, table.set$orig %in% zz$orig & table.set$dest %in% zz$dest)
-mdf6 = t.sub # 238
-mdf6 = temp
-
-mdf6 = subset(mdf6, !orig == dest) # 1824
-
-## 
-
-## extract UMAP coordinates from ggplot object and calculate centroids for clusters as mean of x and y coordiintes
-cluster_cols = c("red", "gray")
-cluster_cols2 = c("red", "blue", "gray")
-cluster_cols3 = c("gray", "red")
- 
-gb<-ggplot_build(p)
-gb.data = gb$data[[1]]
-libs = cds$libID
-gb.data$libID = libs
-
-## extract UMAP coordinates for each expanded cell
-
-mdf6$x = gb.data$x[match(mdf6$orig, gb.data$libID)]
-mdf6$y = gb.data$y[match(mdf6$orig, gb.data$libID)]
-mdf6$xend = gb.data$x[match(mdf6$dest, gb.data$libID)]
-mdf6$yend = gb.data$y[match(mdf6$dest, gb.data$libID)]
-
-for.lines = mdf6
-
-#for.lines = for.lines[,c("lenOver", "x","y","xend", "yend")]
-#for.lines$thick = for.lines$numdup/4
-#for.lines$thick = c(0.00000125)
-for.lines$thick = c(0.1)
-
-#for.lines$thick = c(1)
-
-### colour by cluster
-
-dev.off()
-quartz(width=10,height=8, dpi=72)  ### open plotting window
-
-## set defaults
-theme_set(theme_bw(30) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.key = element_blank()))
-
-pal = c('#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffed6f','#b15928', "gray")	
-plot_cells(cds, color_cells_by="cluster", cell_size = 2, group_label_size = 0.000001, graph_label_size = 0.0001, show_trajectory_graph = F, label_branch_points = F, label_cell_groups = F)
-last_plot() + scale_color_manual(values = pal, name = "cluster")# custom colors
-last_plot() + geom_curve(data = for.lines, aes(x = x, y = y, xend = xend, yend = yend), size = for.lines$thick, curvature = 0.6)
+```

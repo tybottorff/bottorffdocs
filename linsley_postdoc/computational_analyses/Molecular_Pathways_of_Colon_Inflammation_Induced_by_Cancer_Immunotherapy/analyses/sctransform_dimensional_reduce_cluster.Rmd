@@ -1,0 +1,190 @@
+---
+title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RDS of QC filtered data
+
+```{r}
+
+colon_t_cells_filtered <- readRDS("../saved_data/qc_filtered.rds")
+
+```
+
+# Split data by sample, prepare (normalize, find variable features, etc.) before integrating by finding anchors
+
+```{r}
+
+# split the dataset into a list of seurat objects (for each patient sample)
+colon_t_cells_filtered.list <- SplitObject(colon_t_cells_filtered, split.by = "orig.ident")
+
+# normalize and identify variable features for each dataset independently
+colon_t_cells_filtered.list <- lapply(X = colon_t_cells_filtered.list, FUN = SCTransform, method = "glmGamPoi")
+
+```
+
+# Find integration features
+
+```{r}
+
+# select features that are repeatedly variable across datasets for integration
+features <- SelectIntegrationFeatures(object.list = colon_t_cells_filtered.list, nfeatures = 3000)
+
+# prep step
+colon_t_cells_filtered.list <- PrepSCTIntegration(object.list = colon_t_cells_filtered.list, anchor.features = features)
+
+# run PCA to allow rpca use later
+colon_t_cells_filtered.list <- lapply(X = colon_t_cells_filtered.list, FUN = RunPCA, features = features)
+
+```
+
+# Randomly select a single sample per group to use as a reference
+
+```{r}
+
+# Set a random seed for reproducibility
+set.seed(123)
+
+# Extract the starting letters from the names
+starting_letters <- substr(names(colon_t_cells_filtered.list), 1, 1)
+
+# Create a data frame with Seurat object names and their starting letters
+seurat_info <- data.frame(name = names(colon_t_cells_filtered.list), starting_letter = starting_letters)
+
+# Randomly sample one Seurat object from each starting letter group
+randomly_selected_seurat <- seurat_info %>%
+  group_by(starting_letter) %>%
+  sample_n(1) %>%
+  ungroup() %>%
+  select(name)
+
+randomly_selected_seurat
+
+```
+
+# Find integration anchors using the above single sample/group as references
+
+```{r}
+
+# first integrates these references, then aligns other samples within each group to that integrated reference
+# this command creates an 'integrated' data assay
+
+immune.anchors <- FindIntegrationAnchors(object.list = colon_t_cells_filtered.list, reference = which(names(colon_t_cells_filtered.list) %in% randomly_selected_seurat$name), normalization.method = "SCT", anchor.features = features, reduction = "rpca", k.anchor = 10, dims = 1:30)
+
+```
+
+# Integrate the data
+
+```{r}
+
+immune.combined <- IntegrateData(anchorset = immune.anchors, normalization.method = "SCT")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/integrated.rds")
+
+```
+
+# Specify integration, scale data
+
+```{r}
+
+# specify that we will perform downstream analysis on the corrected data note that the
+# original unmodified data still resides in the 'RNA' assay
+DefaultAssay(immune.combined) <- "integrated"
+
+# scale data
+immune.combined <- ScaleData(immune.combined, verbose = FALSE)
+
+```
+
+# PCA using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined <- RunPCA(immune.combined, npcs = 30, verbose = FALSE)
+
+```
+
+# UMAP using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined <- RunUMAP(immune.combined, reduction = "pca", dims = 1:30)
+
+```
+
+# Find clusters
+
+```{r}
+
+immune.combined <- FindNeighbors(immune.combined, reduction = "pca", dims = 1:30)
+immune.combined <- FindClusters(immune.combined, resolution = 3)
+
+```
+
+# Visualize UMAP by patient ID
+
+```{r}
+
+DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident")
+
+ggsave("../figures/umap_patient_id.svg")
+
+```
+
+# Visualize UMAP by cluster
+
+```{r}
+
+DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/umap_cluster.svg")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/integrated_transformed_reduced_clustered.rds")
+
+```
