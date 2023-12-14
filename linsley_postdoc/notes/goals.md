@@ -1,10 +1,12 @@
 # Find publicly available data (**scRNAseq + TCRseq**, like 10X) to mine
 ## Data shortlist
 ### Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis
+### Insight into immune profile associated with vitiligo onset and anti-tumoral response in melanoma patients receiving anti-PD-1 immunotherapy
+ - no RNA data but there is flow data for cell typing?
 ### Interleukin 21 drives CXCR6+ CD8+ T cell mediators in Autoimmune Checkpoint Inhibitor Thyroiditis
- - can't find TCRseq data (emailed for help 11.30.23)
+ - no healthy control T cell data
 ### Distinct molecular and immune hallmarks of inflammatory arthritis induced by immune checkpoint inhibitors for cancer therapy
- - can't find TCRseq data, emailed for help 11.30.23
+ - can't find TCRseq data, emailed for help 11.30.23 (Nurieva) & 12.14.23 (Wang)
 ### Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
  - only 3 patients
  - no irAE data (emailed for it 11.30.23)
