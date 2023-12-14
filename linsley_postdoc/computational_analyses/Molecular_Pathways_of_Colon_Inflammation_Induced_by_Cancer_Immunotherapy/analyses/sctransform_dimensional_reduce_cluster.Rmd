@@ -45,15 +45,32 @@ colon_t_cells_filtered <- readRDS("../saved_data/qc_filtered.rds")
 
 ```
 
+# Create metadata for CD3 vs. CD45 type
+
+```{r}
+
+colon_t_cells_filtered$cd_type <- ifelse(grepl("-CD3$", colon_t_cells_filtered$orig.ident), "CD3", 
+                                         ifelse(grepl("-CD45$", colon_t_cells_filtered$orig.ident), "CD45", "Other"))
+
+```
+
+# Subset Seurat for just T cells
+
+```{r}
+
+colon_qc_just_t_cells <- subset(colon_t_cells_filtered, subset = cd_type == "CD3")
+
+```
+
 # Split data by sample, prepare (normalize, find variable features, etc.) before integrating by finding anchors
 
 ```{r}
 
 # split the dataset into a list of seurat objects (for each patient sample)
-colon_t_cells_filtered.list <- SplitObject(colon_t_cells_filtered, split.by = "orig.ident")
+colon_qc_just_t_cells.list <- SplitObject(colon_qc_just_t_cells, split.by = "orig.ident")
 
 # normalize and identify variable features for each dataset independently
-colon_t_cells_filtered.list <- lapply(X = colon_t_cells_filtered.list, FUN = SCTransform, method = "glmGamPoi")
+colon_qc_just_t_cells.list <- lapply(X = colon_qc_just_t_cells.list, FUN = SCTransform, method = "glmGamPoi")
 
 ```
 
@@ -62,13 +79,13 @@ colon_t_cells_filtered.list <- lapply(X = colon_t_cells_filtered.list, FUN = SCT
 ```{r}
 
 # select features that are repeatedly variable across datasets for integration
-features <- SelectIntegrationFeatures(object.list = colon_t_cells_filtered.list, nfeatures = 3000)
+features <- SelectIntegrationFeatures(object.list = colon_qc_just_t_cells.list, nfeatures = 3000)
 
 # prep step
-colon_t_cells_filtered.list <- PrepSCTIntegration(object.list = colon_t_cells_filtered.list, anchor.features = features)
+colon_qc_just_t_cells.list <- PrepSCTIntegration(object.list = colon_qc_just_t_cells.list, anchor.features = features)
 
 # run PCA to allow rpca use later
-colon_t_cells_filtered.list <- lapply(X = colon_t_cells_filtered.list, FUN = RunPCA, features = features)
+colon_qc_just_t_cells.list <- lapply(X = colon_qc_just_t_cells.list, FUN = RunPCA, features = features)
 
 ```
 
@@ -80,14 +97,14 @@ colon_t_cells_filtered.list <- lapply(X = colon_t_cells_filtered.list, FUN = Run
 set.seed(123)
 
 # Extract the starting letters from the names
-starting_letters <- substr(names(colon_t_cells_filtered.list), 1, 1)
+starting_letters_list <- substr(names(colon_qc_just_t_cells.list), 1, 2)
 
 # Create a data frame with Seurat object names and their starting letters
-seurat_info <- data.frame(name = names(colon_t_cells_filtered.list), starting_letter = starting_letters)
+seurat_info <- data.frame(name = names(colon_qc_just_t_cells.list), starting_letters = starting_letters_list)
 
-# Randomly sample one Seurat object from each starting letter group
+# Randomly sample one Seurat object from each starting letters group
 randomly_selected_seurat <- seurat_info %>%
-  group_by(starting_letter) %>%
+  group_by(starting_letters) %>%
   sample_n(1) %>%
   ungroup() %>%
   select(name)
@@ -103,7 +120,7 @@ randomly_selected_seurat
 # first integrates these references, then aligns other samples within each group to that integrated reference
 # this command creates an 'integrated' data assay
 
-immune.anchors <- FindIntegrationAnchors(object.list = colon_t_cells_filtered.list, reference = which(names(colon_t_cells_filtered.list) %in% randomly_selected_seurat$name), normalization.method = "SCT", anchor.features = features, reduction = "rpca", k.anchor = 10, dims = 1:30)
+immune.anchors <- FindIntegrationAnchors(object.list = colon_qc_just_t_cells.list, reference = which(names(colon_qc_just_t_cells.list) %in% randomly_selected_seurat$name), normalization.method = "SCT", anchor.features = features, reduction = "rpca", k.anchor = 10, dims = 1:30)
 
 ```
 
@@ -136,11 +153,31 @@ immune.combined <- ScaleData(immune.combined, verbose = FALSE)
 
 ```
 
+# Remove TCR genes
+
+ - these dominate clustering
+
+```{r}
+
+# Example regex to match TCR gene names
+tcr_gene_regex <- "^TR[ABCDG][VDJC]"
+
+# Extract TCR genes using the regex
+tcr_genes <- grep(tcr_gene_regex, rownames(immune.combined), value = TRUE)
+
+# Print or use the resulting TCR gene list
+print(tcr_genes)
+
+# Filter out TCR genes from the Seurat object
+immune.combined_no_tcr_genes <- subset(immune.combined, features = !rownames(immune.combined) %in% tcr_genes)
+
+```
+
 # PCA using 2000 most variable genes and top 30 PCs
 
 ```{r}
 
-immune.combined <- RunPCA(immune.combined, npcs = 30, verbose = FALSE)
+immune.combined_no_tcr_genes <- RunPCA(immune.combined_no_tcr_genes, npcs = 30, verbose = FALSE)
 
 ```
 
@@ -148,7 +185,7 @@ immune.combined <- RunPCA(immune.combined, npcs = 30, verbose = FALSE)
 
 ```{r}
 
-immune.combined <- RunUMAP(immune.combined, reduction = "pca", dims = 1:30)
+immune.combined_no_tcr_genes <- RunUMAP(immune.combined_no_tcr_genes, reduction = "pca", dims = 1:30)
 
 ```
 
@@ -156,8 +193,8 @@ immune.combined <- RunUMAP(immune.combined, reduction = "pca", dims = 1:30)
 
 ```{r}
 
-immune.combined <- FindNeighbors(immune.combined, reduction = "pca", dims = 1:30)
-immune.combined <- FindClusters(immune.combined, resolution = 3)
+immune.combined_no_tcr_genes <- FindNeighbors(immune.combined_no_tcr_genes, reduction = "pca", dims = 1:30)
+immune.combined_no_tcr_genes <- FindClusters(immune.combined_no_tcr_genes, resolution = 3)
 
 ```
 
@@ -165,7 +202,7 @@ immune.combined <- FindClusters(immune.combined, resolution = 3)
 
 ```{r}
 
-DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident")
+DimPlot(immune.combined_no_tcr_genes, reduction = "umap", group.by = "orig.ident")
 
 ggsave("../figures/umap_patient_id.svg")
 
@@ -175,7 +212,7 @@ ggsave("../figures/umap_patient_id.svg")
 
 ```{r}
 
-DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE)
+DimPlot(immune.combined_no_tcr_genes, reduction = "umap", label = TRUE, repel = TRUE)
 
 ggsave("../figures/umap_cluster.svg")
 
@@ -185,6 +222,6 @@ ggsave("../figures/umap_cluster.svg")
 
 ```{r}
 
-saveRDS(immune.combined, "../saved_data/integrated_transformed_reduced_clustered.rds")
+saveRDS(immune.combined_no_tcr_genes, "../saved_data/integrated_transformed_reduced_clustered.rds")
 
 ```
