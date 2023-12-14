@@ -97,7 +97,7 @@ colon_qc_just_t_cells.list <- lapply(X = colon_qc_just_t_cells.list, FUN = RunPC
 set.seed(123)
 
 # Extract the starting letters from the names
-starting_letters_list <- substr(names(colon_qc_just_t_cells.list), 1, 2)
+starting_letters_list <- sub("[0-9].*$", "", names(colon_qc_just_t_cells.list))
 
 # Create a data frame with Seurat object names and their starting letters
 seurat_info <- data.frame(name = names(colon_qc_just_t_cells.list), starting_letters = starting_letters_list)
@@ -165,11 +165,12 @@ tcr_gene_regex <- "^TR[ABCDG][VDJC]"
 # Extract TCR genes using the regex
 tcr_genes <- grep(tcr_gene_regex, rownames(immune.combined), value = TRUE)
 
-# Print or use the resulting TCR gene list
-print(tcr_genes)
+tcr_genes
+
+tcr_genes_not_matching <- setdiff(rownames(immune.combined), tcr_genes)
 
 # Filter out TCR genes from the Seurat object
-immune.combined_no_tcr_genes <- subset(immune.combined, features = !rownames(immune.combined) %in% tcr_genes)
+immune.combined_no_tcr_genes <- subset(immune.combined, features = tcr_genes_not_matching)
 
 ```
 
