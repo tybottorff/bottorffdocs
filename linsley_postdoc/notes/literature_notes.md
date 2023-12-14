@@ -444,6 +444,11 @@
 # Depletion of exhausted alloreactive T cells enables targeting of stem-like memory T cells to generate tumor-specific immunity
  - alloreactivity refers to ability of T cells to recognize peptide-allogenic-MHC complexes not encountered during thymic development (HLA/MHC-mismatch recognition, manifestation of transplant rejection and graft-versus-host disease)
  - find that CD8<sup>+</sup> T cell exhaustion in bone marrow was primarily alloantigen-driven
+# Determinants of anti-PD-1 response and resistance in clear cell renal cell carcinoma
+## Abstract
+ - higher number of expanded TCR clones in pre-treatment responders suggesting pre-existing immunity
+## Introduction
+ - clear cell renal cell carcinoma: most common subtype of kidney cancer, immunogenic, most tumor mutational burden (comparable to "cold" tumors, 10-fold lower than melanoma, TMB doesn't associate with ICB response)
 # Development of TCRB CDR3 length repertoire of human T lymphocytes
  - previous literature: CDR3s of CD4 thymocytes become shorter during thymic development, i.e. thymocytes with longer CDR3s are more likely to be deleted
  -repertoire distribution patterns depend on use of the BV gene; BV‐dependent patterns were shaped during thymic selections and maintained in the peripheral blood
@@ -807,6 +812,22 @@
  - as previously seen
 ### Negative selection against many peptides results in TCR sequences with peptide contact residues enriched in weakly interacting amino acids
  - when there are many peptides in thymus, CDR3s of TCRs enriched in amino acids that interact weakly with other amino acids, strong interactions in the case where there are few peptides in thymus
+# Human T cell development, localization, and function throughout life
+## Changes in T cells throughout life
+ - early life (infancy and early childhood): most T cells are naive, also Tregs, greatest number of new antigens are encountered, naïve T cells play key protective roles in fending off pathogens, Treg cells are critical for developing tolerance to innocuous and ubiquitous antigens, and long-term reserves of memory T cells are established
+ - childhood-adulthood: memory T cells accumulate with antigen experience, with the level of memory T cell accumulation plateauing in adulthood and maintained over decades
+ - adulthood: fewer new antigens are encountered and tolerance establishment may be less prevalent, with the role of T cells shifting to maintain homeostasis and immunoregulation in the context of repeat and chronically encountered antigens, with surveillance for tumors also important during this period
+ - late life: increased inflammation and a decline in T cell functionality, contributing to immune dysregulation and associated pathology
+## T cell localization
+ - most T cells in lymphoid tissue (bone marrow, spleen, tonsils, and the 500-700 lymph nodes), also many T cells in mucosal sites (lungs, intestines) and skin, 2-3% of all T cells in peripheral blood
+## Thymopoiesis
+ - progenitors from bone marrow lacking CD4/CD8 undergo TCR rearrangement to generate CD4<sup>+</sup> CD8<sup>+</sup> double positive thymocytes in thymus
+ - Tregs are ~10% of CD4<sup>+</sup> T cells (more in early life, ~10-30%, and less later in life, ~5%)
+ - humans born with full complement of T cells (unlike mice who are born lymphopenic)
+ - majority of naive T cells derive from peripheral turnover in humans (unlike mice, majority from thymus even in old mice)
+ - naive T cells significant proportion (~20-50%) of T cells in lymph nodes decades after thymic output stops
+## T cell effector and memory differentiation
+ - clonal expansion (activated pathogen-specific T cells expand and differentiate into effector T cells), contraction (majority of effector T cells die by apoptosis following clearance of pathogen), and memory (some primed T cells persist as long term memory T cells to protect against subsequent infections even decades later)
 # Hydrophobic CDR3 residues promote the development of self-reactive T cells
  - **hydrophobicity at positions 6 and 7 of CDR3 β promote development of self-reactive T cells**
 # Identification of neoantigens for individualized cancer immunotherapy
@@ -1129,6 +1150,8 @@
  - immunosuppressive environment of liver makes adaptive immune cells of liver readily tolerogenic, promoting death of effector cells (also anergy, senescence, exhaustion) and "education" of regulatory cells
  - tolerance mechanisms of liver related to many liver diseases
  - liver is the largest organ with a rich blood supply (hepatic artery, portal vein), exposed to many microbial products, harmless food-derived antigens via intestines
+# Location, location, location: tissue resident memory T cells in mice and humans
+ - Trm markers: CD69 +/- CD103, many accessory markers (CD101, CD49a, PD-1, CXCR6, CLA, CCR8)
 # Low-dose ipilimumab plus nivolumab combined with IL-2 and hyperthermia in cancer patients with advanced disease: exploratory findings of a case series of 131 stage IV cancers - a retrospective study of a single institution
  - hypothesis: reduce irAEs with hyperthermia to increase numbers of effector lymphocytes
  - irAEs similar to an auto-graft vs. host disease reactions following allogenic bone marrow transplantation
@@ -2089,7 +2112,10 @@
  - tumor-specific antigens: mutated proteins or oncogenic viral proteins
  - genetic cancer mouse model in which they can track tumor-specific CD8<sup>+</sup> T cell and self/shared antigen-specific CD8<sup>+</sup> T cell differentiation longitudinally as liver cancers develop
  - find that both tumor and self/shared antigen specific CD8<sup>+</sup> T cells lost effector function over time but in different ways: **tumor-specific CD8<sup>+</sup> T cells persist long term but are dysfunctional/exhausted (PD-1<sup>+</sup>, CD39<sup>+</sup>, TOX<sup>+</sup>) while self/shared antigen specific CD8<sup>+</sup> T cells exit cell cycle prematurely and disappear from liver lesions but persist in spleen in dysfunctional TCF1<sup>+</sup>PD-1<sup>-</sup> state unable to produce effector cytokines or proliferate in response to PD-1 blockade**
-# Type 1/Type 2 immunity in infectious diseases
+# Tumor resident memory CD8 T cells and concomitant tumor immunity develop independently of CD4 help
+ - immune systems applies a form of 2FA: both CD4 and CD8 T cells need to recognize distinct antigen epitopes in same pathogen, signal integration at level of DC in draining lymph nodes (CD4 T cells license DCs to optimally generate Tcm CD8 T cells to cross presented antigen)
+ - Trm: alternative population of memory CD8 T cells that remain in tissue/tumor
+# Type 1/type 2 immunity in infectious diseases
  - Th1 (T helper type 1) cells secrete IL-2, interferon-γ, lymphotoxin-α and stimulate type 1 immunity (intense phagocytic activity), more or less synonymous with cell-mediated immunity but some antibodies are still produced, protective for most infections
  - Th2 cells secrete IL-4/5/9/10/13 and stimulate type 2 immunity (high antibody titers), more or less synonymous with humoral immunity (Th2 cells suppress phagocytosis), resolves cell-mediated inflammation
  - systemic stress, immunosuppression cause type 2 response to infection normally controlled by type 1 response
