@@ -77,6 +77,8 @@
 ## Limitations of immune checkpoint inhibitors
  - selection for tumor cells that can evade immune system (perhaps they lose MHC class I or IFN-γ response elements)
  - ICB can induce upregulation of other inhibitory receptors
+# A novel immune checkpoint-related gene signature for predicting overall survival and immune status in triple-negative breast cancer
+ - low-risk patients tend to have higher scores of *PD-1*, *CTLA-4*, *PD-L1*, *PD-L2*
 # Antiplatelet drugs may increase the risk for checkpoint inhibitor-related pneumonitis in advanced cancer patients
  - mechanism: changed immune landscape within tumor microenvironemnt, platelets' role in circulation and immune system being disturbed
  - platelet-derived PD-L1 reported to promote immune evasion and contribute to tumor growth by inhibiting CD4<sup>+</sup> and CD8<sup>+</sup> lymphocytes
@@ -88,6 +90,11 @@
  - here, they describe a subset of human memory T<sub>H2</sub> cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific T<sub>H2</sub> cells, denoted as T<sub>H2A</sub> cells, characterized by co-expression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional T<sub>H2</sub> cells
  - transcriptome analysis reveals distinct pathway in initiation of pathogenic responses to allergen
  - elimination of these cells is indicative of clinical responses induced by immunotherapy
+# Application of ATAC-seq in tumor-specific T cell exhaustion
+ - ICB limitations: short-term nature of therapeutic effects, high individual heterogeneity
+ - ICB can only temporarily restore function of some exhausted T cells because of irreversible change in epigenetics of some terminally exhausted T cells
+ - exhausted T cells lose effector functions, change epigenetic/transcriptional profiles, change metabolism, slow down proliferation, and respond more slowly to stimuli due to cytokine (IL-2, TNF, IFN-γ) deficiency
+ - TOX is key inducer of T cell exhaustion, NFAT (upstream target of TOX) is key regulator of T cell exhaustion
 # Association between immune-related adverse events and clinical outcomes to programmed cell death protein 1/programmed death ligand 1 blockade in SCLC
  - ~40% of 183 patients with ICB had irAE(s)
  - median time of onset to first irAE: 24 days (IQR 14-55 days)
@@ -121,6 +128,10 @@
 # Association of vitiligo with tumor response in patients with metastatic melanoma treated with pembrolizumab
  - 25% of patients developed vitiligo
  - **objective response associated with higher occurrence of vitiligo**
+# ATAC-seq: a method for assaying chromatin accessibility genome-wide
+ - probe DNA accessibility with hyperactive Tn5 transposase (inserts sequencing adapters into accessible chromatin regions, sequencing reads used to infer regions of increased accesibility, can also map transcription factor binding and nucleosome positions)
+ - alternative to DNase-seq for chromatin accessibility and MNase-seq for nucleosome positioning
+ - ATAC-seq can use less cells than other methods and can assay multiple chromatin features at the same time (i.e. nucleosome, TF binding, chromatin accessibility)
 # Autoimmune panels as predictors of toxicity in patients treated with immune checkpoint inhibitors (ALERT)
  - auto antigen microarray to profile autoantibodies related to irAEs in patients receiving ICI
  - greater number of IgG and IgM reactivites in pre-ICI in patients vs. healthy controls
@@ -301,6 +312,8 @@
  - CTLA-4 upregulated after T cell activation, to prevent too much activation?
  - CD80/86 are CTLA-4 ligands
  - CAR T cells (chimeric antigen receptor T cells): extracellular ligand recognition domain (single chain variable fragment, ScFv) fused to signaling domain of CD3z, intracellular costimulatory molecule (CD28, 4-1BB, ICOS, CD40, or CD27)
+# Chromatin accessibility profiling by ATAC-seq
+ - success of ATAC-seq library generation determined by enrichment of transposase insertions in accessible chromatin (signal:background, **most important QC metric, can test with TSS enrichment score as TSSs known to be accessible**), unique fragments number (library complexity), ratio of reads mapping to nuclear genome versus those mapping to mitochondrial genome (undesired), and fragment size distribution
 # Circulating pre-treatment T cell repertoire as a predictive biomarker in advanced or metastatic non-small-cell lung cancer patients treated with pembrolizumab alone or in combination with chemotherapy
  - association between reduced number of unique clones and clinical benefit for pembrolizumab, but for pembrolizumab with chemotherapy see opposite effect
  - reduced number of pre-treatment unique clones could mean enrichment for tumor-specific T cells (good response to treatment)
@@ -371,6 +384,8 @@
  - the occurrence of Gly was CDR3 length‐ and position‐dependent in both chains, whereas the frequency of Ser at positions 106 and 107 was positively correlated with CDR3 length in TCR β
  - the amino acids in CDR3 loop regions were significantly different between TCR α and β, which suggests a distinct role for each chain in the recognition of antigen–MHC complexes
  - **see length-dependent increase in glycine usage, may confer cross-reactivity with glycine's small size**
+# Computational simulations of bispecific T-cell engagers by a multiscale model
+ - modeling to try and understand mechanism of bispecific antibodies as T cell engagers (bypass TCR-pMHC interaction, redirect cytotoxic activity, can help kill cancer cells but also off target effects)
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - co-expression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -446,7 +461,7 @@
  - find that CD8<sup>+</sup> T cell exhaustion in bone marrow was primarily alloantigen-driven
 # Determinants of anti-PD-1 response and resistance in clear cell renal cell carcinoma
 ## Abstract
- - higher number of expanded TCR clones in pre-treatment responders suggesting pre-existing immunity
+ - higher number of expanded TCR clones in pre-treatment responders suggesting pre-existing immunity, **presumably to tumor before ICI is what this means?**, maintenance of these pre-treatment expanded clones associates with response
 ## Introduction
  - clear cell renal cell carcinoma: most common subtype of kidney cancer, immunogenic, most tumor mutational burden (comparable to "cold" tumors, 10-fold lower than melanoma, TMB doesn't associate with ICB response)
 # Development of TCRB CDR3 length repertoire of human T lymphocytes
@@ -457,7 +472,7 @@
  - skin irAE associated with better prognosis, pneumonitis severe irAE and high steroid compromise survival
 # Differential requirements for CD4<sup>+</sup> T cells in the efficacy of the anti-PD-1<sup>+</sup> LAG-3 and anti-PD-1<sup>+</sup> CTLA-4 combinations in melanoma flank and brain metastases models
  - mouse melanoma models
- - anti-PD-1<sup>+</sup> CTLA-4 associated with FOXP3<sup>+</sup> CD4<sup>+</sup> T cells (Tregs) infiltrating, fewer activated CD4<sup>+</sup> T cells, accumulation of CD8<sup>+</sup> T cells secreting IFN gamma
+ - anti-PD-1<sup>+</sup> CTLA-4 associated with FOXP3<sup>+</sup> CD4<sup>+</sup> T cells (Tregs) infiltrating, fewer activated CD4<sup>+</sup> T cells, accumulation of CD8<sup>+</sup> T cells secreting IFNγ
  - anti-PD-1<sup>+</sup> LAG-3 associated with CD4<sup>+</sup> T cells expressing CXCF4, TNFSF8, IL21R accumulating
 # Differentiation and homeostasis of effector Treg cells are regulated by inositol polyphosphates modulating Ca<sup>2+</sup> influx
  - subclass of Tregs express Foxp3, activated Foxp3<sup>+</sup> Tregs differentiate into effector Treg (eTreg) cells to maintain peripheral immune homeostasis and tolerance
@@ -592,6 +607,10 @@
 ## Results
 ### Patient cohorts and study design
  - 6 male patients with gastric cancer, 3 with Epstein-Barr virus and 3 without, pre and post treatment so 12 samples
+# Dynamics of T cell receptor repertoire in patients with ankylosing spondylitis after biologic therapy
+ - ankylosing spondylitis: autoimmune condition
+ - see that good responders to biologics have increased TCR repertoire diversity
+ - positive correlation between TCR repertoire diversity and IL-23 levels
 # Early rise in brain damage markers and high ICOS expression in CD4<sup>+</sup> and CD8<sup>+</sup> T cells during checkpoint inhibitor-induced encephalomyelitis
  - ICOS expression on T cells mirrored severity of encephalomyelitis over course of recovery, also see ICOS expression on T cells of other patients with severe irAEs (moreso than in patients without irAEs)
 # Effective use of latent semantic indexing and computational linguistics in biological and biomedical applications
@@ -734,6 +753,12 @@
  - identify few latent variables that explain the most variance in data
 # FDA approves anti-CD3 antibody to delay type 1 diabetes onset
  - T1D: autoreactive T cells destroy insulin secreting β cells
+# From readsto insight: a hitchhiker's guide to ATAC-seq data analysis
+ - ATAC-seq: genetically engineered hyperactive Tn5 transposase cuts open chromatin and leaves behind 9 bp staggered nick, ligates high-throughput sequencing adapters to regions, so nick is repaired leaving behind 9 bp duplication
+ - pre-analysis: QC (FastQC base quality scores, GC content, sequence length distribution, sequence duplication levels, primer contamination, etc.) and alignment to reference genome (> 80% unique mapping rate is successful)
+ - core analysis: peak (accessible region) calling, generally count-based (statistical methods to compare read distribution shape to random background)
+ - advanced analysis: peak differential analysis and annotation, motif enrichment, footprinting, nucleosome position analysis
+ - integration with multiomics
 # Fulminant myocarditis with combination immune checkpoint blockade
 ## Abstract
  - myocarditis with robust T cell and macrophage infiltrates
@@ -830,6 +855,9 @@
  - clonal expansion (activated pathogen-specific T cells expand and differentiate into effector T cells), contraction (majority of effector T cells die by apoptosis following clearance of pathogen), and memory (some primed T cells persist as long term memory T cells to protect against subsequent infections even decades later)
 # Hydrophobic CDR3 residues promote the development of self-reactive T cells
  - **hydrophobicity at positions 6 and 7 of CDR3 β promote development of self-reactive T cells**
+# ICBcomb: a comprehensive expression database for immune checkpoint blockade combination therapy
+ - human and mouse expression data from combination ICB
+ - 1399 samples across 29 cancer types, 52 drugs
 # Identification of neoantigens for individualized cancer immunotherapy
  - neoepitopes are attractive targets for therapeutic cancer vaccines, **but most cancer mutations are unique for individual patients (neoantigenome), requiring individualized treatment**
  - **not all tumor mutations give rise to neoantigens, neoepitope-specific T cells reflect only 1-2% of mutations in an individual tumor, this could be due to not all tumor mutations giving rise to neoantigens and from T cell repertoire not recognizing all neoantigens perhaps as well**
@@ -877,6 +905,8 @@
  - GLIPH algorithm: grouping of lymphocyte interactions by paratrope hotspots, clusters TCRs with high probability of sharing specificity owing to conserved motifs and similarity of CDR3 sequences
 # IL7 genetic variation and toxicity to immune checkpoint blockade in patients with melanoma
  - minor allele carries of *Il7* intron have increased severe irAE risk
+# Immune checkpoint inhibitor-induced myocarditis with myositis/myasthenia gravis overlap syndrome: a systematic review of cases
+ - IM3OS: myocarditis with myositis/myasthenia gravis overlap syndrome
 # Immune checkpoint receptors in autoimmunity
 ## Coordinated expression of checkpoint receptors on T cells
  - loss of a single checkpoint receptor as been associated with compensatory upregulation of other inhibitors molecules
@@ -891,7 +921,7 @@
  - arthritis irAE: shared clonality between CD8<sup>+</sup> CX3CR1<sup>high</sup> effector phenotype in peripheral blood and CXCR3<sup>+</sup> CXCR6<sup>high/low</sup> effector memory or terminally differentiated effector memory CD8<sup>+</sup> in synovial fluid, implying active tracking and differentiation from peripheral blood to synovial fluid, also evidence for expansion of T<sub>RM</sub> cells in mice joints
  - **for tissues that lack T<sub>RM</sub> cells, like the synovium, trafficking of T cells from the periphery may be important for irAEs**
 # Immune checkpoint status and exhaustion-related phenotypes of CD8<sup>+</sup> T cells from the tumor-draining regional lymph nodes in breast cancer
- - regional lymph node subpopulation expressing PD-1, CXCR5, TIM-3, ICOS, reduced IFN-gamma production, perhaps able to be rejuvenated by ICI
+ - regional lymph node subpopulation expressing PD-1, CXCR5, TIM-3, ICOS, reduced IFN-γ production, perhaps able to be rejuvenated by ICI
  - CXCR5 and ICOS mark CD4<sup>+</sup> T cell subset (Tfh), involved in formation of germinal centers, help B cells produce antibodies
 # Immune checkpoints are predominantly co-expressed by clonally expanded CD4<sup>+</sup> FoxP3<sup>+</sup> intratumoral T cells in primary human cancers
  - CD8<sup>+</sup> T cells (~40%), CD4<sup>+</sup> FoxP3<sup>-</sup> T cells (~40%), and CD4<sup>+</sup> FoxP3<sup>+</sup> T cells (~10%) proprtions consistent across patients in tumors
@@ -904,7 +934,7 @@
 # Immune-Related Adverse Events and Their Association With the Effectiveness of PD-1/PD-L1 Inhibitors in Non-Small Cell Lung Cancer: A Real-World Study From China
  - see more antitumor response in irAE group compared to non-irAE group, irAE associated with progression-free survival but not with overall survival
 # Immune-related adverse events in checkpoint blockade: observations from human tissue and therapeutic considerations
- - dysregulated cytokines (IFNgamma and TNF) in irAE tissue
+ - dysregulated cytokines (IFNγ and TNF) in irAE tissue
  - high T cell infiltration in irAE tissue
  - **PD-1 blockade more CD8 effect, CD4 effect more for CTLA-4 blockade**
  - CD8<sup>+</sup>CXCR3<sup>+</sup> T cells elevated in gastrointestinal, dermatological, and musculoskeletal irAEs
@@ -942,7 +972,7 @@
  - **identify 23 immune-related genes/signatures linked to response and progression-free survival**
  - **PD1 gene expression along with 12 signatures tracking CD8 and CD4 T cell activation, natural killer cells, and IFN activation associated significantly with non-progressive disease and progression free survival**
 # Immune mediators as predictive biomarkers for anti-PD-1 antibody therapy in urothelial carcinoma
- - IL-6/8/12, sTNF-R1, IFN gamma plasma levels can help predict prognosis and irAEs in ICI-treated patients
+ - IL-6/8/12, sTNF-R1, IFNγ plasma levels can help predict prognosis and irAEs in ICI-treated patients
 # Immune responses in checkpoint myocarditis across heart, blood, and tumor
 ## Abstract
  - presence of cardiac-expanded TCRs in a circulating, cycling CD8 T cell population as a novel peripheral biomarker of fatality
@@ -1086,6 +1116,9 @@
  - isotype control: primary antibody that lacks specificity to target but matches class/type of primary antibody used, negative control to see non-specific background signal
  - CTLA-4 blockade improves survival in patients with advanced melanoma, also enhances immunity to NY-ESO-1 (cancer-testis antigen expressed in some melanoma patients)
  - see increase (16% to 22%) in seropositivity for NY-ESO-1 antibody after CTLA-4 blockade, seropositive individuals more likely to experience clinical benefit (seropositive individuals who didn't experience clinical benefit more likely didn't have associated CD8<sup>+</sup> T cells)
+# Integrated single-cell profiling dissects cell-state-specific enhancer landscapes of human tumor-infiltrating CD8<sup>+</sup> T cells
+ - common chromatin trajectory underlies TIL dysfunction
+ - molecular continuum from pre-T<sub>EX</sub> to terminally exhausted T cells (continuous increase in *CXCL13*, *TOX1/2*, inhibitory receptor activity)
 # Interpreting T cell crossreactivity through structure: implications for TCR-based cancer immunotherapy
 ## Abstract
  - melanoma-specific T cells crossreacting with healthy heart/nervous tissue, crossreactivity
@@ -1122,7 +1155,8 @@
 # Inverse vaccination, the opposite of Jenner's concept, for therapy of autoimmunity
  - Jenner invented vaccination in 1796
  - autoimmunity treatment includes immunosuppression via anti-CD20 monoclonal antibody (B cells marked by CD20), anti-CD52 mAb (WBCs marked by CD52), similarly reduce transplant rejection with mAbs against CD3 (T cells marked by CD3), can also disrupt lymphocyte ingress into tissue via integrin blockade or impeded egress of lymphocytes out of lymph nodes via spingosine phosphate receptor modulation
-# Kimma: flexible linear mixed effects modeling with kinship covariance for RNA-seq data
+# Landscape of stimulation-responsive chromatin across diverse human immune cells
+ - previous literature: ~90% of GWAS hits for contributors to autoimmunity risk lie in non-coding regions (presumably act by altering gene regulation)
 # Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
 ## Abstract
  - scRNAseq + TCR-seq of tumor, normal, and lymph tissue in patients with lung cancer after ICI
@@ -1339,7 +1373,7 @@
  - neoantigen high immunogenicity (i.e. quality) inference: non-selfness (different from known antigens) and selfness (still able to bind MHC and activate T cell), so high quality/immunogenicity neoantigens are distinct from known antigens but still similar enough to bind MHC and activate T cells
  - long-term survivors of pancreatic cancer develop recurrent tumors with fewer high-quality neoantigens (natural immunoediting of neoantigens)
 # Neoantigen specific CD4<sup>+</sup> T cells in human melanoma have diverse differentiation states and correlate with CD8<sup>+</sup> T cell, macrophage, and B cell function
- - CD4<sup>+</sup> T cells that recognize neoantigens express *CXCL13* and are subdivided into clusters expressing memory and T follicular helper markers, cytolytic markers, inhibitory receptors, and IFN-gamma
+ - CD4<sup>+</sup> T cells that recognize neoantigens express *CXCL13* and are subdivided into clusters expressing memory and T follicular helper markers, cytolytic markers, inhibitory receptors, and IFN-γ
 # Network-based machine learning approach to predict immunotherapy response in cancer patients
  - tumor mutation burden improves model
 # New biomarkers exploration and nomogram construction of prognostic and immune-related adverse events of advanced non-small cell lung cancer patients receiving immune checkpoint inhibitors
@@ -1369,8 +1403,12 @@
  - they suggest irAEs can be broken into 2 categories: true irAEs (T cells activated against tumor and normal cells, theoretically this wanes after ICBs are stopped) and induction/exacerbation of paraneoplastic syndromes triggered by ICB (remote effects of cancer not caused by tumor/metastases, like immune response against tumor with cross-reaction of antibodies between tumor and self), **I don't really understand the difference between these two types here**
 # On the specificity of protein-protein interactions in the context of disorder
  - **trying to find evidence for relation between hydrophobicity and cross-reactivity: bring up idea of transcriptional (co)activators being non-specific due to hydrophobicity, and negative charge (perhaps unhelpful with negatively charged DNA)**
+# Outcome and treatment-related adverse events of combined immune checkpoint inhibition with flipped dosing in a real-world cohort of 79 patients with metastasized melanoma
+ - changing dosages to minimize irAEs while keeping anti-tumor response
 # Overcoming immune checkpoint blockade resistance in solid tumors with intermittent ITK inhibition
  - dampening TCR signaling with ITK inhibitor can confer ICB sensitivity to ICB resistant solid tumors
+# Pan-MHC and cross-species prediction of T cell receptor-antigen binding
+ - new AI assisted method
 # Patient HLA class I genotype influences cancer response to checkpoint blockade immunotherapy
 ## Abstract
  - HLA-I loci heterozygosity associated with better survival (3 major HLA-I genes: A-C)
@@ -1401,7 +1439,7 @@
  - CD8<sup>+</sup>CD28<sup>+</sup> T cell level associated with ICI efficacy but also irAE development
 # Peripheral immune mapping and multi-omics analysis in PD-1 inhibitor-induced myocarditis
  - scRNAseq on CD3<sup>+</sup> T cells from 46 cancer patients, 16 with ICI-induced myocarditis
- - effector T cells in periphery increased in irAE patients, naive T cells, gamma delta T cells, and MAITs decreased in irAE patients
+ - effector T cells in periphery increased in irAE patients, naive T cells, γδ T cells, and MAITs decreased in irAE patients
 # Peripheral T cell expansion predicts tumor infiltration and clinical response
 ## Abstract
  - clonotypic expansion of effector-like T cells within tumor and in normal adjacent tissue, associated with ICB response
@@ -1599,6 +1637,10 @@
 # Specificity, privacy, and degeneracy in the CD4 T cell receptor repertoire following immunization
  - math to back up hundreds to thousands of TCRs for any given antigen in a repertoire
  - mice
+# Stage 4 non-small cell lung cancer with human epidermal growth factor receptor 2 alterations and myocarditis induced by immune checkpoint inhibitors: a case report
+ - case report of patient with metastatic HER2 NSCLC with high PD-L1 level
+ - started on pembrolizumab
+ - ICI-induced myocarditis before third ICI cycle
 # Statistical analysis of CDR3 length distributions for the assessment of T and B cell repertoire biases
  - Gaussian-like distribution in length pattern, given large number of small effects (random mechanism of junction diversity) acting additively and independently on CDR3 length
 # Stitchr: stitching coding TCR nucleotide sequences from V/J/CDR3 information
@@ -2089,6 +2131,8 @@
 ### Th1- and Th17-associated immune responses primarily delineate irAEs after combined ICI, while anti-PD-1 TOX features only a modest Th1-associated response
 ## Discussion
  - helper T cells may provide help to autoantibody-producing B cells
+# Transcript-indexed ATAC-seq for precision immune profiling
+ - they just mean TCRseq + ATAC-seq by transcript-indexed ATAC-seq
 # Transcriptional programs of neoantigen-specific TIL in anti-PD-1-treated lung cancers
 ## Abstract
  - previous literature: majority of TILs don't recognize tumor antigens (bystander T cells)
