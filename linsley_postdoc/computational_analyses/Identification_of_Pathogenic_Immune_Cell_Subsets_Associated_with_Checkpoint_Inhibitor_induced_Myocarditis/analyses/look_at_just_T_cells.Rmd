@@ -65,7 +65,7 @@ dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
   filter(chain != "Multi") %>%
   # pivot to combine 1 alpha and 1 beta (or 0 and 1) barcodes together
   select(-X) %>%
-    # if a cell had two or more qualified chains of the same type, only that chain with the highest UMI count was qualified and retained
+  # if a cell had two or more qualified chains of the same type, only that chain with the highest UMI count was qualified and retained
   group_by(barcode, chain) %>%
   arrange(-umis) %>%
   slice(1) %>%

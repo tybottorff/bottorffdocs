@@ -136,6 +136,8 @@ print(de_markers %>% filter(p_val_adj < 0.05))
 
 ```{r}
 
+feature_df <- read.csv("../saved_data/dehashed_tcr_seq_with_rna.csv")
+
 highest_pgen_beta <- read.csv("../saved_data/igor_output_beta.csv") %>%
   dplyr::rename(TRB_pgen = pgen) %>%
   filter(!(is.na(TRB_pgen)),
