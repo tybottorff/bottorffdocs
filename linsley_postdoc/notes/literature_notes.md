@@ -8,6 +8,11 @@
  - there's a causative link between EBV and MS, want to target EBV-infected B cells (EBV transforms B cells for life upon infection)
 # Advances in immune checkpoint inhibitor combination strategies for microsatellite stable colorectal cancer
  - microsatellite stable (MSS) colorectal tumors are immune-cold
+# Advances in research on molecular markers in immune checkpoint inhibitor-associated myocarditis
+ - PD-L1 expressed on tumor cells, binds to PD-1 on T cells, inhibits T cell activation
+ - CTLA-4 expressed on tumor infiltrating Tregs, binds to B7 on surface of APCs
+ - myocardium infiltrating lymphocytes mostly CD8 T cells in ICI-myocarditis patients
+ - irAE hypotheses: ICIs bind to cell surface proteins (like CTLA-4) in normal tissue leading to T cell infiltration (**this is an obvious one I don't think about much**), crossreactive T cells (T cells recognizing tumor antigens enter circulation and identify similar antigens in healthy tissue), via cytokines (promote infiltration of inflammatory molecules into nontarget tissue, ICIs increase circulating cytokine levels, **this is a good one I don't think about much**), autoantibodies
 # Aging-associated and CD4 T cell-dependent ectopic CXCL13 activation predisposes to anti-PD-1 therapy-induced adverse events
  - mice
  - ectopic accumulation of T and B cells in damaged organs only in aged mice
@@ -42,6 +47,9 @@
  - KLRG1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells more common in teplizumab group than placebo
 # An increased population of regulatory T cells improves the pathophysiology of placental ischemia in a rat model of preeclampsia
  - preeclampsia pathology: suppressed Tregs, autoantibodies to Ang II type I receptor
+# Antigen and checkpoint receptor engagement recalibrates T cell receptor signal strength
+ - mice
+ - PD-1 blockade lead to increased TCR signal strength
 # Antigen presentation in the thymus for positive selection and central tolerance induction
 ## Key points
  - interactions with self-peptide-MHC complexes on thymic epithelial cells crucial for thmocyte survival (positive selection) and CD4 vs. CD8 lineage commitment but can also result in negative selection (apoptosis)
@@ -191,6 +199,10 @@
 # B cell-specific MHC class II deletion reveals multiple nonredundant roles for B cell antigen presentation in murine lupus
  - B cells have both Ab-dependent and Ab-independent functions in systemic autoimmunity
  - Ab-independent functions could include roles in lymphoid development, cytokine secretion, Ag presentation
+# Benchmarking of T cell receptor repertoire profiling methods reveals large systematic biases
+ - methods (RACE vs. mutliplex for example PCR) differ in accuracy and intra/inter-method reproducibility for TRA/TRB sequencing
+ - most methods do worse for TRA than TRB
+ - low RNA input leads to non-representative TCR repertoires
 # Biomarkers of checkpoint inhibitor induced immune-related adverse events - a comprehensive review
  - blood-based, immunogenetic and microbial biomarkers predicting irAEs prior to and during ICI therapy
  - no single biomarker has proven to be sufficiently predictive for irAE development
@@ -480,6 +492,10 @@
 # Dissecting the tumor microenvironment in response to immune checkpoint inhibitors via single cell and spatial transcriptomics
  - good summary of cancer immunity cycle for me: cancer cells generate neoantigens, present on MHC, APCs sample antigens and present fragments via MHCI/II, APCs traffic to lymph nodes (due to signals from proinflammatory cytokines) and induce expansion and differentiation of naive T cells into cytotoxic effector T cells that migrate to tumor, recognize cancer cells via TCR-pMHCI docking, kill cancer cells, release more neoantigens
  - programs that promote response/resistance to immunotherapy: cell cycle genes (CDK4/6) repress resistance to ICB and sensitize tumors (in mice), TCF7 (transcription factor involved in T cell differentiation) levels higher in responders
+# Distinct biomarker profiles and TCR sequence diversity characterize the response to PD-L1 blockade in a mouse melanoma model
+ - melanoma tumors arising from a genetically engineered mouse model
+ - CD8 T cell tumor infiltration corresponds to response
+ - response requires expansion of T cells but also infiltration of T cells into tumor
 # Distinct cellular mechanisms underlie anti-CTLA-4 and anti-PD-1 checkpoint blockade
  - goal: elucidate mechanism by which ICI (immune checkpoint inhibitors) induce tumor rejection
  - mass cytometry approach to profile effects of ICI on tumor immune infiltrates in human melanoma and murine tumor models
@@ -577,6 +593,11 @@
  - chronic antigen exposure leads to T cell exhaustion with reduced effector function
  - do all antigen-specific T cell clones follow the same T<sub>ex</sub> differentiation trajectory?
  - results: high T cell receptor signaling aviditiy correlates with T<sub>ex</sub> terminal phenotype, low avidity correlates with effector-like T<sub>ex</sub> KLR fate (so higher signaling response from TCR activation leads to higher exhaustion)
+# Divergent outcomes of anti-PD-L1 treatment coupled with host-intrinsic differences in TCR repertoire and distinct T cell activation states in responding versus non-responding tumors
+ - squamous cell carcinoma mouse model
+ - treatment efficacy requires CD8 T cells, positively correlates with effector functions of CD8 TILs
+ - TCR repertoire similarly expanded in both responders and non-responders, but most expanded clonotypes are not the same between responders and non-responders CD8 TILs (private? same between all responder CD8 TILs?)
+ - responder and non-responder CD8 TILs RNA phenotype similar
 # Divergent tumor and immune cell reprogramming underlying immunotherapy response and immune-related adverse events in lung squamos cell carcinoma
  - scRNAseq before/after ICI
  - increased proportions of macrophage subcluster with highly expressed SPP1, tumor tumor cell subclusters in irAE patients
@@ -753,12 +774,17 @@
  - identify few latent variables that explain the most variance in data
 # FDA approves anti-CD3 antibody to delay type 1 diabetes onset
  - T1D: autoreactive T cells destroy insulin secreting β cells
-# From readsto insight: a hitchhiker's guide to ATAC-seq data analysis
+# From reads to insight: a hitchhiker's guide to ATAC-seq data analysis
  - ATAC-seq: genetically engineered hyperactive Tn5 transposase cuts open chromatin and leaves behind 9 bp staggered nick, ligates high-throughput sequencing adapters to regions, so nick is repaired leaving behind 9 bp duplication
  - pre-analysis: QC (FastQC base quality scores, GC content, sequence length distribution, sequence duplication levels, primer contamination, etc.) and alignment to reference genome (> 80% unique mapping rate is successful)
  - core analysis: peak (accessible region) calling, generally count-based (statistical methods to compare read distribution shape to random background)
  - advanced analysis: peak differential analysis and annotation, motif enrichment, footprinting, nucleosome position analysis
  - integration with multiomics
+# From tumor mutational burden to blood T cell receptor: looking for the best predictive biomarker in lung cancer treated with immunotherapy
+ - TMB doesn't correlate exactly with how many neoantigens are made or even presented by MHC, or recognized by T cell, so low mutational burden tumors can have neoantigens capable of generating strong antitumor T cell response (and vice versa)
+ - association between antitumor response to ICB and irAE development may be due to TMB correlation (tumors with high TMB associated with more irAEs and better ICB response)
+ - TRA and TRB (or TRD/TRG) joined by disulfides
+ - CD3 and CD247 are invariant TCR chains
 # Fulminant myocarditis with combination immune checkpoint blockade
 ## Abstract
  - myocarditis with robust T cell and macrophage infiltrates
@@ -1428,6 +1454,11 @@
 # PD-1 maintains CD8 T cell tolerance towards cutaneous neoantigens
  - mouse model, skin-specific expression of T cell antigens in epidermis
  - PD-1 maintains skin tolerance by preventing tissue-infiltrating antigen-specific CD8 T cells from becoming fully functional and gaining acess to epidermal APCs
+# PD-L1 expression affects neoantigen presentation
+ - PD-L1 expression on tumor related to ICB prognosis, but can get clinical benefit even without tumor PD-L1 expression and PD-L1 expression on tumor doesn't guarentee response
+ - mice
+ - responsiveness of T cells to neoantigens is key
+ - T cells in PD-L1 expressing tumors are weak (exhausted?), PD-L1 deficient tumor T cells can have stronger antitumor response via ICB
 # PD-L1 inhibitor-induced thyroiditis is associated with better overall survival in cancer patients
  - 21% of 91 patients with PD-1 blockade developed thyroid irAE
  - irAE associated with anti tumor response
@@ -1508,7 +1539,28 @@
 ### TiRP explains T<sub>reg</sub> plasticity in the tumor microenvironment
  - previous literature: naive T thymic emigrants can be peripherally induced to adopt regulatory phenotype, and T<sub>regs</sub> can lose *FOXP3* expression and adopt pro-inflammatory phenotype (exT<sub>regs</sub>), expanded clones observed as both T<sub>regs</sub> and conventional T cells may represent such lineages (mixed clones)
  - hypothesis: TCR features of these mixed clones may be intermediate, increasing conversion susceptibility
-# Retrospective study of advanced melanoma patients treated with ipilimumab after nivolumab: analysis of 60 Japanese patients
+# Rigorous benchmarking of T cell receptor repertoire profiling methods for cancer RNA sequencing
+## Abstract
+ - benchmarking ability of RNAseq methods (vs. gold standard of targeted TCRseq) to profile TCR repertoires, examine 19 bulk RNAseq samples across 4 cancer cohorts, T cell rich/poor tissue
+ - RNAseq work sok in T cell rich tissue with low diversity repertoires, don't work as well in T cell poor tissues especially those with highly diverse repertoires
+## Introduction
+ - MiXCR (RNAseq method) has been shown to be able to detect TCR beta sequences with relative frequencies > 0.15% in T cell rich tissue
+## Results
+ - multi-cohort dataset
+### RNA-seq based TCR profiling methods were able to successfully capture TCR beta low SDI repertoires across various T cell rich tissues
+ - capturing ability based on sum of TCRseq confirmed TCR beta clonotypes captured in RNAseq methods
+ - RNAseq methods capture ~93% of clonotypes in T cell rich low SDI samples, ~76% in T cell poor low SDI samples (averages)
+ - capture fewer clonotypes in high SDI samples
+ - CATT and TRUST4 did better than MiXCR in T cell poor high SDI samples
+ - figure 1. A-D: RNAseq methods do well in T cell rich low SDI samples (capture all clonotypes with frequencies > ~0.04% in T cell rich low SDI samples, > ~2.7% in T cell poor low SDI samples), E-F: RNAseq methods capture clonotypes with frequencies > ~1.5% in T cell rich high SDI samples, E-H: threshold for T cell poor high SDI samples varies ~10-40%
+ - supplementary tables/figures: fewer RNAseq TCR reads in T cell poor tissue vs. T cell rich tissue (4.1 vs. 655.3 TCR reads/million RNAseq reads)
+ - RNAseq methods can capture most of top clonotypes
+### RNA-seq-based TCR profiling methods were able to effectively estimate clonality in T cell rich tissues
+ - lower error between RNAseq and TCRseq based diversity estimates in SDI low tissue
+ - figure 2
+ - also looked at clonality to account for number of clonotypes (SDI doesn't take into account)
+## Discussion
+ - TCRseq costs more than RNAseq?
 # Risk factors and biomarkers for immune-related adverse events: a practical guide to identifying high-risk patients and re-challenging immune checkpoint inhibitors
  - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
  - organ-specific irAEs associated with pre-existing organ dysfunction
@@ -1839,6 +1891,16 @@
  - **highly polar amino acids underrepresented in immunogenic epitopes vs. non-immunogenic epitopes, hydrophobic amino acids overrepresented**
  - **most antigens in this immunogenic dataset are from viruses, lower GC genomic content, so more hydrophobic residues come from that, so perhaps TCRs exploit this to generally recognize pathogens by hydrophobic peptides**
  - **antigen presentation might also favor hydrophobic regions, for example hydrophobic regions enhance degradation and MHC presentation perhaps, immunogenic epitopes biased towards center of antigen where hydrophobic core is for cytosolic proteins**
+# TCR convergence in individuals treated with immune checkpoint inhibition for cancer
+## Abstract
+ - TCR convergence: expansion of T cells having TCRs of shared antigen specificity (same amino acid sequence) but different TCR nucleotide sequences, perhaps due to sustained antigen exposure causing selection of all T cells with the same antigen specificity (same amino acid sequence TCR) but different TCR nucleotide sequences, calculated here as frequency of unique TCR nucleotide sequences (clones) sharing variable gene (excluding allele info) and CDR3 amino acid sequence with at least one other clone
+## Introduction
+ - TMB may fail as checkpoint inhibitor response predictor in cases where tumors have neoantigens not from non-synonymous mutations, **i.e. from frameshift, splice site mutations maybe?**
+ - substitution sequencing errors might be false positives for TCR convergence detection
+## Results
+ - elevated TCR convergence in baseline peripheral blood of those who respond to CTLA-4 blockade for cancer
+## Discussion
+ - **TCRs can have alpha or beta chain dominance, or codominance, in terms of contribution to antigen specificity**, one not contributing as much to specificity would mean it just plays an accessory/stabilizing role
 # TCR sequencing and cloning methods for repertoire analysis and isolation of tumor-reactive TCRs
 ## Abstract
  - SEQTR (SEQuencing T cell Receptor): combines *in vitro* transcription and single primer pair TCR amplification, combine with PCR to amplify TCR from bulk population, tumor-specific TCR identification and cloning
