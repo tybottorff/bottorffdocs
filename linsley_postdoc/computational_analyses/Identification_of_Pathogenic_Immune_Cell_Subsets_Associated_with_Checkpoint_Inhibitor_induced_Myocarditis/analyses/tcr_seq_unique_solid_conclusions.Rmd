@@ -94,7 +94,6 @@ feature_df <- dehashed_combined_tcr_seq %>%
       predicted.celltype.l1 == "CD8 T" & str_detect(predicted.celltype.l2, "CD8") ~ TRUE,
       predicted.celltype.l1 == "other T" & predicted.celltype.l2 %in% c("MAIT", "dnT") ~ TRUE,
       TRUE ~ FALSE)) %>%
-  select(-cdr3_nt) %>%
   rowwise() %>%
   mutate(cdr3_length = nchar(cdr3)) %>%
   ungroup() %>%
@@ -127,6 +126,27 @@ print(chi_square_result)
 
 ```
 
+# Make a plot of cell type abundances within each patient by irAE group
+
+```{r}
+
+cell_abundance_df <- feature_df %>%
+  group_by(Patient_ID, predicted.celltype.l2, irAE) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(Patient_ID) %>%
+  mutate(normalized_count = count / sum(count))
+
+cell_abundance_df
+
+ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "", fill = "irAE", y = "Normalized cell\nproportion (log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+```
+
 # Plot abundance vs. CDR3 length or pgen
 
 ```{r}
@@ -139,7 +159,7 @@ abundance_df <- igor_combined %>%
          cdr3 = CDR3) %>%
   mutate(pgen = as.numeric(pgen)) %>%
   right_join(feature_df, by = c("barcode", "Chain", "cdr3")) %>%
-  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  group_by(Patient_ID, cdr3_nt, chain, v_gene, j_gene) %>%
   mutate(count = n()) %>%
   slice(1) %>%
   ungroup() %>%
@@ -150,8 +170,8 @@ abundance_df
 
 # Plot with best-fit liness
 ggplot(abundance_df %>% filter(predicted.celltype.l1 == "CD8 T" & Chain == "TRB"),
-       aes(x = (count), y = cdr3_length)) +
-  geom_point() +
+       aes(x = log10(count), y = cdr3_length)) +
+  geom_point(alpha = 0.3) +
   geom_smooth(method = "lm", se = FALSE, col = "blue") +
   facet_wrap(~ irAE, scales = "free_y") +
   labs(x = "CD8 TRB clonotype abundance (log10)", fill = "irAE", y = "CD8 TRB CDR3 length") +
@@ -159,8 +179,8 @@ ggplot(abundance_df %>% filter(predicted.celltype.l1 == "CD8 T" & Chain == "TRB"
 
 # Plot with best-fit lines
 ggplot(abundance_df %>% filter(predicted.celltype.l1 == "CD8 T" & Chain == "TRB"),
-       aes(x = (count), y = log10(pgen))) +
-  geom_point() +
+       aes(x = log10(count), y = log10(pgen))) +
+  geom_point(alpha = 0.3) +
   geom_smooth(method = "lm", se = FALSE, col = "blue") +
   facet_wrap(~ irAE, scales = "free_y") +
   labs(x = "CD8 TRB clonotype abundance (log10)", fill = "irAE", y = "CD8 TRB pgen (log10)") +
