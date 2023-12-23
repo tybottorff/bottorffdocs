@@ -42,225 +42,17 @@ theme_set(
 
 ```
 
-# Read in final RNA T cell Seurat with TCR metadata
+# Read in data
 
 ```{r}
 
-tcr_rna <- readRDS("../saved_data/final_seurat_T_cells.rds")
-
-```
-
-# Tibble metadata, add rownames
-
-```{r}
-
-dehashed_combined_tcr_seq <- as_tibble(tcr_rna@meta.data)
-
-dehashed_combined_tcr_seq$barcode <- colnames(tcr_rna)
-
-dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
-  pivot_longer(cols = matches("(TRA|TRB)$"), names_to = c(".value", "Chain"), names_pattern = "(.*)_([A-Z]+)$") %>%
-  mutate(time_point = ifelse(grepl("[EL]", Patient_ID), sub(".*([EL]).*", "\\1", Patient_ID), NA), Patient_ID = gsub("[EL]", "", Patient_ID))
-
-dehashed_combined_tcr_seq
-
-write.csv(dehashed_combined_tcr_seq, "../saved_data/dehashed_tcr_seq_with_rna.csv")
-
-```
-
-# Assess cell identity confidence
-
-```{r}
-
-cell_confidence_test <- dehashed_combined_tcr_seq %>%
-  select(barcode, chain, cdr3, Patient_ID, irAE, predicted.celltype.l1, predicted.celltype.l1.score, predicted.celltype.l2, predicted.celltype.l2.score) %>%
-  group_by(predicted.celltype.l1, predicted.celltype.l2) %>%
-  summarize(count = n(), score1 = mean(predicted.celltype.l1.score), score2 = mean(predicted.celltype.l2.score))
-
-cell_confidence_test
-
-# unexpected combos have low scores, remove them
-
-```
-
-# Prep feature df
-
-```{r}
-
-feature_df <- dehashed_combined_tcr_seq %>%
-  filter(
-    case_when(
-      predicted.celltype.l1 == "CD4 T" & str_detect(predicted.celltype.l2, "CD4") | predicted.celltype.l2 == "Treg" ~ TRUE,
-      predicted.celltype.l1 == "CD8 T" & str_detect(predicted.celltype.l2, "CD8") ~ TRUE,
-      predicted.celltype.l1 == "other T" & predicted.celltype.l2 %in% c("MAIT", "dnT") ~ TRUE,
-      TRUE ~ FALSE)) %>%
-  rowwise() %>%
-  mutate(cdr3_length = nchar(cdr3)) %>%
-  ungroup() %>%
-  mutate(group = case_when(
-    startsWith(Patient_ID, "B") ~ "non-myocarditis irAE",
-    startsWith(Patient_ID, "M") ~ "myocarditis irAE",
-    startsWith(Patient_ID, "A") ~ "no irAE",
-    TRUE ~ "other"  # Add a default condition if none of the above match
-  ))
-
-write.csv(feature_df, "../saved_data/tcr_seq_features.csv")
+feature_df <- read.csv("../saved_data/tcr_seq_features.csv")
 
 feature_df
 
 ```
 
-# Prep table of cell type (l2) vs. irAE
-
-```{r}
-
-contingency_table <- table(feature_df$irAE, feature_df$predicted.celltype.l2)
-
-contingency_table
-
-# Perform Chi-square test
-chi_square_result <- chisq.test(contingency_table)
-
-# Display the test result
-print(chi_square_result)
-
-```
-
-# Make a plot of cell type abundances within each patient by irAE group
-
-```{r}
-
-cell_abundance_df <- feature_df %>%
-  group_by(Patient_ID, predicted.celltype.l2, irAE) %>%
-  summarize(count = n()) %>%
-  ungroup() %>%
-  group_by(Patient_ID) %>%
-  mutate(normalized_count = count / sum(count))
-
-cell_abundance_df
-
-ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = irAE)) +
-  geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "Normalized cell\nproportion (log10)") +
-  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
-
-```
-
-# Plot abundance vs. CDR3 length or pgen
-
-```{r}
-
-abundance_df <- igor_combined %>%
-  pivot_longer(cols = matches("^(TRA|TRB)"),
-               names_to = c("Chain", ".value"),
-               names_pattern = "^(TRA|TRB)_(.*)$") %>%
-  dplyr::rename(barcode = TCR_name,
-         cdr3 = CDR3) %>%
-  mutate(pgen = as.numeric(pgen)) %>%
-  right_join(feature_df, by = c("barcode", "Chain", "cdr3")) %>%
-  group_by(Patient_ID, cdr3_nt, chain, v_gene, j_gene) %>%
-  mutate(count = n()) %>%
-  slice(1) %>%
-  ungroup() %>%
-  select(predicted.celltype.l1, predicted.celltype.l2, count, Patient_ID, irAE, barcode, Chain, cdr3, cdr3_length, pgen) %>%
-  mutate(irAE = paste("irAE:", irAE))
-
-abundance_df
-
-# Plot with best-fit liness
-ggplot(abundance_df %>% filter(predicted.celltype.l1 == "CD8 T" & Chain == "TRB"),
-       aes(x = log10(count), y = cdr3_length)) +
-  geom_point(alpha = 0.3) +
-  geom_smooth(method = "lm", se = FALSE, col = "blue") +
-  facet_wrap(~ irAE, scales = "free_y") +
-  labs(x = "CD8 TRB clonotype abundance (log10)", fill = "irAE", y = "CD8 TRB CDR3 length") +
-  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
-
-# Plot with best-fit lines
-ggplot(abundance_df %>% filter(predicted.celltype.l1 == "CD8 T" & Chain == "TRB"),
-       aes(x = log10(count), y = log10(pgen))) +
-  geom_point(alpha = 0.3) +
-  geom_smooth(method = "lm", se = FALSE, col = "blue") +
-  facet_wrap(~ irAE, scales = "free_y") +
-  labs(x = "CD8 TRB clonotype abundance (log10)", fill = "irAE", y = "CD8 TRB pgen (log10)") +
-  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
-
-```
-  
-# Examine patient sampling depth bias
-
-```{r}
-
-feature_df %>%
-  group_by(Patient_ID, irAE) %>%
-  summarize(count = n()) %>%
-  arrange(-count) %>%
-  print()
-
-# Choose 328 seqs from non B10 samples to downsample all to 328
-
-```
-
-# Normalize cell numbers across samples
-
-```{r}
-
-desired_rows_per_patient <- 328/2
-# /2 to get equal numbers of each chain (TRA and TRB)
-
-set.seed(123)
-
-# Downsample the dataframe
-downsampled_df <- feature_df %>%
-  group_by(Patient_ID, Chain) %>%
-  sample_n(desired_rows_per_patient, replace = FALSE) %>%
-  ungroup()
-
-downsampled_df
-
-downsampled_df_doubled <- downsampled_df %>%
-  bind_rows(mutate(downsampled_df, predicted.celltype.l1 = "All T cells"))
-
-downsampled_df_doubled
-
-```
-
-# Look at public vs. private
-
-```{r}
-
-downsampled_public_df <- downsampled_df %>%
-  group_by(cdr3, v_gene, j_gene, c_gene) %>%
-  filter(n_distinct(Patient_ID) > 1) %>%
-  select(Patient_ID, cdr3) %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
-
-downsampled_public_df
-
-downsampled_df <- downsampled_df %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
-  mutate(publicness = if_else(clonotype %in% downsampled_public_df$clonotype, "public", "private"))
-
-downsampled_df
-
-public_df <- feature_df %>%
-  group_by(cdr3, v_gene, j_gene, c_gene) %>%
-  filter(n_distinct(Patient_ID) > 1) %>%
-  select(Patient_ID, cdr3) %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
-
-public_df
-
-feature_df <- feature_df %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
-  mutate(publicness = if_else(clonotype %in% public_df$clonotype, "public", "private"))
-
-feature_df
-  
-```
-
-# Import pgen data
+# Import pgen data, join with other data
 
 ```{r}
 
@@ -269,122 +61,227 @@ igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
   filter(!(is.na(TRA_pgen)),
          TRA_pgen != "NaN")
 
-igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+combined_data <- read.csv("../saved_data/igor_output_beta.csv") %>%
   dplyr::rename(TRB_pgen = pgen) %>%
   filter(!(is.na(TRB_pgen)),
          TRB_pgen != "NaN") %>%
   full_join(igor_alpha, by = c("TCR_name", "TRA_nt", "TRB_nt", "TRA_aa", "TRB_aa", "TRAV", "TRAJ", "TRA_CDR3", "TRBV", "TRBJ", "TRB_CDR3", "TRAC", "TRBC", "TRA_leader", "TRB_leader", "Linker", "Link_order", "TRA_5_prime_seq", "TRA_3_prime_seq", "TRB_5_prime_seq", "TRB_3_prime_seq", "Linked_nt", "Linked_aa", "Warnings.Errors")) %>%
   select(TCR_name, TRA_CDR3, TRB_CDR3, TRA_pgen, TRB_pgen) %>%
   mutate(TRA_pgen = as.character(TRA_pgen),
-         TRB_pgen = as.character(TRB_pgen))
-
-```
-
-# Get CD8 TEMs TRBs unique dfs
-
-```{r}
-
-unique_downsampled_igor_combined_cd8_tems <- igor_combined %>%
+         TRB_pgen = as.character(TRB_pgen)) %>%
   pivot_longer(cols = matches("^(TRA|TRB)"),
                names_to = c("Chain", ".value"),
                names_pattern = "^(TRA|TRB)_(.*)$") %>%
   dplyr::rename(barcode = TCR_name,
          cdr3 = CDR3) %>%
   mutate(pgen = as.numeric(pgen)) %>%
-  right_join(downsampled_df, by = c("barcode", "Chain", "cdr3")) %>%
+  right_join(feature_df, by = c("barcode", "Chain", "cdr3"))
+
+combined_data
+
+```
+  
+# Examine patient sampling depth bias
+
+```{r}
+
+seq_depth <- combined_data %>%
+  group_by(Patient_ID, irAE) %>%
+  summarize(seq_depth = n()) %>%
+  arrange(seq_depth) %>%
+  print()
+
+seq_depth
+
+# Choose 324 seqs from non B10 samples to downsample all to 324
+
+```
+
+# Downsample
+
+```{r}
+
+desired_rows_per_patient <- 324/2
+# /2 to get equal numbers of each chain (TRA and TRB)
+
+set.seed(123)
+
+# Downsample the dataframe
+downsampled_df <- combined_data %>%
+  group_by(Patient_ID, Chain) %>%
+  sample_n(desired_rows_per_patient, replace = FALSE) %>%
+  ungroup()
+
+downsampled_df
+
+```
+
+# Look at TCR convergence
+
+```{r}
+
+combined_data
+
+```
+
+# Look at public vs. private
+
+```{r}
+
+downsampled_public_df_list <- downsampled_df %>%
+  group_by(cdr3, v_gene, j_gene, c_gene) %>%
+  filter(n_distinct(Patient_ID) > 1) %>%
+  select(Patient_ID, cdr3) %>%
+  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
+
+downsampled_public_df_list
+
+downsampled_public_df <- downsampled_df %>%
+  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
+  filter(clonotype %in% downsampled_public_df_list$clonotype) %>%
+  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  # look at just unique TCRs
+  dplyr::slice(1) %>%
+  mutate(tag = "Public\n(downsampled)")
+
+downsampled_public_df
+
+public_df_list <- combined_data %>%
+  group_by(cdr3, v_gene, j_gene, c_gene) %>%
+  filter(n_distinct(Patient_ID) > 1) %>%
+  select(Patient_ID, cdr3) %>%
+  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
+
+public_df_list
+
+public_df <- combined_data %>%
+  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
+  filter(clonotype %in% public_df_list$clonotype) %>%
+  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  # look at just unique TCRs
+  dplyr::slice(1) %>%
+  mutate(tag = "Public")
+
+public_df
+
+```
+
+# Get unique CD8 TEMs TRBs from top 15 clonotypes per irAE group (normalizing counts by seq depth)
+
+```{r}
+
+unique_cd8_tem_trb <- combined_data %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          Chain == "TRB") %>%
   group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  # calculate clonotype counts within patients to get a sense of expansion
   mutate(count = n()) %>%
+  # normalize by sequencing depth
+  left_join(seq_depth, by = c("Patient_ID", "irAE")) %>%
+  mutate(normalized_count = count / seq_depth) %>%
+  # look at just unique TCRs
   dplyr::slice(1) %>%
-  arrange(-count) %>%
+  arrange(-normalized_count) %>%
   ungroup() %>%
-  #mutate(clonotype_order = min_rank(dplyr::desc(count)))
-  group_by(Patient_ID) %>%
-  filter(row_number() <= 2)
-  #mutate(clonotype_order = min_rank(dplyr::desc(count)))
+  mutate(tag = "All")
 
-#A1, B11, B3 only have 1 count max in downsampled df
+unique_cd8_tem_trb
 
-unique_downsampled_igor_combined_cd8_tems
+unique_cd8_tem_trb_top_15 <- unique_cd8_tem_trb %>%
+  group_by(predicted.celltype.l1, Chain, irAE) %>%
+  filter(row_number() <= 15) %>%
+  ungroup() %>%
+  mutate(tag = "Top 15 clonotypes\n(normalized)")
 
-unique_full_igor_combined_cd8_tems <- igor_combined %>%
-  pivot_longer(cols = matches("^(TRA|TRB)"),
-               names_to = c("Chain", ".value"),
-               names_pattern = "^(TRA|TRB)_(.*)$") %>%
-  dplyr::rename(barcode = TCR_name,
-         cdr3 = CDR3) %>%
-  mutate(pgen = as.numeric(pgen)) %>%
-  right_join(feature_df, by = c("barcode", "Chain", "cdr3")) %>%
+unique_cd8_tem_trb_top_15
+
+```
+
+# Get unique CD8 TEMs TRBs from top 15 clonotypes per irAE group (not normalizing counts by seq depth)
+
+```{r}
+
+unique_cd8_tem_trb_top_15_not_normalized <- combined_data %>%
   filter(predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          Chain == "TRB") %>%
   group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  # calculate clonotype counts within patients to get a sense of expansion
   mutate(count = n()) %>%
+  # look at just unique TCRs
   dplyr::slice(1) %>%
   arrange(-count) %>%
   ungroup() %>%
-  mutate(clonotype_rank = "All")
-  #mutate(clonotype_order = min_rank(dplyr::desc(count)))
-  #group_by(Patient_ID) %>%
-  #filter(row_number() <= 2)
-  #mutate(clonotype_order = min_rank(dplyr::desc(count))) 
+  group_by(predicted.celltype.l1, Chain, irAE) %>%
+  filter(row_number() <= 15) %>%
+  ungroup() %>%
+  mutate(tag = "Top 15 clonotypes\n(not normalized)")
 
-# likely there are ties issues but whatever for now, considering that then raises issue of > 2 per patient (or > n/patient)
-
-unique_full_igor_combined_cd8_tems
+unique_cd8_tem_trb_top_15_not_normalized
 
 ```
 
-# Create df of just solid conclusions
+# Get unique CD8 TEMs TRBs from top 15 clonotypes per irAE group from downsampled data
 
 ```{r}
 
-top_3_per_patient_full <- unique_full_igor_combined_cd8_tems %>%
-  group_by(Patient_ID) %>%
-  filter(row_number() <= 3) %>%
-  mutate(clonotype_rank = "Top 3\nper patient")
+unique_cd8_tem_trb_downsampled <- downsampled_df %>%
+  filter(predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  # calculate clonotype counts within patients to get a sense of expansion
+  mutate(count = n()) %>%
+  # look at just unique TCRs
+  dplyr::slice(1) %>%
+  arrange(-count) %>%
+  ungroup() %>%
+  mutate(tag = "Downsampled")
 
-top_4_per_patient_full <- unique_full_igor_combined_cd8_tems %>%
-  group_by(Patient_ID) %>%
-  filter(row_number() <= 4) %>%
-  mutate(clonotype_rank = "Top 4\nper patient")
+unique_cd8_tem_trb_downsampled
 
-top_5_per_patient_full <- unique_full_igor_combined_cd8_tems %>%
-  group_by(Patient_ID) %>%
-  filter(row_number() <= 5) %>%
-  mutate(clonotype_rank = "Top 5\nper patient")
+unique_cd8_tem_trb_top_15_downsampled <- unique_cd8_tem_trb_downsampled %>%
+  group_by(predicted.celltype.l1, Chain, irAE) %>%
+  filter(row_number() <= 15) %>%
+  ungroup() %>%
+  mutate(tag = "Top 15 clonotypes\n(downsampled)")
 
-unique_full_cd8_tems <- unique_full_igor_combined_cd8_tems %>%
-  full_join(top_3_per_patient_full) %>%
-  full_join(top_4_per_patient_full) %>%
-  full_join(top_5_per_patient_full)
-
-unique_full_cd8_tems
+unique_cd8_tem_trb_top_15_downsampled
 
 ```
 
-# Plot pgen solid conclusions for downsampling
+# Join dfs
 
 ```{r}
 
-p <- ggplot(unique_downsampled_cd8_tems, aes(x = clonotype_rank, y = log10(pgen), fill = irAE)) +
+unique_cd8_tem_trb_all <- unique_cd8_tem_trb_top_15 %>%
+  full_join(unique_cd8_tem_trb) %>%
+  full_join(unique_cd8_tem_trb_top_15_not_normalized) %>%
+  full_join(unique_cd8_tem_trb_top_15_downsampled) %>%
+  full_join(unique_cd8_tem_trb_downsampled) %>%
+  full_join(public_df) %>%
+  full_join(downsampled_public_df)
+
+```
+
+# Plot pgen conclusions
+
+```{r}
+
+unique_cd8_tem_trb_all$tag <- factor(unique_cd8_tem_trb_all$tag, levels = c("Top 15 clonotypes\n(normalized)", "Top 15 clonotypes\n(not normalized)", "Top 15 clonotypes\n(downsampled)", "Public", "Public\n(downsampled)", "All", "Downsampled"))
+
+p <- ggplot(unique_cd8_tem_trb_all, aes(x = tag, y = log10(pgen), fill = irAE)) +
   geom_boxplot() +
-  labs(x = "Clonotype rank", fill = "irAE", y = "TRB pgen (log10)")
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
+  labs(x = "", fill = "irAE", y = "TRB pgen (log10)") +
+  theme(axis.text.x = element_text(size = 8))
 
 # Adjust y-axis scales with a specified number of ticks
 p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
 
-unique_downsampled_cd8_tems %>%
-  group_by(clonotype_rank, irAE) %>%
-  summarize(count = n()) %>%
-  print()
-
 # Filter the data for statistical test
-test_data <- unique_downsampled_cd8_tems %>%
-  filter(clonotype_rank == "Top 100")
+test_data <- unique_cd8_tem_trb_all %>%
+  filter(tag == "Downsampled")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
@@ -392,82 +289,27 @@ wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
 # Print the results
 print(wilcox_result)
 
-# top 5: 0.8
-# top 20: 0.4445
-# top 50: 0.3988
+# top 15 (normalized): 0.03
+# top 15 (not normalized): 0.02
+# top 15 (downsampled): 0.06
 
 ```
 
-# Plot pgen solid conclusions without downsampling
+# Plot length conclusions
 
 ```{r}
 
-unique_full_cd8_tems$clonotype_rank <- factor(unique_full_cd8_tems$clonotype_rank, levels = c("Top 3\nper patient", "Top 4\nper patient", "Top 5\nper patient", "All"))
-
-p <- ggplot(unique_full_cd8_tems, aes(x = clonotype_rank, y = log10(pgen), fill = irAE)) +
+p <- ggplot(unique_cd8_tem_trb_all, aes(x = tag, y = cdr3_length, fill = irAE)) +
   geom_boxplot() +
-  labs(x = "Clonotype rank", fill = "irAE", y = "TRB pgen (log10)")
+  labs(x = "", fill = "irAE", y = "CD8 TEM CDR3β\nlength (AAs)") +
+  theme(axis.text.x = element_text(size = 8))
 
 # Adjust y-axis scales with a specified number of ticks
 p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
 
-unique_full_cd8_tems %>%
-  group_by(clonotype_rank, irAE) %>%
-  summarize(count = n()) %>%
-  print()
-
 # Filter the data for statistical test
-test_data <- unique_full_cd8_tems %>%
-  filter(clonotype_rank == "All")
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
-
-# Print the results
-print(wilcox_result)
-
-# top 3: 0.009639
-# top 4: 0.009833
-# top 5: 0.03519
-# All: 0.1051
-
-# adj: 0.019666 0.019666 0.046920 0.105100
-
-p_values <- c(0.009639, 0.009833, 0.03519, 0.1051)
-
-# Adjust p-values using the Benjamini-Hochberg method (default method)
-adjusted_p_values <- p.adjust(p_values, method = "BH")
-
-# Print the adjusted p-values
-print(adjusted_p_values)
-
-```
-
-# Plot solid length conclusions without downsampling
-
-```{r}
-
-p <- ggplot(unique_full_cd8_tems, aes(x = clonotype_rank, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  labs(x = "Clonotype rank", fill = "irAE", y = "CD8 TEM CDR3β\nlength (AAs)")
-
-# Adjust y-axis scales with a specified number of ticks
-p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
-
-unique_full_cd8_tems %>%
-  group_by(irAE, clonotype_rank) %>%
-  summarize(count = n()) %>%
-  print()
-
-# Filter the data for statistical test
-test_data <- unique_full_cd8_tems %>%
-  filter(clonotype_rank == "All")
-
-# top 20: 0.05834
-# top 30: 0.01727
-# All: 0.9734
-
-# adj: 0.05834 0.03454
+test_data <- unique_cd8_tem_trb_all %>%
+  filter(tag == "Top 15 clonotypes\n(not normalized)")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
@@ -475,49 +317,15 @@ wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
 # Print the results
 print(wilcox_result)
 
-p_values <- c(0.05834, 0.01727, 0.9734)
-
-# Adjust p-values using the Benjamini-Hochberg method (default method)
-adjusted_p_values <- p.adjust(p_values, method = "BH")
-
-# Print the adjusted p-values
-print(adjusted_p_values)
+# top 15 (not normalized): 0.009
 
 ```
 
-# Plot solid length conclusions without downsampling, patient bias
+# Plot germlineness vs. CDR3 length
 
 ```{r}
 
-p <- ggplot(unique_full_cd8_tems %>% filter(clonotype_rank %in% c("Top 20", "Top 30", "All")), aes(x = Patient_ID, y = cdr3_length, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~clonotype_rank) +
-  labs(x = "Patient ID", fill = "irAE", y = "CD8 TEM CDR3β\nlength (AAs)") +
-  theme(axis.text.x = element_blank())
-
-# Adjust y-axis scales with a specified number of ticks
-p + scale_y_continuous(breaks = pretty_breaks(n = 3))
-
-```
-
-# See if germlineness and CDR3 length anticorrelate
-
-```{r}
-
-full_igor_combined <- igor_combined %>%
-  pivot_longer(cols = matches("^(TRA|TRB)"),
-               names_to = c("Chain", ".value"),
-               names_pattern = "^(TRA|TRB)_(.*)$") %>%
-  dplyr::rename(barcode = TCR_name,
-         cdr3 = CDR3) %>%
-  mutate(pgen = as.numeric(pgen)) %>%
-  right_join(feature_df, by = c("barcode", "Chain", "cdr3")) %>%
-  group_by(Patient_ID, Chain, cdr3, v_gene, j_gene) %>%
-  dplyr::slice(1)
-
-full_igor_combined
-
-ggplot(aes(x = cdr3_length, y = log10(pgen)), data = full_igor_combined) +
+ggplot(aes(x = cdr3_length, y = log10(pgen)), data = combined_data) +
   geom_point() +
   labs(y = "log10(pgen)", x = "CDR3 length (AAs)") +
   stat_cor(method = "pearson", label.x = 0.8, label.y = 0.9)

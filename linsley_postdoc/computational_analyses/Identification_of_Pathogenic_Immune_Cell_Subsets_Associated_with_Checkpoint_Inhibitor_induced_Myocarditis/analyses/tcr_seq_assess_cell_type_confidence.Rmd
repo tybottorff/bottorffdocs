@@ -1,0 +1,111 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+library(scales)
+library(ggpubr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in final RNA T cell Seurat with TCR metadata
+
+```{r}
+
+tcr_rna <- readRDS("../saved_data/final_seurat_T_cells.rds")
+
+```
+
+# Tibble metadata, add rownames
+
+```{r}
+
+dehashed_combined_tcr_seq <- as_tibble(tcr_rna@meta.data)
+
+dehashed_combined_tcr_seq$barcode <- colnames(tcr_rna)
+
+dehashed_combined_tcr_seq <- dehashed_combined_tcr_seq %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"), names_to = c(".value", "Chain"), names_pattern = "(.*)_([A-Z]+)$") %>%
+  mutate(time_point = ifelse(grepl("[EL]", Patient_ID), sub(".*([EL]).*", "\\1", Patient_ID), NA), Patient_ID = gsub("[EL]", "", Patient_ID))
+
+dehashed_combined_tcr_seq
+
+write.csv(dehashed_combined_tcr_seq, "../saved_data/dehashed_tcr_seq_with_rna.csv")
+
+```
+
+# Assess cell identity confidence
+
+```{r}
+
+cell_confidence_test <- dehashed_combined_tcr_seq %>%
+  select(barcode, chain, cdr3, Patient_ID, irAE, predicted.celltype.l1, predicted.celltype.l1.score, predicted.celltype.l2, predicted.celltype.l2.score) %>%
+  group_by(predicted.celltype.l1, predicted.celltype.l2) %>%
+  summarize(count = n(), score1 = mean(predicted.celltype.l1.score), score2 = mean(predicted.celltype.l2.score))
+
+cell_confidence_test
+
+# unexpected combos have low scores, remove them
+
+```
+
+# Prep feature df
+
+```{r}
+
+feature_df <- dehashed_combined_tcr_seq %>%
+  filter(
+    case_when(
+      predicted.celltype.l1 == "CD4 T" & str_detect(predicted.celltype.l2, "CD4") | predicted.celltype.l2 == "Treg" ~ TRUE,
+      predicted.celltype.l1 == "CD8 T" & str_detect(predicted.celltype.l2, "CD8") ~ TRUE,
+      predicted.celltype.l1 == "other T" & predicted.celltype.l2 %in% c("MAIT", "dnT") ~ TRUE,
+      TRUE ~ FALSE)) %>%
+  rowwise() %>%
+  mutate(cdr3_length = nchar(cdr3)) %>%
+  ungroup() %>%
+  mutate(group = case_when(
+    startsWith(Patient_ID, "B") ~ "non-myocarditis irAE",
+    startsWith(Patient_ID, "M") ~ "myocarditis irAE",
+    startsWith(Patient_ID, "A") ~ "no irAE",
+    TRUE ~ "other"  # Add a default condition if none of the above match
+  ))
+
+write.csv(feature_df, "../saved_data/tcr_seq_features.csv")
+
+feature_df
+
+```
