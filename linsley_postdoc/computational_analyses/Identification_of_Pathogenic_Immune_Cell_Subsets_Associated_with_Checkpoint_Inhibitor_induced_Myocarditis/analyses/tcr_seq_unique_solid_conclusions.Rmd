@@ -116,14 +116,6 @@ downsampled_df
 
 ```
 
-# Look at TCR convergence
-
-```{r}
-
-combined_data
-
-```
-
 # Look at public vs. private
 
 ```{r}
@@ -138,7 +130,10 @@ downsampled_public_df_list
 
 downsampled_public_df <- downsampled_df %>%
   mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
-  filter(clonotype %in% downsampled_public_df_list$clonotype) %>%
+  filter(clonotype %in% downsampled_public_df_list$clonotype,
+         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
   group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
   # look at just unique TCRs
   dplyr::slice(1) %>%
@@ -156,13 +151,54 @@ public_df_list
 
 public_df <- combined_data %>%
   mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
-  filter(clonotype %in% public_df_list$clonotype) %>%
+  filter(clonotype %in% public_df_list$clonotype,
+         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
   group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
   # look at just unique TCRs
   dplyr::slice(1) %>%
   mutate(tag = "Public")
 
 public_df
+
+```
+
+# Look at TCR convergence
+
+```{r}
+
+convergence_within_patients <- combined_data %>%
+  select(Patient_ID, barcode, Chain, cdr3, cdr3_nt, v_gene, d_gene, j_gene, c_gene) %>%
+  group_by(cdr3, Patient_ID, v_gene) %>%
+  filter(n_distinct(cdr3_nt) > 1) %>%
+  group_by(Patient_ID, cdr3, cdr3_nt) %>%
+  summarize(count = n())
+
+convergence_across_patients <- combined_data %>%
+  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
+  group_by(cdr3, v_gene) %>%
+  filter(n_distinct(cdr3_nt) > 1)
+  #filter(clonotype %in% public_df_list$clonotype) %>%
+  #group_by(Patient_ID, cdr3, cdr3_nt) %>%
+  #summarize(count = n())
+
+convergence_across_patients
+
+# do see more convergence across patients as expected, and they are mostly in public TCRs also as expected
+
+convergence_df <- combined_data %>%
+  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
+  filter(clonotype %in% convergence_across_patients$clonotype,
+         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l2 == "CD8 TEM",
+         Chain == "TRB") %>%
+  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  # look at just unique TCRs
+  dplyr::slice(1) %>%
+  mutate(tag = "Converged")
+
+convergence_df
 
 ```
 
@@ -261,7 +297,8 @@ unique_cd8_tem_trb_all <- unique_cd8_tem_trb_top_15 %>%
   full_join(unique_cd8_tem_trb_top_15_downsampled) %>%
   full_join(unique_cd8_tem_trb_downsampled) %>%
   full_join(public_df) %>%
-  full_join(downsampled_public_df)
+  full_join(downsampled_public_df) %>%
+  full_join(convergence_df)
 
 ```
 
@@ -269,7 +306,7 @@ unique_cd8_tem_trb_all <- unique_cd8_tem_trb_top_15 %>%
 
 ```{r}
 
-unique_cd8_tem_trb_all$tag <- factor(unique_cd8_tem_trb_all$tag, levels = c("Top 15 clonotypes\n(normalized)", "Top 15 clonotypes\n(not normalized)", "Top 15 clonotypes\n(downsampled)", "Public", "Public\n(downsampled)", "All", "Downsampled"))
+unique_cd8_tem_trb_all$tag <- factor(unique_cd8_tem_trb_all$tag, levels = c("Top 15 clonotypes\n(normalized)", "Top 15 clonotypes\n(not normalized)", "Top 15 clonotypes\n(downsampled)", "Converged", "Public", "Public\n(downsampled)", "All", "Downsampled"))
 
 p <- ggplot(unique_cd8_tem_trb_all, aes(x = tag, y = log10(pgen), fill = irAE)) +
   geom_boxplot() +
@@ -281,7 +318,7 @@ p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_b
 
 # Filter the data for statistical test
 test_data <- unique_cd8_tem_trb_all %>%
-  filter(tag == "Downsampled")
+  filter(tag == "Converged")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$pgen ~ test_data$irAE)
@@ -292,6 +329,7 @@ print(wilcox_result)
 # top 15 (normalized): 0.03
 # top 15 (not normalized): 0.02
 # top 15 (downsampled): 0.06
+# public (downsampled): 0.06
 
 ```
 
@@ -309,7 +347,7 @@ p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_b
 
 # Filter the data for statistical test
 test_data <- unique_cd8_tem_trb_all %>%
-  filter(tag == "Top 15 clonotypes\n(not normalized)")
+  filter(tag == "Public\n(downsampled)")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
 wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$irAE)
@@ -329,5 +367,78 @@ ggplot(aes(x = cdr3_length, y = log10(pgen)), data = combined_data) +
   geom_point() +
   labs(y = "log10(pgen)", x = "CDR3 length (AAs)") +
   stat_cor(method = "pearson", label.x = 0.8, label.y = 0.9)
+
+```
+
+# Plot abundance vs. CDR3 length or pgen
+
+```{r}
+
+abundance_df <- combined_data %>%
+  group_by(Patient_ID, cdr3_nt, chain, v_gene, j_gene) %>%
+  mutate(count = n()) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(predicted.celltype.l1, predicted.celltype.l2, count, Patient_ID, irAE, barcode, Chain, cdr3, cdr3_length, pgen) %>%
+  mutate(irAE = paste("irAE:", irAE))
+
+abundance_df
+
+# Plot with best-fit liness
+ggplot(abundance_df %>% filter(predicted.celltype.l1 == "CD8 T" & Chain == "TRB"),
+       aes(x = log10(count), y = cdr3_length)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = FALSE, col = "blue") +
+  facet_wrap(~ irAE, scales = "free_y") +
+  labs(x = "CD8 TRB clonotype abundance (log10)", fill = "irAE", y = "CD8 TRB CDR3 length") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+# Plot with best-fit lines
+ggplot(abundance_df %>% filter(predicted.celltype.l1 == "CD8 T" & Chain == "TRB"),
+       aes(x = log10(count), y = log10(pgen))) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = FALSE, col = "blue") +
+  facet_wrap(~ irAE, scales = "free_y") +
+  labs(x = "CD8 TRB clonotype abundance (log10)", fill = "irAE", y = "CD8 TRB pgen (log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+```
+
+# Plot abundance vs. CDR3 length or pgen just for public TCRs
+
+ - now trends are not what I see for highly expanded
+
+```{r}
+
+abundance_df_public <- combined_data %>%
+  group_by(cdr3, v_gene, j_gene, c_gene) %>%
+  filter(n_distinct(Patient_ID) > 1) %>%
+  ungroup() %>%
+  group_by(Patient_ID, cdr3_nt, chain, v_gene, j_gene) %>%
+  mutate(count = n()) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(predicted.celltype.l1, predicted.celltype.l2, count, Patient_ID, irAE, barcode, Chain, cdr3, cdr3_length, pgen) %>%
+  mutate(irAE = paste("irAE:", irAE))
+
+abundance_df_public
+
+# Plot with best-fit liness
+ggplot(abundance_df_public %>% filter(predicted.celltype.l1 == "CD8 T" & Chain == "TRB"),
+       aes(x = (count), y = cdr3_length)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = FALSE, col = "blue") +
+  facet_wrap(~ irAE, scales = "free_y") +
+  labs(x = "CD8 TRB clonotype abundance (log10)", fill = "irAE", y = "CD8 TRB CDR3 length") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+# Plot with best-fit lines
+ggplot(abundance_df_public %>% filter(predicted.celltype.l1 == "CD8 T" & Chain == "TRB"),
+       aes(x = (count), y = log10(pgen))) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = FALSE, col = "blue") +
+  facet_wrap(~ irAE, scales = "free_y") +
+  labs(x = "CD8 TRB clonotype abundance (log10)", fill = "irAE", y = "CD8 TRB pgen (log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
 
 ```
