@@ -1,0 +1,244 @@
+---
+title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SeuratDisk)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in scRNAseq RDS
+
+```{r}
+
+immune.combined <- readRDS("../saved_data/cell_type_ref_mapped_integrated_transformed_reduced_clustered.rds")
+
+```
+
+# Look at just T cells
+
+```{r}
+
+T_cells <- immune.combined[, immune.combined@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & immune.combined@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
+
+```
+
+# Re-do dimensional reduction, clustering
+
+```{r}
+
+T_cells <- RunPCA(T_cells, npcs = 30, verbose = FALSE)
+T_cells <- RunUMAP(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindNeighbors(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindClusters(T_cells, resolution = 3)
+
+```
+
+# Read in reference to use for mapping
+
+```{r}
+
+reference <- LoadH5Seurat("../../pbmc_multimodal.h5seurat")
+
+```
+
+# Find reference transfer anchors
+
+```{r}
+
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50
+)
+
+```
+
+# Map reference onto my object
+
+```{r}
+
+T_cells <- MapQuery(
+  anchorset = anchors,
+  query = T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca",
+  reduction.model = "wnn.umap"
+)
+
+```
+
+# Plot mapping results
+
+```{r}
+
+p1 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
+
+```
+
+# Re-look at just T cells
+
+```{r}
+
+T_cells <- T_cells[, T_cells@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
+
+T_cells <- RunPCA(T_cells, npcs = 30, verbose = FALSE)
+T_cells <- RunUMAP(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindNeighbors(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindClusters(T_cells, resolution = 3)
+
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50
+)
+
+T_cells <- MapQuery(
+  anchorset = anchors,
+  query = T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca",
+  reduction.model = "wnn.umap"
+)
+
+
+p1 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
+
+```
+
+# Re-look at just T cells
+
+```{r}
+
+T_cells <- T_cells[, T_cells@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
+
+T_cells <- RunPCA(T_cells, npcs = 30, verbose = FALSE)
+T_cells <- RunUMAP(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindNeighbors(T_cells, reduction = "pca", dims = 1:30)
+T_cells <- FindClusters(T_cells, resolution = 3)
+
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50
+)
+
+T_cells <- MapQuery(
+  anchorset = anchors,
+  query = T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca",
+  reduction.model = "wnn.umap"
+)
+
+
+p1 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
+
+```
+
+# Not many non-T cells leftover
+
+```{r}
+
+just_T_cells <- T_cells[, T_cells@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
+
+p1 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
+
+```
+
+# Make some UMAP overlays
+
+```{r}
+
+t_cell_metadata <- as_tibble(just_T_cells@meta.data) %>%
+    mutate(group = case_when(
+    startsWith(orig.ident, "CT") ~ "no ICI",
+    startsWith(orig.ident, "C") ~ "ICI colitis",
+    startsWith(orig.ident, "NC") ~ "ICI no colitis"))
+
+t_cell_metadata
+
+just_T_cells <- AddMetaData(just_T_cells, metadata = t_cell_metadata)
+
+DimPlot(just_T_cells, reduction = "umap", group.by = "group", shuffle = TRUE, seed = 728)
+
+DimPlot(just_T_cells, reduction = "umap", group.by = "orig.ident", shuffle = TRUE, seed = 728) + NoLegend()
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(just_T_cells, "../saved_data/T_cells.rds")
+
+```

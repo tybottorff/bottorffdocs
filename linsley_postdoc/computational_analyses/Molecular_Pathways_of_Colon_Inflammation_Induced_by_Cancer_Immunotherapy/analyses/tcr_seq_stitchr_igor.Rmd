@@ -1,0 +1,269 @@
+---
+title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+library(Biostrings)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RNA RDS
+
+```{r}
+
+rna <- readRDS("../saved_data/T_cells.rds")
+
+```
+
+# Work with RNA metadata
+
+```{r}
+
+rna_metadata <- as_tibble(rna@meta.data)
+
+rna_metadata$barcode <- colnames(rna)
+
+rna_metadata
+
+patient_barcode_connect <- rna_metadata %>%
+  group_by(orig.ident) %>%
+  slice(1) %>%
+  ungroup() %>%
+  mutate(patient = sub("-.*", "", orig.ident),
+         barcode_num = sub(".*_", "", barcode)) %>%
+  select(patient, barcode_num)
+
+patient_barcode_connect
+
+```
+
+# Read in TCR-seq data
+
+```{r}
+
+tcr <- read.csv("../raw_data/tcr/GSE144469_TCR_filtered_contig_annotations_all.csv") %>%
+  select(-X) %>%
+  filter(high_confidence == "True",
+         productive == "True",
+         cdr3 != "None",
+         !(is.na(cdr3)),
+         !(is.na(v_gene)),
+         !(is.na(j_gene)),
+         !(is.na(c_gene)),
+         full_length == "True",
+         is_cell == "True",
+         chain != "Multi") %>%
+  select(-is_cell, -high_confidence, -length, -full_length, -productive, -raw_clonotype_id, -raw_consensus_id, -contig_id) %>%
+  # if a cell had two or more qualified chains of the same type, keep only that chain with the highest UMI count
+  group_by(barcode, chain) %>%
+  arrange(-umis) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(-reads, -umis) %>%
+  pivot_wider(names_from = "chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt")) %>%
+  mutate(patient = sub(".*-", "", barcode)) %>%
+  left_join(patient_barcode_connect, by = "patient") %>%
+  mutate(barcode = sub("-.*", "-1_", barcode)) %>%
+  mutate(barcode = paste(barcode, barcode_num, sep = "")) %>%
+  as.data.frame()
+
+rownames(tcr) <- tcr$barcode
+
+tcr <- tcr %>%
+  select(-barcode)
+
+tcr
+
+```
+
+# Add TCR metadata onto RNA
+
+```{r}
+
+tcr_and_rna <- AddMetaData(rna, metadata = tcr)
+
+```
+
+# Insepct full metadata
+
+```{r}
+
+full_metadata <- tcr_and_rna@meta.data
+
+full_metadata$TCR_name <- rownames(full_metadata)
+
+full_metadata
+
+write.csv(full_metadata, "../saved_data/rna_tcr.csv")
+
+```
+
+# Prep TRA stitchr df
+
+```{r}
+
+bad_alpha <- full_metadata %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter((is.na(TRAV)) | (is.na(TRAJ)) | (is.na(TRAC)) | (is.na(TRA_CDR3)))
+
+stitchr_alpha_data <- full_metadata %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_alpha$TCR_name)) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_alpha_data
+
+# 46,531 rows
+
+write.table(stitchr_alpha_data, file = "../saved_data/tcrseq_tra_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+bad_beta <- full_metadata %>%
+    rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter((is.na(TRBV)) | (is.na(TRBJ)) | (is.na(TRBC)) | (is.na(TRB_CDR3)))
+
+stitchr_beta_data <- full_metadata %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_beta$TCR_name)) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_beta_data
+
+# 47,775 rows
+
+write.table(stitchr_beta_data, file = "../saved_data/tcrseq_trb_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+```
+
+# Read in stitchr output
+
+```{r}
+
+stitchr_alpha_output <- read.delim("../saved_data/stitchr_tra_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_alpha_output
+
+stitchr_beta_output <- read.delim("../saved_data/stitchr_trb_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_beta_output
+
+stitchr_output <- stitchr_alpha_output %>%
+  full_join(stitchr_beta_output, by = colnames(stitchr_alpha_output))
+
+stitchr_output
+
+```
+
+# Prep IGoR input
+
+```{r}
+
+stitchr_output_alpha_df <- stitchr_output %>%
+  filter(!(is.na(TRA_nt)),
+         nchar(TRA_nt) > 1)
+
+stitchr_output_alpha_df
+# 46,451 rows
+
+write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
+
+stitchr_output_beta_df <- stitchr_output %>%
+  filter(!(is.na(TRB_nt)),
+         nchar(TRB_nt) > 1)
+
+stitchr_output_beta_df
+# 47,581 rows
+
+write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
+
+```
+
+# Read in IGoR output
+
+```{r}
+
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
+  mutate(patient_group = case_when(
+    startsWith(Patient_ID, "A") ~ "ici_no_irae",
+    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(patient_group, irAE, chain, pgen, barcode, cdr3) %>%
+  filter(chain == "TRA",
+         pgen != "NaN")
+
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
+  mutate(patient_group = case_when(
+    startsWith(Patient_ID, "A") ~ "ici_no_irae",
+    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(Patient_ID, patient_group, irAE, chain, pgen, barcode, cdr3) %>%
+  filter(chain == "TRB",
+         pgen != "NaN") %>%
+  full_join(igor_alpha, by = c("barcode", "chain", "patient_group", "pgen", "cdr3", "irAE"))
+
+igor_combined
+
+```
