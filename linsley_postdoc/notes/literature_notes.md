@@ -1605,7 +1605,9 @@
  - within V region of heavy and light chains
 # Role of the multiple T cell receptor (TCR)-ζ chain signaling motifs in selection of the T cell repertoire
  - TCR is composed of four distinct signal transducing subunits (CD3-γ, -δ, -ε, and ζ) that contain either one (CD3-γ, -δ, -ε) or three (-ζ) signaling motifs (ITAMs) within their intracytoplasmic domains
-# Sequence count data are poorly fit by the negative binomial distribution
+# Sharing of T cell receptors in antigen-specific responses is driven by convergent recombination
+ - convergent recombination, rather than recombination bias or selection, drives publicity
+ - potential causes of publicity: self tolerance restricts capacity of TCRs to recognize some epitopes, different conformations of peptides in MHC groove (flat or prominent), degenerate binders
 # Simultaneous epitope and transcriptome measurement in single cells
  - cellular indexing of transcriptomes and epitopes by sequencing (CITE-seq), oligonucleotide-labeled antibodies are used to integrate cellular protein and transcriptome measurements into a single cell readout
  - DNA oligonucleotide conjugated to antibody can be measured by sequencing as digital readout of protein abundance
@@ -1844,6 +1846,28 @@
  - find TRBV allele haplotype protective against severe irAEs
  - **T-cells with autoreactive TCRs that escape thymic negative selection and persist as deactivated T-cells in the periphery may be re-activated by ICIs to mediate irAEs**
  - **perhaps ICIs reduce efficacy of thymic negative selection, but doesn't that occur in infancy?**
+# T cell receptor convergence is an indicator of antigen-specific T cell response in cancer immunotherapies
+## Abstract
+ - TCR convergence: same AA sequence, different nt sequence
+ - **link between antigen specificity and convergence stronger than link between antigen specificity and expansion**
+## Result
+### TCR convergence is different from publicity
+ - degeneracy: number of distinct clonotypes (nt seq) encoding TCR within sample, 1 means non-convergent, > 1 means convergent
+ - see ~5% of TCRs as convergent, mostly degeneracy of 2 (some 3, higher rare, i.e. mostly convergent just due to 2 unique nt seqs encoding them)
+ - **shorter CDR3s appear to be more conducive to convergence**
+ - convergence/degeneracy not affected by  V gene usage
+ - **convergent TCRs favor polar neutral AAs and acidic AAs, like tyrosine, serine, glutamic acid, alkaline and hydrophobic AAs less favorable for convergent TCRs**
+ - TCR degeneracy not due to codon degeneracy, arginine, leucine, and serine all encoded by 6 codons but serine moreso than leucine and arginine enriched in convergent TCRs
+ - public TCRs generated from V(D)J recombination biases, might target common antigens like viral epitopes
+ - TCRs targeting cancer neoantigens mostly private, so higher TMB maybe more private TCRs (more neoantigens)
+ - **TCR convergence and publicity seem to diverge by TMB, overlap decreases with increasing TMB**
+### Convergent TCRs are more likely to be antigen specific
+ - antigen specific here really means antigen experienced
+ - moreso than expanded T cells' receptors
+### TCR convergence is associated with the clinical outcome of ICB treatment
+ - even after adjusting for covariates of TCR diversity, clonality
+## Discussion
+ - CD8 TCRs more convergent than CD4 TCRs, perhaps due to greater impact of antigen selection on CD8s
 # T cell receptor repertoire as a predictor of immune-related adverse events in renal cell carcinoma
  - median proportion of top 10 unique reads in TCR repertoire higher in more severe irAEs (grade 3 vs. grade 2) in RCC patients receiving ICB, so **more clonal repertoire with more severe irAEs**
 # T cell repertoire analysis and metrics of diversity and clonality
