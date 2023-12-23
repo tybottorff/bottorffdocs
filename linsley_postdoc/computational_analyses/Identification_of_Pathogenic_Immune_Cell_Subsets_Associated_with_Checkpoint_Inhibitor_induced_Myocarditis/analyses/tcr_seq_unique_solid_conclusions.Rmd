@@ -310,8 +310,8 @@ unique_cd8_tem_trb_all$tag <- factor(unique_cd8_tem_trb_all$tag, levels = c("Top
 
 p <- ggplot(unique_cd8_tem_trb_all, aes(x = tag, y = log10(pgen), fill = irAE)) +
   geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "TRB pgen (log10)") +
-  theme(axis.text.x = element_text(size = 8))
+  labs(x = "", fill = "irAE", y = "CD8 TEM\nTRB pgen (log10)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
 
 # Adjust y-axis scales with a specified number of ticks
 p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
@@ -331,16 +331,24 @@ print(wilcox_result)
 # top 15 (downsampled): 0.06
 # public (downsampled): 0.06
 
+p_values <- c(0.03, 0.02, 0.06)
+
+# Adjust p-values using Benjamini-Hochberg procedure
+adjusted_p_values <- p.adjust(p_values, method = "BH")
+
+# Display the original and adjusted p-values
+data.frame(original_p_values = p_values, adjusted_p_values = adjusted_p_values)
+
 ```
 
 # Plot length conclusions
 
 ```{r}
 
-p <- ggplot(unique_cd8_tem_trb_all, aes(x = tag, y = cdr3_length, fill = irAE)) +
+p <- ggplot(unique_cd8_tem_trb_all, aes(x = tag, y = (cdr3_length), fill = irAE)) +
   geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "CD8 TEM CDR3β\nlength (AAs)") +
-  theme(axis.text.x = element_text(size = 8))
+  labs(x = "", fill = "irAE", y = "CD8 TEM\ TRB\nCDR3 length (AAs)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
 
 # Adjust y-axis scales with a specified number of ticks
 p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
