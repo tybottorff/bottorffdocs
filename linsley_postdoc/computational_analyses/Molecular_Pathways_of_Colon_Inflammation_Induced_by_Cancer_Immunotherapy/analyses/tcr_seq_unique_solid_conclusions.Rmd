@@ -13,13 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
-library(Seurat)
-library(Matrix)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(stringr)
-library(circlize)
 library(scales)
 library(ggpubr)
 
@@ -157,7 +154,6 @@ downsampled_df
 downsampled_public_df_list <- downsampled_df %>%
   group_by(cdr3, v_gene, j_gene, c_gene) %>%
   filter(n_distinct(patient) > 1) %>%
-  select(patient, cdr3) %>%
   mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
 
 downsampled_public_df_list
@@ -178,7 +174,6 @@ downsampled_public_df
 public_df_list <- combined_data %>%
   group_by(cdr3, v_gene, j_gene, c_gene) %>%
   filter(n_distinct(patient) > 1) %>%
-  select(patient, cdr3) %>%
   mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
 
 public_df_list
@@ -231,6 +226,23 @@ convergence_df <- combined_data %>%
   mutate(tag = "Converged")
 
 convergence_df
+
+```
+
+# Look at overlap between public and converged
+
+```{r}
+
+# Create a Venn diagram
+venn.plot <- venn.diagram(
+  x = list(A = public_df$barcode, B = convergence_df$barcode),
+  category.names = c("Public TCRs", "Converged TCRs"),
+  filename = NULL,
+  output = TRUE
+)
+
+# Display the Venn diagram
+grid.draw(venn.plot)
 
 ```
 
@@ -352,7 +364,7 @@ p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_b
 
 # Filter the data for statistical test
 test_data <- unique_cd8_tem_trb_all %>%
-  filter(tag == "Top 20 clonotypes\n(downsampled)",
+  filter(tag == "Top 20 clonotypes\n(not normalized)",
          group != "no ICI")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value

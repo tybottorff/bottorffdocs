@@ -1,0 +1,205 @@
+---
+title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(networkD3)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in TCR data
+
+```{r}
+
+tcr_seq <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv")
+
+tcr_seq
+
+```
+
+# Make Sankey plot for TRA yes irAE
+
+```{r}
+
+yes_irae_alpha_sankey <- tcr_seq %>%
+  filter(Chain == "TRA",
+         group == "ICI colitis") %>%
+  select(v_gene, j_gene)
+  
+yes_irae_alpha_sankey_nodes <- data.frame(nodes = unique(c(unique(yes_irae_alpha_sankey$v_gene), unique(yes_irae_alpha_sankey$j_gene))))
+
+gene_pair_counts <- table(yes_irae_alpha_sankey$v_gene, yes_irae_alpha_sankey$j_gene)
+
+yes_irae_alpha_sankey_links <- as.data.frame(gene_pair_counts)
+
+colnames(yes_irae_alpha_sankey_links) <- c("v_gene", "j_gene", "Count")
+
+yes_irae_alpha_sankey_links <- yes_irae_alpha_sankey_links %>%
+  arrange(-Count) %>%
+  head(75)
+
+yes_irae_alpha_sankey_nodes <- yes_irae_alpha_sankey_nodes %>%
+  filter(nodes %in% yes_irae_alpha_sankey_links$v_gene | nodes %in% yes_irae_alpha_sankey_links$j_gene) %>%
+  mutate(row_number = row_number())
+
+yes_irae_alpha_sankey_links$v_gene <- yes_irae_alpha_sankey_nodes$row_number[match(yes_irae_alpha_sankey_links$v_gene, yes_irae_alpha_sankey_nodes$nodes)] - 1
+
+yes_irae_alpha_sankey_links$j_gene <- yes_irae_alpha_sankey_nodes$row_number[match(yes_irae_alpha_sankey_links$j_gene, yes_irae_alpha_sankey_nodes$nodes)] - 1
+
+p <- sankeyNetwork(Links = yes_irae_alpha_sankey_links, Nodes = yes_irae_alpha_sankey_nodes, Source = "v_gene",
+             Target = "j_gene", Value = "Count", NodeID = "nodes", fontSize = 12, nodeWidth = 30)
+p
+
+```
+
+# Make Sankey plot for TRB yes irAE
+
+```{r}
+
+yes_irae_beta_sankey <- tcr_seq %>%
+  filter(Chain == "TRB",
+         group == "ICI colitis") %>%
+  select(v_gene, j_gene, barcode)
+  
+yes_irae_beta_sankey_nodes <- data.frame(nodes = unique(c(unique(yes_irae_beta_sankey$v_gene), unique(yes_irae_beta_sankey$j_gene))))
+
+gene_pair_counts <- table(yes_irae_beta_sankey$v_gene, yes_irae_beta_sankey$j_gene)
+
+yes_irae_beta_sankey_links <- as.data.frame(gene_pair_counts)
+
+colnames(yes_irae_beta_sankey_links) <- c("v_gene", "j_gene", "Count")
+
+yes_irae_beta_sankey_links <- yes_irae_beta_sankey_links %>%
+  arrange(-Count) %>%
+  head(75)
+
+yes_irae_beta_sankey_nodes <- yes_irae_beta_sankey_nodes %>%
+  filter(nodes %in% yes_irae_beta_sankey_links$v_gene | nodes %in% yes_irae_beta_sankey_links$j_gene) %>%
+  mutate(row_number = row_number())
+
+yes_irae_beta_sankey_links$v_gene <- yes_irae_beta_sankey_nodes$row_number[match(yes_irae_beta_sankey_links$v_gene, yes_irae_beta_sankey_nodes$nodes)] - 1
+
+yes_irae_beta_sankey_links$j_gene <- yes_irae_beta_sankey_nodes$row_number[match(yes_irae_beta_sankey_links$j_gene, yes_irae_beta_sankey_nodes$nodes)] - 1
+
+p <- sankeyNetwork(Links = yes_irae_beta_sankey_links, Nodes = yes_irae_beta_sankey_nodes, Source = "v_gene",
+             Target = "j_gene", Value = "Count", NodeID = "nodes", fontSize = 12, nodeWidth = 30)
+p
+
+```
+
+# Make Sankey plot for TRA no irAE
+
+```{r}
+
+no_irae_alpha_sankey <- tcr_seq %>%
+  filter(Chain == "TRA",
+         group == "ICI no colitis") %>%
+  select(v_gene, j_gene)
+  
+no_irae_alpha_sankey_nodes <- data.frame(nodes = unique(c(unique(no_irae_alpha_sankey$v_gene), unique(no_irae_alpha_sankey$j_gene))))
+
+gene_pair_counts <- table(no_irae_alpha_sankey$v_gene, no_irae_alpha_sankey$j_gene)
+
+no_irae_alpha_sankey_links <- as.data.frame(gene_pair_counts)
+
+colnames(no_irae_alpha_sankey_links) <- c("v_gene", "j_gene", "Count")
+
+no_irae_alpha_sankey_links <- no_irae_alpha_sankey_links %>%
+  arrange(-Count) %>%
+  head(75)
+
+no_irae_alpha_sankey_nodes <- no_irae_alpha_sankey_nodes %>%
+  filter(nodes %in% no_irae_alpha_sankey_links$v_gene | nodes %in% no_irae_alpha_sankey_links$j_gene) %>%
+  mutate(row_number = row_number())
+
+no_irae_alpha_sankey_links$v_gene <- no_irae_alpha_sankey_nodes$row_number[match(no_irae_alpha_sankey_links$v_gene, no_irae_alpha_sankey_nodes$nodes)] - 1
+
+no_irae_alpha_sankey_links$j_gene <- no_irae_alpha_sankey_nodes$row_number[match(no_irae_alpha_sankey_links$j_gene, no_irae_alpha_sankey_nodes$nodes)] - 1
+
+p <- sankeyNetwork(Links = no_irae_alpha_sankey_links, Nodes = no_irae_alpha_sankey_nodes, Source = "v_gene",
+             Target = "j_gene", Value = "Count", NodeID = "nodes", fontSize = 12, nodeWidth = 30)
+p
+
+```
+
+# Make Sankey plot for TRB no irAE
+
+```{r}
+
+no_irae_beta_sankey <- tcr_seq %>%
+  filter(Chain == "TRB",
+         group == "ICI no colitis") %>%
+  select(v_gene, j_gene, barcode)
+  
+no_irae_beta_sankey_nodes <- data.frame(nodes = unique(c(unique(no_irae_beta_sankey$v_gene), unique(no_irae_beta_sankey$j_gene))))
+
+gene_pair_counts <- table(no_irae_beta_sankey$v_gene, no_irae_beta_sankey$j_gene)
+
+no_irae_beta_sankey_links <- as.data.frame(gene_pair_counts)
+
+colnames(no_irae_beta_sankey_links) <- c("v_gene", "j_gene", "Count")
+
+no_irae_beta_sankey_links <- no_irae_beta_sankey_links %>%
+  arrange(-Count) %>%
+  head(75)
+
+no_irae_beta_sankey_nodes <- no_irae_beta_sankey_nodes %>%
+  filter(nodes %in% no_irae_beta_sankey_links$v_gene | nodes %in% no_irae_beta_sankey_links$j_gene) %>%
+  mutate(row_number = row_number())
+
+no_irae_beta_sankey_links$v_gene <- no_irae_beta_sankey_nodes$row_number[match(no_irae_beta_sankey_links$v_gene, no_irae_beta_sankey_nodes$nodes)] - 1
+
+no_irae_beta_sankey_links$j_gene <- no_irae_beta_sankey_nodes$row_number[match(no_irae_beta_sankey_links$j_gene, no_irae_beta_sankey_nodes$nodes)] - 1
+
+p <- sankeyNetwork(Links = no_irae_beta_sankey_links, Nodes = no_irae_beta_sankey_nodes, Source = "v_gene",
+             Target = "j_gene", Value = "Count", NodeID = "nodes", fontSize = 12, nodeWidth = 30)
+p
+
+```
+
+# Inspect neoantigen specific TCRs
+
+ - don't see many hits
+
+```{r}
+
+neoantigen_tcrs <- read.csv("../../Phenotypic_signatures_of_circulating_neoantigen_reactive_CD8_T_cells_in_patients_with_metastatic_cancers/saved_data/joined_tcrs.csv") %>%
+  select(-X)
+
+neoantigen_tcrs
+
+tcr_seq %>%
+  filter(Chain == "TRA" & cdr3 %in% neoantigen_tcrs$TRA.cdr3)
+
+```

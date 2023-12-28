@@ -13,8 +13,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
-library(Seurat)
-library(Matrix)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -191,5 +189,25 @@ ggplot(plot_df %>% filter(Epitope.gene %in% c("BST2", "MLANA")), aes(x = Patient
 
 # Vitiligo
 # B3
+
+```
+
+# Inspect neoantigen specific TCRs
+
+ - don't see many hits
+
+```{r}
+
+neoantigen_tcrs <- read.csv("../../Phenotypic_signatures_of_circulating_neoantigen_reactive_CD8_T_cells_in_patients_with_metastatic_cancers/saved_data/joined_tcrs.csv") %>%
+  select(-X) %>%
+  filter(TRA.cdr3 %in% c("CAVRDNYGQNFVF", "CAVVDNYGQNFVF"))
+
+neoantigen_tcrs
+
+fresh_tcr_seq <- read.csv("../saved_data/tcr_seq_features.csv") %>%
+  select(-X) %>%
+  filter(Chain == "TRA" & cdr3 %in% neoantigen_tcrs$TRA.cdr3 & v_gene == "TRAV21")
+
+fresh_tcr_seq
 
 ```

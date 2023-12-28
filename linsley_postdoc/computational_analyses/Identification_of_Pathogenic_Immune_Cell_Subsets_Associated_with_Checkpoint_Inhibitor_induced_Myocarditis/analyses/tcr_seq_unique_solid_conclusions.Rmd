@@ -13,15 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
-library(Seurat)
-library(Matrix)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(stringr)
-library(circlize)
-library(scales)
-library(ggpubr)
+library(VennDiagram)
 
 ```
 
@@ -123,7 +118,6 @@ downsampled_df
 downsampled_public_df_list <- downsampled_df %>%
   group_by(cdr3, v_gene, j_gene, c_gene) %>%
   filter(n_distinct(Patient_ID) > 1) %>%
-  select(Patient_ID, cdr3) %>%
   mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
 
 downsampled_public_df_list
@@ -144,7 +138,6 @@ downsampled_public_df
 public_df_list <- combined_data %>%
   group_by(cdr3, v_gene, j_gene, c_gene) %>%
   filter(n_distinct(Patient_ID) > 1) %>%
-  select(Patient_ID, cdr3) %>%
   mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
 
 public_df_list
@@ -199,6 +192,23 @@ convergence_df <- combined_data %>%
   mutate(tag = "Converged")
 
 convergence_df
+
+```
+
+# Look at overlap between public and converged
+
+```{r}
+
+# Create a Venn diagram
+venn.plot <- venn.diagram(
+  x = list(A = public_df$barcode, B = convergence_df$barcode),
+  category.names = c("Public TCRs", "Converged TCRs"),
+  filename = NULL,
+  output = TRUE
+)
+
+# Display the Venn diagram
+grid.draw(venn.plot)
 
 ```
 

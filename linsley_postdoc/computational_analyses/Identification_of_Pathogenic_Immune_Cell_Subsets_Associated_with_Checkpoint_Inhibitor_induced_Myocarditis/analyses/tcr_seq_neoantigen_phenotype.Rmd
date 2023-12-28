@@ -1,0 +1,70 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(Seurat)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+rna <- readRDS("../saved_data/final_seurat_T_cells.rds")
+
+rna
+
+```
+
+# Look for neoantigen-speciifc phenotype
+
+ - High TCF7, LEF1, SELL, low TOX CXCL13
+
+```{r}
+
+VlnPlot(rna, features = c("LEF1", "TCF7", "SELL", "TOX"))
+
+rna_2 <- subset(rna, subset = TCF7 > 3 & LEF1 > 3 & SELL > 3 & TOX < 3)
+
+VlnPlot(rna_2, features = c("LEF1", "TCF7", "SELL", "TOX"))
+
+```
+
+```{r}
+
+rna_2@meta.data %>%
+  filter(predicted.celltype.l1 == "CD8 T", predicted.celltype.l2 == "CD8 TEM") %>%
+  print()
+
+```
