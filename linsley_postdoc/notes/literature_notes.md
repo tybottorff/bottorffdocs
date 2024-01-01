@@ -634,6 +634,9 @@
  - ankylosing spondylitis: autoimmune condition
  - see that good responders to biologics have increased TCR repertoire diversity
  - positive correlation between TCR repertoire diversity and IL-23 levels
+# Early changes in the circulating T cells are associated with clinical outcomes after PD-L1 blockade by durvalumab in advanced NSCLC patients
+ - previous literature: increases in T cells after PD-L1 blockade
+ - patients with higher TCR diversity on day 15 had better responses
 # Early rise in brain damage markers and high ICOS expression in CD4<sup>+</sup> and CD8<sup>+</sup> T cells during checkpoint inhibitor-induced encephalomyelitis
  - ICOS expression on T cells mirrored severity of encephalomyelitis over course of recovery, also see ICOS expression on T cells of other patients with severe irAEs (moreso than in patients without irAEs)
 # Effective use of latent semantic indexing and computational linguistics in biological and biomedical applications
@@ -888,7 +891,9 @@
  - 1399 samples across 29 cancer types, 52 drugs
 # Identification of antigen-specific TCR sequences based on biological and statistical enrichment in unselected individuals
  - biological (FACS, TCR beta seq) and statistical methods
- - 
+ - most antigen-specific TCRs in VDJdb come from pMHC-multimer (tetramer) binding FACS experiments, which has the drawbacks of limited throughput and can only be used with T cell donors with genetically matched HLA alleles
+ - **I think all they do is compare TCR repertoires between antigen-activated and resting pools to find enriched TCRs in antigen-activated pools to call antigen-specific, not *de novo* identifying antigen-specific TCRs as would be nice**
+ - **public peanut antigen-specific CDR3s are more germline-like (fewer N-nucleotide insertions than private ones) and show evidence of convergent recombination**
 # Identification of neoantigens for individualized cancer immunotherapy
  - neoepitopes are attractive targets for therapeutic cancer vaccines, **but most cancer mutations are unique for individual patients (neoantigenome), requiring individualized treatment**
  - **not all tumor mutations give rise to neoantigens, neoepitope-specific T cells reflect only 1-2% of mutations in an individual tumor, this could be due to not all tumor mutations giving rise to neoantigens and from T cell repertoire not recognizing all neoantigens perhaps as well**
@@ -1552,7 +1557,7 @@
 # Rigorous benchmarking of T cell receptor repertoire profiling methods for cancer RNA sequencing
 ## Abstract
  - benchmarking ability of RNAseq methods (vs. gold standard of targeted TCRseq) to profile TCR repertoires, examine 19 bulk RNAseq samples across 4 cancer cohorts, T cell rich/poor tissue
- - RNAseq work sok in T cell rich tissue with low diversity repertoires, don't work as well in T cell poor tissues especially those with highly diverse repertoires
+ - RNAseq works ok in T cell rich tissue with low diversity repertoires, don't work as well in T cell poor tissues especially those with highly diverse repertoires
 ## Introduction
  - MiXCR (RNAseq method) has been shown to be able to detect TCR beta sequences with relative frequencies > 0.15% in T cell rich tissue
 ## Results
