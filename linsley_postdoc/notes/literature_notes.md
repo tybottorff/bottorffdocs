@@ -1235,6 +1235,11 @@
  - CD5 surface expression correlates with strength of self-pMHC signal
  - CD5<sup>low</sup> (less self-reactive?) TRB CDR3s longer and more acidic, CD5<sup>high</sup> (more self-reactive?) TRB CDR3s shorter and more hydrophobic
  - experimentally confirm predictions
+# Machine learning predictions of MHC-II specificities reveal alternative binding mode of class II epitopes
+ - dataset of 627,013 unique MHC-II ligands identified by mass spectrometry
+ - determine binding motifs of 88 MHC-II alleles across species
+ - widespread reverse-binding mode in HLA-DP ligands
+ - machine-learning framework to predict binding specificities/ligands of any MHC-II allele
 # Major histocompatibility complex (MHC) class I and MHC class II proteins: conformational plasticity in antigen presentation
  - APC presented peptides are generated from proteins produced by cell's own translational machinery or from proteins funneled into endo-lysosomal vesicular system
  - peptide repertoire presented by MHC proteins largely depends on structural features of binding groove of each particular MHC allelic variant
@@ -1643,6 +1648,8 @@
  - higher exhaustion signature than initial sample, but still lower exhaustion than tumor
 ## Discussion
  - majority of tumor matched cells in blood in melanoma patients show effector or effector memory-like phenotype, contrary to exhausted-like profile prediction
+# Single cell analyses inform mechanisms of myeloid-targeted therapies in colon cancer
+ - macrophage and convential DC subsets as key mediators of cross-talk in TME
 # Single cell analyses reveal key immune cell subsets associated with response to PD-L1 blockade in triple-negative breast cancer
  - high baseline levels of CXCL13<sup>+</sup> T cells linked to proinflammatory features of macrophages, can predict response
 # Single cell dynamics of tumor specificity vs bystander activity in CD8<sup>+</sup> T cells define the diverse immune landscapes in colorectal cancer
