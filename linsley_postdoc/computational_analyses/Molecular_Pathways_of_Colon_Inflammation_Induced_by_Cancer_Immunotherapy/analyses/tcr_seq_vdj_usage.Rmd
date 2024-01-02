@@ -1,9 +1,9 @@
 ---
-title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
 output: pdf_document
 ---
 
- - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -38,14 +38,108 @@ theme_set(
 
 ```
 
-# Load TCRseq data
+# Read in TCR data
 
 ```{r}
 
-tcr_seq <- read.csv("../saved_data/tcr_seq_features.csv") %>%
-  select(-X)
+tcr_seq <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv")
 
 tcr_seq
+
+```
+
+# Prep df for VJ bar plots
+
+```{r}
+
+interesting_v_genes <- tcr_seq %>%
+  select(patient, predicted.celltype.l1, predicted.celltype.l2, barcode, Chain, v_gene, j_gene, c_gene, group) %>%
+  filter(predicted.celltype.l1 != "other T",
+         group != "no ICI") %>%
+  group_by(v_gene, group, predicted.celltype.l1, patient) %>%
+  summarize(count = n()) %>%
+  group_by(patient) %>%
+  mutate(normalized_count = count / sum(count)) %>%
+  group_by(v_gene, group, predicted.celltype.l1) %>%
+  summarize(median = median(normalized_count)) %>%
+  group_by(v_gene, predicted.celltype.l1) %>%
+  mutate(median_differential = if_else(group == "ICI no colitis", median - lag(median), NA)) %>%
+  arrange(-abs(median_differential)) %>%
+  head(10)
+
+v_genes <- tcr_seq %>%
+  select(patient, predicted.celltype.l1, predicted.celltype.l2, barcode, Chain, v_gene, j_gene, c_gene, group) %>%
+  filter(predicted.celltype.l1 != "other T") %>%
+  group_by(v_gene, group, predicted.celltype.l1, patient) %>%
+  summarize(count = n()) %>%
+  group_by(patient) %>%
+  mutate(normalized_count = count / sum(count)) %>%
+  filter(v_gene %in% interesting_v_genes$v_gene)
+
+interesting_j_genes <- tcr_seq %>%
+  select(patient, predicted.celltype.l1, predicted.celltype.l2, barcode, Chain, v_gene, j_gene, c_gene, group) %>%
+    filter(predicted.celltype.l1 != "other T",
+         group != "no ICI") %>%
+  group_by(j_gene, group, predicted.celltype.l1, patient) %>%
+  summarize(count = n()) %>%
+  group_by(patient) %>%
+  mutate(normalized_count = count / sum(count)) %>%
+  group_by(j_gene, group, predicted.celltype.l1) %>%
+  summarize(median = median(normalized_count)) %>%
+  group_by(j_gene, predicted.celltype.l1) %>%
+  mutate(median_differential = if_else(group == "ICI no colitis", median - lag(median), NA)) %>%
+  arrange(-abs(median_differential)) %>%
+  head(10)
+
+j_genes <- tcr_seq %>%
+  select(patient, predicted.celltype.l1, predicted.celltype.l2, barcode, Chain, v_gene, j_gene, c_gene, group) %>%
+  filter(predicted.celltype.l1 != "other T") %>%
+  group_by(j_gene, group, predicted.celltype.l1, patient) %>%
+  summarize(count = n()) %>%
+  group_by(patient) %>%
+  mutate(normalized_count = count / sum(count)) %>%
+  filter(j_gene %in% interesting_j_genes$j_gene)
+
+#c_genes <- tcr_seq %>%
+#  select(patient, predicted.celltype.l1, predicted.celltype.l2, barcode, Chain, v_gene, j_gene, c_gene, group) %>%
+#  group_by(c_gene, group) %>%
+#  summarize(count = n())
+
+```
+
+# Just make bar plots for VJ gene usages by irAE group
+
+```{r}
+
+p <- ggplot(v_genes, aes(x = v_gene, y = log10(normalized_count), fill = group)) +
+  geom_boxplot() +
+  facet_wrap(~predicted.celltype.l1) +
+  labs(x = "", y = "Normalized count (log10)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
+
+# Adjust y-axis scales with a specified number of ticks
+p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+p <- ggplot(j_genes, aes(x = j_gene, y = log10(normalized_count), fill = group)) +
+  geom_boxplot() +
+  facet_wrap(~predicted.celltype.l1) +
+  labs(x = "", y = "Normalized count (log10)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
+
+# Adjust y-axis scales with a specified number of ticks
+p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+# Filter the data for statistical test
+test_data <- v_genes %>%
+  filter(v_gene == "TRAV26-1",
+         predicted.celltype.l1 == "CD8 T",
+         group != "no ICI")
+
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$normalized_count ~ test_data$group)
+
+# Print the results
+print(wilcox_result)
 
 ```
 
@@ -54,8 +148,8 @@ tcr_seq
 ```{r}
 
 yes_irae_alpha_sankey <- tcr_seq %>%
-  filter(chain == "TRA",
-         irAE == "Yes") %>%
+  filter(Chain == "TRA",
+         group == "ICI colitis") %>%
   select(v_gene, j_gene)
   
 yes_irae_alpha_sankey_nodes <- data.frame(nodes = unique(c(unique(yes_irae_alpha_sankey$v_gene), unique(yes_irae_alpha_sankey$j_gene))))
@@ -89,8 +183,8 @@ p
 ```{r}
 
 yes_irae_beta_sankey <- tcr_seq %>%
-  filter(chain == "TRB",
-         irAE == "Yes") %>%
+  filter(Chain == "TRB",
+         group == "ICI colitis") %>%
   select(v_gene, j_gene, barcode)
   
 yes_irae_beta_sankey_nodes <- data.frame(nodes = unique(c(unique(yes_irae_beta_sankey$v_gene), unique(yes_irae_beta_sankey$j_gene))))
@@ -124,8 +218,8 @@ p
 ```{r}
 
 no_irae_alpha_sankey <- tcr_seq %>%
-  filter(chain == "TRA",
-         irAE == "No") %>%
+  filter(Chain == "TRA",
+         group == "ICI no colitis") %>%
   select(v_gene, j_gene)
   
 no_irae_alpha_sankey_nodes <- data.frame(nodes = unique(c(unique(no_irae_alpha_sankey$v_gene), unique(no_irae_alpha_sankey$j_gene))))
@@ -159,8 +253,8 @@ p
 ```{r}
 
 no_irae_beta_sankey <- tcr_seq %>%
-  filter(chain == "TRB",
-         irAE == "No") %>%
+  filter(Chain == "TRB",
+         group == "ICI no colitis") %>%
   select(v_gene, j_gene, barcode)
   
 no_irae_beta_sankey_nodes <- data.frame(nodes = unique(c(unique(no_irae_beta_sankey$v_gene), unique(no_irae_beta_sankey$j_gene))))
@@ -186,5 +280,21 @@ no_irae_beta_sankey_links$j_gene <- no_irae_beta_sankey_nodes$row_number[match(n
 p <- sankeyNetwork(Links = no_irae_beta_sankey_links, Nodes = no_irae_beta_sankey_nodes, Source = "v_gene",
              Target = "j_gene", Value = "Count", NodeID = "nodes", fontSize = 12, nodeWidth = 30)
 p
+
+```
+
+# Inspect neoantigen specific TCRs
+
+ - don't see many hits
+
+```{r}
+
+neoantigen_tcrs <- read.csv("../../Phenotypic_signatures_of_circulating_neoantigen_reactive_CD8_T_cells_in_patients_with_metastatic_cancers/saved_data/joined_tcrs.csv") %>%
+  select(-X)
+
+neoantigen_tcrs
+
+tcr_seq %>%
+  filter(Chain == "TRA" & cdr3 %in% neoantigen_tcrs$TRA.cdr3)
 
 ```

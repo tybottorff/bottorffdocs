@@ -1,9 +1,9 @@
 ---
-title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
 output: pdf_document
 ---
 
- - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -41,7 +41,7 @@ theme_set(
 
 ```{r}
 
-feature_df <- read.csv("../saved_data/tcr_seq_features.csv")
+feature_df <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv")
 
 feature_df
 
@@ -51,7 +51,7 @@ feature_df
 
 ```{r}
 
-contingency_table <- table(feature_df$irAE, feature_df$predicted.celltype.l2)
+contingency_table <- table(feature_df$group, feature_df$predicted.celltype.l2)
 
 contingency_table
 
@@ -68,28 +68,37 @@ print(chi_square_result)
 ```{r}
 
 cell_abundance_df <- feature_df %>%
-  group_by(Patient_ID, predicted.celltype.l2, irAE) %>%
+  group_by(patient, predicted.celltype.l2, group) %>%
   summarize(count = n()) %>%
   ungroup() %>%
-  group_by(Patient_ID) %>%
+  group_by(patient) %>%
   mutate(normalized_count = count / sum(count))
 
 cell_abundance_df
 
-ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = irAE)) +
+cell_abundance_df$group <- factor(cell_abundance_df$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
+
+ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = group)) +
   geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "Normalized cell\nproportion (log10)") +
+  labs(x = "", fill = "group", y = "Normalized cell\nproportion (log10)") +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
 # Filter the data for statistical test
 test_data <- cell_abundance_df %>%
-  filter(predicted.celltype.l2 == "CD4 TEM")
+  filter(predicted.celltype.l2 == "MAIT",
+         group != "no ICI")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$normalized_count ~ test_data$irAE)
+wilcox_result <- wilcox.test(test_data$normalized_count ~ test_data$group)
 
 # Print the results
 print(wilcox_result)
+
+# CD4 TEM: 0.000666
+# CD4 Proliferating: 0.004662
+# CD8 Proliferating: 0.04444
+# CD8 TCM: 0.002664
+# MAITs: 0.000666
 
 ```
