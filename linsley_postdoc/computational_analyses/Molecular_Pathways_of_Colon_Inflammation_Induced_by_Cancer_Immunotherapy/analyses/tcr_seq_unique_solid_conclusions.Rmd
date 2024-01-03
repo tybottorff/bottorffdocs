@@ -207,10 +207,8 @@ convergence_within_patients <- combined_data %>%
 convergence_across_patients <- combined_data %>%
   mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
   group_by(cdr3, v_gene) %>%
-  filter(n_distinct(cdr3_nt) > 1)
-  #filter(clonotype %in% public_df_list$clonotype)
-  #group_by(patient, cdr3, cdr3_nt) %>%
-  #summarize(count = n())
+  mutate(distinct_cdr3_nt_count = n_distinct(cdr3_nt)) %>%
+  filter(distinct_cdr3_nt_count > 1)
 
 # do see more convergence across patients as expected, and they are ~mostly in public TCRs also as expected
 
@@ -226,6 +224,65 @@ convergence_df <- combined_data %>%
   mutate(tag = "Converged")
 
 convergence_df
+
+```
+
+# Check convergence degree by irAE group
+
+```{r}
+
+irae_convergence_df <- convergence_across_patients %>%
+  select(barcode, Chain, cdr3, predicted.celltype.l1, predicted.celltype.l2, group, cdr3_nt, distinct_cdr3_nt_count, clonotype) %>%
+  group_by(clonotype) %>%
+  slice(1)
+
+irae_convergence_df
+
+p <- ggplot(irae_convergence_df, aes(x = predicted.celltype.l1, y = log10(distinct_cdr3_nt_count), fill = group)) +
+  geom_boxplot() +
+  labs(x = "", fill = "irAE", y = "Distinct CDR3 nt\ncount (log10)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
+
+# Adjust y-axis scales with a specified number of ticks
+p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+```
+
+# Plot donors/junction (AA) (x) vs. donors/junction (nt) (y)
+
+```{r}
+
+donor_df <- combined_data %>%
+  select(barcode, Chain, cdr3, cdr3_nt, patient, predicted.celltype.l1, predicted.celltype.l2, group, v_gene, j_gene, c_gene) %>%
+  group_by(cdr3) %>%
+  mutate(donors_per_junction_aa = n_distinct(patient)) %>%
+  ungroup() %>%
+  group_by(cdr3_nt) %>%
+  mutate(donors_per_junction_nt = n_distinct(patient)) %>%
+  ungroup() %>%
+  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
+  mutate(count = n()) %>%
+  left_join(seq_depth, by = c("patient", "group")) %>%
+  mutate(normalized_count = count / seq_depth) %>%
+  ungroup() %>%
+  # look at just unique CDR3 nt seqs
+  group_by(cdr3_nt) %>%
+  slice(1) %>%
+  ungroup() %>%
+  arrange(-normalized_count) %>%
+  group_by(predicted.celltype.l1, Chain, group) %>%
+  mutate(tag = if_else(row_number() <= 15, "Highly\nexpanded", "Not highly\nexpanded")) %>%
+  ungroup()
+
+donor_df
+
+donor_df$group <- factor(donor_df$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
+
+ggplot(donor_df %>% filter(group != "no ICI"), aes(x = donors_per_junction_aa, y = donors_per_junction_nt)) +
+  geom_point(alpha = 0.25) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  facet_wrap(~tag + group, ncol = 4) +
+  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)")
 
 ```
 
