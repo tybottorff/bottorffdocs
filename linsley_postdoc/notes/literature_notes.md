@@ -245,6 +245,10 @@
  - CD4<sup>+</sup> T cells can show cytotoxic characteristics in some chronic inflammatory diseases and cancer
 # CD8<sup>+</sup> CD103<sup>+</sup> PD1<sup>+</sup> TIM3<sup>+</sup> T cells in glioblastoma microenvironment correlate with prognosis
  - Trm cells
+# CD8<sup>+</sup> lymphocyte infiltration is a specific feature of colitis induced by immune checkpoint inhibitors
+ - histological infiltration comparisons between irAE colitis and non-irAE colitis (like ulcerative colitis, ischemic colitis)
+ - **irAE colitis: CD8<sup>+</sup> infiltration greater than CD4<sup>+</sup> infiltration**
+ - CD8<sup>+</sup> infiltration higher in irAE colitis than in non-irAE colitis
 # CD8<sup>+</sup> T cells in the cancer-immunity cycle
 ## Introduction
  - 3 signal model for effective T cell priming and differentiation: 1) TCR signaling by antigens presented by MHCs, 2) co-stimulation, 3) cytokines, all 3 signals necessary to effectively prime naive T cells and differentiate them into effector T cells, perhaps a fourth signal being nutrients/metabolites fueling T cell metabolism
@@ -654,6 +658,10 @@
  - a single TCR has been shown to recognize > 1 million peptides
  - crossreactivity is needed as there are many more potential antigens than TCRs
  - hotspots/anchors can be important parts of peptides that must remain more constant for TCR binding, other parts of peptide can vary and allow crossreactivity, hotspots/anchors need not only bind CDRs
+# Enhancer RNA-based modeling of adverse events and objective responses of cancer immunotherapy reveals associated key enhancers and target genes
+ - predicting irAE risk from enhancer RNA expression
+ - target genes of irAE-related enhancers (including upstream regulators of MYC) were involved in metabolism, inflammation, immune activation
+ - target genes of objective response rate-related enhancers target *PAK2* and *DLG1* (participate in T cell activation)
 # Entropic contributions and the influence of the hydrophobic environment in promiscuous protein-protein association
  - **trying to find evidence for increased hydrophobicity relating to cross-reactivity of TCRs: here they discuss how a particular PKA/AKAP interface demonstrates promiscuity in part due to the number of interactions this hydrophobic interface allows, which allows many alternative contacts (increased entropy, drives forward binding) with other binding partners hence promiscuity**
 # EP08.01-009 TRBV haplotype profile was related to immune-induced adverse events in Chinese patients with advanced NSCLC
@@ -846,7 +854,9 @@
  - **certain HLA alleles (HLA‐B*07:02, ‐C*07:02, ‐A*03:01) predispose to SARS‐CoV‐2‐HCoV cross‐reactive CD8<sup>+</sup> T cells**
  - non-specific antiviral immune responses can lead to the release of self-antigens from damaged cells, resulting in bystander activation of autoreactive T cells
  - immunogenic SARS-CoV-2 peptides similar to self antigens may be candidates for autoimmune associations
-# HLA-DRB alleles are differentially expressed by tumor cells in breast carcinoma
+# HLA-DRB1*0405 is involved in the development of Vogt-Koyanagi-Harada disease-like immune-related adverse events in patients receiving immune checkpoint inhibitors
+ - Vogt-Koyanagi-Harada (VKH) disease-like uveitis is a common form of ICI-associated uveitis (ICIU)
+ - 5 of ICIU cases here were VKH-like ICIUs (4/5 positive for HLA-DRB1*0405), 4 not (3 negative for HLA-DRB-04:05)
 # Holistic approach to immune checkpoint inhibitor-related adverse events
  - irAEs usually occur within the first months after ICI treatment but can develop as early as after the first dose or as late as years after ICI treatment
  - glucocorticoids are usually used to manage irAEs, other immunosuppressive agents as well
@@ -943,6 +953,13 @@
  - minor allele carries of *Il7* intron have increased severe irAE risk
 # Immune checkpoint inhibitor-induced myocarditis with myositis/myasthenia gravis overlap syndrome: a systematic review of cases
  - IM3OS: myocarditis with myositis/myasthenia gravis overlap syndrome
+# Immune checkpoint inhibitor-induced thyroid disorders: a single center experience
+ - thyroid irAEs emerge after median time of 9 weeks, mainly in females
+ - regardless of initial presentation, all irAE thyroidits patients later developed persistent hypothyroidism requiring hormone replacement (levothyroxine), increased TSH (thyroid-stimulating hormone) after ICI in these atients
+# Imune checkpoint inhibitors associated granulomatous small vessel vasculitis accompanied with tubulointerstitial nephritis: a case report
+ - tubulointerstitial nephritis (TIN): most common renal irAE
+ - case report of 65 year old man with acute kidney injury from ICI
+ - T cell infiltration in kidney biopsy (CD8<sup>+</sup> T cells and CD163<sup>+</sup> macrophages, few Tregs)
 # Immune checkpoint receptors in autoimmunity
 ## Coordinated expression of checkpoint receptors on T cells
  - loss of a single checkpoint receptor as been associated with compensatory upregulation of other inhibitors molecules
@@ -1022,6 +1039,8 @@
  - **modest overlap of TCR β clones between heart and tumor but majority of enriched/most expanded clones in each tissue are distinct**
 ## Discussion
  - arguing against shared antigens between heart and tumor, cardiac protein α-myosin autoantigen in mouse models of irMyocarditis but healthy controls here have T cell clones reactive for this antigen in blood (also these were not most expanded clones in irMyocarditis tissue in cancer patients)
+# Immune signatures of checkpoint inhibitor-induced autoimmunity - A focus on neurotoxicity
+ - irAE patients had higher frequencies of CD8 TEM (type 1)/TCM cells
 # Immune signatures predict development of autoimmune toxicity in patients with cancer treated with immune checkpoint inhibitors
 ## Highlights
  - systemic immune signatures shortly after ICI start linked to irAEs
@@ -1080,6 +1099,9 @@
  - **takehome: surprisingly few neo-epitopes of cancer recognized by immune system, guessing that cancer has many more than 1-3 neo-epitopes, but perhaps I'm mistaken**
 # Immunosensitivity mediated by downregulated AKT1-SKP2 induces anti-PD-1-associated thyroid immune injury
  - although female hormones suspected to cause susceptibility to immune injury, dividing female patients by age (to look at pre/post menopausal females) didn't yield any differences
+# Immunotherapy in oncology and the kidneys: a clinical review of the evaluation and management of kidney immune-related adverse events
+ - acute tubulo-interstitial nephritis is most common kidney irAE, glomerular lesions and electrolyte disturbances also seen
+ - recommend early use of carticosteroids when appropriate
 # Improved survival with T cell clonotype stability after anti-CTLA-4 treatment in cancer patients
 # Abstract
  - **CTLA-4 blockade results in both expansion and loss of T cell clonotypes, global turnover of T cell repertoire**
@@ -1100,7 +1122,13 @@
  - both CD4<sup>+</sup> and CD8<sup>+</sup> T cells can become exhausted
  - T cell inhibitory receptors: PD-1, TIM-3, LAG-3, TIGIT, CTLA-4, but several of these inhibitory receptors are upregulated in T cell activation to modulate co-stimulatory signaling (**so inhibitory receptors alone aren't enough to distinguish between exhausted and activated T cells**)
  - targeting TGF-β signaling to help prevent exhaustion: TGF-β is highly expressed in tumor microenvironment and suppresses T cells
-# Improving T cell recpetor on-target specificity via structure-guided design
+# Incidence and risk factors of immune-related adverse events induced by immune checkpoint inhibitors among older adults with non-small cell lung cancer
+ - 8175 older NSCLC patients
+ - 46.8% of patients had irAEs, pneumonitis (16.5%), hypothyroidism (10.5%), arrhythmia (11.18%), and acute kidney injury (5.8%) were the most common irAEs
+ - median time to irAE was 82 days (IQR: 29-182 days)
+ - hematologic irAEs present earlier, gastrointestinal, dermatologic, musculoskeletal irAEs present later
+ - history of autoimmune disorder increases irAE risk
+ - chemotherapy in combination with ICI increases irAE risk
 # Incidence of Endocrine Dysfunction Following the Use of Different Immune Checkpoint Inhibitor Regimens
  - high incidence of endocrine dysfunction (hypo/hyper-thyroidism) in patients receiving ICI (immune checkpoint inhibitor) regimens, higher with combination therapy
 # Incidence of immune-related adverse events and its association with treatment outcomes: the MD Anderson Cancer Center experience
@@ -1296,6 +1324,13 @@
  - path to exhaustion is a continuum, some precursor exhausted T cells can self-renew, TCF1<sup>+</sup> (express TCF7)
  - most CAR T cell protocols use a heterogeneous starting population of bulk CD4 and CD8 T cells spanning developmental potential range, but more plastic memory T cells (T<sub>cm</sub> i.e. central memory T cells and T<sub>scm</sub> i.e. stem cell memory T cells) possess greater effector/proliferative capacities and better eradicate tumors when used as CAR T cell starting populations
  - patients eligible for CAR T cell therapy usually have relapsed/refractory (treatment-resistant), so their T cells have likely been chronically antigen exposed, as well as exposed to chemotherapy (skews T cells towards more terminally differentiated effector memory i.e. T<sub>em</sub> cells), and this all makes the CAR T therapy less effective (than if it had been used at the beginning)
+# Melanoma patients with immune-related adverse events after immune checkpoint inhibitors are characterized by a distinct immunological phenotype of circulating T cells and M-MDSCs
+ - M-MDSCs: monocytic myeloid-derived suppressor cells
+ - 31 melanoma patients
+ - longitudinal study, peripheral blood samples before ICI, during ICI, at time of irAE, and during immunosuppression for irAE treatment
+ - irAEs associated with improved survival, as seen elsewhere
+ - **irAE patients had upregulated CD69 on CD8<sup>+</sup> T cells, fewer Tregs**
+ - patients treated with immunosuppression show more M-MDSCs
 # MHC-II alleles shape the CDR3 repertoires of conventional and regulatory naive CD4<sup>+</sup> T cells
  - **H2-A<sup>j</sup> favors selection of narrower and more hydrophobic CDR3 repertoire compared to H2-A<sup>b</sub> in mice**
 # MHC class II (DRB) promoter polymorphism and its role in parasite control among malaria patients
@@ -1509,6 +1544,14 @@
  - CD40: costimulatory molecule that drives DCs and TAMs (tumor associated macrophages) to prime T cells
  - FAP: fibroblast activation protein, upregulated in tumor in response to radiation (which can be taken advantage of for drug delivery to TME via FAP-CD40 DARPin)
  - FAP-CD40 DARPin: uses FAP and CD40 binding domains to cross-link and activate CD40 specifically in tumor
+# Predicting response and toxicity to PD-1 inhibition using serum autoantibodies identified from immuno-mass spectrometry
+ - Thyroglobulin (Tg) and thyroid peroxidase (TPO) candidate autoantibody targets, higher levels of autoantibodies targeting these proteins associated with irAEs
+# Predictive biomarkers for checkpoint inhibitor immune-related adverse events
+ - irAEs in ~40% of patients
+ - no biomarkers have been validated in prospective studies
+ - irAE thyroiditis more likely in patients with anti-thyroid antibodies pre-treatment
+ - **CD8 T expansion/diversification with ICI associated with irAE, diversification within first 2 weeks of ICI**
+ - **irAE colitis associated with higher counts of CD4 T cells, fewer Tregs at baseline**
 # Prevalence of immune-related adverse events and anti-tumor efficacy following immune checkpoint inhibitor therapy in Japanese patients with various solid tumors
  - combination ICB increases irAE risk
  - baseline eosinophil count predicts liver-irAE
@@ -2149,6 +2192,13 @@
  - another caveat: < 1% of non-synonymous single nucleotide variants in expressed genes result in detectable CD4/CD8 positive T cell reactivity in tumor-infiltrating leukocytes, **would any be predicted in periphery?**, **frameshift mutations much more likely to lead to neoantigens**
 # The relationship between hydrophobicity and drug-protein binding in human serum albumin: a quartz crystal microbalance study
  - positive correlation between drug hydrophobicity and binding strength to human serum albumin, **perhaps in contrast to hypothesis of increased crossreactivity from more hydrophobic TCRs, assuming increased crossreactivity means lower strength binding for each or a lower possible maximum...**
+# The role of immune checkpoints in antitumor response: a potential antitumor immunotherapy
+ - tumor cells primarily employ altered expression of HLA to avoid immune recognition and antitumor immune response (induced by strong immune pressure of CTLs leadin g to development of tumor variants with deregulated expression of classical and non-classical HLA-I molecules to evade immune system)
+ - IL-2 and IL-2R expressed by T cells following dual signal activation (pMHC-TCR and CD80/86 on APC with CD28 on T cell) to regulate clonal expansion
+## Main immune checkpoints
+ - PD-1: regulates T lymphocyte activity in tissues/tumors, expressed on APCS, monocytes, NK/NKT cells, macrophages, activated T cells, B cells, ligands are PD-L1/2
+ - CTLA-4: receptor homologous to CD28, inhibits T lymphocytes by competing with CD28 for binding, expressed on FoxP3-induced Tregs, activated T cells, ligands are CD80/86 (B7-1/2)
+ - HLA-G: HLA class I molecule, ligands are ILT-2/4, KIR2DL4
 # The role of metabolic dysfunction in T cell exhaustion during chronic viral infection
  - dysfunction of T cell metabolism contributes to exhaustion
  - naive (Th0) and memory T cells rely mostly on OXPHOS and FA oxidation for energy, metabolism reprogrammed upon antigen recognition (generates energy but also fuels intermediates for nucleotide, amino acid, and FA synthesis and mitochondrial function, all important for T cell proliferation, differentiation, function), enhanced glycolysis ("Warburg effect", lactic acid fermentation rather than TCA despite normoxic conditions which is less efficient ATP production wise but faster kinetically, glycolysis also helps create intermediates for biomolecule synthesis) important reprogramming during CD4<sup>+</sup> and CD8<sup>+</sup> T cell activation and functioning
@@ -2291,6 +2341,9 @@
  - TEA-seq to investigste transcriptomics, epitopes, and chromatin accessibility of single cells
  - compare children and older adult immune profiles
  - CD8αα T cells in children lost in older adults
+# Unveiling immune checkpoint regulation: exploring the power of *in vivo* CRISPR screenings in cancer immunotherapy
+ - many genetic variants are "passenger gene alterations" that don't harbor any functional significance but can elicit immunoediting when presented as neoepitopes
+ - method: transduce cancer cells into mice, analyze sgRNA abundance in surviving tumors via deep sequencing
 # Using surface hydrophobicity together with empirical potentials to identify protein-protein binding sites. Application to the interactions of E-cadherins
  - **not sure why yet and surprising to me, but apparently hydrophobic interactions are generally the strongest for protein binding BUT don't necessarily provide specificity that comes from other residues**
  - **idea is that hydrophobic residues provide affinity and polar/charged ones provide specificity via a more limited set of specific favorable structures**
@@ -2303,6 +2356,8 @@
  - immunoglobulin: 2 heavy chains (IgH) and 2 light chains (IgL, encoded by IgK and IgL genes)
  - IgH chains ahve 4 or 5 domains, IgL have 2 domains
  - IgH chains have 5 major isotypes: IgM, IgD, IgG, IgA, IgE, 4 subtypes of IgG and 2 subtypes of IgA
+# Utility of T cell immunosequencing in distinguishing mycosis fungoides progression from treatment related cutaneous adverse events
+ - case report of monitoring malignant T cell frequency
 # Virus-specific memory T cell responses unmasked by immune checkpoint blockade cause hepatitis
 ## Abstract
  - identify subset of melanoma patients predisposed to ICB-related hepatitis distinguished by chronic expansion of effector memory CD4<sup>+</sup> T cells (T<sub>EM</sub> cells)
