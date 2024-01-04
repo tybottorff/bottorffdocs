@@ -30,6 +30,8 @@
  - **around half of foreign pMHCs don't induce T cell response, perhaps because T cells with TCRs specific for those pMHCs are deleted in thymus (i.e. those foreign pMHCs look like self ones)**
 # A multi-omic single cell sequencing approach to develop a CD8 T cell specific gene signature for anti-PD1 response in solid tumors
  - **neither pre-treatment TCR clonality nor changes in clonality after ICB correlate with response**
+# Analysis of gene expression and TCR/B cell receptor profiling of immune cells in primary Sjögren's syndrome by single cell sequencing
+ - primary Sjögren's syndrome (pSS): chronic autoimmune disease characterized by lymphocytic infiltration, elevated circulating autoantibodies, proinflammatory cytokines
 # Analysis of immune resistance mechanisms in TNBC: dual effects inside and outside the tumor
 ## TNBC review
  - triple negative breast cancer
@@ -103,6 +105,11 @@
  - ICB can only temporarily restore function of some exhausted T cells because of irreversible change in epigenetics of some terminally exhausted T cells
  - exhausted T cells lose effector functions, change epigenetic/transcriptional profiles, change metabolism, slow down proliferation, and respond more slowly to stimuli due to cytokine (IL-2, TNF, IFN-γ) deficiency
  - TOX is key inducer of T cell exhaustion, NFAT (upstream target of TOX) is key regulator of T cell exhaustion
+# Association between germline HLA and immune-related adverse events
+ - some HLA types associated with irAEs in different organs
+ - HLA-DRB3*01:01 and thrombocytopenia associated
+ - HLA-DPB1*04:02 and hypokalemia/hyponatremia, leukopenia, anemia associated
+ - HLA-A*26:01 and bilirubin elevation associated
 # Association between immune-related adverse events and clinical outcomes to programmed cell death protein 1/programmed death ligand 1 blockade in SCLC
  - ~40% of 183 patients with ICB had irAE(s)
  - median time of onset to first irAE: 24 days (IQR 14-55 days)
@@ -136,10 +143,17 @@
 # Association of vitiligo with tumor response in patients with metastatic melanoma treated with pembrolizumab
  - 25% of patients developed vitiligo
  - **objective response associated with higher occurrence of vitiligo**
+# Asymmetric framework motion of TCRαβ controls load-dependent peptide discrimination
+ - molecular dynamics simulations
+ - A6 TCR bound to HLA-A*02:01 presenting agonist/antagonist peptides
+ - TCR α and β chains move asymmetrically
+ - agonist stabilizes complex, antagonist destabilizes complex
 # ATAC-seq: a method for assaying chromatin accessibility genome-wide
  - probe DNA accessibility with hyperactive Tn5 transposase (inserts sequencing adapters into accessible chromatin regions, sequencing reads used to infer regions of increased accesibility, can also map transcription factor binding and nucleosome positions)
  - alternative to DNase-seq for chromatin accessibility and MNase-seq for nucleosome positioning
  - ATAC-seq can use less cells than other methods and can assay multiple chromatin features at the same time (i.e. nucleosome, TF binding, chromatin accessibility)
+# Attention network for predicting T cell receptor-peptide binding can associate attention with interpretable protein structural properties
+ - machine learning model based on modified version of Transformer, source-target attention neural network
 # Autoimmune panels as predictors of toxicity in patients treated with immune checkpoint inhibitors (ALERT)
  - auto antigen microarray to profile autoantibodies related to irAEs in patients receiving ICI
  - greater number of IgG and IgM reactivites in pre-ICI in patients vs. healthy controls
@@ -203,6 +217,9 @@
  - methods (RACE vs. mutliplex for example PCR) differ in accuracy and intra/inter-method reproducibility for TRA/TRB sequencing
  - most methods do worse for TRA than TRB
  - low RNA input leads to non-representative TCR repertoires
+# Beneficial autoimmunity improves cancer prognosis
+ - beneficial autoimmunity referring to irAEs being associated with improved survival on ICIs **as well as spontaneous autoimmunity without ICIs in patients with tumors**
+ - importance of non-mutated tumor antigens that are autoantigens, for example from reactivated embryonic/gonadal transcriptional programs, epigenetic changes, aberrant RNA splicing, translation of noncoding RNAs (cryptic peptides), unique PTMs, not unique to tumor cells but enriched on them
 # Biomarkers of checkpoint inhibitor induced immune-related adverse events - a comprehensive review
  - blood-based, immunogenetic and microbial biomarkers predicting irAEs prior to and during ICI therapy
  - no single biomarker has proven to be sufficiently predictive for irAE development
@@ -418,6 +435,10 @@
  - TCR repertoires of crossreactive and IAV-specific T cells reveals similarities
 ## Discussion
  - **heterologous immunity may be beneficial in short run (crossreactive memory T cells primed to quickly respond to new antigen) but may be detrimental in long run (narrows TCR diversity, promotes development of viral escape variants)**
+# CTLA-4 antibody-drug conjugte reveals autologous destruction of B lymphocytes associated with regulatory T cell impairment
+ - cancer patients with irAEs have reduced peripheral B cells, unknown why
+ - mice
+ - ICI mice have T cell hyperproliferation, differentiation into effector cells, which depletes B cells (**not sure why that is**)
 # CTLA-4 blockade enhances polyfunctional NY-ESO-1 specific T cell responses in metastatic melanoma patients with clinical benefit
  - 5/8 of patients with clinical benefit to CTLA-4 blockade had NY-ESO-1 antibody (and CD4<sup>+</sup> and CD8<sup>+</sup> T cells against NY-ESO-1), 0/7 of clinical non-responders had NY-ESO-1 antibody
  - NY-ESO-1 is a cancer antigen
@@ -731,6 +752,13 @@
 # Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
  - chronic stimulation assay
  - *in vivo* validation of screen results (perturbation of INO80 and BAF chromatin remodeling complexes improves T cell persistence in tumors)
+# Germline genetic variants are associated with development of insulin-dependent diabetes in cancer patients treated with immune checkpoint inhibitors
+ - *NLRC5* germline mutation as potential predictive biomarker for T1D irAE
+# Germline genetic variation and predicting immune checkpoint inhibitor induced toxicity
+ - irAEs in ~10-55% of patients
+ - endocrine/pneumonitis irAEs more common in younger patients, skin irAEs more common in older patients
+ - thyroid irAEs more common in women, neurological, dermal, vascular irAEs more common in men
+ - germline variants associated with irAE development: *GABRP*, *DSC2*, *BAZ2B*, *ZPLD1*, *MIR548AB*, *SEMA5A*, *LOC105374704*, *CDH6*, *OSBPL6*, *AGPS*...
 # Germline variants associated with toxicity to immune checkpoint blockade
 ## Abstract
  - GWAS of 1,751 patients on ICIs across 12 cancer types
@@ -785,6 +813,8 @@
  - other methods generally fall into cell-based normalization (estimate cell-specific global size factor to normalize all genes in same cell, pool cells to estimate more robust size factors then deconvolve pooled size factors to get cell-specific size factors) and gene-based normalization (parametric modeling of individual genes, **like Pearson residuals method SCTransform**, perform adjustments individually for each group of genes with different sequencing depths or different ranges of abundance levels)
 ## Feature selection and dimension reduction
  - identify few latent variables that explain the most variance in data
+# Facts and hopes for prediction, diagnosis, and treatment of immune-related adverse events
+ - factors associated with irAEs: pre-existing autoimmune disease, sex, BMI, response to ICI, circulating cytokines and immune cells, genetic variants, microbiome
 # FDA approves anti-CD3 antibody to delay type 1 diabetes onset
  - T1D: autoreactive T cells destroy insulin secreting β cells
 # From reads to insight: a hitchhiker's guide to ATAC-seq data analysis
@@ -1102,6 +1132,9 @@
 # Immunotherapy in oncology and the kidneys: a clinical review of the evaluation and management of kidney immune-related adverse events
  - acute tubulo-interstitial nephritis is most common kidney irAE, glomerular lesions and electrolyte disturbances also seen
  - recommend early use of carticosteroids when appropriate
+# Immunotherapy-mediated thyroid dysfunction: genetic risk and impact on outcomes with PD-1 blockade in non-small cell lung cancer
+ - thyroid irAE associated with anti-tumor response
+ - genetic risk for hypothyroidism associated with risk of developing thyroid irAEs
 # Improved survival with T cell clonotype stability after anti-CTLA-4 treatment in cancer patients
 # Abstract
  - **CTLA-4 blockade results in both expansion and loss of T cell clonotypes, global turnover of T cell repertoire**
@@ -1149,7 +1182,6 @@
 # Induction of T cell exhaustion by JAK1/3 inhibition in the treatment of alopecia areata
  - alopecia areata is an autoimmune disease caused by T cell-mediated destruction of the hair follicle
  - JAK1/3 inhibitors disrupt γc cytokine signaling (important for T cell development, activation, homeostasis), selectively induces T cell exhaustion to help treat this autoimmune disease
-# Inhibitory receptors beyond T cell exhaustion
 # Innate lymphoid cells (ILCs): cytokine hubs regulating immunity and tissue homeostasis
  - ILCs enriched at mucosal barriers, activated by stress signals and epithelial/myeloid-derived cytokines, respond by secreting effector cytokines to maintain survival and mucosal integrity
  - ILCs do not possess rearranged antigen-specific cell receptors (TCR/BCR) but they mirror T helper cell diversity regarding cytokine secretion and transcription factors regulating differentiation
@@ -1183,6 +1215,8 @@
 # Integrated single-cell profiling dissects cell-state-specific enhancer landscapes of human tumor-infiltrating CD8<sup>+</sup> T cells
  - common chromatin trajectory underlies TIL dysfunction
  - molecular continuum from pre-T<sub>EX</sub> to terminally exhausted T cells (continuous increase in *CXCL13*, *TOX1/2*, inhibitory receptor activity)
+# Integrative analysis of risk factors for immune-related adverse events of checkpoint blockade therapy in cancer
+ - allelic variation of *HLA-B* correlated with irAE risk
 # Interpreting T cell crossreactivity through structure: implications for TCR-based cancer immunotherapy
 ## Abstract
  - melanoma-specific T cells crossreacting with healthy heart/nervous tissue, crossreactivity
@@ -1215,10 +1249,21 @@
  - *PD-L2* expression levels also correlate with response to nivolumab
  - Th1 response dominance in responders (higher *TBX21/GATA3* ratio)
  - see oligoclonal T cell expansion in responders' TILs
-# Intratumoral heterogeneity and T cell exhaustion in primary CNS lymphoma
 # Inverse vaccination, the opposite of Jenner's concept, for therapy of autoimmunity
  - Jenner invented vaccination in 1796
  - autoimmunity treatment includes immunosuppression via anti-CD20 monoclonal antibody (B cells marked by CD20), anti-CD52 mAb (WBCs marked by CD52), similarly reduce transplant rejection with mAbs against CD3 (T cells marked by CD3), can also disrupt lymphocyte ingress into tissue via integrin blockade or impeded egress of lymphocytes out of lymph nodes via spingosine phosphate receptor modulation
+# Investigational biomarkers for checkpoint inhibitor immune-related adverse event prediction and diagnosis
+ - specific irAEs can be monitored with creatinine clearance, thyroid function tests, serum cortisol/adrenocorticotrophic hormone
+ - history of autoimmune disease is only routinely used clinical parameter to predict irAE risk
+ - different irAEs have different median onset times (myocarditis 34 days, dermatologic 25 days, hypothyroidism 73 days, hyperthyroidism 37 days, T1D 49 days, colitis 38 days, hepatitis 6-14 weeks, pneumonitis 3 months, nephritis 91 days, arthritis 3 months)
+ - ICIs promote attack of self tissue: anti-CTLA-4 therapy disrupts peripheral negative selection (T cell surface CTLA-4 prevents costimulation and activation of novel self-reactive T cells), anti-PD-1 therapy alters epigenome of exhausted T cells, reactivating them and potentially leading to self-tissue attack, ICIs also deplete Tregs (so previously anergic self-reactive T cells can be activated and attack self-tissue)
+ - antigen spread: immune-mediated tumor cell destruction leading to cell debris (otherwise hidden from immune detection) generating new tumor/self-reactive T cells
+ - irAEs may result from direct antibody effects (pituitary CTLA-4 expression results in anti-CTLA-4 toxicity of pituitary dysfunction)
+ - increased baseline levels of CD4<sup>+</sup> T cells, lower baseline Treg levels may increase colitis irAE risk
+ - increased T cell diversity may increase irAE risk (increased expansion of > 55 CD8<sup>+</sup> clones)
+ - HLA-DR4 associated with increased T1D irAE risk
+# Is autoimmunity the Achilles' heel of cancer immunotherapy
+ - hypophysitis most common endocrine irAE after CTLA-4 blockade, rarely observed with PD-1 blockade
 # Landscape of stimulation-responsive chromatin across diverse human immune cells
  - previous literature: ~90% of GWAS hits for contributors to autoimmunity risk lie in non-coding regions (presumably act by altering gene regulation)
 # Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
@@ -1411,6 +1456,9 @@
 # Molecular signatures of antitumor neoantigen-reactive T cells from metastatic human cancers
  - neoantigen-specific TILs exhibited tumor-specific expansion with dysfunctional phenotypes, distinct from blood-emigrant bystanders and regulatory TILs
  - neoantigen-specific TILs largely exhibited tumor-specific clonal expansion, with only limited overlap with dually expanded TILs found in the peripheral blood, possible caveat to any PBMC-based TCR feature analysis is that we don't know if they are tumor-specific or not, although here this is just neoantigen, so perhaps there is more sharing betweeen PBMC and TILs targeting tumor-associated antigens
+# Moving towards personalized treatments of immune-related adverse events
+ - corticosteroids are the cornerstone of irAE treatment, potent suppressors of T cell function/activity, followed by mycophenolate for patients for whom corticosteroids fail (this drug depletes guanosine nucleotides preferentially in T/B cells to inhibit their proliferation to suppress cell-mediated immune responses and antibody production), calcineurin inhibitors and methotrexate can also inhibit T cell function to treat irAEs, as can blocking of integrins T cells use to extravasate from circulation into peripheral tissue where they cause inflammation (like antibodies targeting alpha 4 beta 7 and alpha 4 integrins to treat colitis and encephalitis as these integrins are expressed on gut epithelium and blood-brain barrier, respectively)
+ - histopathological findings of different organ irAEs: generally infiltrates into irAE tissue are lymphocyte rich, sometimes myeloid too (pulmonary)
 # mTOR regulates T cell exhaustion and PD-1-targeted immunotherapy response during chronic viral infection
  - background: PD-1-blockade enhances T cell response by promoting differentiation of stem-like T cells towards TIM3<sup>+</sup> cells
  - results: blocking mTOR during T cell expansion enhances T cell response (stem-like T cells accumulate), but blocking mTOR after exhaustion has progressed causes immunosuppression (decreased TIM3<sup>+</sup> cells, increased viral load)
@@ -1552,6 +1600,12 @@
  - irAE thyroiditis more likely in patients with anti-thyroid antibodies pre-treatment
  - **CD8 T expansion/diversification with ICI associated with irAE, diversification within first 2 weeks of ICI**
  - **irAE colitis associated with higher counts of CD4 T cells, fewer Tregs at baseline**
+# Predictive biomarkers of immune checkpoint inhibitor-based mono- and combination therapies for hepatocellular carcinoma
+ - pre-treatment tumoral PD-L1 expression level (higher associated with longer survival)
+ - pre-treatment intratumoral CD38<sup>+</sup> proportion (higher associated with longer survival)
+# Preserving the CTLA-4 checkpoint for safer and more effective cancer immunotherapy
+ - previous literature: irAEs and cancer immunotherapeutic effects (CITE) are distinct and therapeutically separatable, former attributable to CTLA-4 blockade and latter to selective depletion of Tregs in TME, **not sure of evidence for this**
+ - here, they argue for safer and more effective CTLA-4-targeting immune therapy via preservation (not inhibition) of CTLA-4 checkpoint while still depleting Tregs in TME
 # Prevalence of immune-related adverse events and anti-tumor efficacy following immune checkpoint inhibitor therapy in Japanese patients with various solid tumors
  - combination ICB increases irAE risk
  - baseline eosinophil count predicts liver-irAE
@@ -1565,6 +1619,8 @@
  - TCRs from T cells that recognize the same pMHC epitope often share conserved sequence features, perhaps able to predict model epitope specificity
  - here, they study CD8<sup>+</sup> TCRs in mice and humans to study these conserved features as well as features differentiating them
  - **takehome: each epitope-specific repertoire studied had a clustered group of receptors with core sequence similarities plus a dispersed set of diverse "outlier" sequences, so some similar but some different sort of unhelpful**
+# Rechallenge of immune checkpoint inhibitors in a case with adverse events inducing myasthenia gravis
+ - ICI-induced myasthenia gravis (MG) irAE associated with germline variant in *SLC22A5* in thymoma case
 # Regulatory T cells suppress CD4<sup>+</sup> effector T cell activation by controlling protein synthesis
 ## Abstract
  - Tregs suppress CD4 effector T cells
@@ -1668,6 +1724,8 @@
  - within V region of heavy and light chains
 # Role of the multiple T cell receptor (TCR)-ζ chain signaling motifs in selection of the T cell repertoire
  - TCR is composed of four distinct signal transducing subunits (CD3-γ, -δ, -ε, and ζ) that contain either one (CD3-γ, -δ, -ε) or three (-ζ) signaling motifs (ITAMs) within their intracytoplasmic domains
+# Safety, outcomes and T cell characteristics in patients with relapsed or refractory MDS or CMML treated with atezolizumab in combination with guadecitabine
+ - hypothesis: resistance to hypomethylating agents (HMAs) in patients with myelodysplastic syndrome (MDS) and chronic myelomonocytic leukemia (CMML) overcome by combining PD-L1 blockade with HMA
 # Sharing of T cell receptors in antigen-specific responses is driven by convergent recombination
  - convergent recombination, rather than recombination bias or selection, drives publicity
  - potential causes of publicity: self tolerance restricts capacity of TCRs to recognize some epitopes, different conformations of peptides in MHC groove (flat or prominent), degenerate binders
@@ -2199,6 +2257,12 @@
  - PD-1: regulates T lymphocyte activity in tissues/tumors, expressed on APCS, monocytes, NK/NKT cells, macrophages, activated T cells, B cells, ligands are PD-L1/2
  - CTLA-4: receptor homologous to CD28, inhibits T lymphocytes by competing with CD28 for binding, expressed on FoxP3-induced Tregs, activated T cells, ligands are CD80/86 (B7-1/2)
  - HLA-G: HLA class I molecule, ligands are ILT-2/4, KIR2DL4
+# The role of immune checkpoints in cardiovascular disease
+ - cardiovascular irAEs: atherosclerosis, myocarditis, cardiomyopathy
+ - inhibition of vascular inhibitor checkpoints is associated with increased atherosclerotic burden and plaque instability (ICs protect against atherosclerosis by inhibiting T cell activity and cytokine production, promoting Treg differentiation, inducing T cell exhaustion)
+ - PD-L1 on endothelial cells might promote plaque stability by reducing apoptosis and increasing expression of tight junction molecules
+ - in heart, ICs downregulate immune response to protect against cardiac injury by reducing T cell activity and migration (inhibiton of ICs can induce T cell-mediated myocarditis)
+ - JAK/STAT involved in both PD-L1/2 and CD80/86 signaling, related to irAEs perhaps (JAK inhibitors for autoimmune disorders may be useful for irAE treatment)
 # The role of metabolic dysfunction in T cell exhaustion during chronic viral infection
  - dysfunction of T cell metabolism contributes to exhaustion
  - naive (Th0) and memory T cells rely mostly on OXPHOS and FA oxidation for energy, metabolism reprogrammed upon antigen recognition (generates energy but also fuels intermediates for nucleotide, amino acid, and FA synthesis and mitochondrial function, all important for T cell proliferation, differentiation, function), enhanced glycolysis ("Warburg effect", lactic acid fermentation rather than TCA despite normoxic conditions which is less efficient ATP production wise but faster kinetically, glycolysis also helps create intermediates for biomolecule synthesis) important reprogramming during CD4<sup>+</sup> and CD8<sup>+</sup> T cell activation and functioning
