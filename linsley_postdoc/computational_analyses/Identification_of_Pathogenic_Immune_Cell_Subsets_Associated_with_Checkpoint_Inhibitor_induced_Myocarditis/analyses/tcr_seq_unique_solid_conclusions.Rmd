@@ -18,6 +18,7 @@ library(dplyr)
 library(tidyr)
 library(VennDiagram)
 library(scales)
+library(ggpubr)
 
 ```
 
@@ -516,5 +517,74 @@ ggplot(abundance_df_public %>% filter(predicted.celltype.l1 == "CD8 T" & Chain =
   facet_wrap(~ irAE, scales = "free_y") +
   labs(x = "CD8 TRB clonotype abundance (log10)", fill = "irAE", y = "CD8 TRB pgen (log10)") +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
+
+```
+
+# Prep data for summary plots
+
+```{r}
+
+prepped_data <- combined_data %>%
+  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
+  # calculate clonotype counts within patients to get a sense of expansion
+  mutate(count = n()) %>%
+  # normalize by sequencing depth
+  left_join(seq_depth, by = c("Patient_ID", "irAE")) %>%
+  mutate(normalized_count = count / seq_depth) %>%
+  # look at just unique TCRs
+  dplyr::slice(1) %>%
+  arrange(-normalized_count) %>%
+  ungroup()
+  
+prepped_data
+
+```
+
+# Perform wilcox rank sum tests for top n clonotypes
+
+```{r}
+
+# Function to perform the test for a specific row number
+perform_wilcox_test <- function(data, row_num) {
+  data %>%
+    group_by(predicted.celltype.l1, predicted.celltype.l2, Chain, irAE) %>%
+    filter(row_number() <= row_num) %>%
+    ungroup() %>%
+    group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%    
+    summarize(p_val_pgen = wilcox.test(pgen ~ irAE)$p.value,
+              p_val_cdr3_length = wilcox.test(cdr3_length ~ irAE)$p.value,
+              top_n_clonotypes = row_num) %>%
+    ungroup()
+}
+
+# List to store results
+results_list <- list()
+
+# Iterate through row numbers (1:1, 1:2, ..., 1:50)
+for (row_num in 2:150) {
+  result <- prepped_data %>%
+    perform_wilcox_test(row_num = row_num)
+
+  results_list[[as.character(row_num)]] <- result
+}
+
+# Combine results into a single dataframe
+results_df <- bind_rows(results_list, .id = "Row_Number")
+
+results_df
+
+```
+
+# Create summary plot of p values of yes/no irAE group comparisons across all top n clonotype splits for all cell (sub)types, chains, features
+
+```{r}
+
+ggplot(results_df %>% filter(predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 %in% c("CD8 TEM")), aes(x = top_n_clonotypes, y = p_val_pgen)) +
+  geom_point(size = 0.01) +
+  geom_hline(yintercept = 0.05, linetype = "dashed", color = "red") +
+  facet_wrap(~Chain + predicted.celltype.l2, ncol = 3) +
+  labs(x = "Top n clonotypes (normalized\nfor sequencing depth)", y = "Wilcox p val for yes\nvs. no irAE pgen scores") +
+  scale_y_continuous(trans = 'log10') +
+  scale_x_continuous(trans = 'log10')
 
 ```
