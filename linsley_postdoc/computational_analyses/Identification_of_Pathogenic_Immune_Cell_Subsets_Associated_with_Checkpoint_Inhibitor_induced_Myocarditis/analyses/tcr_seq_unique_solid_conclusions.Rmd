@@ -538,6 +538,13 @@ prepped_data <- combined_data %>%
   
 prepped_data
 
+size_df <- prepped_data %>%
+  filter(irAE == "Yes") %>%
+  group_by(Chain, predicted.celltype.l1, predicted.celltype.l2) %>%
+  summarize(count = n())
+
+size_df
+
 ```
 
 # Perform wilcox rank sum tests for top n clonotypes
@@ -561,7 +568,7 @@ perform_wilcox_test <- function(data, row_num) {
 results_list <- list()
 
 # Iterate through row numbers (1:1, 1:2, ..., 1:50)
-for (row_num in 2:150) {
+for (row_num in 2:5231) {
   result <- prepped_data %>%
     perform_wilcox_test(row_num = row_num)
 
@@ -575,15 +582,32 @@ results_df
 
 ```
 
+# Reformat df
+
+```{r}
+
+reformatted_df <- results_df %>%
+  select(-Row_Number) %>%
+  left_join(size_df, by = c("predicted.celltype.l1", "predicted.celltype.l2", "Chain")) %>%
+  group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%
+  filter(top_n_clonotypes <= count) %>%
+  mutate(top_n_clonotypes_perc = top_n_clonotypes/count * 100) %>%
+  pivot_longer(cols = c("p_val_pgen", "p_val_cdr3_length"), names_to = "p_val_category") %>%
+  mutate(p_val_category = gsub("p_val_", "", p_val_category))
+
+reformatted_df
+
+```
+
 # Create summary plot of p values of yes/no irAE group comparisons across all top n clonotype splits for all cell (sub)types, chains, features
 
 ```{r}
 
-ggplot(results_df %>% filter(predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 %in% c("CD8 TEM")), aes(x = top_n_clonotypes, y = p_val_pgen)) +
+ggplot(reformatted_df %>% filter(predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 == "CD8 TEM"), aes(x = top_n_clonotypes_perc, y = value)) +
   geom_point(size = 0.01) +
   geom_hline(yintercept = 0.05, linetype = "dashed", color = "red") +
-  facet_wrap(~Chain + predicted.celltype.l2, ncol = 3) +
-  labs(x = "Top n clonotypes (normalized\nfor sequencing depth)", y = "Wilcox p val for yes\nvs. no irAE pgen scores") +
+  facet_wrap(~Chain + p_val_category, ncol = 2) +
+  labs(x = "Top repertoire (%, normalized\nfor sequencing depth)", y = "Wilcox p val for yes\nvs. no irAE") +
   scale_y_continuous(trans = 'log10') +
   scale_x_continuous(trans = 'log10')
 
