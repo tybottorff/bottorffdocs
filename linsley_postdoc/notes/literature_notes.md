@@ -2203,7 +2203,10 @@
  - dysfunction of T cell metabolism contributes to exhaustion
  - naive (Th0) and memory T cells rely mostly on OXPHOS and FA oxidation for energy, metabolism reprogrammed upon antigen recognition (generates energy but also fuels intermediates for nucleotide, amino acid, and FA synthesis and mitochondrial function, all important for T cell proliferation, differentiation, function), enhanced glycolysis ("Warburg effect", lactic acid fermentation rather than TCA despite normoxic conditions which is less efficient ATP production wise but faster kinetically, glycolysis also helps create intermediates for biomolecule synthesis) important reprogramming during CD4<sup>+</sup> and CD8<sup>+</sup> T cell activation and functioning
  - downregulation of glycolysis, augmented lipolysis and FA oxidation in exhausted T cells
-# The role of peripheral T cell deletion in transplantation tolerance
+# The role of single cell profiling and deep immunophenotyping in understanding immune therapy cardiotoxicity
+ - review
+ - bulk RNAseq study: upregulation of proinflammatory genes in myocarditis group, also downregulation of homeostasis genes
+ - scRNAseq in mice: macrophages 60% of cardiac immune cell population, type 17 helper T cells with upregulated Hif1a main T cell population in acute myocarditis phase
 # The role of type I conventional dendritic cells in cancer immunity
  - cDC1 = conventional type 1 DC, express BDCA3, CLEC9A/DNGR-1, XCR1
 # The role of type-2 conventional dendritic cells in the regulation of tumor immunity
