@@ -152,15 +152,15 @@ downsampled_df
 ```{r}
 
 downsampled_public_df_list <- downsampled_df %>%
-  group_by(cdr3, v_gene, j_gene, c_gene) %>%
+  group_by(cdr3) %>%
   filter(n_distinct(patient) > 1) %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
+  mutate(barc_chain = paste(barcode, Chain))
 
 downsampled_public_df_list
 
 downsampled_public_df <- downsampled_df %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
-  filter(clonotype %in% downsampled_public_df_list$clonotype,
+  mutate(barc_chain = paste(barcode, Chain)) %>%
+  filter(barc_chain %in% downsampled_public_df_list$barc_chain,
          predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          Chain == "TRB") %>%
@@ -172,15 +172,15 @@ downsampled_public_df <- downsampled_df %>%
 downsampled_public_df
 
 public_df_list <- combined_data %>%
-  group_by(cdr3, v_gene, j_gene, c_gene) %>%
+  group_by(cdr3) %>%
   filter(n_distinct(patient) > 1) %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = ""))
+  mutate(barc_chain = paste(barcode, Chain))
 
 public_df_list
 
 public_df <- combined_data %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
-  filter(clonotype %in% public_df_list$clonotype,
+  mutate(barc_chain = paste(barcode, Chain)) %>%
+  filter(barc_chain %in% public_df_list$barc_chain,
          predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          Chain == "TRB") %>%
@@ -199,22 +199,22 @@ public_df
 
 convergence_within_patients <- combined_data %>%
   select(patient, barcode, Chain, cdr3, cdr3_nt, v_gene, d_gene, j_gene, c_gene) %>%
-  group_by(cdr3, patient, v_gene) %>%
+  group_by(cdr3, patient) %>%
   filter(n_distinct(cdr3_nt) > 1) %>%
   group_by(patient, cdr3, cdr3_nt) %>%
   summarize(count = n())
 
 convergence_across_patients <- combined_data %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
-  group_by(cdr3, v_gene) %>%
+  group_by(cdr3) %>%
   mutate(distinct_cdr3_nt_count = n_distinct(cdr3_nt)) %>%
-  filter(distinct_cdr3_nt_count > 1)
+  filter(distinct_cdr3_nt_count > 1) %>%
+  mutate(barc_chain = paste(barcode, Chain))
 
 # do see more convergence across patients as expected, and they are ~mostly in public TCRs also as expected
 
 convergence_df <- combined_data %>%
-  mutate(clonotype = paste(cdr3, v_gene, j_gene, c_gene, sep = "")) %>%
-  filter(clonotype %in% convergence_across_patients$clonotype,
+  mutate(barc_chain = paste(barcode, Chain)) %>%
+  filter(barc_chain %in% convergence_across_patients$barc_chain,
          predicted.celltype.l1 == "CD8 T",
          predicted.celltype.l2 == "CD8 TEM",
          Chain == "TRB") %>%
@@ -227,62 +227,51 @@ convergence_df
 
 ```
 
-# Check convergence degree by irAE group
-
-```{r}
-
-irae_convergence_df <- convergence_across_patients %>%
-  select(barcode, Chain, cdr3, predicted.celltype.l1, predicted.celltype.l2, group, cdr3_nt, distinct_cdr3_nt_count, clonotype) %>%
-  group_by(clonotype) %>%
-  slice(1)
-
-irae_convergence_df
-
-p <- ggplot(irae_convergence_df, aes(x = predicted.celltype.l1, y = log10(distinct_cdr3_nt_count), fill = group)) +
-  geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "Distinct CDR3 nt\ncount (log10)") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
-
-# Adjust y-axis scales with a specified number of ticks
-p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
-
-```
-
 # Plot donors/junction (AA) (x) vs. donors/junction (nt) (y)
 
 ```{r}
 
 donor_df <- combined_data %>%
   select(barcode, Chain, cdr3, cdr3_nt, patient, predicted.celltype.l1, predicted.celltype.l2, group, v_gene, j_gene, c_gene) %>%
+  mutate(barc_chain = paste(barcode, Chain)) %>%
+  mutate(convergence  = if_else(barc_chain %in% convergence_across_patients$barc_chain, "Converged", "Not converged"),
+         publicity = if_else(barc_chain %in% public_df_list$barc_chain, "Public", "Private")) %>%
   group_by(cdr3) %>%
   mutate(donors_per_junction_aa = n_distinct(patient)) %>%
   ungroup() %>%
   group_by(cdr3_nt) %>%
   mutate(donors_per_junction_nt = n_distinct(patient)) %>%
   ungroup() %>%
-  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
-  mutate(count = n()) %>%
-  left_join(seq_depth, by = c("patient", "group")) %>%
-  mutate(normalized_count = count / seq_depth) %>%
-  ungroup() %>%
-  # look at just unique CDR3 nt seqs
-  group_by(cdr3_nt) %>%
+  # look at just unique CDR3s from each patient
+  group_by(cdr3, cdr3_nt, patient) %>%
   slice(1) %>%
   ungroup() %>%
-  arrange(-normalized_count) %>%
-  group_by(predicted.celltype.l1, Chain, group) %>%
-  mutate(tag = if_else(row_number() <= 15, "Highly\nexpanded", "Not highly\nexpanded")) %>%
-  ungroup()
+  mutate(diagonal = if_else(donors_per_junction_nt == donors_per_junction_aa, "On", "Off"),
+         one_one = if_else(donors_per_junction_aa == 1 & donors_per_junction_nt == 1, "Yes", "No"))
 
-donor_df
+donor_df %>%
+  group_by(diagonal, convergence, publicity, one_one) %>%
+  summarize(count = n()) %>%
+  arrange(-count)
+  #filter(one_one == "No" & convergence == "Converged" & diagonal == "On")
 
 donor_df$group <- factor(donor_df$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
 
-ggplot(donor_df %>% filter(group != "no ICI"), aes(x = donors_per_junction_aa, y = donors_per_junction_nt)) +
-  geom_point(alpha = 0.25) +
+ggplot(donor_df %>% filter(group != "no ICI"), aes(x = donors_per_junction_aa, y = donors_per_junction_nt, color = convergence)) +
+  geom_jitter(size = 0.5) +
   geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
-  facet_wrap(~tag + group, ncol = 4) +
-  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)")
+  facet_wrap(~group, ncol = 4) +
+  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)", color = "CDR3\nconvergence") +
+  theme(legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14))
+
+ggplot(donor_df %>% filter(group != "no ICI"), aes(x = donors_per_junction_aa, y = donors_per_junction_nt, color = publicity)) +
+  geom_jitter(size = 0.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  facet_wrap(~group, ncol = 4) +
+  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)", color = "CDR3\npublicity") +
+  theme(legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14))
 
 ```
 
@@ -299,7 +288,7 @@ venn.plot <- venn.diagram(
 )
 
 # Display the Venn diagram
-grid.draw(venn.plot)
+#grid.draw(venn.plot)
 
 ```
 
@@ -456,5 +445,88 @@ wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$group)
 
 # Print the results
 print(wilcox_result)
+
+```
+
+# Prep data for summary plots (normalized method)
+
+```{r}
+
+prepped_data <- combined_data %>%
+  filter(group != "no ICI") %>%
+  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
+  # calculate clonotype counts within patients to get a sense of expansion
+  mutate(count = n()) %>%
+  # normalize by sequencing depth
+  left_join(seq_depth, by = c("patient", "group")) %>%
+  mutate(normalized_count = count / seq_depth) %>%
+  # look at just unique clonotypes from each patient
+  dplyr::slice(1) %>%
+  ungroup() %>%
+  group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%
+  arrange(-normalized_count) %>%
+  mutate(chunk_size = ceiling(n() * 0.1),
+         chunk = 10*ceiling(row_number() / chunk_size))
+
+prepped_data
+
+```
+
+# Perform wilcox rank sum tests for top n clonotypes in chunks of 10% (normalized method)
+
+```{r}
+
+# Function to perform the test up to a specific cutoff of clonotype abundances
+perform_wilcox_test <- function(data, cutoff) {
+  data %>%
+    filter(chunk <= cutoff) %>%
+    group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%    
+    summarize(p_val_pgen = wilcox.test(pgen ~ group)$p.value,
+              p_val_cdr3_length = wilcox.test(cdr3_length ~ group)$p.value) %>%
+    ungroup()
+}
+
+# List to store results
+results_list <- list()
+
+# Iterate through chunk cutoffs
+for (num in 1:9) {
+  result <- prepped_data %>%
+    perform_wilcox_test(cutoff = num*10)
+
+  results_list[[as.character(num*10)]] <- result
+}
+
+# Combine results into a single dataframe
+results_df <- bind_rows(results_list, .id = "Chunk_limit")
+
+results_df <- results_df %>%
+  pivot_longer(cols = c("p_val_pgen", "p_val_cdr3_length"), names_to = "p_val") %>%
+  rename(p_val_category = p_val) %>%
+  mutate(p_val_category = gsub("p_val_", "", p_val_category)) %>%
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
+
+results_df
+
+```
+
+# Make heatmap (normalized method)
+
+```{r}
+
+top_results <- results_df %>%
+  filter(value < 0.05) %>%
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
+
+filtered_results_df <- results_df %>%
+  filter(category %in% top_results$category)
+
+# basically anything red (p val -log10 > 1.3) is significant (p < 0.05)
+
+ggplot(filtered_results_df, aes(x = Chunk_limit, y = factor(interaction(predicted.celltype.l2, p_val_category, Chain)), fill = -log10(value))) +
+  geom_tile() +
+  scale_fill_gradientn(colors = colorRampPalette(c("blue", "white", "red"))(20), name = "Wilcox p val (-log10)\n for yes vs. no irAE") +
+  labs(x = "Top clonotype (%) cutoff", y = "") +
+  theme_minimal()
 
 ```
