@@ -72,7 +72,9 @@ cell_abundance_df <- feature_df %>%
   summarize(count = n()) %>%
   ungroup() %>%
   group_by(Patient_ID) %>%
-  mutate(normalized_count = count / sum(count))
+  mutate(normalized_count = count / sum(count)) %>%
+  # filter for just subtypes of interest
+  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT"))
 
 cell_abundance_df
 
@@ -84,12 +86,44 @@ ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_co
 
 # Filter the data for statistical test
 test_data <- cell_abundance_df %>%
-  filter(predicted.celltype.l2 == "CD4 TEM")
+  filter(predicted.celltype.l2 == "MAIT")
 
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$normalized_count ~ test_data$irAE)
+# Calculate the t-test statistic and p-value
+t_test_result <- t.test(test_data$normalized_count ~ test_data$irAE)
 
 # Print the results
-print(wilcox_result)
+print(t_test_result)
+
+```
+
+# Read in data for UMAP contour plot
+
+```{r}
+
+seurat_obj <- readRDS("../saved_data/final_seurat_T_cells.rds")
+
+downsampled_df <- read.csv("../saved_data/downsampled_df.csv")
+
+downsampled_seurat <- subset(seurat_obj, cells = downsampled_df$barcode)
+
+```
+
+# Make UMAP contour plot
+
+```{r}
+
+data <- Embeddings(object = downsampled_seurat[["umap"]])[(colnames(downsampled_seurat)), c(1, 2)]
+data <- as.data.frame(data)
+data$celltype <- downsampled_seurat@meta.data$predicted.celltype.l2
+data$irAE <- downsampled_seurat@meta.data$irAE
+
+data <- data %>%
+  filter(celltype %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT")) %>%
+  mutate(irAE = paste("irAE:", irAE))
+
+ggplot(data) +
+  geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01) +
+  facet_wrap(~ irAE) +
+  geom_density2d(aes(x=umap_1, y=umap_2))
 
 ```

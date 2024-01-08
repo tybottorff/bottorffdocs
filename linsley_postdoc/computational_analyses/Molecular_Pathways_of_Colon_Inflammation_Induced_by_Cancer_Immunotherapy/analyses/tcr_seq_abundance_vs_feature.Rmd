@@ -17,6 +17,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(scales)
+library(Seurat)
 
 ```
 
@@ -72,7 +73,10 @@ cell_abundance_df <- feature_df %>%
   summarize(count = n()) %>%
   ungroup() %>%
   group_by(patient) %>%
-  mutate(normalized_count = count / sum(count))
+  mutate(normalized_count = count / sum(count)) %>%
+  # filter for just subtypes of interest
+  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT"),
+         group != "no ICI")
 
 cell_abundance_df
 
@@ -100,5 +104,44 @@ print(wilcox_result)
 # CD8 Proliferating: 0.04444
 # CD8 TCM: 0.002664
 # MAITs: 0.000666
+
+```
+
+# Read in data for UMAP contour plot
+
+```{r}
+
+seurat_obj <- readRDS("../saved_data/T_cells.rds")
+
+downsampled_df <- read.csv("../saved_data/downsampled_df.csv")
+
+downsampled_seurat <- subset(seurat_obj, cells = downsampled_df$barcode)
+
+```
+
+# Make UMAP contour plot
+
+```{r}
+
+DimPlot(downsampled_seurat, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE)
+
+data <- Embeddings(object = downsampled_seurat[["umap"]])[(colnames(downsampled_seurat)), c(1, 2)]
+data <- as.data.frame(data)
+data$celltype <- downsampled_seurat@meta.data$predicted.celltype.l2
+data$patient_ID <- downsampled_seurat@meta.data$orig.ident
+
+data <- data %>%
+  filter(!(grepl("^CT", patient_ID))) %>%
+  filter(celltype %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT")) %>%
+  mutate(irAE = if_else(grepl("^NC", patient_ID), "no colitis", "colitis"))
+
+data$irAE <- factor(data$irAE, levels = c("no colitis", "colitis"))
+
+ggplot(data) +
+  geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01) +
+  facet_wrap(~ irAE) +
+  geom_density2d(aes(x=umap_1, y=umap_2)) +
+  theme(legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14))
 
 ```
