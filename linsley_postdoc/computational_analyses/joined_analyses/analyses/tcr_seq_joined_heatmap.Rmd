@@ -1,0 +1,137 @@
+---
+title: "Joined analyses from myocarditis and colitis datasets"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(ggpubr)
+library(ComplexHeatmap)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+myocarditis_norm <- read.csv("../../Identification_of_Pathogenic_Immune_Cell_Subsets_Associated_with_Checkpoint_Inhibitor_induced_Myocarditis/saved_data/normalized_heatmap_df.csv")
+
+myocarditis_downsampled <- read.csv("../../Identification_of_Pathogenic_Immune_Cell_Subsets_Associated_with_Checkpoint_Inhibitor_induced_Myocarditis/saved_data/downsampled_heatmap_df.csv")
+
+colitis_norm <- read.csv("../../Molecular_Pathways_of_Colon_Inflammation_Induced_by_Cancer_Immunotherapy/saved_data/normalized_heatmap_df.csv")
+
+colitis_downsampled <- read.csv("../../Molecular_Pathways_of_Colon_Inflammation_Induced_by_Cancer_Immunotherapy/saved_data/downsampled_heatmap_df.csv")
+
+joined_df <- myocarditis_norm %>%
+  full_join(myocarditis_downsampled) %>%
+  full_join(colitis_norm) %>%
+  full_join(colitis_downsampled) %>%
+  select(-X, -value, -predicted.celltype.l1, -predicted.celltype.l2, -Chain, -category)
+
+joined_df
+
+```
+
+# Make heatmap using complex heatmap
+
+```{r}
+
+heatmap_df <- joined_df %>%
+  rename(value = log_val) %>%
+  mutate(p_val_category = case_when(
+    p_val_category == "pgen" ~ "Probability of generation",
+    p_val_category == "cdr3_length" ~ "CDR3 length (AAs)"
+  ),
+  dataset = case_when(
+    dataset == "myocarditis" ~ "Myocarditis",
+    dataset == "colitis" ~ "Colitis"
+  ),
+    method = case_when(
+    method == "normalized_by_seq_depth" ~ "Normalized by\nsequencing depth",
+    method == "downsampled" ~ "Downsampled"
+  ))
+
+heatmap_df
+
+# Prepare the data in matrix form
+heatmap_data <- reshape2::dcast(heatmap_df, dataset + method + p_val_category ~ Chunk_limit, value.var = "value")
+
+heatmap_data
+
+# Extract value columns
+mat <- as.matrix(heatmap_data[, -(1:3)])
+
+# Set row names
+rownames(mat) <- paste(heatmap_data$dataset, heatmap_data$method, heatmap_data$p_val_category, sep = "_")
+
+# Create a matrix of annotations
+dataset_annotations <- cbind(
+  Dataset = heatmap_data$dataset
+)
+
+# Create a matrix of annotations
+method_annotations <- cbind(
+  Method = heatmap_data$method
+)
+
+# Create a matrix of annotations
+feature_annotations <- cbind(
+  Feature = heatmap_data$p_val_category
+)
+
+# Plot the heatmap without clustering
+Heatmap(mat,
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
+        right_annotation = rowAnnotation(Dataset = dataset_annotations,
+                                         Method = method_annotations,
+                                         Feature = feature_annotations,
+                                         col = list("Dataset" = c("Myocarditis" = "#fde725", "Colitis" = "#440154"),
+                                                    "Method" = c("Normalized by\nsequencing depth" = "#fde725", "Downsampled" = "#440154"),
+                                                    "Feature" = c("CDR3 length (AAs)" = "#21918c", "Probability of generation" = "#440154"))),
+        show_row_names = FALSE,
+        column_title = "CD8 TEM TRB top clonotypes\ncutoff (% of repertoire across patients)",
+        column_title_side = "bottom",
+        heatmap_legend_param = list(title = "Wilcox p val (-log10)\n for yes vs. no irAE"),
+        layer_fun = function(j, i, x, y, width, height, fill) {
+          v = pindex(mat, i, j)
+          l = v > -log10(0.05) & v < -log10(0.01)
+          if (any(l)) {
+            grid.text("*", x[l], y[l], gp = gpar(fontsize = 10))
+          }
+          q = v > -log10(0.01)
+          if (any(q)) {
+            grid.text("**", x[q], y[q], gp = gpar(fontsize = 10))
+          }
+        }
+      )
+
+```

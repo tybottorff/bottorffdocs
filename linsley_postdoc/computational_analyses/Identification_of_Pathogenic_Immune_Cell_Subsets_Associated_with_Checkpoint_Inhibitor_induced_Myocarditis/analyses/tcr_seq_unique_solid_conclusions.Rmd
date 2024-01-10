@@ -252,7 +252,7 @@ donor_df <- combined_data %>%
   group_by(cdr3_nt) %>%
   mutate(donors_per_junction_nt = n_distinct(Patient_ID)) %>%
   ungroup() %>%
-  # look at just unique CDR3s from each patient
+  # look at just unique CDR3s nts from each patient
   group_by(cdr3, cdr3_nt, Patient_ID) %>%
   slice(1) %>%
   ungroup() %>%
@@ -264,13 +264,19 @@ ggplot(donor_df, aes(x = donors_per_junction_aa, y = donors_per_junction_nt, col
   geom_jitter(size = 0.5) +
   geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
   facet_wrap(~irAE, ncol = 4) +
-  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)", color = "Convergence")
+  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)", color = "Convergence") +
+  theme(legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14))
 
 ggplot(donor_df, aes(x = donors_per_junction_aa, y = donors_per_junction_nt, color = publicity)) +
   geom_jitter(size = 0.5) +
   geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
   facet_wrap(~irAE, ncol = 4) +
-  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)", color = "Publicity")
+  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)", color = "Publicity") +
+  theme(legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14))
+
+# how can something be converged on diagonal (on or off (1,1))? I'm pretty sure it's because of intrapatient convergence
 
 ```
 
@@ -576,21 +582,21 @@ perform_wilcox_test <- function(data, cutoff) {
                   if(length(unique(irAE)) != 2) {
                     NA
                   } else {
-                    wilcox.test(pgen ~ irAE)$p.value
+                    wilcox.test(pgen ~ irAE, exact = FALSE)$p.value
                   }
                 },
               p_val_cdr3_hydrophobicity = {
                   if(length(unique(irAE)) != 2) {
                     NA
                   } else {
-                    wilcox.test(cdr3_hydrophobicity ~ irAE)$p.value
+                    wilcox.test(cdr3_hydrophobicity ~ irAE, exact = FALSE)$p.value
                   }
                 },
               p_val_cdr3_length = {
                   if(length(unique(irAE)) != 2) {
                     NA
                   } else {
-                    wilcox.test(cdr3_length ~ irAE)$p.value
+                    wilcox.test(cdr3_length ~ irAE, exact = FALSE)$p.value
                   }
                 }) %>%
     ungroup()
@@ -633,6 +639,18 @@ top_results <- results_df %>%
 filtered_results_df <- results_df %>%
   filter(category %in% top_results$category) %>%
   mutate(log_val = -log10(value))
+
+# write csv for summary CD8 TEM TRB heatmap across datasets/methods
+
+output_df <- results_df %>%
+  mutate(log_val = -log10(value),
+         dataset = "myocarditis",
+         method = "normalized_by_seq_depth") %>%
+  filter(predicted.celltype.l2 == "CD8 TEM" & Chain == "TRB" & p_val_category != "cdr3_hydrophobicity")
+
+write.csv(output_df, "../saved_data/normalized_heatmap_df.csv")
+
+output_df
 
 # basically anything red (p val -log10 > 1.3) is significant (p < 0.05)
 
@@ -698,7 +716,7 @@ feature_annotations <- cbind(
 # highlight rows of interest
 which_row_highlight = which(grepl("CD8 T_TEM_Probability of generation_TRB", rownames(mat)))
 
-split = data.frame(x = c(rep("", which_row_highlight - 1), "*", rep("", nrow(mat) - which_row_highlight)))
+split = data.frame(x = c(rep("", which_row_highlight - 1), "CD8\nTEM\nTRB", rep("", nrow(mat) - which_row_highlight)))
 
 # Plot the heatmap without clustering
 Heatmap(mat,
@@ -717,7 +735,19 @@ Heatmap(mat,
         column_title = "Top clonotypes cutoff\n(% of repertoire across patients)",
         column_title_side = "bottom",
         heatmap_legend_param = list(title = "Wilcox p val (-log10)\n for yes vs. no irAE"),
-        row_split = split)
+        row_split = split,
+        layer_fun = function(j, i, x, y, width, height, fill) {
+          v = pindex(mat, i, j)
+          l = v > -log10(0.05) & v < -log10(0.01)
+          if (any(l)) {
+            grid.text("*", x[l], y[l], gp = gpar(fontsize = 10))
+          }
+          q = v > -log10(0.01)
+          if (any(q)) {
+            grid.text("**", x[q], y[q], gp = gpar(fontsize = 10))
+          }
+        }
+      )
 
 ```
 # Make some box plots for tiles of interest
@@ -804,6 +834,18 @@ filtered_results_df_downsampled <- results_df_downsampled %>%
   filter(category %in% top_results_downsampled$category) %>%
   mutate(log_val = -log10(value))
 
+# write csv for summary CD8 TEM TRB heatmap across datasets/methods
+
+output_df <- results_df_downsampled %>%
+  mutate(log_val = -log10(value),
+         dataset = "myocarditis",
+         method = "downsampled") %>%
+  filter(predicted.celltype.l2 == "CD8 TEM" & Chain == "TRB" & p_val_category != "cdr3_hydrophobicity")
+
+write.csv(output_df, "../saved_data/downsampled_heatmap_df.csv")
+
+output_df
+
 # basically anything red (p val -log10 > 1.3) is significant (p < 0.05)
 
 filtered_results_df_downsampled$Chunk_limit <- factor(filtered_results_df_downsampled$Chunk_limit, levels = c("10", "20", "30", "40", "50", "60", "70", "80", "90", "100"))
@@ -868,7 +910,7 @@ feature_annotations_downsampled <- cbind(
 # highlight rows of interest
 which_row_highlight = which(grepl("CD8 T_TEM_Probability of generation_TRB", rownames(mat_downsampled)))
 
-split = data.frame(x = c(rep("", which_row_highlight - 2), "*", "*", rep("", nrow(mat_downsampled) - which_row_highlight)))
+split = data.frame(x = c(rep("", which_row_highlight - 2), "CD8 TEM TRB", "CD8 TEM TRB", rep("", nrow(mat_downsampled) - which_row_highlight)))
 
 # Plot the heatmap without clustering
 Heatmap(mat_downsampled,
@@ -887,6 +929,18 @@ Heatmap(mat_downsampled,
         column_title = "Top clonotypes cutoff\n(% of repertoire across patients)",
         column_title_side = "bottom",
         heatmap_legend_param = list(title = "Wilcox p val (-log10)\n for yes vs. no irAE"),
-        row_split = split)
+        row_split = split,
+        layer_fun = function(j, i, x, y, width, height, fill) {
+          v = pindex(mat_downsampled, i, j)
+          l = v > -log10(0.05) & v < -log10(0.01)
+          if (any(l)) {
+            grid.text("*", x[l], y[l], gp = gpar(fontsize = 10))
+          }
+#          q = v > -log10(0.01)
+#          if (any(q)) {
+#            grid.text("**", x[q], y[q], gp = gpar(fontsize = 10))
+#          }
+        }
+      )
 
 ```
