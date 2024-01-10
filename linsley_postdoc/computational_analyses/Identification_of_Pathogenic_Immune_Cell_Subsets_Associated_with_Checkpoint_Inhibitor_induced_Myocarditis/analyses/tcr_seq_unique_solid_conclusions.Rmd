@@ -698,7 +698,7 @@ feature_annotations <- cbind(
 # highlight rows of interest
 which_row_highlight = which(grepl("CD8 T_TEM_Probability of generation_TRB", rownames(mat)))
 
-split = data.frame(x = c(rep("A", which_row_highlight - 1), "B", rep("C", nrow(mat) - which_row_highlight)))
+split = data.frame(x = c(rep("", which_row_highlight - 1), "*", rep("", nrow(mat) - which_row_highlight)))
 
 # Plot the heatmap without clustering
 Heatmap(mat,
@@ -717,8 +717,7 @@ Heatmap(mat,
         column_title = "Top clonotypes cutoff\n(% of repertoire across patients)",
         column_title_side = "bottom",
         heatmap_legend_param = list(title = "Wilcox p val (-log10)\n for yes vs. no irAE"),
-        row_split = split,
-        row_title = NULL)
+        row_split = split)
 
 ```
 # Make some box plots for tiles of interest
@@ -869,7 +868,7 @@ feature_annotations_downsampled <- cbind(
 # highlight rows of interest
 which_row_highlight = which(grepl("CD8 T_TEM_Probability of generation_TRB", rownames(mat_downsampled)))
 
-split = data.frame(x = c(rep("A", which_row_highlight - 1), "B", rep("C", nrow(mat_downsampled) - which_row_highlight)))
+split = data.frame(x = c(rep("", which_row_highlight - 2), "*", "*", rep("", nrow(mat_downsampled) - which_row_highlight)))
 
 # Plot the heatmap without clustering
 Heatmap(mat_downsampled,
@@ -888,7 +887,6 @@ Heatmap(mat_downsampled,
         column_title = "Top clonotypes cutoff\n(% of repertoire across patients)",
         column_title_side = "bottom",
         heatmap_legend_param = list(title = "Wilcox p val (-log10)\n for yes vs. no irAE"),
-        row_split = split,
-        row_title = NULL)
+        row_split = split)
 
 ```
