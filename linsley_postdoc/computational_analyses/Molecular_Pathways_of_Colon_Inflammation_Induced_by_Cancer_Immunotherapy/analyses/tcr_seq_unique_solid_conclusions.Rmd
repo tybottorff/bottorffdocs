@@ -580,7 +580,8 @@ top_results <- results_df %>%
   mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
 
 filtered_results_df <- results_df %>%
-  filter(category %in% top_results$category)
+  filter(category %in% top_results$category) %>%
+  mutate(log_val = -log10(value))
 
 # basically anything red (p val -log10 > 1.3) is significant (p < 0.05)
 
@@ -595,6 +596,78 @@ ggplot(filtered_results_df, aes(x = Chunk_limit, y = factor(interaction(predicte
   scale_fill_gradientn(colors = colorRampPalette(c("blue", "white", "red"))(20), name = "Wilcox p val (-log10)\n for yes vs. no irAE") +
   labs(x = "Top clonotypes cutoff (% of repertoire across patients)", y = "") +
   theme_minimal()
+
+```
+
+# Make prettier heatmap using complex heatmap (normalization method)
+
+```{r}
+
+heatmap_df <- filtered_results_df %>%
+  select(-value, -category) %>%
+  rename(value = log_val) %>%
+  mutate(p_val_category = case_when(
+    p_val_category == "pgen" ~ "Probability of generation",
+    p_val_category == "cdr3_length" ~ "CDR3 length (AAs)",
+    p_val_category == "cdr3_hydrophobicity" ~ "CDR3 hydrophobicity"
+  )) %>%
+  mutate(predicted.celltype.l2 = gsub("CD4 |CD8 ", "", predicted.celltype.l2))
+
+heatmap_df
+
+# Prepare the data in matrix form
+heatmap_data <- reshape2::dcast(heatmap_df, predicted.celltype.l1 + predicted.celltype.l2 + p_val_category + Chain ~ Chunk_limit, value.var = "value")
+
+# Extract value columns
+mat <- as.matrix(heatmap_data[, -(1:4)])
+
+# Set row names
+rownames(mat) <- paste(heatmap_data$predicted.celltype.l1, heatmap_data$predicted.celltype.l2, heatmap_data$p_val_category, heatmap_data$Chain, sep = "_")
+
+# Create a matrix of annotations
+chain_annotations <- cbind(
+  Chain = heatmap_data$Chain
+)
+
+# Create a matrix of annotations
+type_annotations <- cbind(
+  "Cell type" = heatmap_data$predicted.celltype.l1
+)
+
+# Create a matrix of annotations
+subtype_annotations <- cbind(
+  "Cell subtype" = heatmap_data$predicted.celltype.l2
+)
+
+# Create a matrix of annotations
+feature_annotations <- cbind(
+  Feature = heatmap_data$p_val_category
+)
+
+# highlight rows of interest
+which_row_highlight = which(grepl("CD8 T_TEM_Probability of generation_TRB", rownames(mat)))
+
+split = data.frame(x = c(rep("A", which_row_highlight - 1), "B", rep("C", nrow(mat) - which_row_highlight)))
+
+# Plot the heatmap without clustering
+Heatmap(mat,
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
+        right_annotation = rowAnnotation("Cell type" = type_annotations,
+                                         "Cell subtype" = subtype_annotations,
+                                         Chain = chain_annotations,
+                                         Feature = feature_annotations,
+                                         col = list("Cell type" = c("CD4 T" = "#fde725", "CD8 T" = "#21918c", "other T" = "#440154"),
+                                                    "Chain" = c("TRA" = "#fde725", "TRB" = "#440154"),
+                                                    "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725"),
+                                                    "Feature" = c("CDR3 length (AAs)" = "#21918c", "CDR3 hydrophobicity" = "#fde725", "Probability of generation" = "#440154"))),
+        show_row_names = FALSE,
+        column_title = "Top clonotypes cutoff\n(% of repertoire across patients)",
+        column_title_side = "bottom",
+        heatmap_legend_param = list(title = "Wilcox p val (-log10) for\nyes vs. no colitis irAE"),
+        row_split = split,
+        row_title = NULL)
 
 ```
 
@@ -656,7 +729,8 @@ top_results_downsampled <- results_df_downsampled %>%
   mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
 
 filtered_results_df_downsampled <- results_df_downsampled %>%
-  filter(category %in% top_results_downsampled$category)
+  filter(category %in% top_results_downsampled$category) %>%
+  mutate(log_val = -log10(value))
 
 # basically anything red (p val -log10 > 1.3) is significant (p < 0.05)
 
@@ -671,5 +745,77 @@ ggplot(filtered_results_df_downsampled, aes(x = Chunk_limit, y = factor(interact
   scale_fill_gradientn(colors = colorRampPalette(c("blue", "white", "red"))(20), name = "Wilcox p val (-log10)\n for yes vs. no irAE") +
   labs(x = "Top clonotypes cutoff (% of repertoire across patients)", y = "") +
   theme_minimal()
+
+```
+
+# Make prettier heatmap using complex heatmap (downsampled method)
+
+```{r}
+
+heatmap_df_downsampled <- filtered_results_df_downsampled %>%
+  select(-value, -category) %>%
+  rename(value = log_val) %>%
+  mutate(p_val_category = case_when(
+    p_val_category == "pgen" ~ "Probability of generation",
+    p_val_category == "cdr3_length" ~ "CDR3 length (AAs)",
+    p_val_category == "cdr3_hydrophobicity" ~ "CDR3 hydrophobicity"
+  )) %>%
+  mutate(predicted.celltype.l2 = gsub("CD4 |CD8 ", "", predicted.celltype.l2))
+
+heatmap_df_downsampled
+
+# Prepare the data in matrix form
+heatmap_data_downsampled <- reshape2::dcast(heatmap_df_downsampled, predicted.celltype.l1 + predicted.celltype.l2 + p_val_category + Chain ~ Chunk_limit, value.var = "value")
+
+# Extract value columns
+mat_downsampled <- as.matrix(heatmap_data_downsampled[, -(1:4)])
+
+# Set row names
+rownames(mat_downsampled) <- paste(heatmap_data_downsampled$predicted.celltype.l1, heatmap_data_downsampled$predicted.celltype.l2, heatmap_data_downsampled$p_val_category, heatmap_data_downsampled$Chain, sep = "_")
+
+# Create a matrix of annotations
+chain_annotations_downsampled <- cbind(
+  Chain = heatmap_data_downsampled$Chain
+)
+
+# Create a matrix of annotations
+type_annotations_downsampled <- cbind(
+  "Cell type" = heatmap_data_downsampled$predicted.celltype.l1
+)
+
+# Create a matrix of annotations
+subtype_annotations_downsampled <- cbind(
+  "Cell subtype" = heatmap_data_downsampled$predicted.celltype.l2
+)
+
+# Create a matrix of annotations
+feature_annotations_downsampled <- cbind(
+  Feature = heatmap_data_downsampled$p_val_category
+)
+
+# highlight rows of interest
+#which_row_highlight = which(grepl("CD8 T_TEM_Probability of generation_TRB", rownames(mat_downsampled)))
+
+#split = data.frame(x = c(rep("A", which_row_highlight - 1), "B", rep("C", nrow(mat_downsampled) - which_row_highlight)))
+
+# Plot the heatmap without clustering
+Heatmap(mat_downsampled,
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
+        right_annotation = rowAnnotation("Cell type" = type_annotations_downsampled,
+                                         "Cell subtype" = subtype_annotations_downsampled,
+                                         Chain = chain_annotations_downsampled,
+                                         Feature = feature_annotations_downsampled,
+                                         col = list("Cell type" = c("CD4 T" = "#fde725", "CD8 T" = "#21918c", "other T" = "#440154"),
+                                                    "Chain" = c("TRA" = "#fde725", "TRB" = "#440154"),
+                                                    "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725"),
+                                                    "Feature" = c("CDR3 length (AAs)" = "#21918c", "CDR3 hydrophobicity" = "#fde725", "Probability of generation" = "#440154"))),
+        show_row_names = FALSE,
+        column_title = "Top clonotypes cutoff\n(% of repertoire across patients)",
+        column_title_side = "bottom",
+        heatmap_legend_param = list(title = "Wilcox p val (-log10) for\nyes vs. no colitis irAE"))
+#        row_split = split,
+#        row_title = NULL)
 
 ```

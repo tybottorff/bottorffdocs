@@ -64,7 +64,46 @@ print(chi_square_result)
 
 ```
 
-# Make a plot of cell type abundances within each patient by irAE group
+# Read in data for UMAP contour plot
+
+```{r}
+
+seurat_obj <- readRDS("../saved_data/T_cells.rds")
+
+downsampled_df <- read.csv("../saved_data/downsampled_df.csv")
+
+downsampled_seurat <- subset(seurat_obj, cells = downsampled_df$barcode)
+
+```
+
+# Make UMAP contour plot
+
+```{r}
+
+DimPlot(downsampled_seurat, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE)
+
+data <- Embeddings(object = downsampled_seurat[["umap"]])[(colnames(downsampled_seurat)), c(1, 2)]
+data <- as.data.frame(data)
+data$celltype <- downsampled_seurat@meta.data$predicted.celltype.l2
+data$patient_ID <- downsampled_seurat@meta.data$orig.ident
+
+data <- data %>%
+  filter(!(grepl("^CT", patient_ID))) %>%
+  filter(celltype %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT")) %>%
+  mutate(irAE = if_else(grepl("^NC", patient_ID), "no colitis", "colitis"))
+
+data$irAE <- factor(data$irAE, levels = c("no colitis", "colitis"))
+
+ggplot(data) +
+  geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01) +
+  facet_wrap(~ irAE) +
+  geom_density2d(aes(x=umap_1, y=umap_2)) +
+  theme(legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14))
+
+```
+
+# Make a plot of cell type abundances within each patient by irAE group (normalized by seq depth)
 
 ```{r}
 
@@ -107,41 +146,43 @@ print(wilcox_result)
 
 ```
 
-# Read in data for UMAP contour plot
+# Make a plot of cell type abundances within each patient by irAE group (downsampled)
 
 ```{r}
 
-seurat_obj <- readRDS("../saved_data/T_cells.rds")
+cell_abundance_df_downsampled <- downsampled_df %>%
+  group_by(patient, predicted.celltype.l2, group) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  # filter for just subtypes of interest
+  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT"),
+         group != "no ICI")
 
-downsampled_df <- read.csv("../saved_data/downsampled_df.csv")
+cell_abundance_df_downsampled
 
-downsampled_seurat <- subset(seurat_obj, cells = downsampled_df$barcode)
+cell_abundance_df_downsampled$group <- factor(cell_abundance_df_downsampled$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
 
-```
+ggplot(cell_abundance_df_downsampled, aes(x = predicted.celltype.l2, y = log10(count), fill = group)) +
+  geom_boxplot() +
+  labs(x = "", fill = "group", y = "Cell proportion\n(log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
-# Make UMAP contour plot
+# Filter the data for statistical test
+test_data <- cell_abundance_df_downsampled %>%
+  filter(predicted.celltype.l2 == "CD4 TEM",
+         group != "no ICI")
 
-```{r}
+# Calculate the Wilcoxon rank-sum test statistic and p-value
+wilcox_result <- wilcox.test(test_data$count ~ test_data$group)
 
-DimPlot(downsampled_seurat, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE)
+# Print the results
+print(wilcox_result)
 
-data <- Embeddings(object = downsampled_seurat[["umap"]])[(colnames(downsampled_seurat)), c(1, 2)]
-data <- as.data.frame(data)
-data$celltype <- downsampled_seurat@meta.data$predicted.celltype.l2
-data$patient_ID <- downsampled_seurat@meta.data$orig.ident
-
-data <- data %>%
-  filter(!(grepl("^CT", patient_ID))) %>%
-  filter(celltype %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT")) %>%
-  mutate(irAE = if_else(grepl("^NC", patient_ID), "no colitis", "colitis"))
-
-data$irAE <- factor(data$irAE, levels = c("no colitis", "colitis"))
-
-ggplot(data) +
-  geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01) +
-  facet_wrap(~ irAE) +
-  geom_density2d(aes(x=umap_1, y=umap_2)) +
-  theme(legend.text = element_text(size = 12),
-        legend.title = element_text(size = 14))
+# CD4 TEM: 0.000666
+# CD4 Proliferating: 0.004662
+# CD8 Proliferating: 0.04949
+# CD8 TCM: 0.004662
+# MAITs: 0.000666
 
 ```
