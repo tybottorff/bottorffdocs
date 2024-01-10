@@ -1546,6 +1546,9 @@
  - HLA-B44 supertype also associated with better survival, HLA-B62 supertype associated with worse survival
 ## Main
  - **each HLA-I variant binds a select repertoire of peptide ligands, so HLA-I heterozygosity may increase diversity of peptides presented to T cells**
+# Patterns of neurological adverse events among a retrospective cohort of patients receiving immune checkpoint inhibitors
+ - 1.72% incidence of neurological irAEs, mostly peripheral (vs. central)
+ - melanoma and renal cell carcinoma associated with neurological irAEs, perhaps related to frequency of brain metastases in these tumor types
 # PD-1 and ICOS coexpression identifies tumor-reactive CD4<sup>+</sup> T cells in human solid tumors
  - identify subset of CD4<sup>+</sup> Th cells distinct from FOXP3<sup>+</sup> Tregs that coexpress PD-1 and ICOS, Trm phenotype, expansion in tumor but rare in periphery, recognize both neoantigens and tumor-associated antigens
 # PD-1 blockade induces responses by inhibiting adaptive immune resistance
