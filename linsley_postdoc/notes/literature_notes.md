@@ -47,6 +47,8 @@
 # An anti-CD3 antibody, teplizumab, in relatives at risk for type 1 diabetes
  - teplizumab delays progression of type 1 diabetes in high risk participants
  - KLRG1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells more common in teplizumab group than placebo
+# ANGPTL2 promotes immune checkpoint inhibitor-related murine autoimmune myocarditis
+ - ANGPTL2 is a potential inflammatory mediator
 # An increased population of regulatory T cells improves the pathophysiology of placental ischemia in a rat model of preeclampsia
  - preeclampsia pathology: suppressed Tregs, autoantibodies to Ang II type I receptor
 # Antigen and checkpoint receptor engagement recalibrates T cell receptor signal strength
@@ -417,6 +419,8 @@
  - the occurrence of Gly was CDR3 length‐ and position‐dependent in both chains, whereas the frequency of Ser at positions 106 and 107 was positively correlated with CDR3 length in TCR β
  - the amino acids in CDR3 loop regions were significantly different between TCR α and β, which suggests a distinct role for each chain in the recognition of antigen–MHC complexes
  - **see length-dependent increase in glycine usage, may confer cross-reactivity with glycine's small size**
+# Complete and early response to cemiplimab associated to severe immune toxicity in advanced cervical cancer: a case report
+ - potential supplementary evidence for irAE association with ICB response
 # Computational simulations of bispecific T-cell engagers by a multiscale model
  - modeling to try and understand mechanism of bispecific antibodies as T cell engagers (bypass TCR-pMHC interaction, redirect cytotoxic activity, can help kill cancer cells but also off target effects)
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
@@ -528,6 +532,10 @@
  - **PD-1 blockade predominantly induces expansion of specific tumor infiltrating exhausted-like CD8<sup>+</sup> T cell subsets**
  - **CTLA-4 blockade induces expansion of ICOS<sup>+</sup> Th1-like CD4<sup>+</sup> effector T cells, also engages specific subsets of exhausted-like CD8<sup>+</sup> T cells**
  - **different ICI target different T cell subsets**
+# Distinct immune-effector and metabolic profile of CD8<sup>+</sup> T cells in patients with autoimmune polyarthritis induced by therapy with immune checkpoint inhibitors
+ - CD8s from irAE patients show lower activation, effector function, homing, exhaustion, apoptosis, reduced release of cytotoxic and proinflammatory immune mediators
+ - higher glycolytic rate and ATP production from irAE CD8s
+ - **metabolic remodeling from OXPHOS to aerobic glycolysis is hallmark of CD8 activation**
 # Distinct immune signatures indicative of treatment response and immune-related adverse events in melanoma patients under immune checkpoint inhibitor therapy
  - flow cytometric analyses of 15 patients with stage IV melanoma
  - responders characterized by enhanced PD-1 expression on CD8<sup>+</sup> T cells immediately before treatment
@@ -1082,10 +1090,6 @@
 ## Results
 ### The presence of ICI-induced irAEs correlated with improved patient survival
  - irAEs more frequent in treatment responders in both melanoma and NSCLC
-### Canonical blood leukocyte frequencies pre-ICI therapy were similar between patients with the same type of cancer, independent of irAE development
-### Patients with cancer treated with ICIs developing irAEs showed an early expansion of proliferating T cell subsets
-### Patients with expanding CD8<sup>+</sup> CD38<sup>+</sup> Ki-67<sup>+</sup> T cells were more likely to develop irAEs early in their treatment
-### Patients with developing irAEs showed an early increase in the expansion of proteins associated with the IFN-γ signaling pathway
 ### A potential biomarker profile to predict the development of ICI-irAEs in patients with cancer
  - early treatment expansion of IFN-γ-driven cytokines and of Ki-67<sup>+</sup> T cell subsets provide good prediction model for irAE development (also increase in serum CXCL10), expansion of Ki-67<sup>+</sup> Tregs specifically for melanoma irAEs, CD8<sup>+</sup> Ki-67<sup>+</sup> CD38<sup>+</sup> T cell expansion specifically for NSCLC irAEs
  - IL-10 increase in early treatment associated with reduced irAE risk
@@ -1726,6 +1730,9 @@
  - TCR is composed of four distinct signal transducing subunits (CD3-γ, -δ, -ε, and ζ) that contain either one (CD3-γ, -δ, -ε) or three (-ζ) signaling motifs (ITAMs) within their intracytoplasmic domains
 # Safety, outcomes and T cell characteristics in patients with relapsed or refractory MDS or CMML treated with atezolizumab in combination with guadecitabine
  - hypothesis: resistance to hypomethylating agents (HMAs) in patients with myelodysplastic syndrome (MDS) and chronic myelomonocytic leukemia (CMML) overcome by combining PD-L1 blockade with HMA
+# Serum immune modulators associated with immune-related toxicities and efficacy of atezolizumab in patients with non-small cell lung cancer
+ - high baseline levels of B cell-activating factor (BAFF) associated with irAE development
+ - increased ICOS levels during first therapeutic cycle associated with survival
 # Sharing of T cell receptors in antigen-specific responses is driven by convergent recombination
  - convergent recombination, rather than recombination bias or selection, drives publicity
  - potential causes of publicity: self tolerance restricts capacity of TCRs to recognize some epitopes, different conformations of peptides in MHC groove (flat or prominent), degenerate binders
@@ -1753,6 +1760,8 @@
  - macrophage and convential DC subsets as key mediators of cross-talk in TME
 # Single cell analyses reveal key immune cell subsets associated with response to PD-L1 blockade in triple-negative breast cancer
  - high baseline levels of CXCL13<sup>+</sup> T cells linked to proinflammatory features of macrophages, can predict response
+# Single cell analysis of T lymphocytes infiltrating colorectal carcinoma: the dilemma of specificity
+ - review of a paper
 # Single cell dynamics of tumor specificity vs bystander activity in CD8<sup>+</sup> T cells define the diverse immune landscapes in colorectal cancer
  - CD8<sup>+</sup> T cell activation via ICB successful in microsatellite instable (MSI, high TMB, more TILs) colorectal cancer, limited success against microsatellite stable (MSS, lower TMB, fewer TILs) colorectal cancer
  - MSI CD8<sup>+</sup> T cells show tumor-specific activation, MSS CD8<sup>+</sup> T cells show tumor unspecific or bystander features
