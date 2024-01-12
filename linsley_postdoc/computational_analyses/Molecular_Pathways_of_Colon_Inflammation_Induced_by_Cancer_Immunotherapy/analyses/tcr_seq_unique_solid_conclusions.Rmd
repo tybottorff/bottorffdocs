@@ -312,6 +312,43 @@ ggplot(donor_df %>% filter(group != "no ICI"), aes(x = donors_per_junction_aa, y
 
 ```
 
+# Instead look at distribution of unique CDR3 NT seqs / CDR3 (AA) by irAE group
+
+```{r}
+
+new_convergence_df <- combined_data %>%
+  filter(group != "no ICI") %>%
+  group_by(cdr3) %>%
+  mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
+  # look at just unique CDR3s from each patient
+  group_by(cdr3, group) %>%
+  slice(1) %>%
+  ungroup()
+
+new_convergence_df
+
+new_convergence_df$group <- factor(new_convergence_df$group, levels = c("ICI no colitis", "ICI colitis"))
+
+ggplot(new_convergence_df, aes(x = nts_per_aa, fill = group)) +
+  geom_histogram(position = "dodge", binwidth = 1) +
+  facet_wrap(~predicted.celltype.l1) +
+  labs(x = "CDR3 nt seqs / CDR3 AA seq", y = "count (log10)") +
+  scale_y_continuous(trans = "log10", expand = expansion(add = c(0, 0))) +
+  scale_x_continuous(breaks = pretty_breaks(n = 3))
+
+wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l1 == "CD4 T"))
+# 
+
+wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l1 == "CD8 T"))
+# 
+
+wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l1 == "other T"))
+# 
+
+#p.adjust(c("0.1349", "0.02999", "0.1628"), method = "BH")
+
+```
+
 # Look at overlap between public and converged
 
 ```{r}
@@ -329,159 +366,23 @@ ggplot(donor_df %>% filter(group != "no ICI"), aes(x = donors_per_junction_aa, y
 
 ```
 
-# Get unique CD8 TEMs TRBs from Top 20 clonotypes per group (normalizing counts by seq depth)
+# Plot germlineness vs. CDR3 length
 
 ```{r}
 
-unique_cd8_tem_trb <- combined_data %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
+abundance_df <- combined_data %>%
   group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
-  # calculate clonotype counts within patients to get a sense of expansion
   mutate(count = n()) %>%
-  # normalize by sequencing depth
-  left_join(seq_depth, by = c("patient", "group")) %>%
-  mutate(normalized_count = count / seq_depth) %>%
-  # look at just unique TCRs
-  dplyr::slice(1) %>%
-  arrange(-normalized_count) %>%
-  ungroup() %>%
-  mutate(tag = "All")
+  slice(1) %>%
+  ungroup()
 
-unique_cd8_tem_trb
+abundance_df
 
-unique_cd8_tem_trb_top_15 <- unique_cd8_tem_trb %>%
-  group_by(predicted.celltype.l1, Chain, group) %>%
-  filter(row_number() <= 20) %>%
-  ungroup() %>%
-  mutate(tag = "Top 20 clonotypes\n(normalized)")
-
-unique_cd8_tem_trb_top_15
-
-```
-
-# Get unique CD8 TEMs TRBs from Top 20 clonotypes per group (not normalizing counts by seq depth)
-
-```{r}
-
-unique_cd8_tem_trb_top_15_not_normalized <- combined_data %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
-  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
-  # calculate clonotype counts within patients to get a sense of expansion
-  mutate(count = n()) %>%
-  # look at just unique TCRs
-  dplyr::slice(1) %>%
-  arrange(-count) %>%
-  ungroup() %>%
-  group_by(predicted.celltype.l1, Chain, group) %>%
-  filter(row_number() <= 20) %>%
-  ungroup() %>%
-  mutate(tag = "Top 20 clonotypes\n(not normalized)")
-
-unique_cd8_tem_trb_top_15_not_normalized
-
-```
-
-# Get unique CD8 TEMs TRBs from Top 20 clonotypes per group from downsampled data
-
-```{r}
-
-unique_cd8_tem_trb_downsampled <- downsampled_df %>%
-  filter(predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
-  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
-  # calculate clonotype counts within patients to get a sense of expansion
-  mutate(count = n()) %>%
-  # look at just unique TCRs
-  dplyr::slice(1) %>%
-  arrange(-count) %>%
-  ungroup() %>%
-  mutate(tag = "Downsampled")
-
-unique_cd8_tem_trb_downsampled
-
-unique_cd8_tem_trb_top_15_downsampled <- unique_cd8_tem_trb_downsampled %>%
-  group_by(predicted.celltype.l1, Chain, group) %>%
-  filter(row_number() <= 20) %>%
-  ungroup() %>%
-  mutate(tag = "Top 20 clonotypes\n(downsampled)")
-
-unique_cd8_tem_trb_top_15_downsampled
-
-```
-
-# Join dfs
-
-```{r}
-
-unique_cd8_tem_trb_all <- unique_cd8_tem_trb_top_15 %>%
-  full_join(unique_cd8_tem_trb) %>%
-  full_join(unique_cd8_tem_trb_top_15_not_normalized) %>%
-  full_join(unique_cd8_tem_trb_top_15_downsampled) %>%
-  full_join(unique_cd8_tem_trb_downsampled) %>%
-  full_join(public_df) %>%
-  full_join(downsampled_public_df) %>%
-  full_join(convergence_df)
-
-```
-
-# Plot pgen conclusions
-
-```{r}
-
-unique_cd8_tem_trb_all$tag <- factor(unique_cd8_tem_trb_all$tag, levels = c("Top 20 clonotypes\n(normalized)", "Top 20 clonotypes\n(not normalized)", "Top 20 clonotypes\n(downsampled)", "Converged", "Public", "Public\n(downsampled)", "All", "Downsampled"))
-
-unique_cd8_tem_trb_all$group <- factor(unique_cd8_tem_trb_all$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
-
-p <- ggplot(unique_cd8_tem_trb_all, aes(x = tag, y = log10(pgen), fill = group)) +
-  geom_boxplot() +
-  labs(x = "", fill = "group", y = "CD8 TEM\nTRB pgen (log10)") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
-
-# Adjust y-axis scales with a specified number of ticks
-p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
-
-# Filter the data for statistical test
-test_data <- unique_cd8_tem_trb_all %>%
-  filter(tag == "Top 20 clonotypes\n(not normalized)",
-         group != "no ICI")
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$pgen ~ test_data$group)
-
-# Print the results
-print(wilcox_result)
-
-# p = 0.04 for not normalized top 20 clonotypes
-
-```
-
-# Plot length conclusions
-
-```{r}
-
-p <- ggplot(unique_cd8_tem_trb_all, aes(x = tag, y = cdr3_length, fill = group)) +
-  geom_boxplot() +
-  labs(x = "", fill = "group", y = "CD8 TEM TRB\nCDR3 length (AAs)") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12))
-
-# Adjust y-axis scales with a specified number of ticks
-p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3))
-
-# Filter the data for statistical test
-test_data <- unique_cd8_tem_trb_all %>%
-  filter(tag == "Top 20 clonotypes\n(not normalized)",
-         group != "no ICI")
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$cdr3_length ~ test_data$group)
-
-# Print the results
-print(wilcox_result)
+ggplot(aes(x = cdr3_length, y = log10(pgen)), data = abundance_df) +
+  geom_jitter(alpha = 0.05) +
+  labs(y = "log10(pgen)", x = "CDR3 length (AAs)") +
+  stat_cor(method = "pearson", label.x = 0.8, label.y = 0.9) +
+  geom_smooth(method = "lm", se = FALSE, col = "blue")
 
 ```
 
@@ -509,36 +410,38 @@ prepped_data
 
 ```
 
-# Perform wilcox rank sum tests for top n clonotypes in chunks of 10% (normalized method)
+# Perform wilcox rank sum tests within chunks of 10% clonotypes (normalized method)
 
 ```{r}
 
-# Function to perform the test up to a specific cutoff of clonotype abundances
+# Function to perform the test within a specific bin of clonotype abundances
 perform_wilcox_test <- function(data, cutoff) {
   result <- data %>%
-    filter(chunk <= cutoff) %>%
+    filter(chunk == cutoff) %>%
     group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%    
-    summarize(p_val_pgen = {
-                  if(length(unique(group)) != 2) {
-                    NA
-                  } else {
-                    wilcox.test(pgen ~ group, exact = FALSE)$p.value
-                  }
-                },
-              p_val_cdr3_hydrophobicity = {
-                  if(length(unique(group)) != 2) {
-                    NA
-                  } else {
-                    wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
-                  }
-                },
-              p_val_cdr3_length = {
-                  if(length(unique(group)) != 2) {
-                    NA
-                  } else {
-                    wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
-                  }
-                }) %>%
+    summarize(
+      p_val_pgen = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(pgen ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_hydrophobicity = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_length = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
+        }
+      }
+    ) %>%
     ungroup()
   
   return(result)
@@ -556,13 +459,16 @@ for (num in 1:10) {
 }
 
 # Combine results into a single dataframe
-results_df <- bind_rows(results_list, .id = "Chunk_limit")
+results_df <- bind_rows(results_list, .id = "Chunk")
 
 results_df <- results_df %>%
   pivot_longer(cols = c("p_val_pgen", "p_val_cdr3_length", "p_val_cdr3_hydrophobicity"), names_to = "p_val") %>%
   rename(p_val_category = p_val) %>%
   mutate(p_val_category = gsub("p_val_", "", p_val_category)) %>%
-  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category)) %>%
+  # adjust pvals for multiple comparisons %>%
+  mutate(value = p.adjust(value, method = "BH")) %>%
+  arrange(value)
 
 results_df
 
@@ -573,42 +479,14 @@ results_df
 ```{r}
 
 top_results <- results_df %>%
-  filter(value < 0.05) %>%
+  #filter(value < 0.05) %>%
   mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
 
 filtered_results_df <- results_df %>%
   filter(category %in% top_results$category) %>%
   mutate(log_val = -log10(value))
 
-# write csv for summary CD8 TEM TRB heatmap across datasets/methods
-
-output_df <- results_df %>%
-  mutate(log_val = -log10(value),
-         dataset = "colitis",
-         method = "normalized_by_seq_depth") %>%
-  filter(predicted.celltype.l2 == "CD8 TEM" & Chain == "TRB" & p_val_category != "cdr3_hydrophobicity")
-
-write.csv(output_df, "../saved_data/normalized_heatmap_df.csv")
-
-# basically anything red (p val -log10 > 1.3) is significant (p < 0.05)
-
-filtered_results_df$Chunk_limit <- factor(filtered_results_df$Chunk_limit, levels = c("10", "20", "30", "40", "50", "60", "70", "80", "90", "100"))
-
-# Set the cutoff for outlining tiles
-cutoff_value <- 0.05  # Replace with your desired cutoff
-
-# Plotting with outlined tiles
-ggplot(filtered_results_df, aes(x = Chunk_limit, y = factor(interaction(predicted.celltype.l2, p_val_category, Chain)), fill = -log10(value))) +
-  geom_tile(size = 0.5, color = ifelse(filtered_results_df$value < cutoff_value, "black", NA)) +
-  scale_fill_gradientn(colors = colorRampPalette(c("blue", "white", "red"))(20), name = "Wilcox p val (-log10)\n for yes vs. no irAE") +
-  labs(x = "Top clonotypes cutoff (% of repertoire across patients)", y = "") +
-  theme_minimal()
-
-```
-
-# Make prettier heatmap using complex heatmap (normalization method)
-
-```{r}
+filtered_results_df$Chunk <- factor(filtered_results_df$Chunk, levels = c("10", "20", "30", "40", "50", "60", "70", "80", "90", "100"))
 
 heatmap_df <- filtered_results_df %>%
   select(-value, -category) %>%
@@ -623,7 +501,7 @@ heatmap_df <- filtered_results_df %>%
 heatmap_df
 
 # Prepare the data in matrix form
-heatmap_data <- reshape2::dcast(heatmap_df, predicted.celltype.l1 + predicted.celltype.l2 + p_val_category + Chain ~ Chunk_limit, value.var = "value")
+heatmap_data <- reshape2::dcast(heatmap_df, predicted.celltype.l1 + predicted.celltype.l2 + p_val_category + Chain ~ Chunk, value.var = "value")
 
 # Extract value columns
 mat <- as.matrix(heatmap_data[, -(1:4)])
@@ -651,11 +529,6 @@ feature_annotations <- cbind(
   Feature = heatmap_data$p_val_category
 )
 
-# highlight rows of interest
-which_row_highlight = which(grepl("CD8 T_TEM_Probability of generation_TRB", rownames(mat)))
-
-split = data.frame(x = c(rep("", which_row_highlight - 2), "CD8\nTEM\nTRB", "CD8\nTEM\nTRB", rep("", nrow(mat) - which_row_highlight)))
-
 # Plot the heatmap without clustering
 Heatmap(mat,
         cluster_rows = FALSE,
@@ -670,22 +543,9 @@ Heatmap(mat,
                                                     "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725"),
                                                     "Feature" = c("CDR3 length (AAs)" = "#21918c", "CDR3 hydrophobicity" = "#fde725", "Probability of generation" = "#440154"))),
         show_row_names = FALSE,
-        column_title = "Top clonotypes cutoff\n(% of repertoire across patients)",
+        column_title = "Clonotypes bins\n(% of repertoire across patients)",
         column_title_side = "bottom",
-        heatmap_legend_param = list(title = "Wilcox p val (-log10) for\nyes vs. no colitis irAE"),
-        row_split = split,
-        layer_fun = function(j, i, x, y, width, height, fill) {
-          v = pindex(mat, i, j)
-          l = v > -log10(0.05) & v < -log10(0.01)
-          if (any(l)) {
-            grid.text("*", x[l], y[l], gp = gpar(fontsize = 10))
-          }
-          q = v > -log10(0.01)
-          if (any(q)) {
-            grid.text("**", x[q], y[q], gp = gpar(fontsize = 10))
-          }
-        }
-      )
+        heatmap_legend_param = list(title = "Wilcox p val (-log10) for\nyes vs. no colitis irAE"))
 
 ```
 
@@ -710,7 +570,7 @@ prepped_data_downsampled
 
 ```
 
-# Perform wilcox rank sum tests for top n clonotypes in chunks of 10% (downsampled method)
+# Perform wilcox rank sum tests within chunks of 10% clonotypes (downsampled method)
 
 ```{r}
 
@@ -718,15 +578,15 @@ prepped_data_downsampled
 results_list_downsampled <- list()
 
 # Iterate through chunk cutoffs
-for (num in 1:10) {
+for (num in 1:4) {
   result <- prepped_data_downsampled %>%
-    perform_wilcox_test(cutoff = num*10)
+    perform_wilcox_test(cutoff = num*25)
 
-  results_list[[as.character(num*10)]] <- result
+  results_list[[as.character(num*25)]] <- result
 }
 
 # Combine results into a single dataframe
-results_df_downsampled <- bind_rows(results_list, .id = "Chunk_limit")
+results_df_downsampled <- bind_rows(results_list, .id = "Chunk")
 
 results_df_downsampled <- results_df_downsampled %>%
   pivot_longer(cols = c("p_val_pgen", "p_val_cdr3_length", "p_val_cdr3_hydrophobicity"), names_to = "p_val") %>%
@@ -750,37 +610,7 @@ filtered_results_df_downsampled <- results_df_downsampled %>%
   filter(category %in% top_results_downsampled$category) %>%
   mutate(log_val = -log10(value))
 
-# write csv for summary CD8 TEM TRB heatmap across datasets/methods
-
-output_df <- results_df_downsampled %>%
-  mutate(log_val = -log10(value),
-         dataset = "colitis",
-         method = "downsampled") %>%
-  filter(predicted.celltype.l2 == "CD8 TEM" & Chain == "TRB" & p_val_category != "cdr3_hydrophobicity")
-
-write.csv(output_df, "../saved_data/downsampled_heatmap_df.csv")
-
-output_df
-
-# basically anything red (p val -log10 > 1.3) is significant (p < 0.05)
-
-filtered_results_df_downsampled$Chunk_limit <- factor(filtered_results_df_downsampled$Chunk_limit, levels = c("10", "20", "30", "40", "50", "60", "70", "80", "90", "100"))
-
-# Set the cutoff for outlining tiles
-cutoff_value <- 0.05  # Replace with your desired cutoff
-
-# Plotting with outlined tiles
-ggplot(filtered_results_df_downsampled, aes(x = Chunk_limit, y = factor(interaction(predicted.celltype.l2, p_val_category, Chain)), fill = -log10(value))) +
-  geom_tile(size = 0.5, color = ifelse(filtered_results_df_downsampled$value < cutoff_value, "black", NA)) +
-  scale_fill_gradientn(colors = colorRampPalette(c("blue", "white", "red"))(20), name = "Wilcox p val (-log10)\n for yes vs. no irAE") +
-  labs(x = "Top clonotypes cutoff (% of repertoire across patients)", y = "") +
-  theme_minimal()
-
-```
-
-# Make prettier heatmap using complex heatmap (downsampled method)
-
-```{r}
+filtered_results_df_downsampled$Chunk <- factor(filtered_results_df_downsampled$Chunk, levels = c("10", "20", "30", "40", "50", "60", "70", "80", "90", "100"))
 
 heatmap_df_downsampled <- filtered_results_df_downsampled %>%
   select(-value, -category) %>%
@@ -795,7 +625,7 @@ heatmap_df_downsampled <- filtered_results_df_downsampled %>%
 heatmap_df_downsampled
 
 # Prepare the data in matrix form
-heatmap_data_downsampled <- reshape2::dcast(heatmap_df_downsampled, predicted.celltype.l1 + predicted.celltype.l2 + p_val_category + Chain ~ Chunk_limit, value.var = "value")
+heatmap_data_downsampled <- reshape2::dcast(heatmap_df_downsampled, predicted.celltype.l1 + predicted.celltype.l2 + p_val_category + Chain ~ Chunk, value.var = "value")
 
 # Extract value columns
 mat_downsampled <- as.matrix(heatmap_data_downsampled[, -(1:4)])
@@ -842,7 +672,7 @@ Heatmap(mat_downsampled,
                                                     "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725"),
                                                     "Feature" = c("CDR3 length (AAs)" = "#21918c", "CDR3 hydrophobicity" = "#fde725", "Probability of generation" = "#440154"))),
         show_row_names = FALSE,
-        column_title = "Top clonotypes cutoff\n(% of repertoire across patients)",
+        column_title = "Clonotypes bins\n(% of repertoire across patients)",
         column_title_side = "bottom",
         heatmap_legend_param = list(title = "Wilcox p val (-log10) for\nyes vs. no colitis irAE"),
         layer_fun = function(j, i, x, y, width, height, fill) {
