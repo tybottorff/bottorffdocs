@@ -114,7 +114,7 @@ cell_abundance_df <- feature_df %>%
   group_by(patient) %>%
   mutate(normalized_count = count / sum(count)) %>%
   # filter for just subtypes of interest
-  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT"),
+  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Naive", "CD4 TEM", "CD8 TCM", "MAIT"),
          group != "no ICI")
 
 cell_abundance_df
@@ -127,6 +127,13 @@ ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_co
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
+ggplot(cell_abundance_df, aes(x = patient, y = log10(normalized_count), color = group)) +
+  geom_point() +
+  facet_wrap(~predicted.celltype.l2, ncol = 2) +
+  labs(x = "", fill = "group", y = "Normalized cell\nproportion (log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_blank())
+
 # Filter the data for statistical test
 test_data <- cell_abundance_df %>%
   filter(predicted.celltype.l2 == "MAIT",
@@ -136,13 +143,14 @@ test_data <- cell_abundance_df %>%
 wilcox_result <- wilcox.test(test_data$normalized_count ~ test_data$group)
 
 # Print the results
-print(wilcox_result)
+#print(wilcox_result)
 
-# CD4 TEM: 0.000666
-# CD4 Proliferating: 0.004662
-# CD8 Proliferating: 0.04444
-# CD8 TCM: 0.002664
-# MAITs: 0.000666
+# padj
+# CD4 Proliferating: 0.01
+# CD4 TEM: 0.004
+# CD8 Naive: 0.01
+# CD8 TCM: 0.01
+# MAITs: 0.004
 
 ```
 
@@ -155,7 +163,7 @@ cell_abundance_df_downsampled <- downsampled_df %>%
   summarize(count = n()) %>%
   ungroup() %>%
   # filter for just subtypes of interest
-  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT"),
+  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT", "CD8 Naive"),
          group != "no ICI")
 
 cell_abundance_df_downsampled
@@ -168,21 +176,25 @@ ggplot(cell_abundance_df_downsampled, aes(x = predicted.celltype.l2, y = log10(c
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
-# Filter the data for statistical test
-test_data <- cell_abundance_df_downsampled %>%
-  filter(predicted.celltype.l2 == "CD4 TEM",
-         group != "no ICI")
+ggplot(cell_abundance_df_downsampled, aes(x = patient, y = log10(count), color = group)) +
+  geom_point() +
+  facet_wrap(~predicted.celltype.l2, ncol = 2) +
+  labs(x = "", fill = "group", y = "Cell proportion\n(log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_blank())
 
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$count ~ test_data$group)
+# padj values
+# CD4 Proliferating: 0.01
+# CD4 TEM: 0.004
+# CD8 Naive: 0.02
+# CD8 TCM: 0.01
+# MAITs: 0.004
 
-# Print the results
-print(wilcox_result)
+p_values <- c(0.0632, 0.004662, 0.4908, 0.000666, 0.007992, 0.04949, 0.004662, 0.651, 0.219, 0.000666, 0.5728)
 
-# CD4 TEM: 0.000666
-# CD4 Proliferating: 0.004662
-# CD8 Proliferating: 0.04949
-# CD8 TCM: 0.004662
-# MAITs: 0.000666
+# Calculate BH-adjusted p-values
+padj_values <- p.adjust(p_values, method = "BH")
+
+padj_values
 
 ```
