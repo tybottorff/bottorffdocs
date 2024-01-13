@@ -284,21 +284,30 @@ ggplot(donor_df, aes(x = donors_per_junction_aa, y = donors_per_junction_nt, col
 new_convergence_df <- combined_data %>%
   group_by(cdr3) %>%
   mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
-  # look at just unique CDR3s from each patient
-  group_by(cdr3, Patient_ID) %>%
+  # look at just unique CDR3s from each irAE group (to deal with cases with same CDR3 in both groups, don't want to slice and just have it in 1 group)
+  # also don't want to group by patient because then I'd be double counting some CDR3s in group comparisons?
+  group_by(cdr3, irAE) %>%
   slice(1) %>%
   ungroup()
 
-new_convergence_df
+new_convergence_df_hist <- new_convergence_df %>%
+  group_by(nts_per_aa, irAE, predicted.celltype.l1, predicted.celltype.l2) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(irAE, predicted.celltype.l1, predicted.celltype.l2) %>%
+  mutate(count = count / sum(count))
 
-ggplot(new_convergence_df, aes(x = nts_per_aa, fill = irAE)) +
-  geom_histogram(position = "dodge", binwidth = 1) +
+ggplot(new_convergence_df_hist, aes(x = nts_per_aa, y = sqrt(count), fill = irAE)) +
+  geom_bar(stat = "identity", position = "dodge") +
   facet_wrap(~predicted.celltype.l1) +
-  labs(x = "CDR3 nt seqs / CDR3 AA seq", y = "count (log10)") +
-  scale_y_continuous(trans = "log10", expand = expansion(add = c(0, 0))) +
+  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Group normalized\ncount (sqrt)") +
   scale_x_continuous(breaks = pretty_breaks(n = 3))
 
-# padj = 0.08 for CD8 T within l1 group, CD8 TEM within l2 group
+#wilcox.test(nts_per_aa ~ irAE, data = new_convergence_df %>% filter(predicted.celltype.l1 == "other T"))
+# CD4 T: 0.00062 (padj)
+# higher in No irAE
+
+#p.adjust(c(0.0002063, 0.75, 0.1772), method = "BH")
 
 ```
 

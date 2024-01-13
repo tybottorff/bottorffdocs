@@ -320,32 +320,32 @@ new_convergence_df <- combined_data %>%
   filter(group != "no ICI") %>%
   group_by(cdr3) %>%
   mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
-  # look at just unique CDR3s from each patient
+  # look at just unique CDR3s from each irAE group (to deal with cases with same CDR3 in both groups, don't want to slice and just have it in 1 group)
+  # also don't want to group by patient because then I'd be double counting some CDR3s in group comparisons?
   group_by(cdr3, group) %>%
   slice(1) %>%
   ungroup()
 
-new_convergence_df
-
 new_convergence_df$group <- factor(new_convergence_df$group, levels = c("ICI no colitis", "ICI colitis"))
 
-ggplot(new_convergence_df, aes(x = nts_per_aa, fill = group)) +
-  geom_histogram(position = "dodge", binwidth = 1) +
+new_convergence_df_hist <- new_convergence_df %>%
+  group_by(nts_per_aa, group, predicted.celltype.l1, predicted.celltype.l2) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(group, predicted.celltype.l1, predicted.celltype.l2) %>%
+  mutate(count = count / sum(count))
+
+ggplot(new_convergence_df_hist, aes(x = nts_per_aa, y = sqrt(count), fill = group)) +
+  geom_bar(stat = "identity", position = "dodge") +
   facet_wrap(~predicted.celltype.l1) +
-  labs(x = "CDR3 nt seqs / CDR3 AA seq", y = "count (log10)") +
-  scale_y_continuous(trans = "log10", expand = expansion(add = c(0, 0))) +
+  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Group normalized\ncount (sqrt)") +
   scale_x_continuous(breaks = pretty_breaks(n = 3))
 
-wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l1 == "CD4 T"))
-# 
+#wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l1 == "CD4 T"))
+# CD4 T: 2e-6 (padj)
+# higher in No irAE
 
-wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l1 == "CD8 T"))
-# 
-
-wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l1 == "other T"))
-# 
-
-#p.adjust(c("0.1349", "0.02999", "0.1628"), method = "BH")
+#p.adjust(c(), method = "BH")
 
 ```
 
