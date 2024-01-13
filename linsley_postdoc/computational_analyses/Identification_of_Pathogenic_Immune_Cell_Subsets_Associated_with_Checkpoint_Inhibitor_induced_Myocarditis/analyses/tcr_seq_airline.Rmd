@@ -163,12 +163,14 @@ p <- ggplot(umap_coords) +
   #facet_wrap(~ irAE) +
 
 for (i in 1:nrow(alpha_links_with_coords)) {
-  print(paste("Adding segment for row", i))
-  p <- p + geom_segment(
-    aes(x = alpha_links_with_coords$x_start[i], y = alpha_links_with_coords$y_start[i],
-        xend = alpha_links_with_coords$x_end[i], yend = alpha_links_with_coords$y_end[i]),
+  p <- p + annotate(
+    "segment",
+    x = alpha_links_with_coords$x_start[i],
+    y = alpha_links_with_coords$y_start[i],
+    xend = alpha_links_with_coords$x_end[i],
+    yend = alpha_links_with_coords$y_end[i],
     color = "black",
-    size = 0.01
+    size = 0.1
   )
 }
 
