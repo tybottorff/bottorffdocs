@@ -17,6 +17,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(scales)
+library(Seurat)
 
 ```
 
@@ -125,5 +126,31 @@ ggplot(data) +
   geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01) +
   facet_wrap(~ irAE) +
   geom_density2d(aes(x=umap_1, y=umap_2))
+
+```
+
+# Just look at colitis patients from myocarditis dataset for yes irAE group, compare to no colitis (non-colitis irAE, no irAE)
+
+```{r}
+
+# there's only 1 patient with data with colitis irAE (B14)
+
+cell_abundance_df <- feature_df %>%
+  mutate(colitis = if_else(Patient_ID %in% c("B14", "B15", "B4"), "Yes", "No")) %>%
+  # colitis, non-colitis irAE, no irAE
+  # colitis, non-colitis irAE + no irAE
+  group_by(Patient_ID, predicted.celltype.l2, colitis) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(Patient_ID) %>%
+  mutate(normalized_count = count / sum(count))
+
+cell_abundance_df
+
+ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = colitis)) +
+  geom_boxplot() +
+  labs(x = "", fill = "colitis irAE", y = "Normalized cell\nproportion (log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
 ```
