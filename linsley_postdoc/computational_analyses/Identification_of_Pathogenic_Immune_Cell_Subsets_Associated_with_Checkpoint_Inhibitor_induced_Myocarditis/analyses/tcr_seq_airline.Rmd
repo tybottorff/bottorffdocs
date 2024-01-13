@@ -1,0 +1,179 @@
+---
+title: "Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397491/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(Seurat)
+library(purrr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in TCRseq data
+
+```{r}
+
+tcrs <- read.csv("../saved_data/tcr_seq_features.csv") %>%
+  select(Patient_ID, predicted.celltype.l1, predicted.celltype.l2, irAE, barcode, Chain, v_gene, j_gene, c_gene, cdr3, cdr3_nt)
+
+tcrs
+
+```
+
+# Read in RNAseq data for UMAP coordinates
+
+```{r}
+
+seurat_obj <- readRDS("../saved_data/final_seurat_T_cells.rds")
+
+```
+
+# Extract UMAP coordinates
+
+```{r}
+
+umap_coords <- Embeddings(object = seurat_obj[["umap"]])[(colnames(seurat_obj)), c(1, 2)]
+umap_coords <- as.data.frame(umap_coords)
+umap_coords$celltype <- seurat_obj@meta.data$predicted.celltype.l2
+umap_coords$irAE <- seurat_obj@meta.data$irAE
+
+umap_coords$barcode <- rownames(umap_coords)
+
+rownames(umap_coords) <- NULL
+
+umap_coords
+
+```
+
+# Find TCR linkages
+
+```{r}
+
+alpha_tcrs_split <- tcrs %>%
+  filter(Chain == "TRA") %>%
+  group_by(cdr3) %>%
+  filter(n() > 1) %>%
+  ungroup() %>%
+  split(.$cdr3)
+
+alpha_linkages_list <- lapply(alpha_tcrs_split, function(df) {
+  df %>%
+    summarise(linkages = list(t(combn(barcode, 2, simplify = TRUE)))) %>%
+    pull(linkages) %>%
+    as.data.frame() %>%
+    rename(barcode1 = X1, barcode2 = X2)
+})
+
+alpha_linkages <- bind_rows(alpha_linkages_list)
+
+alpha_linkages
+
+beta_tcrs_split <- tcrs %>%
+  filter(Chain == "TRB") %>%
+  group_by(cdr3) %>%
+  filter(n() > 1) %>%
+  ungroup() %>%
+  split(.$cdr3)
+
+beta_linkages_list <- lapply(beta_tcrs_split, function(df) {
+  df %>%
+    summarise(linkages = list(t(combn(barcode, 2, simplify = TRUE)))) %>%
+    pull(linkages) %>%
+    as.data.frame() %>%
+    rename(barcode1 = X1, barcode2 = X2)
+})
+
+beta_linkages <- bind_rows(beta_linkages_list)
+
+beta_linkages
+
+```
+
+# Get UMAP coordinates for barcodes in linkages
+
+```{r}
+
+barcode1 <- umap_coords %>%
+  rename(barcode1 = barcode)
+
+barcode2 <- umap_coords %>%
+  rename(barcode2 = barcode)
+
+alpha_links_with_coords <- alpha_linkages %>%
+  left_join(barcode1, by = "barcode1") %>%
+  rename(x_start = umap_1,
+         y_start = umap_2) %>%
+  select(-celltype, -irAE) %>%
+  left_join(barcode2, by = c("barcode2")) %>%
+  rename(x_end = umap_1,
+         y_end = umap_2) %>%
+  filter(celltype == "CD4 Proliferating")
+
+alpha_links_with_coords
+
+beta_links_with_coords <- beta_linkages %>%
+  left_join(barcode1, by = "barcode1") %>%
+  rename(x_start = umap_1,
+         y_start = umap_2) %>%
+  select(-celltype, -irAE) %>%
+  left_join(barcode2, by = c("barcode2")) %>%
+  rename(x_end = umap_1,
+         y_end = umap_2)
+
+beta_links_with_coords
+
+```
+
+# Plot UMAP, add segments for linked TCRs
+
+```{r}
+
+p <- ggplot(umap_coords) +
+  geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01)
+  #facet_wrap(~ irAE) +
+
+for (i in 1:nrow(alpha_links_with_coords)) {
+  print(paste("Adding segment for row", i))
+  p <- p + geom_segment(
+    aes(x = alpha_links_with_coords$x_start[i], y = alpha_links_with_coords$y_start[i],
+        xend = alpha_links_with_coords$x_end[i], yend = alpha_links_with_coords$y_end[i]),
+    color = "black",
+    size = 0.01
+  )
+}
+
+p
+
+# not sure how to draw segment only in correct facet yet
+
+```
