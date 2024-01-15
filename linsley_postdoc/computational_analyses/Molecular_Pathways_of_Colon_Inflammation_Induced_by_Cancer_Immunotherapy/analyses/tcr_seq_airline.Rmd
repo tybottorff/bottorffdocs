@@ -169,18 +169,17 @@ p <- ggplot(umap_coords) +
   theme(legend.text = element_text(size = 10), legend.title = element_text(size = 12))
 
 set.seed(123)
-sample_size <- 1500
-
-random_indices <- sample(1:nrow(alpha_links_with_coords), size = sample_size)
+shuffled_indices <- sample(nrow(coords))
+coords_shuffled <- coords[shuffled_indices, ]
 
 # Plot the randomly selected rows
-for (i in random_indices) {
+for (i in 1:1500) {
   p <- p + annotate(
     "segment",
-    x = coords$x_start[i],
-    y = coords$y_start[i],
-    xend = coords$x_end[i],
-    yend = coords$y_end[i],
+    x = coords_shuffled$x_start[i],
+    y = coords_shuffled$y_start[i],
+    xend = coords_shuffled$x_end[i],
+    yend = coords_shuffled$y_end[i],
     color = "black",
     size = 0.025
   )
@@ -202,18 +201,17 @@ p <- ggplot(umap_coords) +
   theme(legend.text = element_text(size = 10), legend.title = element_text(size = 12))
 
 set.seed(123)
-sample_size <- 1500
-
-random_indices <- sample(1:nrow(alpha_links_with_coords), size = sample_size)
+shuffled_indices <- sample(nrow(coords))
+coords_shuffled <- coords[shuffled_indices, ]
 
 # Plot the randomly selected rows
-for (i in random_indices) {
+for (i in 1:1500) {
   p <- p + annotate(
     "segment",
-    x = coords$x_start[i],
-    y = coords$y_start[i],
-    xend = coords$x_end[i],
-    yend = coords$y_end[i],
+    x = coords_shuffled$x_start[i],
+    y = coords_shuffled$y_start[i],
+    xend = coords_shuffled$x_end[i],
+    yend = coords_shuffled$y_end[i],
     color = "black",
     size = 0.025
   )
@@ -235,18 +233,17 @@ p <- ggplot(umap_coords) +
   theme(legend.text = element_text(size = 10), legend.title = element_text(size = 12))
 
 set.seed(123)
-sample_size <- 1500
-
-random_indices <- sample(1:nrow(alpha_links_with_coords), size = sample_size)
+shuffled_indices <- sample(nrow(coords))
+coords_shuffled <- coords[shuffled_indices, ]
 
 # Plot the randomly selected rows
-for (i in random_indices) {
+for (i in 1:1500) {
   p <- p + annotate(
     "segment",
-    x = coords$x_start[i],
-    y = coords$y_start[i],
-    xend = coords$x_end[i],
-    yend = coords$y_end[i],
+    x = coords_shuffled$x_start[i],
+    y = coords_shuffled$y_start[i],
+    xend = coords_shuffled$x_end[i],
+    yend = coords_shuffled$y_end[i],
     color = "black",
     size = 0.025
   )
@@ -268,18 +265,17 @@ p <- ggplot(umap_coords) +
   theme(legend.text = element_text(size = 10), legend.title = element_text(size = 12))
 
 set.seed(123)
-sample_size <- 1500
-
-random_indices <- sample(1:nrow(alpha_links_with_coords), size = sample_size)
+shuffled_indices <- sample(nrow(coords))
+coords_shuffled <- coords[shuffled_indices, ]
 
 # Plot the randomly selected rows
-for (i in random_indices) {
+for (i in 1:1500) {
   p <- p + annotate(
     "segment",
-    x = coords$x_start[i],
-    y = coords$y_start[i],
-    xend = coords$x_end[i],
-    yend = coords$y_end[i],
+    x = coords_shuffled$x_start[i],
+    y = coords_shuffled$y_start[i],
+    xend = coords_shuffled$x_end[i],
+    yend = coords_shuffled$y_end[i],
     color = "black",
     size = 0.025
   )
