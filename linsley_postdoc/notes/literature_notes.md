@@ -8,6 +8,9 @@
  - there's a causative link between EBV and MS, want to target EBV-infected B cells (EBV transforms B cells for life upon infection)
 # Advances in immune checkpoint inhibitor combination strategies for microsatellite stable colorectal cancer
  - microsatellite stable (MSS) colorectal tumors are immune-cold
+# Advances in immune checkpoint inhibitors induced-cardiotoxicity
+ - ICIs promote formation of cardiac troponin I (cTnI) that indues cardiac dysfunction and myocardial dilatation
+ - ICIs can inhibit Tregs, leading to loss of self-tolerance
 # Advances in research on molecular markers in immune checkpoint inhibitor-associated myocarditis
  - PD-L1 expressed on tumor cells, binds to PD-1 on T cells, inhibits T cell activation
  - CTLA-4 expressed on tumor infiltrating Tregs, binds to B7 on surface of APCs
@@ -128,6 +131,9 @@
 # Association between immune-related thyroid dysfunction and efficacy of immune checkpoint inhibitors - a systematic review and meta analysis
  - 47 studies
  - thyroid irAE during ICI associated with improved anti tumor response despite tumor origin heterogeneity
+# Association between rheumatic autoantibodies and immune-related adverse events
+ - irAEs associated with better anti-tumor response
+ - rheumatic-irAEs associated with pre-ICI baseline rhematoid factor (pre-existing perhaps subclinical autoimmunity)
 # Association between T cell repertoire diversificaton and both clinical response as well as toxicity following immune checkpoint blockade in metastatic cancer patients
  - increase repertoire diversity after ICB correlates with ICB response and irAE development in prostate cancer patients
 # Association of antithyroglobulin antibodies with the development of thyroid dysfunction induced by nivolumab
@@ -156,11 +162,17 @@
  - ATAC-seq can use less cells than other methods and can assay multiple chromatin features at the same time (i.e. nucleosome, TF binding, chromatin accessibility)
 # Attention network for predicting T cell receptor-peptide binding can associate attention with interpretable protein structural properties
  - machine learning model based on modified version of Transformer, source-target attention neural network
+# Autoantibody profiles in patients with immune checkpoint inhibitor-induced neurological immune related adverse events
+ - higher prevalence of neuromuscular autoantibodies in irAE patients (63% had autoantibodies vs. 7% in no irAE group)
+ - brain-reactive autoantibodies in 45% of irAE patients (20% of controls at baseline, but 7 controls developed *de novo* brain-reactive autoantibodies after ICI so no difference between irAE groups)
 # Autoimmune panels as predictors of toxicity in patients treated with immune checkpoint inhibitors (ALERT)
  - auto antigen microarray to profile autoantibodies related to irAEs in patients receiving ICI
  - greater number of IgG and IgM reactivites in pre-ICI in patients vs. healthy controls
  - patients with severe irAEs had pre-ICI IgG reactivity to more autoantigens than patients who didn't develop severe irAEs
  - post-treatment increase in IgM reactivities in people developing irAEs, decrease in IgG levels after steroids
+# Autoimmunity affecting the biliary tract fuels the immunosurveillance of cholangiocarcinoma
+ - TCR clonotypes shared between liver and cholangiocarcinoma tumor of primary sclerosing cholangitis host
+ - mechanistic overlap between autoimmunity and cancer immunosurveillance (autoimmunity fuels immunosurveillance)
 # Autoreactive napsin A-specific T cells are enriched in lung tumors and inflammatory lung lesions during immune checkpoint blockade
 ## Summary
  - DITAS: discovery of tumor-associated self-antigens to find peptides that induce both antitumor and irAE responses, analyze shared antigens between NSCLC and lung tissue, determine which HLA peptides bind to, predicting CD8<sup>+</sup> T cell epitopes of peptides
@@ -423,6 +435,9 @@
  - potential supplementary evidence for irAE association with ICB response
 # Computational simulations of bispecific T-cell engagers by a multiscale model
  - modeling to try and understand mechanism of bispecific antibodies as T cell engagers (bypass TCR-pMHC interaction, redirect cytotoxic activity, can help kill cancer cells but also off target effects)
+# Consensus disease definitions for neurologic immune-related adverse events of immune checkpoint inhibitors
+ - neurologic irAE indicence rate: 1-12%
+ - CNS (meningitis, encephalitis, demyelinating syndrome, vasculitis) and PNS (neuropathy, NMJ disorders, myopathy)
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - co-expression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -994,10 +1009,22 @@
 # Immune checkpoint inhibitor-induced thyroid disorders: a single center experience
  - thyroid irAEs emerge after median time of 9 weeks, mainly in females
  - regardless of initial presentation, all irAE thyroidits patients later developed persistent hypothyroidism requiring hormone replacement (levothyroxine), increased TSH (thyroid-stimulating hormone) after ICI in these atients
-# Imune checkpoint inhibitors associated granulomatous small vessel vasculitis accompanied with tubulointerstitial nephritis: a case report
+# Immune checkpoint inhibitor rechallenge after immune-related adverse events in patients with cancer
+ - ~29% recurrence rate of same irAE that prompted discontinuation of ICI therapy after rechallenge with same ICI
+ - colitis, hepatitis, pneumonitis more common than other irAEs among patients who had recurrence
+# Immune checkpoint inhibitor-related thyroid dysfunction
+ - thyroid irAEs usually destructive thyroiditis or hypothyroidism, hyperthyroidism (Graves' disease) is rare
+ - thyroid irAE development associated with prolonged survival in NSCLC patients
+ - higher incidence of thyroid irAEs for patients with anti-thyroid antibodies at baseline
+ - T cells involved in destructive thyroiditis, perhaps moreso CD4 T cells
+# Immune checkpoint inhibitors associated granulomatous small vessel vasculitis accompanied with tubulointerstitial nephritis: a case report
  - tubulointerstitial nephritis (TIN): most common renal irAE
  - case report of 65 year old man with acute kidney injury from ICI
  - T cell infiltration in kidney biopsy (CD8<sup>+</sup> T cells and CD163<sup>+</sup> macrophages, few Tregs)
+# Immune checkpoint inhibitor use in patients with cancer and pre-existing autoimmune diseases
+ - **TNF or IL-6 inhibitors may help ICIs with anti-tumor response while also preventing severe irAEs**
+ - link between autoimmunity and cancer: chronic inflammation and immunosuppression can lead to cancer, cancer can also lead to autoimmunity (paraneoplastic syndrome: manifestations in organs distant from tumor)
+ - expansion of T cells associated with irAEs, also makes sense with being associated with anti-tumor response so could be covariate
 # Immune checkpoint receptors in autoimmunity
 ## Coordinated expression of checkpoint receptors on T cells
  - loss of a single checkpoint receptor as been associated with compensatory upregulation of other inhibitors molecules
@@ -1024,6 +1051,8 @@
  - metastases macrophages less M1-like, inflammatory markers (HLA-DR, CD127)
 # Immune-Related Adverse Events and Their Association With the Effectiveness of PD-1/PD-L1 Inhibitors in Non-Small Cell Lung Cancer: A Real-World Study From China
  - see more antitumor response in irAE group compared to non-irAE group, irAE associated with progression-free survival but not with overall survival
+# Immune-related adverse events as potential surrogates of immune checkpoint inhibitors' efficacy: a systematic review and meta-analysis of randomized studies
+ - **low strength correlation between ICI therapy effects and overall/specific irAE rates (< 1/3 of variability in anti-tumor response from ICI explained by variability in irAE incidence from ICI), seems less robust here than what I thought from other studies**
 # Immune-related adverse events in checkpoint blockade: observations from human tissue and therapeutic considerations
  - dysregulated cytokines (IFNγ and TNF) in irAE tissue
  - high T cell infiltration in irAE tissue
@@ -1483,6 +1512,8 @@
  - allelic exclusion conventional for TCR β
  - TCR α expression less strictly regulated, endogenous TCR α chains often found in association with transgenic TCR β chains in transgenic mice
  - TCR α may make multiple rearrangements on each chromosome
+# Multisystem immune-related adverse events associated with immune checkpoint inhibitors for treatment of non-small cell lung cancer
+ - multisystem irAEs associated with improved survival from ICIs in NSCLC (adjusting for treatment duration)
 # Negative binomial additive model for RNA-Seq data analysis
 ## Methods for differential expression analysis
  - DESeq2, edgeR (based on negative binomial regression to model gene counts)
@@ -1601,6 +1632,8 @@
  - FAP-CD40 DARPin: uses FAP and CD40 binding domains to cross-link and activate CD40 specifically in tumor
 # Predicting response and toxicity to PD-1 inhibition using serum autoantibodies identified from immuno-mass spectrometry
  - Thyroglobulin (Tg) and thyroid peroxidase (TPO) candidate autoantibody targets, higher levels of autoantibodies targeting these proteins associated with irAEs
+# Predictive and sensitive biomarkers for thyroid dysfunctions during treatment with immune-checkpoint inhibitors
+ - early increase in serum thyroglobulin levels and thyroid autoantibodies associated with thyroid irAE
 # Predictive biomarkers for checkpoint inhibitor immune-related adverse events
  - irAEs in ~40% of patients
  - no biomarkers have been validated in prospective studies
@@ -1819,9 +1852,14 @@
  - D-J joining happens first, then V-D-J joining for TCR β
  - CDR1-2 in V gene, CDR3 at junction of V, (D), and J
  - first sequencing-based techniques to look at CDR3 looked at CDR3 length distributions (electrophoresis of PCR fragments from amplifying across CDR3), Gaussian (normal) distribution with polyclonal TCRs and skewed with clonal enrichment
-# Single-gene negative binomial regression models for RNA-Seq data with higher-order asymptotic inference
 # SLC7A7 is a prognostic biomarker correlated with immune infiltrates in non-small cell lung cancer
  - SLC7A7 expression associated with poor overall survival in lung cancer patients, positively correlated with immune cell infiltration
+# Society for immunotherapy of cancer (SITC) consensus definitions for immune checkpoint inhibitor-associated immune-related adverse events (irAEs) terminology
+ - recurrent irAEs: in same organ at least twice after ICI discontinuation
+ - delayed/late onset irAEs: > 3 months after ICI discontinuation
+ - chronic irAEs: persist > 3 months after ICI discontinuation (active if requiring immunosuppression due to ongoing inflammation, inactive if not)
+ - multisystem irAEs: irAEs in different organ systems (or different tissues within same system if in 1 system)
+ - steroid-resistant irAEs: some benefit but dont resolve with steroids (vs. steroid unresponsive or dependent)
 # Specificity of T cell alloreactivity
  - many alloreactive T cells are much more peptide specific than previously thought, few if any recognize only the MHC molecule
  - alloreactive T cells are polyspecific, able to recognize multiple distinct peptide-MHC complexes (perhaps why there's a high frequency of allorecognition)
@@ -2308,6 +2346,8 @@
  - **V(D)J gene usage known to influence transcriptional fate, *PLZF*<sup>high</sup> innate-like transcriptional fate ~guaranteed with *TRAV1-2* and *TRAJ33*, *TRAJ20*, or *TRAJ12***
 ## Discussion
  - **CDR3s more hydrophobic in KIR<sup>+</sup>*HELIOS*<sup>+</sup> CD8 T cells, has been seen before, KIR<sup>+</sup> CD8 T cells may be CD8 T<sub>regs</sub> and hydrophobic/aromatic junctional CDR3 residues may increase likelihood of self-reactivity and therefore Treg (CD4 *FOXP3* or CD8 KIR<sup>+</sup>*HELIOS*<sup>+</sup>) fate**
+# The T cell repertoire in tumors overlaps with pulmonary inflammatory lesions in patients treated with checkpoint inhibitors
+ - **significant overlap between CDR3s of TRBs from tumor infiltrating T cell clones and clones infiltrating irAE lesions, most prevalent clones also expanded in peripheral blood but much less overlap**
 # The yin and yang of co-inhibitory receptors: towards anti-tumor immunity without autoimmunity
  - co-inhibitory receptors: PD-1 (CD279), CTLA-4 (cytotoxic T lymphocyte-associated antigen-4, CD152, high sequence similarity to co-stimulatory CD28 that it outcompetes for ligands B7-1/2), TIGIT (T cell immunoglobulin and ITIM domain, in CD28 protein family), TIM-3 (T cell immunoglobulin and mucin-domain containing protein-3), LAG-3 (lymphocyte activation gene-3)
  - central tolerance in the thymus acts as the first control during T cell development to eliminate autoreactive clones
