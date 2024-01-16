@@ -162,7 +162,9 @@ beta_links_with_coords
 ```{r}
 
 coords <- alpha_links_with_coords %>%
-  filter(celltype1 == "CD4 Proliferating" | celltype2 == "CD4 Proliferating")
+  filter(celltype1 == "CD4 Proliferating" | celltype2 == "CD4 Proliferating",
+         group1 != "no ICI",
+         group2 != "no ICI")
 
 p <- ggplot(umap_coords) +
   geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01) +
@@ -172,15 +174,28 @@ set.seed(123)
 shuffled_indices <- sample(nrow(coords))
 coords_shuffled <- coords[shuffled_indices, ]
 
+coords_shuffled
+
 # Plot the randomly selected rows
 for (i in 1:1500) {
+  
+  if (coords_shuffled$group1[i] == "ICI colitis" && coords_shuffled$group2[i] == "ICI colitis") {
+    line_color <- "red"
+  } else {
+    if (coords_shuffled$group1[i] == "ICI no colitis" && coords_shuffled$group2[i] == "ICI no colitis") {
+      line_color <- "blue"
+    } else {
+      line_color <- "black"
+    }
+  }
+  
   p <- p + annotate(
     "segment",
     x = coords_shuffled$x_start[i],
     y = coords_shuffled$y_start[i],
     xend = coords_shuffled$x_end[i],
     yend = coords_shuffled$y_end[i],
-    color = "black",
+    color = line_color,
     size = 0.025
   )
 }
@@ -194,7 +209,9 @@ p + guides(color = guide_legend(override.aes = list(size = 4)))
 ```{r}
 
 coords <- beta_links_with_coords %>%
-  filter(celltype1 == "CD4 Proliferating" | celltype2 == "CD4 Proliferating")
+  filter(celltype1 == "CD4 Proliferating" | celltype2 == "CD4 Proliferating",
+         group1 != "no ICI",
+         group2 != "no ICI")
 
 p <- ggplot(umap_coords) +
   geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01) +
@@ -206,13 +223,24 @@ coords_shuffled <- coords[shuffled_indices, ]
 
 # Plot the randomly selected rows
 for (i in 1:1500) {
+  
+  if (coords_shuffled$group1[i] == "ICI colitis" && coords_shuffled$group2[i] == "ICI colitis") {
+    line_color <- "red"
+  } else {
+    if (coords_shuffled$group1[i] == "ICI no colitis" && coords_shuffled$group2[i] == "ICI no colitis") {
+      line_color <- "blue"
+    } else {
+      line_color <- "black"
+    }
+  }
+  
   p <- p + annotate(
     "segment",
     x = coords_shuffled$x_start[i],
     y = coords_shuffled$y_start[i],
     xend = coords_shuffled$x_end[i],
     yend = coords_shuffled$y_end[i],
-    color = "black",
+    color = line_color,
     size = 0.025
   )
 }
@@ -226,7 +254,9 @@ p + guides(color = guide_legend(override.aes = list(size = 4)))
 ```{r}
 
 coords <- alpha_links_with_coords %>%
-  filter(celltype1 == "CD8 Naive" | celltype2 == "CD8 Naive")
+  filter(celltype1 == "CD8 Naive" | celltype2 == "CD8 Naive",
+         group1 != "no ICI",
+         group2 != "no ICI")
 
 p <- ggplot(umap_coords) +
   geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01) +
@@ -238,13 +268,24 @@ coords_shuffled <- coords[shuffled_indices, ]
 
 # Plot the randomly selected rows
 for (i in 1:1500) {
+  
+  if (coords_shuffled$group1[i] == "ICI colitis" && coords_shuffled$group2[i] == "ICI colitis") {
+    line_color <- "red"
+  } else {
+    if (coords_shuffled$group1[i] == "ICI no colitis" && coords_shuffled$group2[i] == "ICI no colitis") {
+      line_color <- "blue"
+    } else {
+      line_color <- "black"
+    }
+  }
+  
   p <- p + annotate(
     "segment",
     x = coords_shuffled$x_start[i],
     y = coords_shuffled$y_start[i],
     xend = coords_shuffled$x_end[i],
     yend = coords_shuffled$y_end[i],
-    color = "black",
+    color = line_color,
     size = 0.025
   )
 }
@@ -258,7 +299,9 @@ p + guides(color = guide_legend(override.aes = list(size = 4)))
 ```{r}
 
 coords <- beta_links_with_coords %>%
-  filter(celltype1 == "CD8 Naive" | celltype2 == "CD8 Naive")
+  filter(celltype1 == "CD8 Naive" | celltype2 == "CD8 Naive",
+         group1 != "no ICI",
+         group2 != "no ICI")
 
 p <- ggplot(umap_coords) +
   geom_point(aes(x=umap_1, y=umap_2, color=celltype), show.legend = TRUE, size = 0.01) +
@@ -270,13 +313,24 @@ coords_shuffled <- coords[shuffled_indices, ]
 
 # Plot the randomly selected rows
 for (i in 1:1500) {
+  
+  if (coords_shuffled$group1[i] == "ICI colitis" && coords_shuffled$group2[i] == "ICI colitis") {
+    line_color <- "red"
+  } else {
+    if (coords_shuffled$group1[i] == "ICI no colitis" && coords_shuffled$group2[i] == "ICI no colitis") {
+      line_color <- "blue"
+    } else {
+      line_color <- "black"
+    }
+  }
+  
   p <- p + annotate(
     "segment",
     x = coords_shuffled$x_start[i],
     y = coords_shuffled$y_start[i],
     xend = coords_shuffled$x_end[i],
     yend = coords_shuffled$y_end[i],
-    color = "black",
+    color = line_color,
     size = 0.025
   )
 }
@@ -290,9 +344,13 @@ p + guides(color = guide_legend(override.aes = list(size = 4)))
 ```{r}
 
 cd4_prolif_links_tra <- alpha_links_with_coords %>%
-  select(celltype1, celltype2) %>%
+  filter(group1 != "no ICI",
+         group2 != "no ICI") %>%
+  select(celltype1, celltype2, group1, group2) %>%
+  mutate(group_same = group1 == group2) %>%
+  mutate(group_combo = if_else(group_same == TRUE & group1 == "ICI colitis", "ICI colitis", if_else(group_same == TRUE & group1 == "ICI no colitis", "ICI no colitis", "Mix"))) %>%
   mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
-  group_by(celltype_combo) %>%
+  group_by(celltype_combo, group_combo) %>%
   summarize(count = n()) %>%
   arrange(-count) %>%
   filter(grepl("CD4 Proliferating", celltype_combo))
@@ -300,9 +358,13 @@ cd4_prolif_links_tra <- alpha_links_with_coords %>%
 cd4_prolif_links_tra
 
 cd4_prolif_links_trb <- beta_links_with_coords %>%
-  select(celltype1, celltype2) %>%
+  filter(group1 != "no ICI",
+         group2 != "no ICI") %>%
+  select(celltype1, celltype2, group1, group2) %>%
+  mutate(group_same = group1 == group2) %>%
+  mutate(group_combo = if_else(group_same == TRUE & group1 == "ICI colitis", "ICI colitis", if_else(group_same == TRUE & group1 == "ICI no colitis", "ICI no colitis", "Mix"))) %>%
   mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
-  group_by(celltype_combo) %>%
+  group_by(celltype_combo, group_combo) %>%
   summarize(count = n()) %>%
   arrange(-count) %>%
   filter(grepl("CD4 Proliferating", celltype_combo))
@@ -310,9 +372,13 @@ cd4_prolif_links_trb <- beta_links_with_coords %>%
 cd4_prolif_links_trb
 
 cd8_naive_links_tra <- alpha_links_with_coords %>%
-  select(celltype1, celltype2) %>%
+  filter(group1 != "no ICI",
+         group2 != "no ICI") %>%
+  select(celltype1, celltype2, group1, group2) %>%
+  mutate(group_same = group1 == group2) %>%
+  mutate(group_combo = if_else(group_same == TRUE & group1 == "ICI colitis", "ICI colitis", if_else(group_same == TRUE & group1 == "ICI no colitis", "ICI no colitis", "Mix"))) %>%
   mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
-  group_by(celltype_combo) %>%
+  group_by(celltype_combo, group_combo) %>%
   summarize(count = n()) %>%
   arrange(-count) %>%
   filter(grepl("CD8 Naive", celltype_combo))
@@ -320,9 +386,13 @@ cd8_naive_links_tra <- alpha_links_with_coords %>%
 cd8_naive_links_tra
 
 cd8_naive_links_trb <- beta_links_with_coords %>%
-  select(celltype1, celltype2) %>%
+  filter(group1 != "no ICI",
+         group2 != "no ICI") %>%
+  select(celltype1, celltype2, group1, group2) %>%
+  mutate(group_same = group1 == group2) %>%
+  mutate(group_combo = if_else(group_same == TRUE & group1 == "ICI colitis", "ICI colitis", if_else(group_same == TRUE & group1 == "ICI no colitis", "ICI no colitis", "Mix"))) %>%
   mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
-  group_by(celltype_combo) %>%
+  group_by(celltype_combo, group_combo) %>%
   summarize(count = n()) %>%
   arrange(-count) %>%
   filter(grepl("CD8 Naive", celltype_combo))
