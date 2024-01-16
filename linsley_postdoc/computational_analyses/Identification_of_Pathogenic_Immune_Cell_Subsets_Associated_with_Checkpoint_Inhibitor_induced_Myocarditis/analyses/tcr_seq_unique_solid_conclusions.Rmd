@@ -297,11 +297,22 @@ new_convergence_df_hist <- new_convergence_df %>%
   group_by(irAE, predicted.celltype.l1, predicted.celltype.l2) %>%
   mutate(count = count / sum(count))
 
-ggplot(new_convergence_df_hist, aes(x = nts_per_aa, y = sqrt(count), fill = irAE)) +
-  geom_bar(stat = "identity", position = "dodge") +
+# Calculate mean values
+means <- new_convergence_df_hist %>%
+  group_by(predicted.celltype.l1, irAE) %>%
+  summarize(mean_val = mean(nts_per_aa))
+
+means
+
+p <- ggplot(new_convergence_df_hist, aes(x = nts_per_aa, y = sqrt(count), fill = irAE)) +
+  geom_density(stat = "identity", position = "dodge", alpha = 0.75) +
   facet_wrap(~predicted.celltype.l1) +
   labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Group normalized\ncount (sqrt)") +
   scale_x_continuous(breaks = pretty_breaks(n = 3))
+
+p + geom_vline(data = means, aes(xintercept = mean_val, color = irAE),
+             linetype = "solid", size = 0.5) +
+    scale_color_manual(values = c("red", "blue"))  # Adjust colors as needed
 
 #wilcox.test(nts_per_aa ~ irAE, data = new_convergence_df %>% filter(predicted.celltype.l1 == "other T"))
 # CD4 T: 0.00062 (padj)
