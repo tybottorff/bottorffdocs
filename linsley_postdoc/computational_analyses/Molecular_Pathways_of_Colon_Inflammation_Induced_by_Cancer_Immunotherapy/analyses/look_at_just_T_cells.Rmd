@@ -242,3 +242,33 @@ DimPlot(just_T_cells, reduction = "umap", group.by = "orig.ident", shuffle = TRU
 saveRDS(just_T_cells, "../saved_data/T_cells.rds")
 
 ```
+
+# See if there might be cell types not well mapped (due to reference being PBMCs and query being colon tissue)
+
+```{r}
+
+#just_T_cells <- readRDS("../saved_data/T_cells.rds")
+
+#reference <- ScaleData(reference, verbose = FALSE)
+
+#reference <- RunPCA(reference, npcs = 30, verbose = FALSE)
+#just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
+# reference
+#reference <- DietSeurat(reference, counts = FALSE, dimreducs = "pca")
+
+# query
+#just_T_cells <- DietSeurat(just_T_cells, counts = FALSE, dimreducs = "ref.pca")
+
+reference@assays$SCT
+
+just_T_cells@assays$integrated
+
+#merge reference and query
+#reference$id <- 'reference'
+#just_T_cells$id <- 'query'
+#refquery <- merge(reference@assays$SCT, just_T_cells@assays$integrated)
+#refquery[["pca"]] <- merge(reference[["pca"]], just_T_cells[["ref.pca"]])
+#refquery <- RunUMAP(refquery, reduction = 'pca', dims = 1:50)
+#DimPlot(refquery, group.by = 'id', shuffle = TRUE)
+
+```
