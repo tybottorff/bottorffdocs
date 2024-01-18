@@ -322,6 +322,71 @@ p + geom_vline(data = means, aes(xintercept = mean_val, color = irAE),
 
 ```
 
+# Instead look at distribution of unique CDR3 NT seqs / CDR3 (AA) by irAE group (INTRAPATIENT CONVERGENCE ONLY)
+
+```{r}
+
+new_convergence_df <- combined_data %>%
+  group_by(cdr3, Patient_ID) %>%
+  mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
+  slice(1) %>%
+  ungroup()
+
+new_convergence_df_hist <- new_convergence_df %>%
+  group_by(nts_per_aa, irAE, predicted.celltype.l1, predicted.celltype.l2) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(irAE, predicted.celltype.l1, predicted.celltype.l2) %>%
+  mutate(count = count / sum(count))
+
+# Calculate mean values
+means <- new_convergence_df_hist %>%
+  group_by(predicted.celltype.l1, irAE) %>%
+  summarize(mean_val = mean(nts_per_aa))
+
+means
+
+p <- ggplot(new_convergence_df_hist, aes(x = nts_per_aa, y = sqrt(count), fill = irAE)) +
+  geom_density(stat = "identity", position = "dodge", alpha = 0.75) +
+  facet_wrap(~predicted.celltype.l1) +
+  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Group normalized\ncount (sqrt)") +
+  scale_x_continuous(breaks = pretty_breaks(n = 3))
+
+p + geom_vline(data = means, aes(xintercept = mean_val, color = irAE),
+             linetype = "solid", size = 0.5) +
+    scale_color_manual(values = c("red", "blue"))
+
+#wilcox.test(nts_per_aa ~ irAE, data = new_convergence_df %>% filter(predicted.celltype.l1 == "CD4 T"))
+
+```
+
+# Try to differentiate between seq errors and intrapatient convergence, or at least see if intrapatient convergence seems to be dominated by seq errors
+
+```{r}
+
+new_convergence_df <- combined_data %>%
+  group_by(cdr3, Patient_ID) %>%
+  mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
+  ungroup()
+
+seq_errors_estimate <- new_convergence_df %>%
+  select(barcode, Chain, cdr3, cdr3_nt, Patient_ID, nts_per_aa) %>%
+  arrange(-nts_per_aa) %>%
+  group_by(cdr3_nt, cdr3, Patient_ID, nts_per_aa) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(Patient_ID, cdr3, nts_per_aa) %>%
+  summarize(max_frac = max(count)/sum(count))
+
+seq_errors_estimate
+
+ggplot(seq_errors_estimate, aes(x = nts_per_aa, y = max_frac)) +
+  geom_jitter(size = 0.5, alpha = 0.75, position = position_jitter(width = 0.05, height = 0.05)) +
+  geom_function(fun = function(x) 1/x, color = "red", linetype = "dashed") +
+  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Max dominance\nof CDR3 NT")
+
+```
+
 # Look at overlap between public and converged
 
 ```{r}
