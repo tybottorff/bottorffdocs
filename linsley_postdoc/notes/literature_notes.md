@@ -244,6 +244,8 @@
  - **takehome for me: on treatment markers including clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality all very interestingly associated with more irAEs**
 # Biomarkers for immune checkpoint inhibitor-mediated tumor response and adverse events
  - **irAE incidence does depend on tumor type, melanoma has higher frequency of skin and gastrointestinal irAEs but lower frequency of pneumonia compared to NSCLC patients, dermatitis, arthritis, and myalgia more common in melanoma patients than renal cell carcinoma patients, pneumonitis and dyspnea less common in melanoma**
+# BMI, irAE, and gene expression signatures associate with resistance to immune-checkpoint inhibition and outcomes in renal cell carcinoma
+ - irAEs associated with clinical benefit
 # Broad TCR repertoire and diverse structural solutions for recognition of an immunodominant CD8<sup>+</sup> T cell epitope
  - many distinct TCRs recognizing HLA-A2-M1 (pMHC) here, solution to specifically recognizing a relatively featureless peptide antigen
 # Cancer immunotherapy based on mutation-speciifc CD4<sup>+</sup> T cells in a patient with epithelial cancer
@@ -1335,6 +1337,8 @@
  - hypothesis: reduce irAEs with hyperthermia to increase numbers of effector lymphocytes
  - irAEs similar to an auto-graft vs. host disease reactions following allogenic bone marrow transplantation
  - perhaps try lower dose of ICIs
+# Low TCR binding strength results in increased progenitor-like CD8<sup>+</sup> tumor-infiltrating lymphocytes
+ - TILs with low TCR affinity to tumor-associated antigen had progenitor-like phenotypes and increased quiescence, higher affinity TCR TILs had more cell division and faster progression to T-cell exhaustion programs
 # Machine learning analysis of the T cell receptor repertoire identifies sequence features of self-reactivity
  - train model on mice data
  - TRBs
@@ -2105,7 +2109,7 @@
 # TCR sequencing and cloning methods for repertoire analysis and isolation of tumor-reactive TCRs
 ## Abstract
  - SEQTR (SEQuencing T cell Receptor): combines *in vitro* transcription and single primer pair TCR amplification, combine with PCR to amplify TCR from bulk population, tumor-specific TCR identification and cloning
- - TCR RNA expression doesn’t affect clonotype quantification, **meaning that you can't infer clonotype frequencies from RNA levels?**
+ - TCR RNA expression doesn’t affect clonotype quantification, **meaning that you can rather reliably infer clonotype frequencies from RNA levels, previously thought to be biased by different RNA abundances**
 ## Introduction
  - TCR repertoire refers to assembly of TCR sequences
 ## Other TCRseq methods
