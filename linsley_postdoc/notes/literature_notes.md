@@ -761,6 +761,8 @@
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
 # External validation of biomarkers for immune-related adverse events after immune checkpoint inhibition
  - **unable to reliably predict risk of irAEs in most cases from pre-therapy flow cytometry and clinical data**
+# Genetic imprinting: recognition and marking of imprinted loci
+ - genetic imprinting: epigenetic process resulting in monoallelic parent-of-origin-specific expression of subset of genes (parental alleles differentially marked by DNA methylation during gametogenesis)
 # Genetic variation associated with thyroid autoimmunity shapes the systemic immune response to PD-1 checkpoint blockade
 ## Abstract
  - study endocrine irAEs from 7 clinical trials across 6 cancers with PD-1 blockade combined with chemotherapy
@@ -1051,6 +1053,8 @@
 # Immune dysfunction revealed by digital spatial profiling of immuno-oncology markers in progressive states of renal cell carcinoma and in brain metastases
  - lower immune checkpoint inhibitor (TIM-3, CTLA-4), cytolytic (GZMA, GZMB), and T cell activation (CD25) protein expression in metastases compared with primary tumors
  - metastases macrophages less M1-like, inflammatory markers (HLA-DR, CD127)
+# Immune-related adverse events and survival among patients with metastatic NSCLC treated with immune checkpoint inhibitors
+ - irAE development associated with improved anti-tumor response
 # Immune-Related Adverse Events and Their Association With the Effectiveness of PD-1/PD-L1 Inhibitors in Non-Small Cell Lung Cancer: A Real-World Study From China
  - see more antitumor response in irAE group compared to non-irAE group, irAE associated with progression-free survival but not with overall survival
 # Immune-related adverse events as potential surrogates of immune checkpoint inhibitors' efficacy: a systematic review and meta-analysis of randomized studies
@@ -1328,6 +1332,8 @@
  - immunosuppressive environment of liver makes adaptive immune cells of liver readily tolerogenic, promoting death of effector cells (also anergy, senescence, exhaustion) and "education" of regulatory cells
  - tolerance mechanisms of liver related to many liver diseases
  - liver is the largest organ with a rich blood supply (hepatic artery, portal vein), exposed to many microbial products, harmless food-derived antigens via intestines
+# Linkage disequilibrium - understanding the evolutionary past and mapping the medical future
+ - linkage disequilibrium: nonranom association of alleles of different loci
 # Linking T cell receptor sequence to functional phenotype at the single cell level
  - different T cells bearing the same TCR can be functionally distinct
  - methods
