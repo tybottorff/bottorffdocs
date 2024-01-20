@@ -19,6 +19,8 @@ library(tidyr)
 library(scales)
 library(Seurat)
 library(purrr)
+library(ComplexHeatmap)
+library(UpSetR)
 
 ```
 
@@ -339,7 +341,7 @@ p + guides(color = guide_legend(override.aes = list(size = 4)))
 
 ```
 
-# Summarize degree of cell type junction crossover sharing
+# Summarize degree of cell type junction crossover sharing for specific cell types
 
 ```{r}
 
@@ -398,5 +400,175 @@ cd8_naive_links_trb <- beta_links_with_coords %>%
   filter(grepl("CD8 Naive", celltype_combo))
 
 cd8_naive_links_trb
+
+```
+
+# Summarize degree of cell type junction crossover sharing for all cell types to make heatmap (TRA)
+
+```{r}
+
+heatmap_prep_tra <- alpha_links_with_coords %>%
+  mutate(celltype1 = ifelse(celltype1 == "dnT", "DNT", celltype1),
+         celltype2 = ifelse(celltype2 == "dnT", "DNT", celltype2)) %>%
+  select(celltype1, celltype2, group1, group2) %>%
+  mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_")),
+         group_combo = apply(across(c(group1, group2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
+  group_by(celltype_combo) %>%
+  summarize(count = n()) %>%
+  mutate(
+    cell_type1 = map_chr(strsplit(celltype_combo, "_"), 1),
+    cell_type2 = map_chr(strsplit(celltype_combo, "_"), 2)
+  ) %>%
+  select(-celltype_combo)
+
+# Create a matrix with all possible combinations of cell types for rows and cols
+all_combinations <- expand.grid(
+  cell_type1 = unique(c(heatmap_prep_tra$cell_type1, heatmap_prep_tra$cell_type2)),
+  cell_type2 = unique(c(heatmap_prep_tra$cell_type1, heatmap_prep_tra$cell_type2))
+)
+
+# Merge the actual data with all combinations and fill missing counts with 1 (for cell type combos with 0 linkages, 1 because doing log transform)
+df_merged <- merge(all_combinations, heatmap_prep_tra, by = c("cell_type1", "cell_type2"), all.x = TRUE)
+df_merged[is.na(df_merged$count), "count"] <- 1
+
+df_merged <- df_merged %>%
+  mutate(count = log10(count))
+
+# Sorting levels for ordered display in the heatmap to keep row and col orders same
+df_merged$cell_type1 <- factor(df_merged$cell_type1, levels = sort(unique(df_merged$cell_type1)))
+df_merged$cell_type2 <- factor(df_merged$cell_type2, levels = sort(unique(df_merged$cell_type2)))
+
+# Creat a matrix with counts
+heatmap_matrix <- matrix(df_merged$count, nrow = length(unique(df_merged$cell_type1)), 
+                         ncol = length(unique(df_merged$cell_type2)),
+                         byrow = TRUE)
+
+# Set the lower triangle to 0
+heatmap_matrix[lower.tri(heatmap_matrix)] <- NA
+
+# Setting row and column names
+rownames(heatmap_matrix) <- sort(unique(df_merged$cell_type1))
+colnames(heatmap_matrix) <- sort(unique(df_merged$cell_type2))
+
+# Plotting the heatmap
+Heatmap(heatmap_matrix, 
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        heatmap_legend_param = list(title = "TRA CDR3 AA\nlinkage count (log10)"),
+        na_col = "white"
+)
+
+```
+
+# Summarize degree of cell type junction crossover sharing for all cell types to make heatmap (TRB)
+
+```{r}
+
+heatmap_prep_trb <- beta_links_with_coords %>%
+  mutate(celltype1 = ifelse(celltype1 == "dnT", "DNT", celltype1),
+         celltype2 = ifelse(celltype2 == "dnT", "DNT", celltype2)) %>%
+  select(celltype1, celltype2, group1, group2) %>%
+  mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_")),
+         group_combo = apply(across(c(group1, group2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
+  group_by(celltype_combo) %>%
+  summarize(count = n()) %>%
+  mutate(
+    cell_type1 = map_chr(strsplit(celltype_combo, "_"), 1),
+    cell_type2 = map_chr(strsplit(celltype_combo, "_"), 2)
+  ) %>%
+  select(-celltype_combo)
+
+# Create a matrix with all possible combinations of cell types for rows and cols
+all_combinations <- expand.grid(
+  cell_type1 = unique(c(heatmap_prep_trb$cell_type1, heatmap_prep_trb$cell_type2)),
+  cell_type2 = unique(c(heatmap_prep_trb$cell_type1, heatmap_prep_trb$cell_type2))
+)
+
+# Merge the actual data with all combinations and fill missing counts with 1 (for cell type combos with 0 linkages, 1 because doing log transform)
+df_merged <- merge(all_combinations, heatmap_prep_trb, by = c("cell_type1", "cell_type2"), all.x = TRUE)
+df_merged[is.na(df_merged$count), "count"] <- 1
+
+df_merged <- df_merged %>%
+  mutate(count = log10(count))
+
+# Sorting levels for ordered display in the heatmap to keep row and col orders same
+df_merged$cell_type1 <- factor(df_merged$cell_type1, levels = sort(unique(df_merged$cell_type1)))
+df_merged$cell_type2 <- factor(df_merged$cell_type2, levels = sort(unique(df_merged$cell_type2)))
+
+# Creat a matrix with counts
+heatmap_matrix <- matrix(df_merged$count, nrow = length(unique(df_merged$cell_type1)), 
+                         ncol = length(unique(df_merged$cell_type2)),
+                         byrow = TRUE)
+
+# Set the lower triangle to 0
+heatmap_matrix[lower.tri(heatmap_matrix)] <- NA
+
+# Setting row and column names
+rownames(heatmap_matrix) <- sort(unique(df_merged$cell_type1))
+colnames(heatmap_matrix) <- sort(unique(df_merged$cell_type2))
+
+# Plotting the heatmap
+Heatmap(heatmap_matrix, 
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        heatmap_legend_param = list(title = "TRB CDR3 AA\nlinkage count (log10)"),
+        na_col = "white"
+)
+
+```
+
+# Prepare df for upset plots
+
+```{r}
+
+alpha_upset <- tcrs %>%
+  filter(Chain == "TRA") %>%
+  mutate(present = 1) %>%
+  spread(key = 'predicted.celltype.l2', value = 'present', fill = 0) %>%
+  select(-patient, -predicted.celltype.l1, -group, -barcode, -Chain, -v_gene, -j_gene, -c_gene, -cdr3_nt) %>%
+  group_by(cdr3) %>%
+  summarize(across(everything(), sum)) %>%
+  ungroup() %>%
+  mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
+
+alpha_upset
+
+beta_upset <- tcrs %>%
+  filter(Chain == "TRB") %>%
+  mutate(present = 1) %>%
+  spread(key = 'predicted.celltype.l2', value = 'present', fill = 0) %>%
+  select(-patient, -predicted.celltype.l1, -group, -barcode, -Chain, -v_gene, -j_gene, -c_gene, -cdr3_nt) %>%
+  group_by(cdr3) %>%
+  summarize(across(everything(), sum)) %>%
+  ungroup() %>%
+  mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
+
+beta_upset
+
+```
+
+# Create upset plots
+
+```{r}
+
+upset(as.data.frame(alpha_upset), sets = setdiff(colnames(alpha_upset), "cdr3"), sets.bar.color = "#56B4E9")
+
+upset(as.data.frame(beta_upset), sets = setdiff(colnames(beta_upset), "cdr3"), sets.bar.color = "#56B4E9")
+
+```
+
+# Investigate validity of upset plots
+
+```{r}
+
+# looks like there's 6 CDR3s shared between Treg, CD8 Naive and CD8 TCM
+# 10 CDR3s shared between CD8 TCM/Naive
+# 323? between CD4 TCM CD8 TEM
+
+test <- tcrs %>%
+  filter(Chain == "TRA") %>%
+  filter(cdr3 == "CAVRDSNYQLIW")
+
+unique(test$predicted.celltype.l2)
 
 ```
