@@ -403,7 +403,7 @@ cd8_naive_links_trb
 
 ```
 
-# Summarize degree of cell type junction crossover sharing for all cell types to make heatmap (TRA)
+# Summarize degree of cell type junction crossover sharing for all cell types to make heatmap (TRA, ICI colitis)
 
 ```{r}
 
@@ -413,6 +413,7 @@ heatmap_prep_tra <- alpha_links_with_coords %>%
   select(celltype1, celltype2, group1, group2) %>%
   mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_")),
          group_combo = apply(across(c(group1, group2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
+  filter(group_combo == "ICI colitis_ICI colitis") %>%
   group_by(celltype_combo) %>%
   summarize(count = n()) %>%
   mutate(
@@ -420,6 +421,8 @@ heatmap_prep_tra <- alpha_links_with_coords %>%
     cell_type2 = map_chr(strsplit(celltype_combo, "_"), 2)
   ) %>%
   select(-celltype_combo)
+
+print(sum(heatmap_prep_tra$count))
 
 # Create a matrix with all possible combinations of cell types for rows and cols
 all_combinations <- expand.grid(
@@ -454,13 +457,73 @@ colnames(heatmap_matrix) <- sort(unique(df_merged$cell_type2))
 Heatmap(heatmap_matrix, 
         cluster_rows = FALSE,
         cluster_columns = FALSE,
-        heatmap_legend_param = list(title = "TRA CDR3 AA\nlinkage count (log10)"),
+        heatmap_legend_param = list(title = "TRA CDR3 AA linkage\ncount (log10) within\nirAE colitis group"),
         na_col = "white"
 )
 
 ```
 
-# Summarize degree of cell type junction crossover sharing for all cell types to make heatmap (TRB)
+# Summarize degree of cell type junction crossover sharing for all cell types to make heatmap (TRA, ICI no colitis)
+
+```{r}
+
+heatmap_prep_tra <- alpha_links_with_coords %>%
+  mutate(celltype1 = ifelse(celltype1 == "dnT", "DNT", celltype1),
+         celltype2 = ifelse(celltype2 == "dnT", "DNT", celltype2)) %>%
+  select(celltype1, celltype2, group1, group2) %>%
+  mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_")),
+         group_combo = apply(across(c(group1, group2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
+  filter(group_combo == "ICI no colitis_ICI no colitis") %>%
+  group_by(celltype_combo) %>%
+  summarize(count = n()) %>%
+  mutate(
+    cell_type1 = map_chr(strsplit(celltype_combo, "_"), 1),
+    cell_type2 = map_chr(strsplit(celltype_combo, "_"), 2)
+  ) %>%
+  select(-celltype_combo)
+
+print(sum(heatmap_prep_tra$count))
+
+# Create a matrix with all possible combinations of cell types for rows and cols
+all_combinations <- expand.grid(
+  cell_type1 = unique(c(heatmap_prep_tra$cell_type1, heatmap_prep_tra$cell_type2)),
+  cell_type2 = unique(c(heatmap_prep_tra$cell_type1, heatmap_prep_tra$cell_type2))
+)
+
+# Merge the actual data with all combinations and fill missing counts with 1 (for cell type combos with 0 linkages, 1 because doing log transform)
+df_merged <- merge(all_combinations, heatmap_prep_tra, by = c("cell_type1", "cell_type2"), all.x = TRUE)
+df_merged[is.na(df_merged$count), "count"] <- 1
+
+df_merged <- df_merged %>%
+  mutate(count = log10(count))
+
+# Sorting levels for ordered display in the heatmap to keep row and col orders same
+df_merged$cell_type1 <- factor(df_merged$cell_type1, levels = sort(unique(df_merged$cell_type1)))
+df_merged$cell_type2 <- factor(df_merged$cell_type2, levels = sort(unique(df_merged$cell_type2)))
+
+# Creat a matrix with counts
+heatmap_matrix <- matrix(df_merged$count, nrow = length(unique(df_merged$cell_type1)), 
+                         ncol = length(unique(df_merged$cell_type2)),
+                         byrow = TRUE)
+
+# Set the lower triangle to 0
+heatmap_matrix[lower.tri(heatmap_matrix)] <- NA
+
+# Setting row and column names
+rownames(heatmap_matrix) <- sort(unique(df_merged$cell_type1))
+colnames(heatmap_matrix) <- sort(unique(df_merged$cell_type2))
+
+# Plotting the heatmap
+Heatmap(heatmap_matrix, 
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        heatmap_legend_param = list(title = "TRA CDR3 AA linkage\ncount (log10) within\nno irAE colitis group"),
+        na_col = "white"
+)
+
+```
+
+# Summarize degree of cell type junction crossover sharing for all cell types to make heatmap (TRB, ICI colitis)
 
 ```{r}
 
@@ -470,6 +533,7 @@ heatmap_prep_trb <- beta_links_with_coords %>%
   select(celltype1, celltype2, group1, group2) %>%
   mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_")),
          group_combo = apply(across(c(group1, group2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
+  filter(group_combo == "ICI colitis_ICI colitis") %>%
   group_by(celltype_combo) %>%
   summarize(count = n()) %>%
   mutate(
@@ -477,6 +541,8 @@ heatmap_prep_trb <- beta_links_with_coords %>%
     cell_type2 = map_chr(strsplit(celltype_combo, "_"), 2)
   ) %>%
   select(-celltype_combo)
+
+print(sum(heatmap_prep_trb$count))
 
 # Create a matrix with all possible combinations of cell types for rows and cols
 all_combinations <- expand.grid(
@@ -511,7 +577,67 @@ colnames(heatmap_matrix) <- sort(unique(df_merged$cell_type2))
 Heatmap(heatmap_matrix, 
         cluster_rows = FALSE,
         cluster_columns = FALSE,
-        heatmap_legend_param = list(title = "TRB CDR3 AA\nlinkage count (log10)"),
+        heatmap_legend_param = list(title = "TRB CDR3 AA linkage\ncount (log10) within\nirAE colitis group"),
+        na_col = "white"
+)
+
+```
+
+# Summarize degree of cell type junction crossover sharing for all cell types to make heatmap (TRB, ICI no colitis)
+
+```{r}
+
+heatmap_prep_trb <- beta_links_with_coords %>%
+  mutate(celltype1 = ifelse(celltype1 == "dnT", "DNT", celltype1),
+         celltype2 = ifelse(celltype2 == "dnT", "DNT", celltype2)) %>%
+  select(celltype1, celltype2, group1, group2) %>%
+  mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_")),
+         group_combo = apply(across(c(group1, group2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
+  filter(group_combo == "ICI no colitis_ICI no colitis") %>%
+  group_by(celltype_combo) %>%
+  summarize(count = n()) %>%
+  mutate(
+    cell_type1 = map_chr(strsplit(celltype_combo, "_"), 1),
+    cell_type2 = map_chr(strsplit(celltype_combo, "_"), 2)
+  ) %>%
+  select(-celltype_combo)
+
+print(sum(heatmap_prep_trb$count))
+
+# Create a matrix with all possible combinations of cell types for rows and cols
+all_combinations <- expand.grid(
+  cell_type1 = unique(c(heatmap_prep_trb$cell_type1, heatmap_prep_trb$cell_type2)),
+  cell_type2 = unique(c(heatmap_prep_trb$cell_type1, heatmap_prep_trb$cell_type2))
+)
+
+# Merge the actual data with all combinations and fill missing counts with 1 (for cell type combos with 0 linkages, 1 because doing log transform)
+df_merged <- merge(all_combinations, heatmap_prep_trb, by = c("cell_type1", "cell_type2"), all.x = TRUE)
+df_merged[is.na(df_merged$count), "count"] <- 1
+
+df_merged <- df_merged %>%
+  mutate(count = log10(count))
+
+# Sorting levels for ordered display in the heatmap to keep row and col orders same
+df_merged$cell_type1 <- factor(df_merged$cell_type1, levels = sort(unique(df_merged$cell_type1)))
+df_merged$cell_type2 <- factor(df_merged$cell_type2, levels = sort(unique(df_merged$cell_type2)))
+
+# Creat a matrix with counts
+heatmap_matrix <- matrix(df_merged$count, nrow = length(unique(df_merged$cell_type1)), 
+                         ncol = length(unique(df_merged$cell_type2)),
+                         byrow = TRUE)
+
+# Set the lower triangle to 0
+heatmap_matrix[lower.tri(heatmap_matrix)] <- NA
+
+# Setting row and column names
+rownames(heatmap_matrix) <- sort(unique(df_merged$cell_type1))
+colnames(heatmap_matrix) <- sort(unique(df_merged$cell_type2))
+
+# Plotting the heatmap
+Heatmap(heatmap_matrix, 
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        heatmap_legend_param = list(title = "TRB CDR3 AA linkage\ncount (log10) within\nno irAE colitis group"),
         na_col = "white"
 )
 
@@ -551,9 +677,9 @@ beta_upset
 
 ```{r}
 
-upset(as.data.frame(alpha_upset), sets = setdiff(colnames(alpha_upset), "cdr3"), sets.bar.color = "#56B4E9")
+upset(as.data.frame(alpha_upset), sets = setdiff(colnames(alpha_upset), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRA CDR3AAs per cell type", mainbar.y.label = "TRA CDR3AA linkages (log10) within cell type (combos)", point.size = 1.5, show.numbers = FALSE, scale.intersections = "log10", text.scale = 0.75)
 
-upset(as.data.frame(beta_upset), sets = setdiff(colnames(beta_upset), "cdr3"), sets.bar.color = "#56B4E9")
+upset(as.data.frame(beta_upset), sets = setdiff(colnames(alpha_upset), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRB CDR3AAs per cell type", mainbar.y.label = "TRB CDR3AA linkages (log10) within cell type (combos)", point.size = 1.5, show.numbers = FALSE, scale.intersections = "log10", text.scale = 0.75)
 
 ```
 
@@ -561,14 +687,23 @@ upset(as.data.frame(beta_upset), sets = setdiff(colnames(beta_upset), "cdr3"), s
 
 ```{r}
 
-# looks like there's 6 CDR3s shared between Treg, CD8 Naive and CD8 TCM
-# 10 CDR3s shared between CD8 TCM/Naive
-# 323? between CD4 TCM CD8 TEM
+#upset(as.data.frame(beta_upset), sets = setdiff(colnames(alpha_upset), "cdr3"))
 
-test <- tcrs %>%
-  filter(Chain == "TRA") %>%
-  filter(cdr3 == "CAVRDSNYQLIW")
+# TRB
+# 3 interactions between Tregs and CD8 naive NOT MATCHING 10 EXPECTED
+# 11614 interactions within CD4 TCMs ok ~close enough to 12278 unique CDR3s in CD4 TCM cell group and makes sense to be lower since some CDR3s aren't shared even within a cell type ~MATCHES
+# 4 interactions among all but CD4 CTL/Naive NOT MATCHING 0 EXPECTED
 
-unique(test$predicted.celltype.l2)
+#unique(test$predicted.celltype.l2)
+
+beta_upset %>%
+  filter(Treg == 1 & `CD8 Naive` == 1 & `CD4 Proliferating` == 1 & `CD4 TCM` == 1) %>%
+  print()
+
+# 2 among Treg CD8 Naive CD4 Prolif & CD4 TCM I don't think on upset plot...
+
+#colnames(beta_upset)
+
+# 10 CDR3s seem to be present in both Treg and CD8 Naive (10) BUT upset plot only has number 3 for this...
 
 ```
