@@ -647,8 +647,9 @@ Heatmap(heatmap_matrix,
 
 ```{r}
 
-alpha_upset <- tcrs %>%
-  filter(Chain == "TRA") %>%
+alpha_upset_yes_irae <- tcrs %>%
+  filter(Chain == "TRA",
+         group == "ICI colitis") %>%
   mutate(present = 1) %>%
   spread(key = 'predicted.celltype.l2', value = 'present', fill = 0) %>%
   select(-patient, -predicted.celltype.l1, -group, -barcode, -Chain, -v_gene, -j_gene, -c_gene, -cdr3_nt) %>%
@@ -657,10 +658,11 @@ alpha_upset <- tcrs %>%
   ungroup() %>%
   mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
 
-alpha_upset
+alpha_upset_yes_irae
 
-beta_upset <- tcrs %>%
-  filter(Chain == "TRB") %>%
+alpha_upset_no_irae <- tcrs %>%
+  filter(Chain == "TRA",
+         group == "ICI no colitis") %>%
   mutate(present = 1) %>%
   spread(key = 'predicted.celltype.l2', value = 'present', fill = 0) %>%
   select(-patient, -predicted.celltype.l1, -group, -barcode, -Chain, -v_gene, -j_gene, -c_gene, -cdr3_nt) %>%
@@ -669,7 +671,33 @@ beta_upset <- tcrs %>%
   ungroup() %>%
   mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
 
-beta_upset
+alpha_upset_no_irae
+
+beta_upset_yes_irae <- tcrs %>%
+  filter(Chain == "TRB",
+         group == "ICI colitis") %>%
+  mutate(present = 1) %>%
+  spread(key = 'predicted.celltype.l2', value = 'present', fill = 0) %>%
+  select(-patient, -predicted.celltype.l1, -group, -barcode, -Chain, -v_gene, -j_gene, -c_gene, -cdr3_nt) %>%
+  group_by(cdr3) %>%
+  summarize(across(everything(), sum)) %>%
+  ungroup() %>%
+  mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
+
+beta_upset_yes_irae
+
+beta_upset_no_irae <- tcrs %>%
+  filter(Chain == "TRB",
+         group == "ICI no colitis") %>%
+  mutate(present = 1) %>%
+  spread(key = 'predicted.celltype.l2', value = 'present', fill = 0) %>%
+  select(-patient, -predicted.celltype.l1, -group, -barcode, -Chain, -v_gene, -j_gene, -c_gene, -cdr3_nt) %>%
+  group_by(cdr3) %>%
+  summarize(across(everything(), sum)) %>%
+  ungroup() %>%
+  mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
+
+beta_upset_no_irae
 
 ```
 
@@ -677,33 +705,12 @@ beta_upset
 
 ```{r}
 
-upset(as.data.frame(alpha_upset), sets = setdiff(colnames(alpha_upset), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRA CDR3AAs per cell type", mainbar.y.label = "TRA CDR3AA linkages (log10) within cell type (combos)", point.size = 1.5, show.numbers = FALSE, scale.intersections = "log10", text.scale = 0.75)
+upset(as.data.frame(alpha_upset_yes_irae), sets = setdiff(colnames(alpha_upset_yes_irae), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRA CDR3AAs per cell type in irAE colitis", mainbar.y.label = "TRA CDR3AA linkages (log10) within cell type (combos) in irAE colitis", point.size = 1.5, show.numbers = FALSE, scale.intersections = "log10", text.scale = 0.75)
 
-upset(as.data.frame(beta_upset), sets = setdiff(colnames(alpha_upset), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRB CDR3AAs per cell type", mainbar.y.label = "TRB CDR3AA linkages (log10) within cell type (combos)", point.size = 1.5, show.numbers = FALSE, scale.intersections = "log10", text.scale = 0.75)
+upset(as.data.frame(alpha_upset_no_irae), sets = setdiff(colnames(alpha_upset_no_irae), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRA CDR3AAs per cell type in no irAE colitis", mainbar.y.label = "TRA CDR3AA linkages (log10) within cell type (combos) in irAE no colitis", point.size = 1.5, show.numbers = FALSE, scale.intersections = "log10", text.scale = 0.75)
 
-```
+upset(as.data.frame(beta_upset_yes_irae), sets = setdiff(colnames(beta_upset_yes_irae), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRB CDR3AAs per cell type in irAE colitis", mainbar.y.label = "TRB CDR3AA linkages (log10) within cell type (combos) in irAE colitis", point.size = 1.5, show.numbers = FALSE, scale.intersections = "log10", text.scale = 0.75)
 
-# Investigate validity of upset plots
-
-```{r}
-
-#upset(as.data.frame(beta_upset), sets = setdiff(colnames(alpha_upset), "cdr3"))
-
-# TRB
-# 3 interactions between Tregs and CD8 naive NOT MATCHING 10 EXPECTED
-# 11614 interactions within CD4 TCMs ok ~close enough to 12278 unique CDR3s in CD4 TCM cell group and makes sense to be lower since some CDR3s aren't shared even within a cell type ~MATCHES
-# 4 interactions among all but CD4 CTL/Naive NOT MATCHING 0 EXPECTED
-
-#unique(test$predicted.celltype.l2)
-
-beta_upset %>%
-  filter(Treg == 1 & `CD8 Naive` == 1 & `CD4 Proliferating` == 1 & `CD4 TCM` == 1) %>%
-  print()
-
-# 2 among Treg CD8 Naive CD4 Prolif & CD4 TCM I don't think on upset plot...
-
-#colnames(beta_upset)
-
-# 10 CDR3s seem to be present in both Treg and CD8 Naive (10) BUT upset plot only has number 3 for this...
+upset(as.data.frame(beta_upset_no_irae), sets = setdiff(colnames(beta_upset_no_irae), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRB CDR3AAs per cell type in no irAE colitis", mainbar.y.label = "TRB CDR3AA linkages (log10) within cell type (combos) in irAE no colitis", point.size = 1.5, show.numbers = FALSE, scale.intersections = "log10", text.scale = 0.75)
 
 ```
