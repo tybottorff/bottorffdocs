@@ -492,3 +492,53 @@ Heatmap(mat_downsampled,
       )
 
 ```
+
+# Perform feature comparisons instead between cell types rather than between irAE groups
+
+```{r}
+
+tra_cell_type_features <- combined_data %>%
+  filter(Chain == "TRA") %>%
+  mutate(is_CD4_prolif = if_else(predicted.celltype.l2 == "CD4 Proliferating", "Yes", "No"),
+         is_CD4_TEM = if_else(predicted.celltype.l2 == "CD4 TEM", "Yes", "No"),
+         is_CD8_naive = if_else(predicted.celltype.l2 == "CD8 Naive", "Yes", "No"),
+         is_CD8_TCM = if_else(predicted.celltype.l2 == "CD8 TCM", "Yes", "No"),
+         is_mait = if_else(predicted.celltype.l2 == "MAIT", "Yes", "No")) %>%
+  group_by(patient, cdr3, chain, v_gene, j_gene) %>%
+  slice(1) %>%
+  ungroup()
+  #select(barcode, Chain, cdr3, pgen, cdr3_length, cdr3_hydrophobicity, irAE, predicted.celltype.l2, is_CD4_TEM, is_mait)
+
+tra_cell_type_features
+
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_CD4_prolif, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_CD4_TEM, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_CD8_naive, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_CD8_TCM, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_mait, exact = FALSE))
+
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_CD4_prolif, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_CD4_TEM, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_CD8_naive, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_CD8_TCM, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_mait, exact = FALSE))
+
+print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_CD4_prolif, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_CD4_TEM, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_CD8_naive, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_CD8_TCM, exact = FALSE))
+print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_mait, exact = FALSE))
+
+# cell types up/down in colitis irAE (some trending same in myocard data)
+# CDR3 length (TRA): padj vals (adjusted within 5 cell types I tested for this feature for TRA)
+# CD4 TEM: 1.6335e-3
+# MAITs: 8.52e-12
+
+# TRA CDR3 length for CD4 TEMs and MAITs seems significantly different vs other cell types
+# as do TRA pgen for CD4 TEMs and MAITs
+
+# pgen (TRA) padj vals
+# CD4 TEM: 4.85e-3
+# MAITs: 1.485e-13
+
+#adjusted_p_values <- p.adjust(c(0.3066, 0.00194, 0.2181, 0.4082, 2.97*10^-14), method = "BH")
