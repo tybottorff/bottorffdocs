@@ -504,41 +504,47 @@ tra_cell_type_features <- combined_data %>%
          is_CD8_naive = if_else(predicted.celltype.l2 == "CD8 Naive", "Yes", "No"),
          is_CD8_TCM = if_else(predicted.celltype.l2 == "CD8 TCM", "Yes", "No"),
          is_mait = if_else(predicted.celltype.l2 == "MAIT", "Yes", "No")) %>%
-  group_by(patient, cdr3, chain, v_gene, j_gene) %>%
+  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
   slice(1) %>%
-  ungroup()
-  #select(barcode, Chain, cdr3, pgen, cdr3_length, cdr3_hydrophobicity, irAE, predicted.celltype.l2, is_CD4_TEM, is_mait)
+  ungroup() %>%
+  select(barcode, Chain, cdr3, pgen, cdr3_length, cdr3_hydrophobicity, group, predicted.celltype.l2, is_CD4_TEM, is_mait)
 
 tra_cell_type_features
 
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_CD4_prolif, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_CD4_TEM, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_CD8_naive, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_CD8_TCM, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ test$is_mait, exact = FALSE))
+ggplot(tra_cell_type_features, aes(x = is_CD4_TEM, y = log10(pgen))) +
+  geom_boxplot() +
+  labs(x = "CD4 TEM status", y = "pgen (-log10)")
 
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_CD4_prolif, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_CD4_TEM, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_CD8_naive, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_CD8_TCM, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_hydrophobicity ~ test$is_mait, exact = FALSE))
+ggplot(tra_cell_type_features, aes(x = is_CD4_TEM, y = cdr3_length)) +
+  geom_boxplot() +
+  labs(x = "CD4 TEM status", y = "CDR3 length (AAs)")
 
-print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_CD4_prolif, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_CD4_TEM, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_CD8_naive, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_CD8_TCM, exact = FALSE))
-print(wilcox_result <- wilcox.test(tra_cell_type_features$pgen ~ test$is_mait, exact = FALSE))
+ggplot(tra_cell_type_features, aes(x = is_mait, y = log10(pgen))) +
+  geom_boxplot() +
+  labs(x = "MAIT status", y = "pgen (-log10)")
 
-# cell types up/down in colitis irAE (some trending same in myocard data)
-# CDR3 length (TRA): padj vals (adjusted within 5 cell types I tested for this feature for TRA)
-# CD4 TEM: 1.6335e-3
-# MAITs: 8.52e-12
+ggplot(tra_cell_type_features, aes(x = is_mait, y = cdr3_length)) +
+  geom_boxplot() +
+  labs(x = "MAIT status", y = "CDR3 length (AAs)")
 
-# TRA CDR3 length for CD4 TEMs and MAITs seems significantly different vs other cell types
-# as do TRA pgen for CD4 TEMs and MAITs
+# cdr3 length TRA padj
+# CD4 TEM: 4.5850e-04
+# CD8 naive: 1.2900e-02
+# CD8 TCM: 5.4400e-03
+# MAIT: 2.3965e-10
 
-# pgen (TRA) padj vals
-# CD4 TEM: 4.85e-3
-# MAITs: 1.485e-13
+# cdr3 pgen TRA padj
+# MAIT: 6.635000e-13
 
-#adjusted_p_values <- p.adjust(c(0.3066, 0.00194, 0.2181, 0.4082, 2.97*10^-14), method = "BH")
+#print(wilcox_result <- wilcox.test(tra_cell_type_features$cdr3_length ~ tra_cell_type_features$is_CD4_prolif, exact = FALSE))
+
+# cdr3 length TRB padj
+# CD8 naive: 0.001790
+
+#print(p.adjust(c(0.2391, 0.9648, 0.000358, 0.1884, 0.08194), method = "BH"))
+
+# cdr3 hydrophobicity TRB padj
+# CD8 naive: 0.0044400
+# CD8 TCM: 0.0026015
+
+```
