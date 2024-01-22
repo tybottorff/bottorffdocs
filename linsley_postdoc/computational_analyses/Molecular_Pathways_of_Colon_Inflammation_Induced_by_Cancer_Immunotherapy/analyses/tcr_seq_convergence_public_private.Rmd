@@ -19,8 +19,6 @@ library(tidyr)
 library(stringr)
 library(scales)
 library(ggpubr)
-library(ComplexHeatmap)
-library(e1071)
 
 ```
 
@@ -45,41 +43,24 @@ theme_set(
 
 ```{r}
 
-tcr_rna <- read.csv("../saved_data/rna_tcr.csv")
+combined_data <- read.csv("../saved_data/rna_tcr.csv") %>%
+  filter(
+    case_when(
+      predicted.celltype.l1 == "CD4 T" & str_detect(predicted.celltype.l2, "CD4") | predicted.celltype.l2 == "Treg" ~ TRUE,
+      predicted.celltype.l1 == "CD8 T" & str_detect(predicted.celltype.l2, "CD8") ~ TRUE,
+      predicted.celltype.l1 == "other T" & predicted.celltype.l2 %in% c("MAIT", "dnT") ~ TRUE,
+      TRUE ~ FALSE)) %>%
+  filter(!(is.na(v_gene)),
+         !(is.na(d_gene)),
+         !(is.na(j_gene)),
+         !(is.na(c_gene)),
+         !(is.na(cdr3))) %>%
+  mutate(group = case_when(
+    startsWith(patient, "CT") ~ "no ICI",
+    startsWith(patient, "C") ~ "ICI colitis",
+    startsWith(patient, "NC") ~ "ICI no colitis"))
 
-tcr_rna
-
-```
-
-# Assess cell identity confidence
-
-```{r}
-
-cell_confidence_test <- tcr_rna %>%
-  group_by(predicted.celltype.l1, predicted.celltype.l2) %>%
-  summarize(count = n(), score1 = mean(predicted.celltype.l1.score), score2 = mean(predicted.celltype.l2.score))
-
-cell_confidence_test
-
-# unexpected combos have low scores, remove them
-
-```
-
-# Read in IGoR pgen data
-
-```{r}
-
-pgen_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
-  select(TCR_name, pgen) %>%
-  mutate(Chain = "TRA")
-
-pgen <- read.csv("../saved_data/igor_output_beta.csv") %>%
-  select(TCR_name, pgen) %>%
-  mutate(Chain = "TRB") %>%
-  full_join(pgen_alpha, by = c("TCR_name", "Chain", "pgen")) %>%
-  rename(barcode = TCR_name)
-
-pgen
+combined_data
 
 ```
 
@@ -87,55 +68,22 @@ pgen
 
 ```{r}
 
-downsampled_public_df_list <- downsampled_df %>%
-  group_by(cdr3) %>%
-  filter(n_distinct(patient) > 1) %>%
-  mutate(barc_chain = paste(barcode, Chain))
-
-downsampled_public_df_list
-
-downsampled_public_df <- downsampled_df %>%
-  mutate(barc_chain = paste(barcode, Chain)) %>%
-  filter(barc_chain %in% downsampled_public_df_list$barc_chain,
-         predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
-  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
-  # look at just unique TCRs
-  dplyr::slice(1) %>%
-  mutate(tag = "Public\n(downsampled)")
-
-downsampled_public_df
-
 public_df_list <- combined_data %>%
   group_by(cdr3) %>%
   filter(n_distinct(patient) > 1) %>%
-  mutate(barc_chain = paste(barcode, Chain))
+  mutate(barc_chain = paste(barcode, Chain, sep = ""))
 
 public_df_list
 
-public_df <- combined_data %>%
-  mutate(barc_chain = paste(barcode, Chain)) %>%
-  filter(barc_chain %in% public_df_list$barc_chain,
-         predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
+private_df_list <- combined_data %>%
+  group_by(cdr3) %>%
+  filter(n_distinct(patient) == 1) %>%
+  mutate(barc_chain = paste(barcode, Chain, sep = "")) %>%
   group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
-  # look at just unique TCRs
-  dplyr::slice(1) %>%
-  ungroup() %>%
-  mutate(tag = "Public")
+  # exclude singletons
+  filter(n() > 1)
 
-public_df
-
-more_abundant_in_colitis_publicity <- combined_data %>%
-  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Naive")) %>%
-  mutate(barc_chain = paste(barcode, Chain)) %>%
-  mutate(publicity = if_else(barc_chain %in% public_df$barc_chain, "Public", "Private")) %>%
-  group_by(predicted.celltype.l2, publicity, group) %>%
-  summarize(count = n())
-
-more_abundant_in_colitis_publicity
+private_df_list
 
 ```
 
@@ -154,294 +102,11 @@ convergence_across_patients <- combined_data %>%
   group_by(cdr3) %>%
   mutate(distinct_cdr3_nt_count = n_distinct(cdr3_nt)) %>%
   filter(distinct_cdr3_nt_count > 1) %>%
-  mutate(barc_chain = paste(barcode, Chain))
+  mutate(barc_chain = paste(barcode, Chain, sep = ""))
+
+convergence_across_patients
 
 # do see more convergence across patients as expected, and they are ~mostly in public TCRs also as expected
-
-convergence_df <- combined_data %>%
-  mutate(barc_chain = paste(barcode, Chain)) %>%
-  filter(barc_chain %in% convergence_across_patients$barc_chain,
-         predicted.celltype.l1 == "CD8 T",
-         predicted.celltype.l2 == "CD8 TEM",
-         Chain == "TRB") %>%
-  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
-  # look at just unique TCRs
-  dplyr::slice(1) %>%
-  mutate(tag = "Converged")
-
-convergence_df
-
-```
-
-# Plot donors/junction (AA) (x) vs. donors/junction (nt) (y)
-
-```{r}
-
-donor_df <- combined_data %>%
-  select(barcode, Chain, cdr3, cdr3_nt, patient, predicted.celltype.l1, predicted.celltype.l2, group, v_gene, j_gene, c_gene) %>%
-  mutate(barc_chain = paste(barcode, Chain)) %>%
-  mutate(convergence  = if_else(barc_chain %in% convergence_across_patients$barc_chain, "Converged", "Not converged"),
-         publicity = if_else(barc_chain %in% public_df_list$barc_chain, "Public", "Private")) %>%
-  group_by(cdr3) %>%
-  mutate(donors_per_junction_aa = n_distinct(patient)) %>%
-  ungroup() %>%
-  group_by(cdr3_nt) %>%
-  mutate(donors_per_junction_nt = n_distinct(patient)) %>%
-  ungroup() %>%
-  # look at just unique CDR3s from each patient
-  group_by(cdr3, cdr3_nt, patient) %>%
-  slice(1) %>%
-  ungroup() %>%
-  mutate(diagonal = if_else(donors_per_junction_nt == donors_per_junction_aa, "On", "Off"),
-         one_one = if_else(donors_per_junction_aa == 1 & donors_per_junction_nt == 1, "Yes", "No"))
-
-donor_df$group <- factor(donor_df$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
-
-ggplot(donor_df %>% filter(group != "no ICI"), aes(x = donors_per_junction_aa, y = donors_per_junction_nt, color = convergence)) +
-  geom_jitter(size = 0.5) +
-  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
-  facet_wrap(~group, ncol = 4) +
-  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)", color = "CDR3\nconvergence") +
-  theme(legend.text = element_text(size = 12),
-        legend.title = element_text(size = 14))
-
-ggplot(donor_df %>% filter(group != "no ICI"), aes(x = donors_per_junction_aa, y = donors_per_junction_nt, color = publicity)) +
-  geom_jitter(size = 0.01) +
-  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
-  facet_wrap(~group, ncol = 4) +
-  labs(x = "Donors/junction (AA)", y = "Donors/junction (nt)", color = "CDR3\npublicity") +
-  theme(legend.text = element_text(size = 12),
-        legend.title = element_text(size = 14))
-
-# how can something be converged on diagonal (on or off (1,1))? I'm pretty sure it's because of intrapatient convergence
-
-```
-
-# Instead look at distribution of unique CDR3 NT seqs / CDR3 (AA) by irAE group
-
-```{r}
-
-new_convergence_df <- combined_data %>%
-  filter(group != "no ICI") %>%
-  group_by(cdr3) %>%
-  mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
-  # look at just unique CDR3s from each irAE group (to deal with cases with same CDR3 in both groups, don't want to slice and just have it in 1 group)
-  # also don't want to group by patient because then I'd be double counting some CDR3s in group comparisons?
-  group_by(cdr3, group) %>%
-  slice(1) %>%
-  ungroup()
-
-new_convergence_df$group <- factor(new_convergence_df$group, levels = c("ICI no colitis", "ICI colitis"))
-
-new_convergence_df_hist <- new_convergence_df %>%
-  group_by(nts_per_aa, group, predicted.celltype.l1, predicted.celltype.l2) %>%
-  summarize(count = n()) %>%
-  ungroup() %>%
-  group_by(group, predicted.celltype.l1, predicted.celltype.l2) %>%
-  mutate(count = count / sum(count))
-
-# Calculate mean values
-means <- new_convergence_df_hist %>%
-  group_by(predicted.celltype.l1, group) %>%
-  summarize(mean_val = mean(nts_per_aa))
-
-means
-
-p <- ggplot(new_convergence_df_hist, aes(x = nts_per_aa, y = sqrt(count), fill = group)) +
-  geom_density(stat = "identity", position = "dodge", alpha = 0.75) +
-  facet_wrap(~predicted.celltype.l1) +
-  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Group normalized\ncount (sqrt)") +
-  scale_x_continuous(breaks = pretty_breaks(n = 3))
-
-p + geom_vline(data = means, aes(xintercept = mean_val, color = group),
-             linetype = "solid", size = 0.5) +
-    scale_color_manual(values = c("red", "blue"))
-
-#wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l1 == "CD4 T"))
-# CD4 T: 2e-6 (padj)
-# higher in No irAE
-
-#p.adjust(c(), method = "BH")
-
-```
-
-# Instead look at distribution of unique CDR3 NT seqs / CDR3 (AA) by irAE group (INTRAPATIENT CONVERGENCE ONLY)
-
-```{r}
-
-new_convergence_df <- combined_data %>%
-  filter(group != "no ICI") %>%
-  group_by(cdr3, patient) %>%
-  mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
-  slice(1) %>%
-  ungroup()
-
-new_convergence_df$group <- factor(new_convergence_df$group, levels = c("ICI no colitis", "ICI colitis"))
-
-new_convergence_df_hist <- new_convergence_df %>%
-  group_by(nts_per_aa, group, predicted.celltype.l1, predicted.celltype.l2) %>%
-  summarize(count = n()) %>%
-  ungroup() %>%
-  group_by(group, predicted.celltype.l1, predicted.celltype.l2) %>%
-  mutate(count = count / sum(count))
-
-# Calculate mean values
-means <- new_convergence_df_hist %>%
-  group_by(predicted.celltype.l1, group) %>%
-  summarize(mean_val = mean(nts_per_aa))
-
-means
-
-p <- ggplot(new_convergence_df_hist, aes(x = nts_per_aa, y = sqrt(count), fill = group)) +
-  geom_density(stat = "identity", position = "dodge", alpha = 0.75) +
-  facet_wrap(~predicted.celltype.l1) +
-  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Group normalized\ncount (sqrt)") +
-  scale_x_continuous(breaks = pretty_breaks(n = 3))
-
-p + geom_vline(data = means, aes(xintercept = mean_val, color = group),
-             linetype = "solid", size = 0.5) +
-    scale_color_manual(values = c("red", "blue"))
-
-#wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l1 == "other T"))
-
-# CD8: 0.01 (padj)
-
-#p.adjust(c(0.3317, 0.003664, 0.809), method = "BH")
-
-```
-
-# Try to differentiate between seq errors and intrapatient convergence, or at least see if intrapatient convergence seems to be dominated by seq errors
-
-```{r}
-
-new_convergence_df <- combined_data %>%
-  filter(group != "no ICI") %>%
-  group_by(cdr3, patient) %>%
-  mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
-  ungroup()
-
-seq_errors_estimate <- new_convergence_df %>%
-  select(barcode, Chain, cdr3, cdr3_nt, patient, nts_per_aa) %>%
-  arrange(-nts_per_aa) %>%
-  group_by(cdr3_nt, cdr3, patient, nts_per_aa) %>%
-  summarize(count = n()) %>%
-  ungroup() %>%
-  group_by(patient, cdr3, nts_per_aa) %>%
-  summarize(max_frac = max(count)/sum(count),
-            median = median(count),
-            skewness = skewness(count),
-            stdev = sd(count),
-            coef_of_var = sd(count) / mean(count))
-
-seq_errors_estimate
-
-ggplot(seq_errors_estimate, aes(x = nts_per_aa, y = max_frac)) +
-  geom_jitter(size = 0.5, alpha = 0.75, position = position_jitter(width = 0.05, height = 0.05)) +
-  geom_function(fun = function(x) 1/x, color = "red", linetype = "dashed") +
-  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Max dominance\nof CDR3 NT")
-
-ggplot(seq_errors_estimate, aes(x = nts_per_aa, y = median)) +
-  geom_jitter(size = 0.5, alpha = 0.75, position = position_jitter(width = 0.05, height = 0.05)) +
-  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Median count\nof CDR3 NT")
-
-ggplot(seq_errors_estimate, aes(x = nts_per_aa, y = skewness)) +
-  geom_jitter(size = 0.5, alpha = 0.75, position = position_jitter(width = 0.05, height = 0.05)) +
-  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Skewness\nof CDR3 NT")
-
-ggplot(seq_errors_estimate, aes(x = nts_per_aa, y = stdev)) +
-  geom_jitter(size = 0.5, alpha = 0.75, position = position_jitter(width = 0.05, height = 0.05)) +
-  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Standard deviation\nof CDR3 NT")
-
-ggplot(seq_errors_estimate, aes(x = nts_per_aa, y = coef_of_var)) +
-  geom_jitter(size = 0.5, alpha = 0.75, position = position_jitter(width = 0.05, height = 0.05)) +
-  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Coefficient of variation\nof CDR3 NT")
-
-```
-
-# Instead look at distribution of unique CDR3 NT seqs / CDR3 (AA) by irAE group just for cell types of interest
-
-```{r}
-
-new_convergence_df <- combined_data %>%
-  filter(group != "no ICI") %>%
-  group_by(cdr3) %>%
-  mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
-  # look at just unique CDR3s from each irAE group (to deal with cases with same CDR3 in both groups, don't want to slice and just have it in 1 group)
-  # also don't want to group by patient because then I'd be double counting some CDR3s in group comparisons?
-  group_by(cdr3, group) %>%
-  slice(1) %>%
-  ungroup() %>%
-  filter(predicted.celltype.l2 %in% c("CD8 Naive", "CD4 Proliferating"))
-
-new_convergence_df$group <- factor(new_convergence_df$group, levels = c("ICI no colitis", "ICI colitis"))
-
-new_convergence_df_hist <- new_convergence_df %>%
-  group_by(nts_per_aa, group, predicted.celltype.l1, predicted.celltype.l2) %>%
-  summarize(count = n()) %>%
-  ungroup() %>%
-  group_by(group, predicted.celltype.l1, predicted.celltype.l2) %>%
-  mutate(count = count / sum(count))
-
-# Calculate mean values
-means <- new_convergence_df_hist %>%
-  group_by(predicted.celltype.l1, group) %>%
-  summarize(mean_val = mean(nts_per_aa))
-
-means
-
-p <- ggplot(new_convergence_df_hist, aes(x = nts_per_aa, y = sqrt(count), fill = group)) +
-  geom_density(stat = "identity", position = "dodge", alpha = 0.75) +
-  facet_wrap(~predicted.celltype.l1) +
-  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Group normalized\ncount (sqrt)") +
-  scale_x_continuous(breaks = pretty_breaks(n = 3))
-
-p + geom_vline(data = means, aes(xintercept = mean_val, color = group),
-             linetype = "solid", size = 0.5) +
-    scale_color_manual(values = c("red", "blue"))
-
-wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l2 == "CD4 Proliferating"))
-
-```
-
-# Instead look at distribution of unique CDR3 NT seqs / CDR3 (AA) by irAE group just for cell types of interest (INTRAPATIENT CONVERGENCE ONLY)
-
-```{r}
-
-new_convergence_df <- combined_data %>%
-  filter(group != "no ICI") %>%
-  group_by(cdr3, patient) %>%
-  mutate(nts_per_aa = n_distinct(cdr3_nt)) %>%
-  slice(1) %>%
-  ungroup() %>%
-  filter(predicted.celltype.l2 %in% c("CD8 Naive", "CD4 Proliferating"))
-
-new_convergence_df$group <- factor(new_convergence_df$group, levels = c("ICI no colitis", "ICI colitis"))
-
-new_convergence_df_hist <- new_convergence_df %>%
-  group_by(nts_per_aa, group, predicted.celltype.l1, predicted.celltype.l2) %>%
-  summarize(count = n()) %>%
-  ungroup() %>%
-  group_by(group, predicted.celltype.l1, predicted.celltype.l2) %>%
-  mutate(count = count / sum(count))
-
-# Calculate mean values
-means <- new_convergence_df_hist %>%
-  group_by(predicted.celltype.l1, group) %>%
-  summarize(mean_val = mean(nts_per_aa))
-
-means
-
-p <- ggplot(new_convergence_df_hist, aes(x = nts_per_aa, y = sqrt(count), fill = group)) +
-  geom_density(stat = "identity", position = "dodge", alpha = 0.75) +
-  facet_wrap(~predicted.celltype.l1) +
-  labs(x = "CDR3 NT sequences/\nCDR3 AA sequence", y = "Group normalized\ncount (sqrt)") +
-  scale_x_continuous(breaks = pretty_breaks(n = 3))
-
-p + geom_vline(data = means, aes(xintercept = mean_val, color = group),
-             linetype = "solid", size = 0.5) +
-    scale_color_manual(values = c("red", "blue"))
-
-wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.celltype.l2 == "CD8 Naive"))
 
 ```
 
@@ -459,5 +124,86 @@ wilcox.test(nts_per_aa ~ group, data = new_convergence_df %>% filter(predicted.c
 
 # Display the Venn diagram
 #grid.draw(venn.plot)
+
+```
+
+# Contingency tables for publicity, privicity, convergence for TRA/TRB comparing irAE groups
+
+```{r}
+
+convergence_publicity_privicity_df <- combined_data %>%
+  mutate(barc_chain = paste(barcode, Chain, sep = "")) %>%
+  mutate(publicity = if_else(barc_chain %in% public_df_list$barc_chain, "Yes", "No"),
+         privicity = if_else(barc_chain %in% private_df_list$barc_chain, "Yes", "No"),
+         convergence = if_else(barc_chain %in% convergence_across_patients$barc_chain, "Yes", "No")) %>%
+  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
+  # look at just unique clonotypes from each patient
+  dplyr::slice(1)
+
+convergence_publicity_privicity_df
+
+public_counts <- convergence_publicity_privicity_df %>%
+  filter(group != "no ICI") %>%
+  group_by(publicity, group, predicted.celltype.l1, Chain) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(publicity, Chain, predicted.celltype.l1) %>%
+  mutate(fraction = count/sum(count))
+
+public_counts
+
+public_counts$group <- factor(public_counts$group, levels = c("ICI no colitis", "ICI colitis"))
+
+# Create a contingency table
+#data <- matrix(c(14, 56, 2, 1), nrow = 2)
+#colnames(data) <- c("Not converged", "Converged")
+#rownames(data) <- c("ICI colitis", "ICI no colitis")
+
+#print(data)
+
+# Perform Fisher's exact test
+#print(fisher.test(data))
+
+ggplot(public_counts, aes(x = publicity, y = fraction, fill = group)) +
+  geom_bar(stat = "identity", position = "stack") +
+  facet_wrap(~Chain + predicted.celltype.l1, ncol = 2) +
+  labs(x = "Publicity", y = "Fraction") +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.5))
+
+private_counts <- convergence_publicity_privicity_df %>%
+  filter(group != "no ICI") %>%
+  group_by(privicity, group, predicted.celltype.l1, Chain) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(privicity, Chain, predicted.celltype.l1) %>%
+  mutate(fraction = count/sum(count))
+
+convergence_counts$group <- factor(convergence_counts$group, levels = c("ICI no colitis", "ICI colitis"))
+
+private_counts
+
+ggplot(private_counts, aes(x = privicity, y = fraction, fill = group)) +
+  geom_bar(stat = "identity", position = "stack") +
+  facet_wrap(~Chain + predicted.celltype.l1, ncol = 2) +
+  labs(x = "Privicity", y = "Fraction") +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.5))
+
+convergence_counts <- convergence_publicity_privicity_df %>%
+  filter(group != "no ICI") %>%
+  group_by(convergence, group, Chain, predicted.celltype.l1) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(convergence, Chain, predicted.celltype.l1) %>%
+  mutate(fraction = count/sum(count))
+
+convergence_counts
+
+convergence_counts$group <- factor(convergence_counts$group, levels = c("ICI no colitis", "ICI colitis"))
+
+ggplot(convergence_counts, aes(x = convergence, y = fraction, fill = group)) +
+  geom_bar(stat = "identity", position = "stack") +
+  facet_wrap(~Chain + predicted.celltype.l1, ncol = 2) +
+  labs(x = "Converged", y = "Fraction") +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.5))
 
 ```
