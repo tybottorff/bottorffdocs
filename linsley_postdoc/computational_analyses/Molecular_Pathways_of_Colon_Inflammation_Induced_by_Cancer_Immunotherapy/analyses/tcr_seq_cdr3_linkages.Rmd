@@ -46,6 +46,7 @@ theme_set(
 ```{r}
 
 tcrs <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv") %>%
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2))) %>%
   select(patient, predicted.celltype.l1, predicted.celltype.l2, group, barcode, Chain, v_gene, j_gene, c_gene, cdr3, cdr3_nt)
 
 tcrs

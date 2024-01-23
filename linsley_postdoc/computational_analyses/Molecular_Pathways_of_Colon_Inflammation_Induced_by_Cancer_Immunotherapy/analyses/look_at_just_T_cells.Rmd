@@ -247,7 +247,7 @@ saveRDS(just_T_cells, "../saved_data/T_cells.rds")
 
 ```{r}
 
-#just_T_cells <- readRDS("../saved_data/T_cells.rds")
+just_T_cells <- readRDS("../saved_data/T_cells.rds")
 
 #reference <- ScaleData(reference, verbose = FALSE)
 
@@ -259,9 +259,9 @@ saveRDS(just_T_cells, "../saved_data/T_cells.rds")
 # query
 #just_T_cells <- DietSeurat(just_T_cells, counts = FALSE, dimreducs = "ref.pca")
 
-reference@assays$SCT
+#reference@assays$SCT
 
-just_T_cells@assays$integrated
+#just_T_cells@assays$integrated
 
 #merge reference and query
 #reference$id <- 'reference'
@@ -270,5 +270,55 @@ just_T_cells@assays$integrated
 #refquery[["pca"]] <- merge(reference[["pca"]], just_T_cells[["ref.pca"]])
 #refquery <- RunUMAP(refquery, reduction = 'pca', dims = 1:50)
 #DimPlot(refquery, group.by = 'id', shuffle = TRUE)
+
+```
+
+# Look for clusters with high Trm marker expression
+
+ - take home is I'll change clusters 25 and 27 (CD4 TCM) to CD4 Trm and 3, 7, 9, 15-16 (CD8 TEM) to CD8 Trm in abundance, feature, linkage analyses
+
+```{r}
+
+# Human TRM are typically associated with the expression of the surface markers CD69 and CD103 (ITGAE, integrin αE), maybe also CD49a (integrin α1, ITGA1)
+
+VlnPlot(just_T_cells, features = c("CD69"), pt.size = 0)
+
+# CD69
+# 25 (CD4 TCM) and 29 (only MAIT) highest --> I think I'll just take 25 & 27 (previously CD4 TCM NOW CD4 Trm!)
+# 27 (CD4 TCM), 36 (CD8 TCM), 37, 6 somewhat as well
+
+# ITGAE/CD103
+# 15, 16, 9, 7, 2, 3 highest --> I think I'll just take 15, 16, 7, 9, 3 (all CD8 TEM --> now CD8 Trm?)
+# also 22, 28, 34, 35, 37, 38 a bit
+# ITGA1/CD49a
+# 16 highest
+# also 15, 7, 9-10, 2-3
+# CD101
+# highest in 3, 7, 9, 15, 16
+
+#FeaturePlot(just_T_cells, features = "CD69")
+
+#FeaturePlot(just_T_cells, features = "ITGAE")
+
+#FeaturePlot(just_T_cells, features = "ITGA1")
+
+#FeaturePlot(just_T_cells, features = "CD101")
+
+#DimPlot(just_T_cells, reduction = "umap", label.size = 1)
+
+```
+
+```{r}
+rows_with_CD103 <- grep("ITGA1", rownames(just_T_cells))
+
+rows_with_CD103
+```
+
+```{r}
+just_T_cells@meta.data %>%
+  group_by(seurat_clusters) %>%
+  slice(1) %>%
+  select(seurat_clusters, predicted.celltype.l2) %>%
+  filter(seurat_clusters %in% c(15, 16, 9, 7, 2, 3))
 
 ```

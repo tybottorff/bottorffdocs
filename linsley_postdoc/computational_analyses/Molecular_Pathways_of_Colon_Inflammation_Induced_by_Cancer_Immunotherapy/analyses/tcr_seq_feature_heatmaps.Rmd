@@ -118,11 +118,12 @@ calculate_hydrophobicity <- function(sequence, hydrophobicity_df) {
 
 ```
 
-# Prep feature df, join with IGoR pgen data
+# Prep feature df (update cell types with Trms), join with IGoR pgen data
 
 ```{r}
 
 combined_data <- tcr_rna %>%
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2))) %>%
   filter(
     case_when(
       predicted.celltype.l1 == "CD4 T" & str_detect(predicted.celltype.l2, "CD4") | predicted.celltype.l2 == "Treg" ~ TRUE,
@@ -164,7 +165,7 @@ seq_depth <- combined_data %>%
 
 seq_depth
 
-# Choose ~2512/2 seqs from non B10 samples to downsample all to 2512/2
+# Choose ~2512/2 seqs from non B10 samples to downsample all to 2449/2
 
 ```
 
@@ -172,10 +173,10 @@ seq_depth
 
 ```{r}
 
-desired_rows_per_patient <- 1249
+desired_rows_per_patient <- 1218
 # ~/2 to get equal numbers of each Chain (TRA and TRB)
 
-set.seed(123)
+set.seed(4562)
 
 # Downsample the dataframe
 downsampled_df <- combined_data %>%
@@ -269,7 +270,7 @@ results_df <- results_df %>%
   rename(p_val_category = p_val) %>%
   mutate(p_val_category = gsub("p_val_", "", p_val_category)) %>%
   mutate(category = paste(predicted.celltype.l2, Chain, p_val_category)) %>%
-  # adjust pvals for multiple comparisons %>%
+  # adjust pvals for multiple comparisons
   mutate(value = p.adjust(value, method = "BH")) %>%
   arrange(value)
 
@@ -282,7 +283,7 @@ results_df
 ```{r}
 
 top_results <- results_df %>%
-  #filter(value < 0.05) %>%
+  filter(value < 0.05) %>%
   mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
 
 filtered_results_df <- results_df %>%
@@ -343,12 +344,24 @@ Heatmap(mat,
                                          Feature = feature_annotations,
                                          col = list("Cell type" = c("CD4 T" = "#fde725", "CD8 T" = "#21918c", "other T" = "#440154"),
                                                     "Chain" = c("TRA" = "#fde725", "TRB" = "#440154"),
-                                                    "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725"),
+                                                    "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725", "Trm" = "black"),
                                                     "Feature" = c("CDR3 length (AAs)" = "#21918c", "CDR3 hydrophobicity" = "#fde725", "Probability of generation" = "#440154"))),
         show_row_names = FALSE,
         column_title = "Clonotypes bins\n(% of repertoire across patients)",
         column_title_side = "bottom",
-        heatmap_legend_param = list(title = "Wilcox p val (-log10) for\nyes vs. no colitis irAE"))
+        heatmap_legend_param = list(title = "Wilcox padj val (-log10) for\nyes vs. no colitis irAE"),
+        layer_fun = function(j, i, x, y, width, height, fill) {
+          v = pindex(mat, i, j)
+          l = v > -log10(0.05) & v < -log10(0.01)
+          if (any(l)) {
+            grid.text("*", x[l], y[l], gp = gpar(fontsize = 10))
+          }
+          q = v > -log10(0.01)
+          if (any(q)) {
+            grid.text("**", x[q], y[q], gp = gpar(fontsize = 10))
+          }
+        }
+      )
 
 ```
 
@@ -395,7 +408,10 @@ results_df_downsampled <- results_df_downsampled %>%
   pivot_longer(cols = c("p_val_pgen", "p_val_cdr3_length", "p_val_cdr3_hydrophobicity"), names_to = "p_val") %>%
   rename(p_val_category = p_val) %>%
   mutate(p_val_category = gsub("p_val_", "", p_val_category)) %>%
-  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category)) %>%
+  # adjust pvals for multiple comparisons
+  mutate(value = p.adjust(value, method = "BH")) %>%
+  arrange(value)
 
 results_df_downsampled
 
@@ -472,12 +488,12 @@ Heatmap(mat_downsampled,
                                          Feature = feature_annotations_downsampled,
                                          col = list("Cell type" = c("CD4 T" = "#fde725", "CD8 T" = "#21918c", "other T" = "#440154"),
                                                     "Chain" = c("TRA" = "#fde725", "TRB" = "#440154"),
-                                                    "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725"),
+                                                    "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725", "Trm" = "black"),
                                                     "Feature" = c("CDR3 length (AAs)" = "#21918c", "CDR3 hydrophobicity" = "#fde725", "Probability of generation" = "#440154"))),
         show_row_names = FALSE,
         column_title = "Clonotypes bins\n(% of repertoire across patients)",
         column_title_side = "bottom",
-        heatmap_legend_param = list(title = "Wilcox p val (-log10) for\nyes vs. no colitis irAE"),
+        heatmap_legend_param = list(title = "Wilcox padj val (-log10) for\nyes vs. no colitis irAE"),
         layer_fun = function(j, i, x, y, width, height, fill) {
           v = pindex(mat_downsampled, i, j)
           l = v > -log10(0.05) & v < -log10(0.01)
