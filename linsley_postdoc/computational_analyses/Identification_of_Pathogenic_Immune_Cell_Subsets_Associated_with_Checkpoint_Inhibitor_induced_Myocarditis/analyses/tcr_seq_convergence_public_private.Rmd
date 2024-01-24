@@ -156,9 +156,6 @@ ggplot(private_counts, aes(x = privicity, y = fraction, fill = irAE)) +
   labs(x = "Private", y = "Fraction") +
   scale_y_continuous(breaks = seq(0, 1, by = 0.5))
 
-```
-
-```{r}
 convergence_counts <- convergence_publicity_privicity_df %>%
   group_by(convergence, irAE, Chain, predicted.celltype.l1) %>%
   summarize(count = n()) %>%
@@ -173,5 +170,36 @@ ggplot(convergence_counts, aes(x = convergence, y = fraction, fill = irAE)) +
   facet_wrap(~Chain + predicted.celltype.l1) +
   labs(x = "Converged", y = "Fraction") +
   scale_y_continuous(breaks = seq(0, 1, by = 0.5))
+
+```
+
+# Overlay convergence, publicity, privicity onto UMAP
+
+```{r}
+
+T_cells <- readRDS("../saved_data/final_seurat_T_cells.rds")
+```
+
+```{r}
+
+metadata <- T_cells@meta.data
+  
+metadata$barcode <- rownames(metadata)
+
+metadata
+
+metadata <- metadata %>%
+  mutate(barc_chain = paste(barcode, chain, sep = "")) %>%
+  mutate(publicity = if_else(barc_chain %in% public_df_list$barc_chain, "Yes", "No"),
+         privicity = if_else(barc_chain %in% private_df_list$barc_chain, "Yes", "No"),
+         convergence = if_else(barc_chain %in% convergence_across_patients$barc_chain, "Yes", "No"))
+
+T_cells$publicity <- metadata$publicity
+T_cells$privicity <- metadata$privicity
+T_cells$convergence <- metadata$convergence
+
+DimPlot(just_T_cells, reduction = "umap", group.by = "publicity")
+
+# just make separate plots for TRA/TRB as they're in same cell but plots may look different
 
 ```
