@@ -42,7 +42,8 @@ theme_set(
 
 ```{r}
 
-feature_df <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv")
+feature_df <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv") %>%
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2)))
 
 feature_df
 
@@ -54,13 +55,18 @@ feature_df
 
 seurat_obj <- readRDS("../saved_data/T_cells.rds")
 
+new_meta <- seurat_obj@meta.data %>%
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2)))
+
+seurat_obj$predicted.celltype.l2 <- new_meta$predicted.celltype.l2
+
 downsampled_df <- read.csv("../saved_data/downsampled_df.csv")
 
 downsampled_seurat <- subset(seurat_obj, cells = downsampled_df$barcode)
 
 ```
 
-# Make UMAP contour plot
+# Make UMAP contour plot (only for downsampled, too crowded otherwise)
 
 ```{r}
 
@@ -73,7 +79,7 @@ data$patient_ID <- downsampled_seurat@meta.data$orig.ident
 
 data <- data %>%
   filter(!(grepl("^CT", patient_ID))) %>%
-  filter(celltype %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT")) %>%
+  filter(celltype %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT", "CD4 Trm")) %>%
   mutate(irAE = if_else(grepl("^NC", patient_ID), "no colitis", "colitis"))
 
 data$irAE <- factor(data$irAE, levels = c("no colitis", "colitis"))
@@ -98,7 +104,7 @@ cell_abundance_df <- feature_df %>%
   group_by(patient) %>%
   mutate(normalized_count = count / sum(count)) %>%
   # filter for just subtypes of interest
-  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Naive", "CD4 TEM", "CD8 TCM", "MAIT"),
+  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Naive", "CD4 TEM", "CD8 TCM", "MAIT", "CD4 Trm"),
          group != "no ICI")
 
 cell_abundance_df
@@ -135,6 +141,7 @@ wilcox_result <- wilcox.test(test_data$normalized_count ~ test_data$group)
 # CD8 Naive: 0.01
 # CD8 TCM: 0.01
 # MAITs: 0.004
+# CD4 Trm: 0.004662 (not adjusted yet)
 
 ```
 
@@ -147,7 +154,7 @@ cell_abundance_df_downsampled <- downsampled_df %>%
   summarize(count = n()) %>%
   ungroup() %>%
   # filter for just subtypes of interest
-  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT", "CD8 Naive"),
+  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT", "CD8 Naive", "CD4 Trm"),
          group != "no ICI")
 
 cell_abundance_df_downsampled
@@ -156,14 +163,14 @@ cell_abundance_df_downsampled$group <- factor(cell_abundance_df_downsampled$grou
 
 ggplot(cell_abundance_df_downsampled, aes(x = predicted.celltype.l2, y = log10(count), fill = group)) +
   geom_boxplot() +
-  labs(x = "", fill = "group", y = "Cell proportion\n(log10)") +
+  labs(x = "", fill = "group", y = "Cell counts\n(log10)") +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
 ggplot(cell_abundance_df_downsampled, aes(x = patient, y = log10(count), color = group)) +
   geom_point() +
   facet_wrap(~predicted.celltype.l2, ncol = 2) +
-  labs(x = "", fill = "group", y = "Cell proportion\n(log10)") +
+  labs(x = "", fill = "group", y = "Cell counts\n(log10)") +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_blank())
 
@@ -173,6 +180,7 @@ ggplot(cell_abundance_df_downsampled, aes(x = patient, y = log10(count), color =
 # CD8 Naive: 0.02
 # CD8 TCM: 0.01
 # MAITs: 0.004
+# CD4 Trm: ?
 
 p_values <- c(0.0632, 0.004662, 0.4908, 0.000666, 0.007992, 0.04949, 0.004662, 0.651, 0.219, 0.000666, 0.5728)
 
@@ -180,48 +188,5 @@ p_values <- c(0.0632, 0.004662, 0.4908, 0.000666, 0.007992, 0.04949, 0.004662, 0
 padj_values <- p.adjust(p_values, method = "BH")
 
 padj_values
-
-```
-
-# Re-do cell abundance comparisons with new Trm clusters
-
- - change clusters 25 and 27 (CD4 TCM) to CD4 Trm and clusters 3, 7, 9, 15-16 (CD8 TEM) to CD8 Trm
- 
-```{r}
- 
-trm_df <- feature_df %>%
-  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2)))
-
-trm_df
-
-cell_abundance_df <- trm_df %>%
-  group_by(patient, predicted.celltype.l2, group) %>%
-  summarize(count = n()) %>%
-  ungroup() %>%
-  group_by(patient) %>%
-  mutate(normalized_count = count / sum(count)) %>%
-  # filter for just subtypes of interest, add Trms
-  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Naive", "CD4 TEM", "CD8 TCM", "MAIT", "CD8 Trm", "CD4 Trm"),
-         group != "no ICI")
-
-cell_abundance_df
-
-cell_abundance_df$group <- factor(cell_abundance_df$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
-
-ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = group)) +
-  geom_boxplot() +
-  labs(x = "", fill = "group", y = "Normalized cell\nproportion (log10)") +
-  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
-
-# Filter the data for statistical test
-test_data <- cell_abundance_df %>%
-  filter(predicted.celltype.l2 == "CD8 Trm",
-         group != "no ICI")
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-print(wilcox.test(test_data$normalized_count ~ test_data$group))
-
-# CD4 Trm: 0.004662
 
 ```

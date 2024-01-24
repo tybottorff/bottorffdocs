@@ -247,7 +247,7 @@ saveRDS(just_T_cells, "../saved_data/T_cells.rds")
 
 ```{r}
 
-just_T_cells <- readRDS("../saved_data/T_cells.rds")
+#just_T_cells <- readRDS("../saved_data/T_cells.rds")
 
 #reference <- ScaleData(reference, verbose = FALSE)
 
@@ -308,17 +308,21 @@ VlnPlot(just_T_cells, features = c("CD69"), pt.size = 0)
 
 ```
 
-```{r}
-rows_with_CD103 <- grep("ITGA1", rownames(just_T_cells))
-
-rows_with_CD103
-```
+# Remake UMAPs with new Trm cell types
 
 ```{r}
-just_T_cells@meta.data %>%
-  group_by(seurat_clusters) %>%
-  slice(1) %>%
-  select(seurat_clusters, predicted.celltype.l2) %>%
-  filter(seurat_clusters %in% c(15, 16, 9, 7, 2, 3))
+
+t_cell_metadata <- just_T_cells@meta.data %>%
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2)))
+
+t_cell_metadata
+
+just_T_cells$predicted.celltype.l2 <- t_cell_metadata$predicted.celltype.l2
+
+p1 <- DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l1", shuffle = TRUE, seed = 728, label = TRUE, repel = TRUE) + NoLegend()
+
+p2 <- DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", shuffle = TRUE, seed = 728, label = TRUE, repel = TRUE) + NoLegend()
+
+p1 + p2
 
 ```
