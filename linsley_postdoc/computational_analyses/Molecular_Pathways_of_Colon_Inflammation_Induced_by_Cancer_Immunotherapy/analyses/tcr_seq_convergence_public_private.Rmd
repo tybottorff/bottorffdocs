@@ -178,7 +178,7 @@ private_counts <- convergence_publicity_privicity_df %>%
   group_by(privicity, Chain, predicted.celltype.l1) %>%
   mutate(fraction = count/sum(count))
 
-convergence_counts$group <- factor(convergence_counts$group, levels = c("ICI no colitis", "ICI colitis"))
+private_counts$group <- factor(private_counts$group, levels = c("ICI no colitis", "ICI colitis"))
 
 private_counts
 
@@ -205,5 +205,81 @@ ggplot(convergence_counts, aes(x = convergence, y = fraction, fill = group)) +
   facet_wrap(~Chain + predicted.celltype.l1, ncol = 2) +
   labs(x = "Converged", y = "Fraction") +
   scale_y_continuous(breaks = seq(0, 1, by = 0.5))
+
+```
+
+# Filter public, private, converged dfs for TRA/TRB to simplify downstream analysis
+
+```{r}
+
+public_df_list_tra <- public_df_list %>% filter(Chain == "TRA")
+
+public_df_list_trb <- public_df_list %>% filter(Chain == "TRB")
+
+private_df_list_tra <- private_df_list %>% filter(Chain == "TRA")
+
+private_df_list_trb <- private_df_list %>% filter(Chain == "TRB")
+
+convergence_across_patients_tra <- convergence_across_patients %>% filter(Chain == "TRA")
+
+convergence_across_patients_trb <- convergence_across_patients %>% filter(Chain == "TRB")
+
+```
+
+# Read in T cells RDS
+
+```{r}
+
+T_cells <- readRDS("../saved_data/T_cells.rds")
+
+```
+
+# Overlay convergence, publicity, privicity onto UMAP for TRA
+
+```{r}
+
+metadata <- T_cells@meta.data
+  
+metadata$barcode <- rownames(metadata)
+
+metadata <- metadata %>%
+  mutate(publicity_tra = if_else(barcode %in% public_df_list_tra$barcode, "Yes", "No"),
+         privicity_tra = if_else(barcode %in% private_df_list_tra$barcode, "Yes", "No"),
+         convergence_tra = if_else(barcode %in% convergence_across_patients_tra$barcode, "Yes", "No"))
+
+T_cells$publicity_tra <- metadata$publicity_tra
+T_cells$privicity_tra <- metadata$privicity_tra
+T_cells$convergence_tra <- metadata$convergence_tra
+
+DimPlot(T_cells, reduction = "umap", group.by = "publicity_tra", shuffle = TRUE, seed = 123)
+
+DimPlot(T_cells, reduction = "umap", group.by = "privicity_tra", shuffle = TRUE, seed = 123)
+
+DimPlot(T_cells, reduction = "umap", group.by = "convergence_tra", shuffle = TRUE, seed = 123)
+
+```
+
+# Overlay convergence, publicity, privicity onto UMAP for TRB
+
+```{r}
+
+metadata <- T_cells@meta.data
+  
+metadata$barcode <- rownames(metadata)
+
+metadata <- metadata %>%
+  mutate(publicity_trb = if_else(barcode %in% public_df_list_trb$barcode, "Yes", "No"),
+         privicity_trb = if_else(barcode %in% private_df_list_trb$barcode, "Yes", "No"),
+         convergence_trb = if_else(barcode %in% convergence_across_patients_trb$barcode, "Yes", "No"))
+
+T_cells$publicity_trb <- metadata$publicity_trb
+T_cells$privicity_trb <- metadata$privicity_trb
+T_cells$convergence_trb <- metadata$convergence_trb
+
+DimPlot(T_cells, reduction = "umap", group.by = "publicity_trb", shuffle = TRUE, seed = 123)
+
+DimPlot(T_cells, reduction = "umap", group.by = "privicity_trb", shuffle = TRUE, seed = 123)
+
+DimPlot(T_cells, reduction = "umap", group.by = "convergence_trb", shuffle = TRUE, seed = 123)
 
 ```
