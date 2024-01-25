@@ -190,19 +190,43 @@ write.csv(downsampled_df, "../saved_data/downsampled_df.csv")
 
 ```
 
+# Calculate expansion from full clonotype
+
+```{r}
+
+combined_data <- combined_data %>%
+  pivot_wider(id_cols = c(barcode, patient, group, predicted.celltype.l1, predicted.celltype.l2), names_from = "Chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
+  filter(!(is.na(v_gene_TRA)),
+         !(is.na(j_gene_TRA)),
+         !(is.na(cdr3_TRA)),
+         !(is.na(v_gene_TRB)),
+         !(is.na(j_gene_TRB)),
+         !(is.na(cdr3_TRB))) %>%
+  mutate(clonotype = paste(v_gene_TRA, v_gene_TRB, j_gene_TRA, j_gene_TRB, cdr3_TRA, cdr3_TRB, sep = "_")) %>%
+  group_by(patient, clonotype) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$")
+
+# just throw out ~5k seqs that aren't paired TRA/TRB?
+
+combined_data
+
+```
+
 # Prep data for summary plots (normalized method)
 
 ```{r}
 
 prepped_data <- combined_data %>%
   filter(group != "no ICI") %>%
-  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
-  # calculate clonotype counts within patients to get a sense of expansion
-  mutate(count = n()) %>%
   # normalize by sequencing depth
   left_join(seq_depth, by = c("patient", "group")) %>%
   mutate(normalized_count = count / seq_depth) %>%
-  # look at just unique clonotypes from each patient
+  ## look at just unique clonotypes from each patient
+  group_by(patient, clonotype, Chain) %>%
   dplyr::slice(1) %>%
   ungroup() %>%
   group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%
@@ -322,7 +346,6 @@ results_df
 ```{r}
 
 top_results <- results_df %>%
-  filter(value < 0.05) %>%
   mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
 
 filtered_results_df <- results_df %>%
@@ -408,29 +431,28 @@ Heatmap(mat,
 
 ```{r}
 
-cd8_tem_trb_pgen <- prepped_data %>%
-  filter(predicted.celltype.l2 == "CD8 TEM" & Chain == "TRB" & chunk == "25")
+cd8_trm_tra_10 <- prepped_data %>%
+  filter(predicted.celltype.l2 == "CD8 Trm" & Chain == "TRA" & chunk %in% c("5", "10")) %>%
+  mutate(pgen = log10(pgen),
+         new_chunk = 10)
 
-cd8_tem_trb_pgen
+cd8_trm_tra_15 <- prepped_data %>%
+  filter(predicted.celltype.l2 == "CD8 Trm" & Chain == "TRA" & chunk %in% c("5", "10", "15")) %>%
+  mutate(pgen = log10(pgen),
+         new_chunk = 15)
 
-ggplot(cd8_tem_trb_pgen, aes(x = group, y = log10(pgen))) +
+cd8_trm_tra_20 <- prepped_data %>%
+  filter(predicted.celltype.l2 == "CD8 Trm" & Chain == "TRA" & chunk %in% c("5", "10", "15", "20")) %>%
+  mutate(pgen = log10(pgen),
+         new_chunk = 20)
+
+cd8_trm_tra <- cd8_trm_tra_10 %>%
+  full_join(cd8_trm_tra_15) %>%
+  full_join(cd8_trm_tra_20)
+
+ggplot(cd8_trm_tra, aes(x = as.factor(new_chunk), y = pgen, fill = group)) +
   geom_boxplot() +
-  labs(title = "Top 25% expanded CD8 TEM TRBs")
-
-cd8_trm_tra <- prepped_data %>%
-  filter(predicted.celltype.l2 == "CD8 Trm" & Chain == "TRA" & chunk == "10") %>%
-  mutate(pgen = log10(pgen)) %>%
-  pivot_longer(cols = c("pgen", "cdr3_length"), names_to = "var") %>%
-  mutate(var = case_when(
-    var == "cdr3_length" ~ "CDR3 length (AAs)",
-    var == "pgen" ~ "pgen (log10)"
-  ))
-
-cd8_trm_tra
-
-ggplot(cd8_trm_tra, aes(x = var, y = value, fill = group)) +
-  geom_boxplot() +
-  labs(x = "", y = "Value")
+  labs(x = "Clonotype bins (% of repertoire across patients)", y = "pgen (log10)")
 
 ```
 
@@ -440,10 +462,9 @@ ggplot(cd8_trm_tra, aes(x = var, y = value, fill = group)) +
 
 prepped_data_downsampled <- downsampled_df %>%
   filter(group != "no ICI") %>%
-  group_by(patient, cdr3, Chain, v_gene, j_gene) %>%
-  # calculate clonotype counts within patients to get a sense of expansion
-  mutate(count = n()) %>%
-  # look at just unique clonotypes from each patient
+  left_join(combined_data, by = c("barcode", "Chain", "patient", "predicted.celltype.l1", "predicted.celltype.l2", "group", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
+  group_by(patient, clonotype, Chain) %>%
+  # look at just unique clonotypes (CDR3 AA - VJ) from each patient
   dplyr::slice(1) %>%
   ungroup() %>%
   group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%

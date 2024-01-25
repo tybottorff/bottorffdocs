@@ -154,18 +154,40 @@ write.csv(downsampled_df, "../saved_data/downsampled_df.csv")
 
 ```
 
+# Calculate expansion from full clonotype
+
+```{r}
+
+combined_data <- combined_data %>%
+  pivot_wider(id_cols = c(barcode, Patient_ID, irAE, predicted.celltype.l1, predicted.celltype.l2), names_from = "chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
+  filter(!(is.na(v_gene_TRA)),
+         !(is.na(j_gene_TRA)),
+         !(is.na(cdr3_TRA)),
+         !(is.na(v_gene_TRB)),
+         !(is.na(j_gene_TRB)),
+         !(is.na(cdr3_TRB))) %>%
+  mutate(clonotype = paste(v_gene_TRA, v_gene_TRB, j_gene_TRA, j_gene_TRB, cdr3_TRA, cdr3_TRB, sep = "_")) %>%
+  group_by(Patient_ID, clonotype) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$")
+
+combined_data
+
+```
+
 # Prep data for summary plots (normalized method)
 
 ```{r}
 
 prepped_data <- combined_data %>%
-  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
-  # calculate clonotype counts within patients to get a sense of expansion
-  mutate(count = n()) %>%
   # normalize by sequencing depth
   left_join(seq_depth, by = c("Patient_ID", "irAE")) %>%
   mutate(normalized_count = count / seq_depth) %>%
   # look at just unique clonotypes (CDR3 AA - VJ) from each patient
+  group_by(Patient_ID, clonotype, Chain) %>%
   dplyr::slice(1) %>%
   ungroup() %>%
   group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%
@@ -188,24 +210,24 @@ perform_wilcox_test <- function(data, cutoff) {
     group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%    
     summarize(
       p_val_pgen = {
-        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+        if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
           NA
         } else {
-          wilcox.test(pgen ~ group, exact = FALSE)$p.value
+          wilcox.test(pgen ~ irAE, exact = FALSE)$p.value
         }
       },
       p_val_cdr3_hydrophobicity = {
-        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+        if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
           NA
         } else {
-          wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
+          wilcox.test(cdr3_hydrophobicity ~ irAE, exact = FALSE)$p.value
         }
       },
       p_val_cdr3_length = {
-        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+        if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
           NA
         } else {
-          wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
+          wilcox.test(cdr3_length ~ irAE, exact = FALSE)$p.value
         }
       }
     ) %>%
@@ -221,24 +243,24 @@ perform_wilcox_test_cumulatively <- function(data, cutoff) {
     group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%    
     summarize(
       p_val_pgen = {
-        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+        if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
           NA
         } else {
-          wilcox.test(pgen ~ group, exact = FALSE)$p.value
+          wilcox.test(pgen ~ irAE, exact = FALSE)$p.value
         }
       },
       p_val_cdr3_hydrophobicity = {
-        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+        if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
           NA
         } else {
-          wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
+          wilcox.test(cdr3_hydrophobicity ~ irAE, exact = FALSE)$p.value
         }
       },
       p_val_cdr3_length = {
-        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+        if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
           NA
         } else {
-          wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
+          wilcox.test(cdr3_length ~ irAE, exact = FALSE)$p.value
         }
       }
     ) %>%
@@ -358,9 +380,8 @@ Heatmap(mat,
 ```{r}
 
 prepped_data_downsampled <- downsampled_df %>%
-  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
-  # calculate clonotype counts within patients to get a sense of expansion
-  mutate(count = n()) %>%
+  left_join(combined_data, by = c("barcode", "Chain", "Patient_ID", "predicted.celltype.l1", "predicted.celltype.l2", "irAE", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
+  group_by(Patient_ID, clonotype, Chain) %>%
   # look at just unique clonotypes (CDR3 AA - VJ) from each patient
   dplyr::slice(1) %>%
   ungroup() %>%
