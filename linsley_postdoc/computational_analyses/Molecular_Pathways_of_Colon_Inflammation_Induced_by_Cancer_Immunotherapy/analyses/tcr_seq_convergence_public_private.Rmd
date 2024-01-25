@@ -140,6 +140,8 @@ convergence_publicity_privicity_df <- combined_data %>%
   # look at just unique clonotypes from each patient
   dplyr::slice(1)
 
+write.csv(convergence_publicity_privicity_df, "../saved_data/converged_public_private_tcrs.csv")
+
 convergence_publicity_privicity_df
 
 public_counts <- convergence_publicity_privicity_df %>%
