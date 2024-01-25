@@ -373,12 +373,49 @@ tcr <- read.csv("../raw_data/tcr/GSE144469_TCR_filtered_contig_annotations_all.c
   mutate(barcode = paste(barcode, barcode_num, sep = "")) %>%
   as.data.frame()
 
+tcr
+
+```
+
+# Add pgen metadata
+
+```{r}
+
+pgen <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv") %>%
+  mutate(pgen = log10(pgen)) %>%
+  pivot_wider(id_cols = c(barcode, predicted.celltype.l1, predicted.celltype.l2), names_from = "Chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt", "pgen", "cdr3_length", "cdr3_hydrophobicity"))
+
+test <- tcr %>%
+  left_join(pgen, by = c("barcode", "v_gene_TRA", "v_gene_TRB", "d_gene_TRA", "d_gene_TRB", "j_gene_TRA", "j_gene_TRB", "c_gene_TRA", "c_gene_TRB", "cdr3_TRA", "cdr3_TRB", "cdr3_nt_TRA", "cdr3_nt_TRB")) %>%
+  filter(predicted.celltype.l2 == "CD8 Trm") %>%
+  filter(!(is.na(pgen_TRA)))
+
+# Find the quantiles for the top and bottom 10%
+top_10_percentile <- quantile(test$pgen_TRA, 0.9)
+bottom_10_percentile <- quantile(test$pgen_TRA, 0.1)
+
+# Filter the values in the top and bottom 10%
+top_10_percentile_values <- test$pgen_TRA[test$pgen_TRA >= top_10_percentile]
+bottom_10_percentile_values <- test$pgen_TRA[test$pgen_TRA <= bottom_10_percentile]
+
+# top 10% are from -5.36 to -7.36 so > -7.36
+# bot 10% are from -13.36 to -24.03 so < -13.36
+
+ggplot(test, aes(x = pgen_TRA)) +
+  geom_histogram(fill = "blue", color = "black", alpha = 0.7)
+
+tcr <- tcr %>%
+  left_join(pgen, by = c("barcode", "v_gene_TRA", "v_gene_TRB", "d_gene_TRA", "d_gene_TRB", "j_gene_TRA", "j_gene_TRB", "c_gene_TRA", "c_gene_TRB", "cdr3_TRA", "cdr3_TRB", "cdr3_nt_TRA", "cdr3_nt_TRB")) %>%
+  mutate(quantile = case_when(
+    pgen_TRA > -7.36 ~ "Top 10%",
+    pgen_TRA < -13.36 ~ "Bottom 10%",
+    TRUE ~ "Middle 80%"
+  ))
+
 rownames(tcr) <- tcr$barcode
 
 tcr <- tcr %>%
   select(-barcode)
-
-tcr
 
 ```
 
@@ -426,5 +463,53 @@ DimPlot(tcr_and_rna, reduction = "umap", group.by = "expansion_bin", shuffle = T
 ```{r}
 
 DimPlot(tcr_and_rna, reduction = "umap", group.by = "group", shuffle = TRUE, seed = 455)
+
+```
+
+# Look at CD8 Trms with highest and lowest TRA pgen (log10) scores on UMAP
+
+```{r}
+
+cd8_trms <- subset(tcr_and_rna, subset = predicted.celltype.l2 == 'CD8 Trm' & quantile %in% c("Bottom 10%", "Top 10%"))
+
+DimPlot(cd8_trms, reduction = "umap", group.by = "quantile", shuffle = TRUE, seed = 455, pt.size = 0.5)
+
+```
+
+# DEG analysis between CD8 Trms with highest and lowest TRA pgen (log10) scores
+
+```{r}
+
+Idents(cd8_trms) <- "quantile"
+
+#Idents(cd8_trms)
+
+cd8_trms_degs <- FindMarkers(cd8_trms, ident.1 = "Bottom 10%", ident.2 = "Top 10%", verbose = FALSE)
+
+cd8_trms_degs
+
+```
+
+# Pseudobulk to take into account that many cells come from same patient
+
+```{r}
+
+# pseudobulk the counts based on donor-condition-celltype
+cd8_trms_pseudobulk <- AggregateExpression(cd8_trms, assays = "SCT", return.seurat = T, group.by = c("orig.ident", "quantile"))
+
+# each 'cell' is a donor-quantile (top or bot) combination
+#Cells(cd8_trms_pseudobulk)
+
+cd8_trms_pseudobulk$quantile <- sub(".*_([^_]+)$", "\\1", colnames(cd8_trms_pseudobulk))
+
+cd8_trms_pseudobulk$quantile <- factor(cd8_trms_pseudobulk$quantile, levels = c("Bottom 10%", "Top 10%"))
+
+Idents(cd8_trms_pseudobulk) <- "quantile"
+
+cd8_trms_degs_pseudobulk <- FindMarkers(object = cd8_trms_pseudobulk, 
+                         ident.1 = "Bottom 10%", 
+                         ident.2 = "Top 10%")
+
+cd8_trms_degs_pseudobulk
 
 ```
