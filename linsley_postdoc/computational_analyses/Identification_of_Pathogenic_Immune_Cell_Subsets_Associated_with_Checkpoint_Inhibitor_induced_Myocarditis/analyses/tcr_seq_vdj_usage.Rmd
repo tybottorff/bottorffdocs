@@ -99,11 +99,6 @@ j_genes <- tcr_seq %>%
   mutate(normalized_count = count / sum(count)) %>%
   filter(j_gene %in% interesting_j_genes$j_gene)
 
-#c_genes <- tcr_seq %>%
-#  select(Patient_ID, predicted.celltype.l1, predicted.celltype.l2, barcode, Chain, v_gene, j_gene, c_gene, irAE) %>%
-#  group_by(c_gene, irAE) %>%
-#  summarize(count = n())
-
 ```
 
 # Just make bar plots for VJ gene usages by irAE group
