@@ -19,6 +19,7 @@ library(tidyr)
 library(VennDiagram)
 library(scales)
 library(ggpubr)
+library(Seurat)
 
 ```
 
@@ -173,12 +174,33 @@ ggplot(convergence_counts, aes(x = convergence, y = fraction, fill = irAE)) +
 
 ```
 
-# Overlay convergence, publicity, privicity onto UMAP
+# Filter public, private, converged dfs for TRA/TRB to simplify downstream analysis
+
+```{r}
+
+public_df_list_tra <- public_df_list %>% filter(Chain == "TRA")
+
+public_df_list_trb <- public_df_list %>% filter(Chain == "TRB")
+
+private_df_list_tra <- private_df_list %>% filter(Chain == "TRA")
+
+private_df_list_trb <- private_df_list %>% filter(Chain == "TRB")
+
+convergence_across_patients_tra <- convergence_across_patients %>% filter(Chain == "TRA")
+
+convergence_across_patients_trb <- convergence_across_patients %>% filter(Chain == "TRB")
+
+```
+
+# Read in T cells RDS
 
 ```{r}
 
 T_cells <- readRDS("../saved_data/final_seurat_T_cells.rds")
+
 ```
+
+# Overlay convergence, publicity, privicity onto UMAP for TRA
 
 ```{r}
 
@@ -186,20 +208,44 @@ metadata <- T_cells@meta.data
   
 metadata$barcode <- rownames(metadata)
 
-metadata
+metadata <- metadata %>%
+  mutate(publicity_tra = if_else(barcode %in% public_df_list_tra$barcode, "Yes", "No"),
+         privicity_tra = if_else(barcode %in% private_df_list_tra$barcode, "Yes", "No"),
+         convergence_tra = if_else(barcode %in% convergence_across_patients_tra$barcode, "Yes", "No"))
+
+T_cells$publicity_tra <- metadata$publicity_tra
+T_cells$privicity_tra <- metadata$privicity_tra
+T_cells$convergence_tra <- metadata$convergence_tra
+
+DimPlot(T_cells, reduction = "umap", group.by = "publicity_tra", shuffle = TRUE, seed = 123)
+
+DimPlot(T_cells, reduction = "umap", group.by = "privicity_tra", shuffle = TRUE, seed = 123)
+
+DimPlot(T_cells, reduction = "umap", group.by = "convergence_tra", shuffle = TRUE, seed = 123)
+
+```
+
+# Overlay convergence, publicity, privicity onto UMAP for TRB
+
+```{r}
+
+metadata <- T_cells@meta.data
+  
+metadata$barcode <- rownames(metadata)
 
 metadata <- metadata %>%
-  mutate(barc_chain = paste(barcode, chain, sep = "")) %>%
-  mutate(publicity = if_else(barc_chain %in% public_df_list$barc_chain, "Yes", "No"),
-         privicity = if_else(barc_chain %in% private_df_list$barc_chain, "Yes", "No"),
-         convergence = if_else(barc_chain %in% convergence_across_patients$barc_chain, "Yes", "No"))
+  mutate(publicity_trb = if_else(barcode %in% public_df_list_trb$barcode, "Yes", "No"),
+         privicity_trb = if_else(barcode %in% private_df_list_trb$barcode, "Yes", "No"),
+         convergence_trb = if_else(barcode %in% convergence_across_patients_trb$barcode, "Yes", "No"))
 
-T_cells$publicity <- metadata$publicity
-T_cells$privicity <- metadata$privicity
-T_cells$convergence <- metadata$convergence
+T_cells$publicity_trb <- metadata$publicity_trb
+T_cells$privicity_trb <- metadata$privicity_trb
+T_cells$convergence_trb <- metadata$convergence_trb
 
-DimPlot(just_T_cells, reduction = "umap", group.by = "publicity")
+DimPlot(T_cells, reduction = "umap", group.by = "publicity_trb", shuffle = TRUE, seed = 123)
 
-# just make separate plots for TRA/TRB as they're in same cell but plots may look different
+DimPlot(T_cells, reduction = "umap", group.by = "privicity_trb", shuffle = TRUE, seed = 123)
+
+DimPlot(T_cells, reduction = "umap", group.by = "convergence_trb", shuffle = TRUE, seed = 123)
 
 ```
