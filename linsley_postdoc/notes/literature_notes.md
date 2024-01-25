@@ -1,6 +1,8 @@
 # Accumulation of identical T cells in melanoma and vitiligo-like leukoderma
  - numbers of T cells in small skin samples often insufficient for clonality analysis
  - **perhaps only well-expressed self proteins are efficient in inducing tolerance, so rare self proteins can induce autoreactivity?**
+# Activation of CD8 T cells accelerates anti-PD-1 antibody-induced psoriasis-like dermatitis through IL-6
+ - human samples: infiltration of CD8 T cells into epidermis, IL-6-dependent pathogenesis
 # Activation of human T cells by major histocompatability complex class II expressing neutrophils: proliferation in the presence of superantigen, but not tetanus toxoid
  - polymorphonuclear neutrophils (PMNs) function for acute phagocytic clearance of foreign pathogens, release inflammatory mediators, assumed to not express but can express MHC class II molecules after stimulation by interferon γ
  - superantigen refers to antigen binding to MHC class II with high affinity outside antigen binding groove in absence of antigen processing, trigger proliferation of T cells expressing TcR-VB gene products (stimulate T cells in TCR Vβ-specific manner)
@@ -1256,6 +1258,9 @@
  - molecular continuum from pre-T<sub>EX</sub> to terminally exhausted T cells (continuous increase in *CXCL13*, *TOX1/2*, inhibitory receptor activity)
 # Integrative analysis of risk factors for immune-related adverse events of checkpoint blockade therapy in cancer
  - allelic variation of *HLA-B* correlated with irAE risk
+# Interferon-gamma-producing CD8<sup>+</sup> tissue resident memory T cells are a targetable hallmark of immune checkpoint inhibitor-colitis
+ - CD8 Trms dominant activated T cell subset in ICI colitis, activation correlates with ICI colitis severity
+ - activated CD8 Trms express high levels of checkpoint inhibitor, interferon-gamma transcripts
 # Interpreting T cell crossreactivity through structure: implications for TCR-based cancer immunotherapy
 ## Abstract
  - melanoma-specific T cells crossreacting with healthy heart/nervous tissue, crossreactivity
@@ -1635,6 +1640,8 @@
  - **apparently possible to identify antitumor TCRs from TIL transcriptomic state, and here they extend that to PBMCs?**
 ## Results
  - circulating tumor reactive T cells: lower expression of cytotoxic molecules, higher expression of T cell activation genes, memory quiescence, tissue residency, inhibitory markers
+# Positive correlation of peripheral CD8<sup>+</sup> T lymphocytes with immune-related adverse events and combinatorial prognostic value in advanced non-small cell lung cancer patients receiving immune checkpoint inhibitors
+ - baseline level of peripheral CD8 Ts risk factor for irAE onset, also associated with longer survival
 # Potentiating local and abscopal antitumor efficacy through radiation with FAP-CD40 DARPin and anti-PD1 therapy
  - ~70% of patients develop resistance to ICI
  - CD40: costimulatory molecule that drives DCs and TAMs (tumor associated macrophages) to prime T cells
