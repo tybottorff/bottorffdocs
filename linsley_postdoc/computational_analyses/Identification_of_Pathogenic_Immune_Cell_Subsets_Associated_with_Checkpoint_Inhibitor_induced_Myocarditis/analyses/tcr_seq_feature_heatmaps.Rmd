@@ -170,14 +170,14 @@ prepped_data <- combined_data %>%
   ungroup() %>%
   group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%
   arrange(-normalized_count) %>%
-  mutate(chunk_size = ceiling(n() * 0.1),
-         chunk = 10*ceiling(row_number() / chunk_size))
+  mutate(chunk_size = ceiling(n() * 0.05),
+         chunk = 5*ceiling(row_number() / chunk_size))
 
 prepped_data
 
 ```
 
-# Perform wilcox rank sum tests within chunks of 10% clonotypes (normalized method)
+# Define test functions
 
 ```{r}
 
@@ -188,24 +188,24 @@ perform_wilcox_test <- function(data, cutoff) {
     group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%    
     summarize(
       p_val_pgen = {
-        if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
           NA
         } else {
-          wilcox.test(pgen ~ irAE, exact = FALSE)$p.value
+          wilcox.test(pgen ~ group, exact = FALSE)$p.value
         }
       },
       p_val_cdr3_hydrophobicity = {
-        if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
           NA
         } else {
-          wilcox.test(cdr3_hydrophobicity ~ irAE, exact = FALSE)$p.value
+          wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
         }
       },
       p_val_cdr3_length = {
-        if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
           NA
         } else {
-          wilcox.test(cdr3_length ~ irAE, exact = FALSE)$p.value
+          wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
         }
       }
     ) %>%
@@ -214,15 +214,54 @@ perform_wilcox_test <- function(data, cutoff) {
   return(result)
 }
 
+# Function to perform the test cumulativley up to a specific bin of clonotype abundances
+perform_wilcox_test_cumulatively <- function(data, cutoff) {
+  result <- data %>%
+    filter(chunk <= cutoff) %>%
+    group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%    
+    summarize(
+      p_val_pgen = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(pgen ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_hydrophobicity = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_length = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
+        }
+      }
+    ) %>%
+    ungroup()
+  
+  return(result)
+}
+
+```
+
+# Perform wilcox rank sum tests within chunks of 5% clonotypes (normalized method)
+
+```{r}
+
 # List to store results
 results_list <- list()
 
 # Iterate through chunk cutoffs
-for (num in 1:10) {
+for (num in 1:5) {
   result <- prepped_data %>%
-    perform_wilcox_test(cutoff = num*10)
+    perform_wilcox_test_cumulatively(cutoff = num*5)
 
-  results_list[[as.character(num*10)]] <- result
+  results_list[[as.character(num*5)]] <- result
 }
 
 # Combine results into a single dataframe
@@ -246,14 +285,13 @@ results_df
 ```{r}
 
 top_results <- results_df %>%
-  filter(value < 0.05) %>%
   mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
 
 filtered_results_df <- results_df %>%
   filter(category %in% top_results$category) %>%
   mutate(log_val = -log10(value))
 
-filtered_results_df$Chunk <- factor(filtered_results_df$Chunk, levels = c("10", "20", "30", "40", "50", "60", "70", "80", "90", "100"))
+filtered_results_df$Chunk <- factor(filtered_results_df$Chunk, levels = c("5", "10", "15", "20", "25"))
 
 heatmap_df <- filtered_results_df %>%
   select(-value, -category) %>%
@@ -312,19 +350,7 @@ Heatmap(mat,
         show_row_names = FALSE,
         column_title = "Clonotypes bins\n(% of repertoire across patients)",
         column_title_side = "bottom",
-        heatmap_legend_param = list(title = "Wilcox padj val (-log10)\n for yes vs. no irAE"),
-        layer_fun = function(j, i, x, y, width, height, fill) {
-          v = pindex(mat, i, j)
-          l = v > -log10(0.05) & v < -log10(0.01)
-          if (any(l)) {
-            grid.text("*", x[l], y[l], gp = gpar(fontsize = 10))
-          }
-          q = v > -log10(0.01)
-          if (any(q)) {
-            grid.text("**", x[q], y[q], gp = gpar(fontsize = 10))
-          }
-        }
-      )
+        heatmap_legend_param = list(title = "Wilcox padj val (-log10)\n for yes vs. no irAE"))
 
 ```
 # Prep data for summary plots (downsampled method)
@@ -340,14 +366,14 @@ prepped_data_downsampled <- downsampled_df %>%
   ungroup() %>%
   group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%
   arrange(-count) %>%
-  mutate(chunk_size = ceiling(n() * 0.1),
-         chunk = 10*ceiling(row_number() / chunk_size))
+  mutate(chunk_size = ceiling(n() * 0.05),
+         chunk = 5*ceiling(row_number() / chunk_size))
 
 prepped_data_downsampled
 
 ```
 
-# Perform wilcox rank sum tests within chunks of 10% clonotypes (downsampled method)
+# Perform wilcox rank sum tests within chunks of 5% clonotypes (downsampled method)
 
 ```{r}
 
@@ -355,11 +381,11 @@ prepped_data_downsampled
 results_list_downsampled <- list()
 
 # Iterate through chunk cutoffs
-for (num in 1:10) {
+for (num in 1:5) {
   result <- prepped_data_downsampled %>%
-    perform_wilcox_test(cutoff = num*10)
+    perform_wilcox_test_cumulatively(cutoff = num*5)
 
-  results_list[[as.character(num*10)]] <- result
+  results_list[[as.character(num*5)]] <- result
 }
 
 # Combine results into a single dataframe
@@ -389,7 +415,7 @@ filtered_results_df_downsampled <- results_df_downsampled %>%
   filter(category %in% top_results_downsampled$category) %>%
   mutate(log_val = -log10(value))
 
-filtered_results_df_downsampled$Chunk <- factor(filtered_results_df_downsampled$Chunk, levels = c("10", "20", "30", "40", "50", "60", "70", "80", "90", "100"))
+filtered_results_df_downsampled$Chunk <- factor(filtered_results_df_downsampled$Chunk, levels = c("5", "10", "15", "20", "25"))
 
 heatmap_df_downsampled <- filtered_results_df_downsampled %>%
   select(-value, -category) %>%
@@ -449,57 +475,5 @@ Heatmap(mat_downsampled,
         column_title = "Clonotypes bins\n(% of repertoire across patients)",
         column_title_side = "bottom",
         heatmap_legend_param = list(title = "Wilcox p val (-log10)\n for yes vs. no irAE"))
-
-```
-
-# Perform feature comparisons instead between cell types rather than between irAE groups
-
-```{r}
-
-tra_cell_type_features <- combined_data %>%
-  filter(Chain == "TRA") %>%
-  mutate(is_CD4_prolif = if_else(predicted.celltype.l2 == "CD4 Proliferating", "Yes", "No"),
-         is_CD4_TEM = if_else(predicted.celltype.l2 == "CD4 TEM", "Yes", "No"),
-         is_CD8_naive = if_else(predicted.celltype.l2 == "CD8 Naive", "Yes", "No"),
-         is_CD8_TCM = if_else(predicted.celltype.l2 == "CD8 TCM", "Yes", "No"),
-         is_mait = if_else(predicted.celltype.l2 == "MAIT", "Yes", "No")) %>%
-  group_by(Patient_ID, cdr3, chain, v_gene, j_gene) %>%
-  slice(1) %>%
-  ungroup() %>%
-  select(barcode, Chain, cdr3, pgen, cdr3_length, cdr3_hydrophobicity, irAE, predicted.celltype.l2, is_CD4_TEM, is_mait)
-
-tra_cell_type_features
-
-ggplot(tra_cell_type_features, aes(x = is_CD4_TEM, y = log10(pgen))) +
-  geom_boxplot() +
-  labs(x = "CD4 TEM status", y = "pgen (-log10)")
-
-ggplot(tra_cell_type_features, aes(x = is_CD4_TEM, y = cdr3_length)) +
-  geom_boxplot() +
-  labs(x = "CD4 TEM status", y = "CDR3 length (AAs)")
-
-ggplot(tra_cell_type_features, aes(x = is_mait, y = log10(pgen))) +
-  geom_boxplot() +
-  labs(x = "MAIT status", y = "pgen (-log10)")
-
-ggplot(tra_cell_type_features, aes(x = is_mait, y = cdr3_length)) +
-  geom_boxplot() +
-  labs(x = "MAIT status", y = "CDR3 length (AAs)")
-
-#print(wilcox_result <- wilcox.test(test$cdr3_length ~ test$is_CD4_prolif, exact = FALSE))
-
-# cell types up/down in colitis irAE (some trending same in myocard data)
-# CDR3 length (TRA): padj vals (adjusted within 5 cell types I tested for this feature for TRA)
-# CD4 TEM: 1.6335e-3
-# MAITs: 8.52e-12
-
-# TRA CDR3 length for CD4 TEMs and MAITs seems significantly different vs other cell types
-# as do TRA pgen for CD4 TEMs and MAITs
-
-# pgen (TRA) padj vals
-# CD4 TEM: 4.85e-3
-# MAITs: 1.485e-13
-
-#adjusted_p_values <- p.adjust(c(0.3066, 0.00194, 0.2181, 0.4082, 2.97*10^-14), method = "BH")
 
 ```
