@@ -52,13 +52,14 @@ dehashed_combined_tcr_seq_doubled <- dehashed_combined_tcr_seq %>%
 
 ```
 
-# Analyze diversity
+# Analyze diversity of CDR3 AAs using Shannon metric
 
 ```{r}
 
 cdr3_amino_acid_diversity_df <- dehashed_combined_tcr_seq_doubled %>%
   filter(!(is.na(cdr3)),
-         chain != "Multi") %>%
+         chain != "Multi",
+         predicted.celltype.l2 != "NK") %>%
   group_by(cdr3, chain, Patient_ID, irAE, predicted.celltype.l1) %>%
   mutate(cdr3_amino_acid_count = n()) %>%
   ungroup() %>%
@@ -76,7 +77,8 @@ ggplot(cdr3_amino_acid_diversity_df, aes(x = chain, y = shannon, fill = irAE)) +
   geom_boxplot() +
   facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
   labs(x = "Chain",
-       y = "Shannon entropy")
+       y = "Shannon entropy") +
+  scale_y_continuous(breaks = pretty_breaks(n = 3))
 
 # Shannon entropy: 0 means monoclonal, higher means polyclonal, weights richness (total # of unique clones) over evenness
 
@@ -87,16 +89,5 @@ ggplot(cdr3_amino_acid_diversity_df, aes(x = chain, y = inv_shannon, fill = irAE
        y = "Inverse Shannon entropy")
 
 # assuming higher inverse means monoclonal, lower inverse means polyclonal
-
-# Filter the data for statistical test
-test_data <- cdr3_amino_acid_diversity_df %>%
-  filter(chain == "TRA",
-         predicted.celltype.l1 == "other T")
-
-# Calculate the Wilcoxon rank-sum test statistic and p-value
-wilcox_result <- wilcox.test(test_data$inv_shannon ~ test_data$irAE)
-
-# Print the results
-print(wilcox_result)
 
 ```
