@@ -382,6 +382,8 @@ DimPlot(just_T_cells, reduction = "umap", group.by = "expansion_bin", shuffle = 
 
 ```{r}
 
-DimPlot(just_T_cells, reduction = "umap", group.by = "irAE", shuffle = TRUE, seed = 455)
+# standardize colors with UMAP for irAE groups from colitis dataset
+
+DimPlot(just_T_cells, reduction = "umap", group.by = "irAE", shuffle = TRUE, seed = 455, cols = c("#00BA38", "#F8766D"))
 
 ```
