@@ -47,6 +47,9 @@ theme_set(
 
 rna_tcr <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv")
 
+rna_tcr <- rna_tcr %>%
+  bind_rows(mutate(rna_tcr, predicted.celltype.l1 = "All T cells"))
+
 ```
 
 # Analyze diversity
@@ -55,7 +58,8 @@ rna_tcr <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv")
 
 cdr3_amino_acid_diversity_df <- rna_tcr %>%
   filter(!(is.na(cdr3)),
-         Chain != "Multi") %>%
+         Chain != "Multi",
+         group != "no ICI") %>%
   group_by(cdr3, Chain, orig.ident, group, predicted.celltype.l1) %>%
   mutate(cdr3_amino_acid_count = n()) %>%
   ungroup() %>%
@@ -98,7 +102,7 @@ p + scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_b
 # Filter the data for statistical test
 test_data <- cdr3_amino_acid_diversity_df %>%
   filter(Chain == "TRB",
-         predicted.celltype.l1 == "CD8 T",
+         predicted.celltype.l1 == "All T cells",
          group != "no ICI")
 
 # Calculate the Wilcoxon rank-sum test statistic and p-value
@@ -110,16 +114,10 @@ print(wilcox_result)
 # TRA != no ICI other T: 0.0293
 # TRB != no ICI other T: 0.1079
 
-# TRA != ICI no colitis other T: 0.002953
-# TRB != ICI no colitis other T: 0.02067
-
 # TRA != no ICI CD8 T: 0.1079
 # TRB != no ICI CD8 T: 0.1419
 
-# TRA != ICI no colitis CD8 T: 0.08298
-# TRB != ICI no colitis CD8 T: 0.08298
-
-p_values <- c(0.0293, 0.002953, 0.02067, 0.08298, 0.08298)
+p_values <- c(0.0293, 0.1079, 0.1079, 0.1419)
 
 # Adjust p-values using the Benjamini-Hochberg method (default method)
 adjusted_p_values <- p.adjust(p_values, method = "BH")
