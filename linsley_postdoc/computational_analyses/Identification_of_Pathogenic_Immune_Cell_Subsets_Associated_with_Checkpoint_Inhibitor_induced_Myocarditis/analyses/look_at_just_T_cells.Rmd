@@ -351,3 +351,37 @@ p1 + p2
 saveRDS(just_T_cells, "../saved_data/final_seurat_T_cells.rds")
 
 ```
+
+# Make plot of UMAP colored by expansion
+
+```{r}
+
+metadata <- just_T_cells@meta.data %>%
+  mutate(clonotype = paste(v_gene_TRA, v_gene_TRB, j_gene_TRA, j_gene_TRB, cdr3_TRA, cdr3_TRB, sep = "_")) %>%
+  group_by(Patient_ID, clonotype) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(expansion_bin = case_when(
+    count == 1 ~ "1",
+    count > 1 & count < 5 ~ "2-4",
+    count >= 5 & count < 20 ~ "5-19",
+    count >= 20 & count < 40 ~ "20-39",
+    count >= 40 & count < 100 ~ "40-99",
+    count >= 100 ~ "> 100"
+  ))
+
+just_T_cells$expansion_bin <- metadata$expansion_bin
+
+just_T_cells$expansion_bin <- factor(just_T_cells$expansion_bin, levels = c("1", "2-4", "5-19", "20-39", "40-99", "> 100"))
+
+DimPlot(just_T_cells, reduction = "umap", group.by = "expansion_bin", shuffle = TRUE, seed = 123)
+
+```
+
+# Look at UMAP colored by irAE group
+
+```{r}
+
+DimPlot(just_T_cells, reduction = "umap", group.by = "irAE", shuffle = TRUE, seed = 455)
+
+```
