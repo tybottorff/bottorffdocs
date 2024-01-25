@@ -134,6 +134,18 @@ vln_plot
 
 ggsave(vln_plot, file = "../figures/vln_plot_qc.svg")
 
+# show plots with QC cutoffs
+
+VlnPlot(colon_t_cells, features = c("nFeature_RNA"), pt.size = 0) +
+  geom_hline(yintercept = 200, linetype = "dashed", color = "red") +
+  NoLegend() +
+  theme(axis.text.x = element_blank())
+
+VlnPlot(colon_t_cells, features = c("percent_mito"), pt.size = 0) +
+  geom_hline(yintercept = 11, linetype = "dashed", color = "red") +
+  NoLegend() +
+  theme(axis.text.x = element_blank())
+
 ```
 
 # Set author QC metric thresholds
