@@ -75,7 +75,7 @@ cell_abundance_df <- feature_df %>%
   group_by(Patient_ID) %>%
   mutate(normalized_count = count / sum(count)) %>%
   # filter for just subtypes of interest
-  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Proliferating", "CD4 TEM", "CD8 TCM", "MAIT"))
+  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Proliferating", "CD8 Trm", "CD4 Trm", "CD4 TEM", "CD4 TCM", "CD8 TEM", "CD8 TCM", "CD4 Naive", "CD8 Naive"))
 
 cell_abundance_df
 
@@ -84,16 +84,6 @@ ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_co
   labs(x = "", fill = "irAE", y = "Normalized cell\nproportion (log10)") +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
-
-# Filter the data for statistical test
-test_data <- cell_abundance_df %>%
-  filter(predicted.celltype.l2 == "MAIT")
-
-# Calculate the t-test statistic and p-value
-t_test_result <- t.test(test_data$normalized_count ~ test_data$irAE)
-
-# Print the results
-print(t_test_result)
 
 ```
 
