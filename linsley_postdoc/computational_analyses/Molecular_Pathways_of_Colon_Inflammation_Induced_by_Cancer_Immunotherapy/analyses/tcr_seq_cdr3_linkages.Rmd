@@ -68,13 +68,15 @@ seurat_obj <- readRDS("../saved_data/T_cells.rds")
 umap_coords <- Embeddings(object = seurat_obj[["umap"]])[(colnames(seurat_obj)), c(1, 2)]
 umap_coords <- as.data.frame(umap_coords)
 umap_coords$celltype <- seurat_obj@meta.data$predicted.celltype.l2
+umap_coords$cluster <- seurat_obj@meta.data$seurat_clusters
 
 umap_coords$barcode <- rownames(umap_coords)
 
 rownames(umap_coords) <- NULL
 
 umap_coords <- umap_coords %>%
-  left_join(tcrs %>% group_by(barcode) %>% slice(1) %>% ungroup() %>% select(barcode, group), by = "barcode")
+  left_join(tcrs %>% group_by(barcode) %>% slice(1) %>% ungroup() %>% select(barcode, group), by = "barcode") %>%
+  mutate(celltype = if_else(cluster %in% c(25, 27), "CD4 Trm", if_else(cluster %in% c(3, 7, 9, 15, 16), "CD8 Trm", celltype)))
 
 umap_coords
 
