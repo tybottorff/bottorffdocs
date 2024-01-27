@@ -621,6 +621,10 @@ ggplot(cd8_trm_tra, aes(x = as.factor(new_chunk), y = pgen, fill = group)) +
 
 converged_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
   left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "group", "cdr3_nt", "c_gene", "patient")) %>%
+  ## look at just unique clonotypes from each patient
+  group_by(patient, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
   filter(convergence == "Yes",
          group != "no ICI") %>%
   group_by(predicted.celltype.l2, Chain) %>%
@@ -658,6 +662,10 @@ converged_tcrs
 
 public_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
   left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "group", "cdr3_nt", "c_gene", "patient")) %>%
+  ## look at just unique clonotypes from each patient
+  group_by(patient, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
   filter(publicity == "Yes",
          group != "no ICI") %>%
   group_by(predicted.celltype.l2, Chain) %>%
@@ -695,6 +703,10 @@ public_tcrs
 
 private_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
   left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "group", "cdr3_nt", "c_gene", "patient")) %>%
+  ## look at just unique clonotypes from each patient
+  group_by(patient, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
   filter(privicity == "Yes",
          group != "no ICI") %>%
   group_by(predicted.celltype.l2, Chain) %>%
@@ -732,6 +744,10 @@ private_tcrs
 
 all_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
   left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "group", "cdr3_nt", "c_gene", "patient")) %>%
+  ## look at just unique clonotypes from each patient
+  group_by(patient, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
   filter(group != "no ICI") %>%
   group_by(predicted.celltype.l2, Chain) %>%
   summarize(
@@ -767,6 +783,26 @@ all_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
 all_tcrs
 
 # private CD8 TEM TRB pgen and CDR3 length different between irAE groups
-# CD4 proliferawting TRB pgen different pgen irAE groups
+# CD4 proliferating TRB pgen different pgen irAE groups
+
+```
+
+# Make box plot for all CD4 proliferating TRB pgen
+
+```{r}
+
+cd4_prolif_trb_pgen <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
+  left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "group", "cdr3_nt", "c_gene", "patient")) %>%
+  filter(group != "no ICI",
+         Chain == "TRB")
+
+cd4_prolif_trb_pgen
+
+cd4_prolif_trb_pgen$group <- factor(cd4_prolif_trb_pgen$group, levels = c("ICI no colitis", "ICI colitis"))
+
+ggplot(cd4_prolif_trb_pgen, aes(x = predicted.celltype.l2, y = log10(pgen), fill = group)) +
+  geom_boxplot() +
+  labs(x = "Cell type", y = "pgen (log10)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
 
 ```
