@@ -505,6 +505,10 @@ Heatmap(mat_downsampled,
 
 converged_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
   left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "irAE", "cdr3_nt", "c_gene", "Patient_ID", "cdr3_length")) %>%
+  ## look at just unique clonotypes from each patient
+  group_by(Patient_ID, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
   filter(convergence == "Yes") %>%
   group_by(predicted.celltype.l2, Chain) %>%
   summarize(
@@ -541,6 +545,10 @@ converged_tcrs
 
 public_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
   left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "irAE", "cdr3_nt", "c_gene", "Patient_ID", "cdr3_length")) %>%
+  ## look at just unique clonotypes from each patient
+  group_by(Patient_ID, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
   filter(publicity == "Yes") %>%
   group_by(predicted.celltype.l2, Chain) %>%
   summarize(
@@ -577,6 +585,10 @@ public_tcrs
 
 private_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
   left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "irAE", "cdr3_nt", "c_gene", "Patient_ID", "cdr3_length")) %>%
+  ## look at just unique clonotypes from each patient
+  group_by(Patient_ID, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
   filter(privicity == "Yes") %>%
   group_by(predicted.celltype.l2, Chain) %>%
   summarize(
@@ -613,6 +625,10 @@ private_tcrs
 
 all_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
   left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "irAE", "cdr3_nt", "c_gene", "Patient_ID", "cdr3_length")) %>%
+  ## look at just unique clonotypes from each patient
+  group_by(Patient_ID, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
   group_by(predicted.celltype.l2, Chain) %>%
   summarize(
       p_val_pgen = {
