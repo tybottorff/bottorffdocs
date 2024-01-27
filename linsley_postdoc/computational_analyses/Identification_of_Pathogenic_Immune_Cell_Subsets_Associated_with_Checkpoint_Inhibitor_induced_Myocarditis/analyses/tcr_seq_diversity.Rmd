@@ -60,34 +60,38 @@ cdr3_amino_acid_diversity_df <- dehashed_combined_tcr_seq_doubled %>%
   filter(!(is.na(cdr3)),
          chain != "Multi",
          predicted.celltype.l2 != "NK") %>%
-  group_by(cdr3, chain, Patient_ID, irAE, predicted.celltype.l1) %>%
+  group_by(cdr3, chain, Patient_ID, irAE, predicted.celltype.l2) %>%
   mutate(cdr3_amino_acid_count = n()) %>%
   ungroup() %>%
-  group_by(Patient_ID, chain, predicted.celltype.l1) %>%
+  group_by(Patient_ID, chain, predicted.celltype.l2) %>%
   # Calculate Shannon diversity index (H)
   mutate(shannon = diversity(cdr3_amino_acid_count),
          inv_shannon = 1/diversity(cdr3_amino_acid_count)) %>%
   slice(1) %>%
   ungroup() %>%
-  select(chain, irAE, Patient_ID, shannon, inv_shannon, predicted.celltype.l1)
+  select(chain, irAE, Patient_ID, shannon, inv_shannon, predicted.celltype.l2)
+  #group_by(chain, predicted.celltype.l2) %>%
+  #summarize(
+  #    p_val_diveristy = {
+  #      if(length(unique(irAE)) != 2 | any(table(irAE) == 1)) {
+  #        NA
+  #      } else {
+  #        wilcox.test(shannon ~ irAE, exact = FALSE)$p.value
+  #      }
+  #    }) %>%
+  #ungroup() %>%
+  #mutate(p_val_diveristy = p.adjust(p_val_diveristy, method = "BH")) %>%
+  #arrange(p_val_diveristy)
 
 cdr3_amino_acid_diversity_df
 
-ggplot(cdr3_amino_acid_diversity_df, aes(x = chain, y = shannon, fill = irAE)) +
+ggplot(cdr3_amino_acid_diversity_df %>% filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Naive", "CD8 TEM", "Treg")), aes(x = chain, y = shannon, fill = irAE)) +
   geom_boxplot() +
-  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
+  facet_wrap(~ predicted.celltype.l2, scales = "free_y") +
   labs(x = "Chain",
        y = "Shannon entropy") +
   scale_y_continuous(breaks = pretty_breaks(n = 3))
 
 # Shannon entropy: 0 means monoclonal, higher means polyclonal, weights richness (total # of unique clones) over evenness
-
-ggplot(cdr3_amino_acid_diversity_df, aes(x = chain, y = inv_shannon, fill = irAE)) +
-  geom_boxplot() +
-  facet_wrap(~ predicted.celltype.l1, scales = "free_y") +
-  labs(x = "Chain",
-       y = "Inverse Shannon entropy")
-
-# assuming higher inverse means monoclonal, lower inverse means polyclonal
 
 ```
