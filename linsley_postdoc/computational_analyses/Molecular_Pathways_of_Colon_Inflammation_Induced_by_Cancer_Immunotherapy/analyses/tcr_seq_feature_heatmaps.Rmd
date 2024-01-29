@@ -805,4 +805,13 @@ ggplot(cd4_prolif_trb_pgen, aes(x = predicted.celltype.l2, y = log10(pgen), fill
   labs(x = "Cell type", y = "pgen (log10)") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
 
+prepped_data_downsampled
+
+prepped_data_downsampled$group <- factor(prepped_data_downsampled$group, levels = c("ICI no colitis", "ICI colitis"))
+
+ggplot(prepped_data_downsampled %>% filter(predicted.celltype.l2 == "CD4 Proliferating" & Chain == "TRB"), aes(x = predicted.celltype.l2, y = log10(pgen), fill = group)) +
+  geom_boxplot() +
+  labs(x = "Cell type", y = "pgen (log10)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
 ```
