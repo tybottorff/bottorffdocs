@@ -2272,7 +2272,7 @@
  - donor T cells (and maybe other immune cells) eliminate residual leukemia cells after radio/chemotherapy = graft-versus-leukemia response
  - donor alloimmune responses can also be directed against healthy tissue = graft-versus-host disease (GvHD)
  - graft-versus-leukemia and graft-versus-host often co-occur
-# The IL-33/ST2 pathway: therapeutic target and novel biomrker
+# The IL-33/ST2 pathway: therapeutic target and novel biomarker
  - IL-33 is in IL-1 family of cytokines
  - ST2 (IL-33 receptor) is present in multiple isoforms including membrane-bound ST2L and soluble sST2 (may be decoy for IL-33)
  - ST2 participates in activation of antigen-primed Th2 cells
