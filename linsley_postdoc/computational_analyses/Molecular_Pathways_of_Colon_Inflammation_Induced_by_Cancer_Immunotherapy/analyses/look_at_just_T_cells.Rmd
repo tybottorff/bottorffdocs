@@ -512,21 +512,7 @@ DimPlot(cd8_trms, reduction = "umap", group.by = "quantile", shuffle = TRUE, see
 
 ```
 
-# DEG analysis between CD8 Trms with highest and lowest TRA pgen (log10) scores
-
-```{r}
-
-Idents(cd8_trms) <- "quantile"
-
-#Idents(cd8_trms)
-
-cd8_trms_degs <- FindMarkers(cd8_trms, ident.1 = "Bottom 10%", ident.2 = "Top 10%", verbose = FALSE)
-
-cd8_trms_degs
-
-```
-
-# Pseudobulk to take into account that many cells come from same patient
+# DEG analysis between CD8 Trms with highest and lowest TRA pgen (log10) scores, pseudobulk to take into account that many cells come from same patient
 
 ```{r}
 
@@ -547,5 +533,37 @@ cd8_trms_degs_pseudobulk <- FindMarkers(object = cd8_trms_pseudobulk,
                          ident.2 = "Top 10%")
 
 cd8_trms_degs_pseudobulk
+
+```
+
+# DEG analysis for CD4 proliferating T cells between irAE groups, pseudobulk
+
+```{r}
+
+cd4_prolif <- subset(just_T_cells, subset = predicted.celltype.l2 == 'CD4 Proliferating')
+
+cd4_prolif_meta <- cd4_prolif@meta.data %>%
+  mutate(group = case_when(
+    startsWith(orig.ident, "CT") ~ "no ICI",
+    startsWith(orig.ident, "C") ~ "ICI colitis",
+    startsWith(orig.ident, "NC") ~ "ICI no colitis"))
+
+cd4_prolif$group <- cd4_prolif_meta$group
+
+cd4_prolif_ici <- subset(cd4_prolif, subset = group != "no ICI")
+
+cd4_prolif_ici_pseudobulk <- AggregateExpression(cd4_prolif_ici, assays = "SCT", return.seurat = T, group.by = c("orig.ident", "group"))
+
+cd4_prolif_ici_pseudobulk$group <- factor(cd4_prolif_ici_pseudobulk$group, levels = c("ICI colitis", "ICI no colitis"))
+
+Idents(cd4_prolif_ici_pseudobulk) <- "group"
+
+#Idents(cd4_prolif_ici_pseudobulk)
+
+cd4_prolif_ici_pseudobulk_degs <- FindMarkers(object = cd4_prolif_ici_pseudobulk, 
+                         ident.1 = "ICI colitis", 
+                         ident.2 = "ICI no colitis")
+
+cd4_prolif_ici_pseudobulk_degs
 
 ```
