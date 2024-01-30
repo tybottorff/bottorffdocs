@@ -146,53 +146,46 @@ convergence_publicity_privicity_df
 
 public_counts <- convergence_publicity_privicity_df %>%
   filter(group != "no ICI") %>%
-  group_by(publicity, group, predicted.celltype.l1, Chain) %>%
+  group_by(publicity, group, predicted.celltype.l2, Chain) %>%
   summarize(count = n()) %>%
   ungroup() %>%
-  group_by(publicity, Chain, predicted.celltype.l1) %>%
+  group_by(publicity, Chain, predicted.celltype.l2) %>%
   mutate(fraction = count/sum(count))
 
 public_counts
 
 public_counts$group <- factor(public_counts$group, levels = c("ICI no colitis", "ICI colitis"))
 
-# Create a contingency table
-#data <- matrix(c(14, 56, 2, 1), nrow = 2)
-#colnames(data) <- c("Not converged", "Converged")
-#rownames(data) <- c("ICI colitis", "ICI no colitis")
-
-#print(data)
-
-# Perform Fisher's exact test
-#print(fisher.test(data))
-
-ggplot(public_counts, aes(x = publicity, y = fraction, fill = group)) +
+plot <- ggplot(public_counts, aes(x = publicity, y = fraction, fill = group)) +
   geom_bar(stat = "identity", position = "stack") +
-  facet_wrap(~Chain + predicted.celltype.l1, ncol = 2) +
+  facet_wrap(~Chain + predicted.celltype.l2) +
   labs(x = "Publicity", y = "Fraction") +
   scale_y_continuous(breaks = seq(0, 1, by = 0.5))
 
+ggsave("../figures/publicity.svg", plot, device = "svg")
+
 private_counts <- convergence_publicity_privicity_df %>%
   filter(group != "no ICI") %>%
-  group_by(privicity, group, predicted.celltype.l1, Chain) %>%
+  group_by(privicity, group, predicted.celltype.l2, Chain) %>%
   summarize(count = n()) %>%
   ungroup() %>%
-  group_by(privicity, Chain, predicted.celltype.l1) %>%
+  group_by(privicity, Chain, predicted.celltype.l2) %>%
   mutate(fraction = count/sum(count))
 
 private_counts$group <- factor(private_counts$group, levels = c("ICI no colitis", "ICI colitis"))
 
 private_counts
 
-ggplot(private_counts, aes(x = privicity, y = fraction, fill = group)) +
+plot <- ggplot(private_counts, aes(x = privicity, y = fraction, fill = group)) +
   geom_bar(stat = "identity", position = "stack") +
-  facet_wrap(~Chain + predicted.celltype.l1, ncol = 2) +
+  facet_wrap(~Chain + predicted.celltype.l2) +
   labs(x = "Privicity", y = "Fraction") +
   scale_y_continuous(breaks = seq(0, 1, by = 0.5))
 
+ggsave("../figures/privicity.svg", plot, device = "svg")
+
 convergence_counts <- convergence_publicity_privicity_df %>%
-  filter(group != "no ICI",
-         predicted.celltype.l1 == "CD4 T") %>%
+  filter(group != "no ICI") %>%
   group_by(convergence, group, Chain, predicted.celltype.l2) %>%
   summarize(count = n()) %>%
   ungroup() %>%
@@ -203,11 +196,36 @@ convergence_counts
 
 convergence_counts$group <- factor(convergence_counts$group, levels = c("ICI no colitis", "ICI colitis"))
 
-ggplot(convergence_counts %>% filter(predicted.celltype.l2 == "CD4 Proliferating"), aes(x = convergence, y = fraction, fill = group)) +
+plot <- ggplot(convergence_counts, aes(x = convergence, y = fraction, fill = group)) +
   geom_bar(stat = "identity", position = "stack") +
-  facet_wrap(~Chain, ncol = 2) +
+  facet_wrap(~Chain + predicted.celltype.l2) +
   labs(x = "Converged", y = "Fraction") +
   scale_y_continuous(breaks = seq(0, 1, by = 0.5))
+
+ggsave("../figures/convergence.svg", plot, device = "svg")
+
+```
+
+# Fischers test for convergnece, privicity, publicity
+
+```{r}
+
+fischer <- convergence_publicity_privicity_df %>%
+  ungroup() %>%
+  filter(predicted.celltype.l2 == "CD4 Naive" & Chain == "TRB") %>%
+  group_by(predicted.celltype.l2, Chain) %>% summarize(p_val_convergence = fisher.test(table(fischer$group, fischer$convergence), simulate.p.value = TRUE)$p.val)
+
+fischer
+
+# Create a contingency table
+#data <- matrix(c(14, 56, 2, 1), nrow = 2)
+#colnames(data) <- c("Not converged", "Converged")
+#rownames(data) <- c("ICI colitis", "ICI no colitis")
+
+#print(data)
+
+# Perform Fisher's exact test
+#print(fisher.test(data))
 
 ```
 
