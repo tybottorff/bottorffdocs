@@ -344,73 +344,11 @@ p + guides(color = guide_legend(override.aes = list(size = 4)))
 
 ```
 
-# Summarize degree of cell type junction crossover sharing for specific cell types
-
-```{r}
-
-cd4_prolif_links_tra <- alpha_links_with_coords %>%
-  filter(group1 != "no ICI",
-         group2 != "no ICI") %>%
-  select(celltype1, celltype2, group1, group2) %>%
-  mutate(group_same = group1 == group2) %>%
-  mutate(group_combo = if_else(group_same == TRUE & group1 == "ICI colitis", "ICI colitis", if_else(group_same == TRUE & group1 == "ICI no colitis", "ICI no colitis", "Mix"))) %>%
-  mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
-  group_by(celltype_combo, group_combo) %>%
-  summarize(count = n()) %>%
-  arrange(-count) %>%
-  filter(grepl("CD4 Proliferating", celltype_combo))
-
-cd4_prolif_links_tra
-
-cd4_prolif_links_trb <- beta_links_with_coords %>%
-  filter(group1 != "no ICI",
-         group2 != "no ICI") %>%
-  select(celltype1, celltype2, group1, group2) %>%
-  mutate(group_same = group1 == group2) %>%
-  mutate(group_combo = if_else(group_same == TRUE & group1 == "ICI colitis", "ICI colitis", if_else(group_same == TRUE & group1 == "ICI no colitis", "ICI no colitis", "Mix"))) %>%
-  mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
-  group_by(celltype_combo, group_combo) %>%
-  summarize(count = n()) %>%
-  arrange(-count) %>%
-  filter(grepl("CD4 Proliferating", celltype_combo))
-
-cd4_prolif_links_trb
-
-cd8_naive_links_tra <- alpha_links_with_coords %>%
-  filter(group1 != "no ICI",
-         group2 != "no ICI") %>%
-  select(celltype1, celltype2, group1, group2) %>%
-  mutate(group_same = group1 == group2) %>%
-  mutate(group_combo = if_else(group_same == TRUE & group1 == "ICI colitis", "ICI colitis", if_else(group_same == TRUE & group1 == "ICI no colitis", "ICI no colitis", "Mix"))) %>%
-  mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
-  group_by(celltype_combo, group_combo) %>%
-  summarize(count = n()) %>%
-  arrange(-count) %>%
-  filter(grepl("CD8 Naive", celltype_combo))
-
-cd8_naive_links_tra
-
-cd8_naive_links_trb <- beta_links_with_coords %>%
-  filter(group1 != "no ICI",
-         group2 != "no ICI") %>%
-  select(celltype1, celltype2, group1, group2) %>%
-  mutate(group_same = group1 == group2) %>%
-  mutate(group_combo = if_else(group_same == TRUE & group1 == "ICI colitis", "ICI colitis", if_else(group_same == TRUE & group1 == "ICI no colitis", "ICI no colitis", "Mix"))) %>%
-  mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
-  group_by(celltype_combo, group_combo) %>%
-  summarize(count = n()) %>%
-  arrange(-count) %>%
-  filter(grepl("CD8 Naive", celltype_combo))
-
-cd8_naive_links_trb
-
-```
-
 # Summarize degree of cell type junction crossover sharing for all cell types to make heatmap (TRA, ICI colitis)
 
 ```{r}
 
-heatmap_prep_tra <- alpha_links_with_coords %>%
+heatmap_prep_tra_colitis <- alpha_links_with_coords %>%
   mutate(celltype1 = ifelse(celltype1 == "dnT", "DNT", celltype1),
          celltype2 = ifelse(celltype2 == "dnT", "DNT", celltype2)) %>%
   select(celltype1, celltype2, group1, group2) %>%
@@ -425,16 +363,16 @@ heatmap_prep_tra <- alpha_links_with_coords %>%
   ) %>%
   select(-celltype_combo)
 
-print(sum(heatmap_prep_tra$count))
+print(sum(heatmap_prep_tra_colitis$count))
 
 # Create a matrix with all possible combinations of cell types for rows and cols
 all_combinations <- expand.grid(
-  cell_type1 = unique(c(heatmap_prep_tra$cell_type1, heatmap_prep_tra$cell_type2)),
-  cell_type2 = unique(c(heatmap_prep_tra$cell_type1, heatmap_prep_tra$cell_type2))
+  cell_type1 = unique(c(heatmap_prep_tra_colitis$cell_type1, heatmap_prep_tra_colitis$cell_type2)),
+  cell_type2 = unique(c(heatmap_prep_tra_colitis$cell_type1, heatmap_prep_tra_colitis$cell_type2))
 )
 
 # Merge the actual data with all combinations and fill missing counts with 1 (for cell type combos with 0 linkages, 1 because doing log transform)
-df_merged <- merge(all_combinations, heatmap_prep_tra, by = c("cell_type1", "cell_type2"), all.x = TRUE)
+df_merged <- merge(all_combinations, heatmap_prep_tra_colitis, by = c("cell_type1", "cell_type2"), all.x = TRUE)
 df_merged[is.na(df_merged$count), "count"] <- 1
 
 df_merged <- df_merged %>%
@@ -470,7 +408,7 @@ Heatmap(heatmap_matrix,
 
 ```{r}
 
-heatmap_prep_tra <- alpha_links_with_coords %>%
+heatmap_prep_tra_no_colitis <- alpha_links_with_coords %>%
   mutate(celltype1 = ifelse(celltype1 == "dnT", "DNT", celltype1),
          celltype2 = ifelse(celltype2 == "dnT", "DNT", celltype2)) %>%
   select(celltype1, celltype2, group1, group2) %>%
@@ -485,16 +423,16 @@ heatmap_prep_tra <- alpha_links_with_coords %>%
   ) %>%
   select(-celltype_combo)
 
-print(sum(heatmap_prep_tra$count))
+print(sum(heatmap_prep_tra_no_colitis$count))
 
 # Create a matrix with all possible combinations of cell types for rows and cols
 all_combinations <- expand.grid(
-  cell_type1 = unique(c(heatmap_prep_tra$cell_type1, heatmap_prep_tra$cell_type2)),
-  cell_type2 = unique(c(heatmap_prep_tra$cell_type1, heatmap_prep_tra$cell_type2))
+  cell_type1 = unique(c(heatmap_prep_tra_no_colitis$cell_type1, heatmap_prep_tra_no_colitis$cell_type2)),
+  cell_type2 = unique(c(heatmap_prep_tra_no_colitis$cell_type1, heatmap_prep_tra_no_colitis$cell_type2))
 )
 
 # Merge the actual data with all combinations and fill missing counts with 1 (for cell type combos with 0 linkages, 1 because doing log transform)
-df_merged <- merge(all_combinations, heatmap_prep_tra, by = c("cell_type1", "cell_type2"), all.x = TRUE)
+df_merged <- merge(all_combinations, heatmap_prep_tra_no_colitis, by = c("cell_type1", "cell_type2"), all.x = TRUE)
 df_merged[is.na(df_merged$count), "count"] <- 1
 
 df_merged <- df_merged %>%
@@ -523,6 +461,45 @@ Heatmap(heatmap_matrix,
         heatmap_legend_param = list(title = "TRA CDR3 AA linkage\ncount (log10) within\nno irAE colitis group"),
         na_col = "white"
 )
+
+```
+
+# Statistically compare TRA colitis vs. no colitis
+
+```{r}
+
+tra_stats <- alpha_links_with_coords %>%
+  filter(celltype1 == "CD8 TEM") %>%
+  mutate(celltype1 = ifelse(celltype1 == "dnT", "DNT", celltype1),
+         celltype2 = ifelse(celltype2 == "dnT", "DNT", celltype2)) %>%
+  select(celltype1, celltype2, group1, group2) %>%
+  mutate(celltype_combo = apply(across(c(celltype1, celltype2)), 1, function(x) paste(sort(x), collapse = "_")),
+         group_combo = apply(across(c(group1, group2)), 1, function(x) paste(sort(x), collapse = "_"))) %>%
+  filter(group_combo %in% c("ICI colitis_ICI colitis", "ICI no colitis_ICI no colitis")) %>%
+  select(-celltype1, -celltype2, -group1, -group2) %>%
+  group_by(celltype_combo, group_combo) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(celltype_combo) %>%
+  summarise(
+    celltype_combo = first(celltype_combo),
+    p_val = fisher.test(matrix(c(sum(count[group_combo == "ICI colitis_ICI colitis"]), 
+                                 sum(count[group_combo == "ICI no colitis_ICI no colitis"])), 
+                               ncol = 2), 
+                        simulate.p.value = TRUE)$p.value
+  )
+
+tra_stats
+
+> # Create a contingency table
+> #data <- matrix(c(14, 56, 2, 1), nrow = 2)
+> #colnames(data) <- c("Not converged", "Converged")
+> #rownames(data) <- c("ICI colitis", "ICI no colitis")
+> 
+> #print(data)
+> 
+> # Perform Fisher's exact test
+> #print(fisher.test(data))
 
 ```
 
