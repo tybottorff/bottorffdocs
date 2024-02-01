@@ -113,14 +113,14 @@ cell_abundance_df$group <- factor(cell_abundance_df$group, levels = c("no ICI", 
 
 ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = group)) +
   geom_boxplot() +
-  labs(x = "", fill = "group", y = "Normalized cell\nproportion (log10)") +
+  labs(x = "", fill = "group", y = "T cell proportion\n(log10)") +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
 ggplot(cell_abundance_df, aes(x = patient, y = log10(normalized_count), color = group)) +
   geom_point() +
   facet_wrap(~predicted.celltype.l2, ncol = 2) +
-  labs(x = "", fill = "group", y = "Normalized cell\nproportion (log10)") +
+  labs(x = "", fill = "group", y = "T cell proportion\n(log10)") +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_blank())
 
