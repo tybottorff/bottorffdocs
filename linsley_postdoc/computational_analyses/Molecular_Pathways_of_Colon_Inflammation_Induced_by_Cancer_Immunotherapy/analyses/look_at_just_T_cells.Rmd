@@ -498,7 +498,7 @@ DimPlot(tcr_and_rna, reduction = "umap", group.by = "expansion_bin", shuffle = T
 
 ```{r}
 
-DimPlot(tcr_and_rna, reduction = "umap", group.by = "group", shuffle = TRUE, seed = 455)
+DimPlot(tcr_and_rna, reduction = "umap", group.by = "group", shuffle = TRUE, seed = 455, cols = c("#619CFF", "#F8766D", "#00BA38"))
 
 ```
 
