@@ -479,27 +479,40 @@ tra_stats <- alpha_links_with_coords %>%
   select(-celltype1, -celltype2, -group1, -group2) %>%
   group_by(celltype_combo, group_combo) %>%
   summarize(count = n()) %>%
-  ungroup() %>%
-  group_by(celltype_combo) %>%
-  summarise(
-    celltype_combo = first(celltype_combo),
-    p_val = fisher.test(matrix(c(sum(count[group_combo == "ICI colitis_ICI colitis"]), 
-                                 sum(count[group_combo == "ICI no colitis_ICI no colitis"])), 
-                               ncol = 2), 
-                        simulate.p.value = TRUE)$p.value
-  )
+  ungroup()
+  #group_by(celltype_combo) %>%
+  #summarise(
+  #  celltype_combo = first(celltype_combo),
+  #  p_val = fisher.test(matrix(c(sum(count[group_combo == "ICI colitis_ICI colitis"]), 
+  #                               sum(count[group_combo == "ICI no colitis_ICI no colitis"])), 
+  #                             ncol = 2), 
+  #                      simulate.p.value = TRUE)$p.value
+  #)
 
 tra_stats
 
-> # Create a contingency table
-> #data <- matrix(c(14, 56, 2, 1), nrow = 2)
-> #colnames(data) <- c("Not converged", "Converged")
-> #rownames(data) <- c("ICI colitis", "ICI no colitis")
-> 
-> #print(data)
-> 
-> # Perform Fisher's exact test
-> #print(fisher.test(data))
+```
+
+```{r}
+# Create a contingency table
+data <- matrix(c(370, 11, 52, 21), nrow = 2)
+colnames(data) <- c("Shared clonotypes between 2 clusters", "Non-shared clonotypes summed across 2 clusters")
+rownames(data) <- c("ICI colitis", "ICI no colitis")
+
+print(data)
+
+# Perform Fisher's exact test
+print(fisher.test(data))
+
+# counted the number of shared clonotypes among different clusters, and then applied the one-sided Fisher’s exact test (followed with Benjamini-Hochberg multiple test correction) on 2 × 2 cluster-by-cluster contingency tables to evaluate the significance of clone sharing between clusters. 
+
+#                       Cluster 1              ~ Cluster 2
+#                      ____________________|____________________
+#Clonotype Status | Shared Clonotypes | Non-Shared Clonotypes |   
+#_________________|___________________|_______________________| 
+#  Present         |           a           |           b           | 
+#  Absent          |           c           |           d           | 
+
 
 ```
 
