@@ -1,0 +1,120 @@
+---
+title: "Joined analyses from myocarditis and colitis datasets"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(UpSetR)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+myocard_data <- read.csv("../../Identification_of_Pathogenic_Immune_Cell_Subsets_Associated_with_Checkpoint_Inhibitor_induced_Myocarditis/saved_data/dehashed_tcr_seq_with_rna.csv") %>%
+  select(barcode, Chain, cdr3, v_gene, j_gene, predicted.celltype.l1, predicted.celltype.l2, Patient_ID, irAE) %>%
+  mutate(dataset = "myocarditis",
+         irAE = if_else(irAE == "Yes", "irAE", "no irAE")) %>%
+  rename(patient = Patient_ID,
+         group = irAE)
+
+joined_data <- read.csv("../../Molecular_Pathways_of_Colon_Inflammation_Induced_by_Cancer_Immunotherapy/saved_data/rna_tcr_no_na_good_cell_typing.csv") %>%
+  select(barcode, Chain, cdr3, v_gene, j_gene, predicted.celltype.l1, predicted.celltype.l2, patient, group) %>%
+  mutate(dataset = "colitis") %>%
+  full_join(myocard_data)
+
+joined_data
+
+```
+
+# Look for same TCRs across both datasets
+
+```{r}
+
+tra_irae_upset_prep <- joined_data %>%
+  filter(Chain == "TRA",
+         group %in% c("irAE", "ICI colitis")) %>%
+  mutate(present = 1) %>%
+  spread(key = 'dataset', value = 'present', fill = 0) %>%
+  select(-patient, -predicted.celltype.l1, -predicted.celltype.l2, -group, -barcode, -Chain, -v_gene, -j_gene) %>%
+  group_by(cdr3) %>%
+  summarize(across(everything(), sum)) %>%
+  ungroup() %>%
+  mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
+
+trb_irae_upset_prep <- joined_data %>%
+  filter(Chain == "TRB",
+         group %in% c("irAE", "ICI colitis")) %>%
+  mutate(present = 1) %>%
+  spread(key = 'dataset', value = 'present', fill = 0) %>%
+  select(-patient, -predicted.celltype.l1, -predicted.celltype.l2, -group, -barcode, -Chain, -v_gene, -j_gene) %>%
+  group_by(cdr3) %>%
+  summarize(across(everything(), sum)) %>%
+  ungroup() %>%
+  mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
+
+tra_no_irae_upset_prep <- joined_data %>%
+  filter(Chain == "TRA",
+         group %in% c("no irAE", "ICI no colitis")) %>%
+  mutate(present = 1) %>%
+  spread(key = 'dataset', value = 'present', fill = 0) %>%
+  select(-patient, -predicted.celltype.l1, -predicted.celltype.l2, -group, -barcode, -Chain, -v_gene, -j_gene) %>%
+  group_by(cdr3) %>%
+  summarize(across(everything(), sum)) %>%
+  ungroup() %>%
+  mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
+
+trb_no_irae_upset_prep <- joined_data %>%
+  filter(Chain == "TRB",
+         group %in% c("no irAE", "ICI no colitis")) %>%
+  mutate(present = 1) %>%
+  spread(key = 'dataset', value = 'present', fill = 0) %>%
+  select(-patient, -predicted.celltype.l1, -predicted.celltype.l2, -group, -barcode, -Chain, -v_gene, -j_gene) %>%
+  group_by(cdr3) %>%
+  summarize(across(everything(), sum)) %>%
+  ungroup() %>%
+  mutate(across(-cdr3, ~ifelse(. > 0, 1, 0)))
+
+```
+
+# Create upset plots
+
+```{r}
+
+upset(as.data.frame(tra_irae_upset_prep), sets = setdiff(colnames(tra_irae_upset_prep), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRA CDR3AAs\nper dataset", mainbar.y.label = "TRA CDR3AA linkages\n(log10) within dataset(s)", point.size = 2, show.numbers = FALSE, scale.intersections = "log10", text.scale = 1.5)
+
+upset(as.data.frame(trb_irae_upset_prep), sets = setdiff(colnames(trb_irae_upset_prep), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRB CDR3AAs\nper dataset", mainbar.y.label = "TRB CDR3AA linkages\n(log10) within dataset(s)", point.size = 2, show.numbers = FALSE, scale.intersections = "log10", text.scale = 1.5)
+
+upset(as.data.frame(tra_no_irae_upset_prep), sets = setdiff(colnames(tra_no_irae_upset_prep), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRA CDR3AAs\nper dataset", mainbar.y.label = "TRA CDR3AA linkages\n(log10) within dataset(s)", point.size = 2, show.numbers = FALSE, scale.intersections = "log10", text.scale = 1.5)
+
+upset(as.data.frame(trb_no_irae_upset_prep), sets = setdiff(colnames(trb_no_irae_upset_prep), "cdr3"), sets.bar.color = "#56B4E9", sets.x.label = "TRB CDR3AAs\nper dataset", mainbar.y.label = "TRB CDR3AA linkages\n(log10) within dataset(s)", point.size = 2, show.numbers = FALSE, scale.intersections = "log10", text.scale = 1.5)
+
+```
