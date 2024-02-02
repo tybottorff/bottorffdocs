@@ -968,3 +968,32 @@ ggplot(prepped_data_downsampled %>% filter(predicted.celltype.l2 == "CD4 Prolife
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
 
 ```
+
+# Compare pgen of most and least expanded T cells
+
+```{r}
+
+expansion_features <- prepped_data %>%
+  ungroup() %>%
+  mutate(top_bot = if_else(chunk <= 10, "Highly expanded", if_else(chunk > 90, "Not expanded", "Middle"))) %>%
+  filter(top_bot != "Middle")
+
+expansion_features
+
+wilcox.test(pgen ~ top_bot, data = expansion_features, exact = FALSE)
+
+# Comparing top 10 vs. bot 10 and top 5 vs. bot 5 does have significance... 15/85 doesn't
+
+prepped_data
+
+plot <- ggplot(prepped_data, aes(x = as.factor(chunk), y = log10(pgen))) +
+  geom_boxplot() +
+  facet_wrap(~ predicted.celltype.l2) +
+  labs(x = "Clonotype bin", y = "pgen (log10)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+plot
+
+ggsave(plot, file = "../figures/expansion_vs_pgen.svg", height = 10)
+
+```
