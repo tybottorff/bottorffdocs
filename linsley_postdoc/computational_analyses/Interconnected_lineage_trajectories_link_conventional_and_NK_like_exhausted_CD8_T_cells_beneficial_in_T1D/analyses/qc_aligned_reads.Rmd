@@ -1,0 +1,65 @@
+---
+title: "Interconnected lineage trajectories link conventional and NK-like exhausted CD8+ T cells beneficial in T1D"
+output: pdf_document
+---
+
+ - data reproduction of Erin Witkop's ATAC-seq
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# 
+
+you probably want to use the shiftedAlignments as your bamfiles, and peaks should contain the peak files.
+
+Erin code: https://github.com/BenaroyaResearch/Witkop_T1DAL_2023/tree/main
+
+# QC
+
+### Make list of pre-QC metrics I'm interested in
+pre_align_metrics_list <- c("fastq_total_reads",  "mean_read_length")
+pre_align_perc_metrics <- c("percent_gc","pct_correct_strand_reads","percent_duplication") 
+
+### Plot the percentage of over-represented sequences 
+
+
+#### PLOT THE PERCENT OF MITOCHONDRIAL READS IN EACH ALIGNMENT ####
+
+
+#### PLOT POST-ALIGNMENT METRICS ####
+
+post_align_metrics_list <- c("pf_hq_aligned_reads", "pf_reads_aligned", "median_cv_coverage", "median_3prime_bias","median_5prime_bias")
+post_align_perc_metrics <- c("pct_pf_reads_aligned")    
+
+#### PLOT READ FRAGMENT LENGTH DISTRIBUTION ####
+
+
+#### PLOT ENRICHMENT AROUND THE TF START SITE ####
+# Run P452_3_TSSe_biometal.R on a server to calculate transcription factor start site enrichment 
