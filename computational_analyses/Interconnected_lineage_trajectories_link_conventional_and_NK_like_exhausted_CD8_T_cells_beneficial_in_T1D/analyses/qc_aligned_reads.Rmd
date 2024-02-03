@@ -13,8 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+library(Rsamtools)
 library(ggplot2)
 library(dplyr)
+library(GenomicAlignments)
 
 ```
 
@@ -35,31 +37,152 @@ theme_set(
 
 ```
 
-# 
+# Set working directory, create lists of relevant objects
 
-you probably want to use the shiftedAlignments as your bamfiles, and peaks should contain the peak files.
+```{r}
 
-Erin code: https://github.com/BenaroyaResearch/Witkop_T1DAL_2023/tree/main
+shifted_alignments_wd <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments"
 
-# QC
+shifted_alignments <- list.files(shifted_alignments_wd)
 
-### Make list of pre-QC metrics I'm interested in
-pre_align_metrics_list <- c("fastq_total_reads",  "mean_read_length")
-pre_align_perc_metrics <- c("percent_gc","pct_correct_strand_reads","percent_duplication") 
+shifted_alignments
 
-### Plot the percentage of over-represented sequences 
+peaks_wd <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/peaks"
 
+peaks <- list.files(peaks_wd)
 
-#### PLOT THE PERCENT OF MITOCHONDRIAL READS IN EACH ALIGNMENT ####
+peaks
 
+```
 
-#### PLOT POST-ALIGNMENT METRICS ####
+# Look on which chromosomes 1 .bam file aligned
 
-post_align_metrics_list <- c("pf_hq_aligned_reads", "pf_reads_aligned", "median_cv_coverage", "median_3prime_bias","median_5prime_bias")
-post_align_perc_metrics <- c("pct_pf_reads_aligned")    
+```{r}
 
-#### PLOT READ FRAGMENT LENGTH DISTRIBUTION ####
+mappedReads <- idxstatsBam("/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/lib82437_AAAMVKNHV_star_alignments_shifted_sorted.bam")
 
+# just look at top 30 chr hits, lots of random non-expected ones
+filtered_mappedReads <- mappedReads %>%
+  arrange(-mapped) %>%
+  head(30)
 
-#### PLOT ENRICHMENT AROUND THE TF START SITE ####
-# Run P452_3_TSSe_biometal.R on a server to calculate transcription factor start site enrichment 
+ggplot(filtered_mappedReads, aes(seqnames, mapped, fill = seqnames)) + geom_bar(stat = "identity") +
+  coord_flip() +
+  theme(legend.position = "none", axis.text.y = element_text(size = 8))
+
+```
+
+# Look on which (expected) chromosomes all .bam files aligned
+
+```{r}
+
+bam_dir <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/"
+
+bam_files <- list.files(bam_dir, pattern = "\\_sorted.bam$", full.names = TRUE)
+
+all_mapped_reads <- data.frame()
+
+for (bam_file in bam_files) {
+  # some reads mapped to alternative chr, but less commonly
+  mapped_reads <- idxstatsBam(bam_file) %>% filter(seqnames %in% c(1:22, "X", "Y", "MT"))
+  mapped_reads$file <- basename(bam_file)
+  mapped_reads$libid <- sub("lib([0-9]+)_.*", "\\1", mapped_reads$file)
+  all_mapped_reads <- rbind(all_mapped_reads, mapped_reads)
+}
+
+# lots of files, make 2 plots to see both here, all pretty similar (most reads map to mitochondrial genome)
+
+ggplot(all_mapped_reads %>% filter(libid < 82449), aes(seqnames, mapped, fill = seqnames)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  facet_wrap(~ libid, ncol = 6) +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 6),
+        axis.text.x = element_text(size = 6)) +
+  labs(x = "Chromosome", y = "Mapped counts")
+
+ggplot(all_mapped_reads %>% filter(libid >= 82449), aes(seqnames, mapped, fill = seqnames)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  facet_wrap(~ libid, ncol = 6) +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 6),
+        axis.text.x = element_text(size = 6)) +
+  labs(x = "Chromosome", y = "Mapped counts")
+
+```
+# Plot percent mitochondrial reads for each sorted .bam file
+
+```{r}
+
+perc_mt <- all_mapped_reads %>%
+  group_by(libid) %>%
+  summarize(mt_perc = 100*mapped[seqnames == "MT"] / sum(mapped))
+
+perc_mt
+
+ggplot(perc_mt, aes(libid, mt_perc, fill = libid)) +
+  geom_bar(stat = "identity") +
+  theme(legend.position = "none",
+        axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  labs(x = "Lib ID", y = "Mapped counts to MT (%)")
+
+```
+
+# Check for paired reads
+
+```{r}
+
+flags = scanBamFlag(isProperPair = TRUE)
+
+myParam = ScanBamParam(flag = flags, what = c("qname", "mapq", "isize"))
+                       #, which = GRanges("chr20", IRanges(1, 63025520)))
+myParam
+
+test <- readGAlignmentPairs("/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/lib82437_AAAMVKNHV_star_alignments_shifted_sorted.bam", param = myParam)
+class(test)
+
+```
+
+# Investigate mean read length, plot read fragment length distribution
+
+```{r}
+
+atacReads_read1 <- first(atacReads)
+insertSizes <- abs(elementMetadata(atacReads_read1)$isize)
+head(insertSizes)
+
+fragLenSizes <- table(insertSizes)
+fragLenSizes[1:5]
+
+toPlot <- data.frame(InsertSize = as.numeric(names(fragLenSizes)), Count = as.numeric(fragLenSizes))
+fragLenPlot <- ggplot(toPlot, aes(x = InsertSize, y = Count)) + geom_line()
+
+# annotate our nucleosome free (< 100bp), mononucleosome (180bp-247bp) and dinucleosome (315-437) lengths
+
+fragLenPlot + scale_y_continuous(trans = "log2") + geom_vline(xintercept = c(180,
+    247), colour = "red") + geom_vline(xintercept = c(315, 437), colour = "darkblue") +
+    geom_vline(xintercept = c(100), colour = "darkgreen") + theme_bw()
+
+```
+
+# Investigate total read numbers
+
+# Investigate percent GC
+
+# Investigate percent correct strand reads
+
+# Investigate percent duplication
+
+# Investigate percent over-represented sequences
+
+# Investigate median CV coverage
+
+# Investigate 3' and 5' bias
+
+# Plot encichment aroudn TF start site
+ - run P452_3_TSSe_biometal.R to calculate transcription factor start site enrichment
+
+# Notes
+ - Erin code: https://github.com/BenaroyaResearch/Witkop_T1DAL_2023/tree/main
+ - Stephan advice: use /shiftedAlignments as bamfiles; /peaks contains peak files
