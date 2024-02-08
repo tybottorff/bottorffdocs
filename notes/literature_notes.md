@@ -658,6 +658,8 @@
  - enhanced macrophage abundance and TNF signaling in on-treatment tumors and organs developing irAEs
  - increased circulating TNF protein in plasma/serum of irAE patients but not ICI responders
  - Th17 abundance didn't change in irAE group, nor was Th17 identified in CD4<sup>+</sup> T cells in tumors 
+# Dynamic changes in chromatin accessibility in CD8<sup>+</sup> T cells responding to viral infection
+ - more evidence for exhaustion of T cells being epigentic and driven by BATF, IRF4, also E2A, T-beet, TCF1, and NFAT, Nrf4a families
 # Dynamic immune signatures as biomarkers for irAEs
  - summary of paper I've read
 # Dynamics and survival associations of T cell receptor clusters in patients with pleural mesothelioma treated with immunotherapy
@@ -1815,6 +1817,8 @@
  - high baseline levels of CXCL13<sup>+</sup> T cells linked to proinflammatory features of macrophages, can predict response
 # Single cell analysis of T lymphocytes infiltrating colorectal carcinoma: the dilemma of specificity
  - review of a paper
+# Single cell ATAC-seq maps the comprehensive and dynamic chromatin accessibility landscape of CAR-T cell dysfunction
+ - CAR-T cells get exhausted, epigenetic state change via BATF/IRF4
 # Single cell dynamics of tumor specificity vs bystander activity in CD8<sup>+</sup> T cells define the diverse immune landscapes in colorectal cancer
  - CD8<sup>+</sup> T cell activation via ICB successful in microsatellite instable (MSI, high TMB, more TILs) colorectal cancer, limited success against microsatellite stable (MSS, lower TMB, fewer TILs) colorectal cancer
  - MSI CD8<sup>+</sup> T cells show tumor-specific activation, MSS CD8<sup>+</sup> T cells show tumor unspecific or bystander features
@@ -2069,10 +2073,13 @@
  - **CDR1-2 contact MHC and CDR3 contacts peptide is the general rule, but CDR1α also contacts peptide and CDR3β doesn't contact peptide too much**
 ## Diversity meaures
  - richness refers to number of unique TCR sequences, evenness refers to distribution spectrum of these TCR sequences (relative abundances)
- - diversity relates to level of uncertainty that TCR sequence sorted from reportoire would belong to a certain T cell clone (unique TCR sequence)
- - Shannon entropy: order (α) of 1, 0 means monoclonal, max (log of number of unique sequences) means evenely distributed TCR sequences, encounters higher variation upon addition of low frequency clones than Gini-Simpson index
+ - diversity relates to level of uncertainty that TCR sequence sorted from reportoire would belong to a certain T cell clone (unique TCR sequence), very diverse indicating a high uncertainty that random TCR seq would come from a randomly selected T cell in pool
+ - effective number of species i.e. Hill number yields effective number of distinct clonotypes (# of equally abundant seqs that would produce given diversity value), derived by summing all frequencies of sequences and the nraising to (1/(1-α)) power?
+ - α sets sensitivity of diversity index to species abundances in system, when α = 0 all species are weighted equally so diversity = richness (# of unique sequences, independent of/ignore abundances)
+ - Shannon entropy: order (α) of 1, negative sum of (frequency of seq * log of frequency of seq), 0 means monoclonal, max (log of number of unique sequences) means evenely distributed TCR sequences, encounters higher variation upon addition of low frequency clones than Gini-Simpson index and is more sensitive to undersampling than Gini coefficient
+ - Gini coefficinet: rangs from 0 (max diversity, equal abundance) to 1 (high clonality of 1 sequence)
  - Gini-Simpson index: order (α) of 2, 0 means monoclonal, 1 means polyclonal with equivalent representation of all clones, barely affected by increasing number of unique TCRs in repertoire (unlike Shannon entropy)
- - Pielou's index (evenness measure): clonal evenness refers to clonal diversity, 1 - Pielou's index is often used and here 0 means maximally diverse and 1 means monoclonal
+ - Pielou's index (evenness measure): clonal evenness refers to clonal diversity, 1 - Pielou's index is often used and here 0 means maximally diverse and 1 means monoclonal (very affected by undersampling i.e. unseen TCR seq issue as not all from population analyzed)
  - Gini coefficient: inequality measure, distinct from Gini-Simpson index, 0 means maximal diversity, high value means monoclonal
 # T cell repertoire diversity: friend or foe for protective antitumor response?
  - **CD3 is signal transducing subunit for TCR**
@@ -2457,6 +2464,8 @@
 # Tumor resident memory CD8 T cells and concomitant tumor immunity develop independently of CD4 help
  - immune systems applies a form of 2FA: both CD4 and CD8 T cells need to recognize distinct antigen epitopes in same pathogen, signal integration at level of DC in draining lymph nodes (CD4 T cells license DCs to optimally generate Tcm CD8 T cells to cross presented antigen)
  - Trm: alternative population of memory CD8 T cells that remain in tissue/tumor
+# Tutorial: guidelines for annotating single cell transcriptomic maps using automated and manual methods
+ - Seurat reference method is reference-based automatic annotation
 # Type 1/type 2 immunity in infectious diseases
  - Th1 (T helper type 1) cells secrete IL-2, interferon-γ, lymphotoxin-α and stimulate type 1 immunity (intense phagocytic activity), more or less synonymous with cell-mediated immunity but some antibodies are still produced, protective for most infections
  - Th2 cells secrete IL-4/5/9/10/13 and stimulate type 2 immunity (high antibody titers), more or less synonymous with humoral immunity (Th2 cells suppress phagocytosis), resolves cell-mediated inflammation
