@@ -17,6 +17,8 @@ library(Rsamtools)
 library(ggplot2)
 library(dplyr)
 library(GenomicAlignments)
+library(Rsubread)
+library(ATACseqQC)
 
 ```
 
@@ -37,48 +39,36 @@ theme_set(
 
 ```
 
-# Set working directory, create lists of relevant objects
-
-```{r}
-
-shifted_alignments_wd <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments"
-
-shifted_alignments <- list.files(shifted_alignments_wd)
-
-shifted_alignments
-
-peaks_wd <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/peaks"
-
-peaks <- list.files(peaks_wd)
-
-peaks
-
-```
-
-# Look on which chromosomes 1 .bam file aligned
-
-```{r}
-
-mappedReads <- idxstatsBam("/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/lib82437_AAAMVKNHV_star_alignments_shifted_sorted.bam")
-
-# just look at top 30 chr hits, lots of random non-expected ones
-filtered_mappedReads <- mappedReads %>%
-  arrange(-mapped) %>%
-  head(30)
-
-ggplot(filtered_mappedReads, aes(seqnames, mapped, fill = seqnames)) + geom_bar(stat = "identity") +
-  coord_flip() +
-  theme(legend.position = "none", axis.text.y = element_text(size = 8))
-
-```
-
-# Look on which (expected) chromosomes all .bam files aligned
+# Create list of sorted .bam files
 
 ```{r}
 
 bam_dir <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/"
 
 bam_files <- list.files(bam_dir, pattern = "\\_sorted.bam$", full.names = TRUE)
+
+```
+
+# Check mapping percent for all sorted .bam files
+
+```{r}
+
+all_map_percs <- data.frame()
+
+for (bam_file in bam_files) {
+  map_perc <- propmapped(bam_file)
+  map_perc$file <- basename(bam_file)
+  map_perc$libid <- sub("lib([0-9]+)_.*", "\\1", map_perc$file)
+  all_map_percs <- rbind(all_map_percs, map_perc)
+}
+
+all_map_percs
+
+```
+
+# Look on which (expected) chromosomes all sorted .bam files aligned
+
+```{r}
 
 all_mapped_reads <- data.frame()
 
@@ -101,7 +91,7 @@ ggplot(all_mapped_reads %>% filter(libid < 82449), aes(seqnames, mapped, fill = 
         axis.text.x = element_text(size = 6)) +
   labs(x = "Chromosome", y = "Mapped counts")
 
-ggplot(all_mapped_reads %>% filter(libid >= 82449), aes(seqnames, mapped, fill = seqnames)) +
+p <- ggplot(all_mapped_reads %>% filter(libid >= 82449), aes(seqnames, mapped, fill = seqnames)) +
   geom_bar(stat = "identity") +
   coord_flip() +
   facet_wrap(~ libid, ncol = 6) +
@@ -110,7 +100,12 @@ ggplot(all_mapped_reads %>% filter(libid >= 82449), aes(seqnames, mapped, fill =
         axis.text.x = element_text(size = 6)) +
   labs(x = "Chromosome", y = "Mapped counts")
 
+p
+
+ggsave("../figures/chr_map.svg", p)
+
 ```
+
 # Plot percent mitochondrial reads for each sorted .bam file
 
 ```{r}
@@ -121,68 +116,106 @@ perc_mt <- all_mapped_reads %>%
 
 perc_mt
 
-ggplot(perc_mt, aes(libid, mt_perc, fill = libid)) +
+p <- ggplot(perc_mt, aes(libid, mt_perc, fill = libid)) +
   geom_bar(stat = "identity") +
   theme(legend.position = "none",
         axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
   labs(x = "Lib ID", y = "Mapped counts to MT (%)")
 
-```
+p
 
-# Check for paired reads
-
-```{r}
-
-flags = scanBamFlag(isProperPair = TRUE)
-
-myParam = ScanBamParam(flag = flags, what = c("qname", "mapq", "isize"))
-                       #, which = GRanges("chr20", IRanges(1, 63025520)))
-myParam
-
-test <- readGAlignmentPairs("/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/lib82437_AAAMVKNHV_star_alignments_shifted_sorted.bam", param = myParam)
-class(test)
-
-# retry just for specific chr? not sure if IRanges is correct for hg38 though
-
-#atacReads <- readGAlignmentPairs(sortedBAM, param = ScanBamParam(mapqFilter = 1, 
-#    flag = scanBamFlag(isPaired = TRUE, isProperPair = TRUE), what = c("qname", 
-#        "mapq", "isize"), which = GRanges("chr20", IRanges(1, 63025520))))
-# length(atacReads)
-#atacReads
+ggsave("../figures/mt_map_perc.svg", p)
 
 ```
 
-# Investigate mean read length, plot read fragment length distribution
+# Extract (paired) read info from chr1 from 3 sorted .bam files
+
+ - crashes if trying to do for all bam files
 
 ```{r}
 
-atacReads_read1 <- first(test)
-insertSizes <- abs(elementMetadata(atacReads_read1)$isize)
-head(insertSizes)
+# hg38 chr sizes (from UCSC genome browser)
+# chr20:1-64,444,167
+# chrX:1-156,040,895
+# chr1:1-248,956,422
+
+read_chr_1 <- function(bam_file_path) {
+  chr1_reads <- readGAlignmentPairs(bam_file_path, 
+                                    param = ScanBamParam(mapqFilter = 1, 
+                                                          flag = scanBamFlag(isPaired = TRUE, isProperPair = TRUE), 
+                                                          what = c("qname", "mapq", "isize"), 
+                                                          which = GRanges("1", IRanges(1, 248956422))))
+  mcols(chr1_reads)$libid <- sub("lib([0-9]+)_.*", "\\1", basename(bam_file_path))
+  
+  return(chr1_reads)
+}
+
+chr1_list <- lapply(bam_files[1:3], read_chr_1)
+
+```
+
+```{r}
+chr1_list
+```
+
+# Plot read fragment length distribution for chr 1 mapping reads from 3 sorted .bam files
+
+```{r}
+
+# need to update this to work on chr1_list each object of which is now like below chr1_reads
+
+chr1_reads_1 <- first(chr1_reads)
+insertSizes <- abs(elementMetadata(chr1_reads_1)$isize)
 
 fragLenSizes <- table(insertSizes)
-fragLenSizes[1:5]
 
 toPlot <- data.frame(InsertSize = as.numeric(names(fragLenSizes)), Count = as.numeric(fragLenSizes))
-fragLenPlot <- ggplot(toPlot, aes(x = InsertSize, y = Count)) + geom_line()
+
+# filter for insert sizes < 2 kb because there are some that are wildly longer messing up plot...
+p <- ggplot(toPlot %>% filter(InsertSize < 2000), aes(x = InsertSize, y = Count)) +
+  geom_line() +
+  scale_y_continuous(trans = "log2") +
+  geom_vline(xintercept = c(180, 247), colour = "red") +
+  geom_vline(xintercept = c(315, 437), colour = "darkblue") +
+  geom_vline(xintercept = c(100), colour = "darkgreen")
+
+p
 
 # annotate our nucleosome free (< 100bp), mononucleosome (180bp-247bp) and dinucleosome (315-437) lengths
 
-fragLenPlot + scale_y_continuous(trans = "log2") + geom_vline(xintercept = c(180,
-    247), colour = "red") + geom_vline(xintercept = c(315, 437), colour = "darkblue") +
-    geom_vline(xintercept = c(100), colour = "darkgreen") + theme_bw()
+# generally looks ok except for rare, long inserts (mapping artifacts and/or underdigestion due to too many cells)
 
 ```
 
- - if not paired reads, then they won't have same size i.e. first and second(atacReads) different sizes...? so check insert size stuffs for both?
- 
- Warning:   57808 alignments with ambiguous pairing were dumped.
-    Use 'getDumpedAlignments()' to retrieve them from the dump environment.
+# Look at MapQ scores for 1 sorted .bam file for chr 1
 
-# More QC
 ```{r}
-BiocManager::install("ATACseqQC")
-ATACQC <- bamQC("~/Downloads/Sorted_ATAC_50K_2_ch17.bam")
+
+read1MapQ <- mcols(chr1_reads_1)$mapq
+read2MapQ <- mcols(second(chr1_reads))$mapq
+
+read1MapQFreqs <- table(read1MapQ)
+read2MapQFreqs <- table(read2MapQ)
+
+library(ggplot2)
+toPlot <- data.frame(MapQ = c(names(read1MapQFreqs), names(read2MapQFreqs)), Frequency = c(read1MapQFreqs,
+    read2MapQFreqs), Read = c(rep("Read1", length(read1MapQFreqs)), rep("Read2",
+    length(read2MapQFreqs))))
+toPlot$MapQ <- factor(toPlot$MapQ, levels = unique(sort(as.numeric(toPlot$MapQ))))
+ggplot(toPlot, aes(x = MapQ, y = Frequency, fill = MapQ)) + geom_bar(stat = "identity") +
+    facet_grid(~Read)
+
+# The quality of the alignment, or how well a read matches a specific region of the genome, is reported as a MAPQ score. The highest MAPQ value (255) goes to reads that are unique for a single region, while the lowest (0) goes to those that have a lot of matching regions
+
+# so most reads here are uniquely mapping!
+
+```
+ 
+# More QC
+
+```{r}
+
+ATACQC <- bamQC("/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/lib82438_AAAMVKNHV_star_alignments_shifted_sorted.bam")
 names(ATACQC)
 
 # PCR bottleneck coefficients identify PCR bias/overamplification in library prep
@@ -195,6 +228,7 @@ ATACQC$PCRbottleneckCoefficient_1
 ATACQC$PCRbottleneckCoefficient_2
 
 ```
+
 # Investigate total read numbers
 
 # Investigate percent GC
@@ -209,7 +243,7 @@ ATACQC$PCRbottleneckCoefficient_2
 
 # Investigate 3' and 5' bias
 
-# Plot encichment aroudn TF start site
+# Plot encichment around TF start site
  - run P452_3_TSSe_biometal.R to calculate transcription factor start site enrichment
 
 BiocManager::install("soGGi")
