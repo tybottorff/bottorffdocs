@@ -7,9 +7,9 @@
  - complement cascade of serine proteases (create pore in microbe/self membrane), overactivation leads to autoimmunity and underactivtion leads to infections i.e. immunodeficiency, initated by classic (IgM/IgG Ag), alternative, or lectin (surface sugars, different between self and nonself) mechanisms
  - opsonized = Ab-bound, complement-tagged, induces phagocytosis
  - pathogen/damage associated molecular patterns = PAMPs/DAMPs, DAMPs include uric acid crystals, ATP (stuff dead cells release/expose), PAMPs include LPS, CpG, dsRNA, flagellin
- - PRR: pattern recognition receptor, TLR (for extracellular/endosome things, TLR4-LPS, leads to proinflammatory NF-k beta), CLR (carbs), NLR (cytosolic, activates inflammasome and cytokines IL-1 beta and 1L-18), RLR (viral uncapped dsRNA), CDS (DNA nucleotides in cytosol, bacterial DNA less methylated than ours)
+ - PRR: pattern recognition receptor, TLR (for extracellular/endosome things, TLR4-LPS, leads to proinflammatory NF-kβ), CLR (carbs), NLR (cytosolic, activates inflammasome and cytokines IL-1β and 1L-18), RLR (viral uncapped dsRNA), CDS (DNA nucleotides in cytosol, bacterial DNA less methylated than ours)
  - cGAS-STING: DNA-dependent cyclase activates STING which activates type I interferon
- - type II interferon is gamma, type 1 is alpha/beta (antiviral state in uninfected cells to prevent infection i.e. by turning off translation)
+ - type II interferon is γ, type 1 is α/β (antiviral state in uninfected cells to prevent infection i.e. by turning off translation)
  - autoinflammatory = innate, autoimmunity = adaptive
  - ILC: innate lymphoid cell (ILC1 = NK, antiviral), Id2 = key TF, ILC2 = antiparasite and proallergy
  - neutrophils: kamikazes, vomit DNA (NETs), use granules to trap stuff, hard to pull out of RNAseq (short-lived), may drive autoimmunity (self DNA i.e. via NETs)
@@ -19,11 +19,11 @@
  - **APCs only express 2nd signal (costimulation) if PRRs active so only prime T cells if against foreign peptide ideally**
  - lipid particles in mRNA vaccine are immunogenic (adjuvant)
  - NK ~= CD8 T, ILC1 ~= CD4 Th1, ILC2 ~= CD4 Th2, ILC3 ~= CD4 Th17
- - NKs: CD3 negative, CD56 positive (adhesion molecule, also T cell activtion marker), Nkp46 positive, comprise 5-20% of lymphocytes, mature (low CD56, 90% of NKs) or immature (high CD56, 10% of NKs), pervasive in blood/lymph, kill opsonized cells, can be antigen specific (CD16 activating receptor for mature NKs), early IFN gamma production, NK receptor = KIR (very polymorphic, most so after MHC, sees HLA)
- - iNKT: invariant TCR alpha chain, recognize CD1-lipid not pMHC4/8
+ - NKs: CD3 negative, CD56 positive (adhesion molecule, also T cell activtion marker), Nkp46 positive, comprise 5-20% of lymphocytes, mature (low CD56, 90% of NKs) or immature (high CD56, 10% of NKs), pervasive in blood/lymph, kill opsonized cells, can be antigen specific (CD16 activating receptor for mature NKs), early IFNγ production, NK receptor = KIR (very polymorphic, most so after MHC, sees HLA)
+ - iNKT: invariant TCR α chain, recognize CD1-lipid not pMHC4/8
 # Antigen presentation
  - turned over proteins (via proteasome/inflammasome) lead to peptides some of which are presented on MHCI
- - MHCI: heavy transmembrane domain (alpha), light beta chain (heterodimer)
+ - MHCI: heavy transmembrane domain (α), light β chain (heterodimer)
  - HLA-A/B/C (MHCI), DQ/DR/DP (MHCII)
  - MHC polymorphic (> 20,000 MHCI alleles), especially around peptide binding pocket
  - HLA-B B refers to gene (allele group), stuff after is more info
@@ -60,13 +60,13 @@
  - cytokines = signal 3
  - most cytokines signal via JAK/STAT
 ## Th1
- - make IFN gamma, targets/activates macrophages, driven by IL-2 and IFN gamma, leads to STAT1/4 and Tbet, helps fight intracellular bugs
- - activate macrophage via IFN gamma and membrane CD40L
+ - make IFNγ, targets/activates macrophages, driven by IL-2 and IFNγ, leads to STAT1/4 and Tbet, helps fight intracellular bugs
+ - activate macrophage via IFNγ and membrane CD40L
 ## Th2
  - makes IL-4/5/13, targets eosinophils/mast cells to fight parasites, roles in allergy, driven by IL-4, leads to STAT6 and GATA3 TF
  - alternative macrophage activation (M2, vs. classical M1)
 ## Th17
- - makes IL-17/23, driven by IL-1/6/23 and TGF beta, leads to ROR gamma (TF), targets neutrophils/monocytes to fight extracellular pathogens
+ - makes IL-17/23, driven by IL-1/6/23 and TGFβ, leads to RORγ (TF), targets neutrophils/monocytes to fight extracellular pathogens
  - IL-22 increases barrier integrity in epithelium, IL-17 activates neutrophils, IL-17/22 lead to antimicrobial peptides
  - Th1 star: hybrid Th1/17
 # Collaboration between T/B cells
