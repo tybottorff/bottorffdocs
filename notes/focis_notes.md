@@ -19,7 +19,7 @@
  - **APCs only express 2nd signal (costimulation) if PRRs active so only prime T cells if against foreign peptide ideally**
  - lipid particles in mRNA vaccine are immunogenic (adjuvant)
  - NK ~= CD8 T, ILC1 ~= CD4 Th1, ILC2 ~= CD4 Th2, ILC3 ~= CD4 Th17
- - NKs: CD3 negative, CD56 positive (adhesion molecule, also T cell activtion marker), Nkp46 positive, comprise 5-20% of lymphocytes, mature (low CD56, 90% of NKs) or immature (high CD56, 10% of NKs), pervasive in blood/lymph, kill opsonized cells, can be antigen specific (CD16 activating receptor for mature NKs), early IFNγ production, NK receptor = KIR (very polymorphic, most so after MHC, sees HLA)
+ - NKs: CD3<sup>-</sup>, CD56<sup>+</sup> (adhesion molecule, also T cell activtion marker), Nkp46<sup>+</sup>, comprise 5-20% of lymphocytes, mature (low CD56, 90% of NKs) or immature (high CD56, 10% of NKs), pervasive in blood/lymph, kill opsonized cells, can be antigen specific (CD16 activating receptor for mature NKs), early IFNγ production, NK receptor = KIR (very polymorphic, most so after MHC, sees HLA)
  - iNKT: invariant TCR α chain, recognize CD1-lipid not pMHC4/8
 # Antigen presentation
  - turned over proteins (via proteasome/inflammasome) lead to peptides some of which are presented on MHCI
@@ -44,7 +44,7 @@
  - central tolerance is not perfect, but it's ok because of peripheral tolerance (can easily control low affinity pMHC-TCR)
  - peptide driving positive selection in thymus often not same peptide as one recognized by TCR later
  - **thymic epithelial APCs produce tissue specific proteins from whole body to avoid autoimmunity! use distinct proteasomes so peptide driving selection aren't same as peptides in periphery, also to avoid autoimmunity**
- - Tregs: CD25 positive (IL-2 receptor), FoxP3 positive, CTLA-4 positive (CTLA-4 removes B7 on APCs, known as **trogocytosis**)
+ - Tregs: CD25<sup>+</sup> (IL-2 receptor), FoxP3<sup>+</sup>, CTLA-4<sup>+</sup> (CTLA-4 removes B7 on APCs, known as **trogocytosis**)
 # T cell activation
  - **naive T cells need signals 1-2, activated T cells just need signal 1**
  - CTLA-4's effects are mostly in draining lymph node for new naive cells that are activated, also disruption of Tregs
