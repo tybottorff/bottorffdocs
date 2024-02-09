@@ -435,8 +435,14 @@
  - the occurrence of Gly was CDR3 length‐ and position‐dependent in both chains, whereas the frequency of Ser at positions 106 and 107 was positively correlated with CDR3 length in TCR β
  - the amino acids in CDR3 loop regions were significantly different between TCR α and β, which suggests a distinct role for each chain in the recognition of antigen–MHC complexes
  - **see length-dependent increase in glycine usage, may confer cross-reactivity with glycine's small size**
+# Comparative immunologic characterization of autoimmune giant cell myocarditis with ipilimumab
+ - see more sharing between myocarditis tissue TCRs and lung tumor TCRs (~10%) vs. hepatitis tissue TCRs and myocarditis tissue TCRs (~1%)
+ - see more T cells in myocarditis tissue (mostly CD4<sup>+</sup>) than hepatitis tissue
+ - perhaps related to hepatiits being steroid responsive, myocarditis being steroid refractory
 # Complete and early response to cemiplimab associated to severe immune toxicity in advanced cervical cancer: a case report
  - potential supplementary evidence for irAE association with ICB response
+# Complimentary mechanisms of dual checkpoint blockade expand unique T cell repertoires and activate adaptive anti-tumor immunity in triple-negative breast tumors
+ - efficacy of dual ICB (anti-CTLA-4 and anti-PD-1) in TNBC derives from CTLA-4 blockade-driven expansion of T cells whose functionality is enhanced by PD-1 blockade
 # Computational simulations of bispecific T-cell engagers by a multiscale model
  - modeling to try and understand mechanism of bispecific antibodies as T cell engagers (bypass TCR-pMHC interaction, redirect cytotoxic activity, can help kill cancer cells but also off target effects)
 # Consensus disease definitions for neurologic immune-related adverse events of immune checkpoint inhibitors
@@ -503,6 +509,10 @@
 ## Discussion
  - clonal T cells recognizing GAD65 339-352 crossreact with hCMV major DNA-binding protein pUL57 peptide 674-687, peptide efficiently processed for presentation by HLA-DR3
  - crossreactive response may be polyclonal, so T cells recognizing hCMV peptide more efficiently than GAD65 peptide may exist
+# Deciphering pathogenic cellular module at single-cell resolution in checkpoint inhibitor-related pneumonitis
+ - single cell RNAseq of bronchoalveolar lavage fluid
+ - also do TCR analysis!
+ - CXCL13<sup>+</sup> T cells and hyperinflammatory CXCL9<sup>+</sup> monocytes accumulate in pneumonitis patient samples
 # Deconstructing the peptide-MHC specificity of T cell recognition
  - identify MHC-presented peptide ligands by combining TCR selection of highly diverse yeast-displayed peptide-MHC libraries with deep sequencing
  - structural conservation of the TCR interaction surface, not surprising
@@ -515,10 +525,13 @@
 # Deletion of the inhibitory co-receptor CTLA-4 enhances and invigorates chimeric antigen receptor T cells
  - deletion of *CTLA4* permits unopposed CD28 signaling in CAR T cells
  - PD-1 deficiency nullifies CD28 signaling enabled by *CTLA4* deletion in CAR T cells
-# Dendritic cells as shepherds of T cell immunity in cancer
 # Depletion of exhausted alloreactive T cells enables targeting of stem-like memory T cells to generate tumor-specific immunity
  - alloreactivity refers to ability of T cells to recognize peptide-allogenic-MHC complexes not encountered during thymic development (HLA/MHC-mismatch recognition, manifestation of transplant rejection and graft-versus-host disease)
  - find that CD8<sup>+</sup> T cell exhaustion in bone marrow was primarily alloantigen-driven
+# Detection of identical T cell clones in peritumoral pleural effusion and pneumonitis lesions in a cancer patient during immune-checkpoint blockade
+ - bronchoalveolar lavage fluid from patient with ICB-pneumonitis
+ - TCR beta sequencing
+ - **see identical clones between peritumoral pleural effusion and bronchoalveolar lavage fluid, don't see in peripheral blood**
 # Determinants of anti-PD-1 response and resistance in clear cell renal cell carcinoma
 ## Abstract
  - higher number of expanded TCR clones in pre-treatment responders suggesting pre-existing immunity, **presumably to tumor before ICI is what this means?**, maintenance of these pre-treatment expanded clones associates with response
@@ -701,6 +714,10 @@
  - **HLA-B57 restricted T cells are more crossreactive to mutants of target epitopes, this HLA allele also associated with autoimmunity**
 # Elevated circulating memory T cells precede immunotherapy toxicities in melanoma
  - summary of a paper I've already read (*T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma*)
+# Elucidating the heterogeneity of immunotherapy response and immune-related toxicities by longitudinal ctDNA and immune cell compartemtn tracking in lung cancer
+ - TCR beta seq
+ - data from 79 patients in 2 cohorts
+ - paired analyses of peripheral TCRseq at baseline and on-treatment time points showed no significant changes in TCR clonotype abundances by clinical benefit **but did see on-treatment changes (more expanding and regressing clones) in circulating TCR clonotypes in patients with irAEs, perhaps surprising given correlation between irAE development and clinical benefit**
 # Emerging concepts in T cell receptor specificity: rationalizing and (maybe) predicting outcomes
 ## Rules are made to be broken and roles are not easily defined
  - example: A6 TCR recognizes HTLV-1 Tax<sub>11-19</sub> peptide presented by MHCI HLA-A*0201, surprisingly strongest interaction in interface is between CDR3α and HLA-A2 (so peptide not involved surprisingly yet TCR is specific not degenerate)
@@ -1251,6 +1268,8 @@
  - **"beneficial autoimmunity": shared TCRs recognizing tumor-associated antigens in vitiligo and metastatic lesions of positive responders**
 # Integrated analysis of multimodal single cell data
  - weighted nearest neighbor analysis integrates multimodal single cell data in an unsupervised manner by learning relative utility of each data type in each cell
+# Integrated cancer cell-specific single-cell RNA-seq datasets of immune checkpoint blockade-treated patients
+ - compiled 8 scRNA-seq datasets from 9 cancer types, 174 patients, ~90k cancer cells, don't think they have TCRseq though...
 # Integrated NY-ESO-1 antibody and CD8<sup>+</sup> T cell responses correlate with clinical benefit in advanced melanoma patients treated with ipilimumab
  - isotype control: primary antibody that lacks specificity to target but matches class/type of primary antibody used, negative control to see non-specific background signal
  - CTLA-4 blockade improves survival in patients with advanced melanoma, also enhances immunity to NY-ESO-1 (cancer-testis antigen expressed in some melanoma patients)
@@ -1743,6 +1762,9 @@
  - higher risk of irAE associated with age < 60 years, high BMI, women on CTLA-4, men on PD-1 blockade, chronic smoking, pre-existing autoimmune disease, anti-inflammatory drug use, 
  - organ-specific irAEs associated with pre-existing organ dysfunction
  - high pre-treatment soluble CTLA4 associated with irAEs
+# Risk of colitis in immune checkpoint inhibitors and in chemotherapy/placebo for solid tumors: a systematic review and meta-analysis
+ - CTLA-4 blockade more likely to induce colitis than PD-1 blockade
+ - NSCLC patients with ICB less likely to develop colitis than melanoma patients
 # Role of B cells as antigen presenting cells
  - B2s: conventional B cells
  - Bregs: suppress inflammation, < 1% of peripheral blood mononuclear cells
