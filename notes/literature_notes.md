@@ -112,6 +112,9 @@
  - ICB can only temporarily restore function of some exhausted T cells because of irreversible change in epigenetics of some terminally exhausted T cells
  - exhausted T cells lose effector functions, change epigenetic/transcriptional profiles, change metabolism, slow down proliferation, and respond more slowly to stimuli due to cytokine (IL-2, TNF, IFN-γ) deficiency
  - TOX is key inducer of T cell exhaustion, NFAT (upstream target of TOX) is key regulator of T cell exhaustion
+# Assessment of human leukocyte antigen-based neoantigen presentation to determine pan-cancer response to immunotherapy
+ - integration of binding affinity of neoantigens to HLA-I and HLA-I allele divergence = HLA tumor-antigen presentation score (HAPS)
+ - high HAPS associated with better response to ICB (makes sense, more neoantigens presented, more likely to be recognized by T cells)
 # Association between germline HLA and immune-related adverse events
  - some HLA types associated with irAEs in different organs
  - HLA-DRB3*01:01 and thrombocytopenia associated
@@ -917,6 +920,11 @@
  - different germline segments can recombine with each other with different frequencies, and the number of insertions and deletions is random, so the overall receptor generation process cannot be described deterministically
  - IGoR starts by listing the possible recombination and hypermutation scenarios leading to an observed sequence in the data set, then assigns probability weights reflecting the likelihood of these scenarios, IGoR restricts its exploration to the reasonably likely ones to save on computational cost
  - computational pipeline: V(D)J recombination proceeds by joining randomly selected segments (V, D, and J segments in the case of TRB and IGH), each segment gets trimmed at its ends (hashed areas), and a varying number of non-templated insertions are added between them, IGoR lists putative recombination scenarios consistent with the observed sequence, and weighs them according to their likelihood, the likelihood of each scenario is computed using a Bayesian network of dependencies between the recombination features (V, D, J segment choices, insertions, and deletions)
+# *HLA* autoimmune risk alleles restrict the hypervariable region of T cell receptors
+ - little prior evidence for hypothesis that *HLA* risk alleles may influence thymic selection to increase frequency of autoreactive T cells (central hypothesis)
+ - could also be due to peripheral hypothesis (*HLA* risk alleles increasing presentation of autoantigens in periphery to T cells)
+ - *HLA-DRB1* site 13 influences CDR3 AA composition, evidence for central hypothesis?
+ - RA characterized by reaction to citrullinated antigens
 # *HLA-DQA1* and *HLA-DQB1* in Celiac disease predisposition: practical implications of the HLA molecular typing
  - HLA class I and II genes code for cell surface glycoproteins important for antigen presentation and self-recognition by immune cells
  - HLA class I heterodimers consist of α-heavy chain (encoded by *HLA-A/B/C*) and small β-microglobulin
@@ -1699,6 +1707,8 @@
  - **takehome: each epitope-specific repertoire studied had a clustered group of receptors with core sequence similarities plus a dispersed set of diverse "outlier" sequences, so some similar but some different sort of unhelpful**
 # Rechallenge of immune checkpoint inhibitors in a case with adverse events inducing myasthenia gravis
  - ICI-induced myasthenia gravis (MG) irAE associated with germline variant in *SLC22A5* in thymoma case
+# Regulatory  T cell-specific epigenomic region variants are a key determinant of susceptibility to common autoimmune diseases
+ - SNPs associated with autoimmunity enriched in CpG demethylated regions in naive Tregs, less enriched in activation-induced demethylated regions in Tconv/Tregs
 # Regulatory T cells suppress CD4<sup>+</sup> effector T cell activation by controlling protein synthesis
 ## Abstract
  - Tregs suppress CD4 effector T cells
