@@ -1,0 +1,269 @@
+---
+title: "Interconnected lineage trajectories link conventional and NK-like exhausted CD8+ T cells beneficial in T1D"
+output: pdf_document
+---
+
+ - data reproduction of Erin Witkop's ATAC-seq
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Rsamtools)
+library(ggplot2)
+library(dplyr)
+library(GenomicAlignments)
+library(Rsubread)
+library(ATACseqQC)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(soGGi)
+library(BiocParallel)
+register(SerialParam())
+library(DiffBind)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Prep metadata
+
+```{r}
+
+time <- rep(c("baseline", "week 104"), each = 3)
+
+cells <- rep(c("CD57pos_DP_NN_CD8", "CD57neg_DP_NN_CD8", "DN_NN_CD8"), times = 2)
+
+libID <- 82437:82460
+
+metadata <- data.frame(Time = time, Cells = cells, libID = libID) %>% arrange(libID)
+
+# CD57 neg ~= PD-1 pos (see figure 1A)
+
+# baseline CD57 neg: 438, 444, 450, 456
+# baseline CD57 pos: 437, 443, 449, 455
+# baseline DN NN CD8: 439, 445, 451, 457
+# week 104 CD57 neg: 441, 447, 453, 459
+# week 104 CD57 pos: 440, 446, 452, 458
+# week 104 DN NN CD8: 442, 448, 454, 460
+
+bam_dir <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments"
+
+bam_files <- list.files(bam_dir, pattern = "\\_sorted.bam$", full.names = TRUE)
+
+metadata$bamReads <- bam_files
+
+peaks_dir <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/peaks"
+
+peak_files <- list.files(peaks_dir, pattern = "*peaks-narrow.bed$", full.names = TRUE)
+
+metadata$Peaks <- peak_files
+
+# csv with cols SampleID, Tissue, Factor, Condition, Treatment, Replicate, bamReads (path), ControlID, bamControl, Peaks (bed path), PeakCaller (bed for all?)
+# might need few more cols...
+
+metadata <- metadata %>%
+  group_by(Time, Cells) %>%
+  mutate(Replicate = row_number()) %>%
+  rename(SampleID = libID,
+         Condition = Time,
+         Tissue = Cells) %>%
+  mutate(Factor = NA,
+         ControlID = NA,
+         bamControl = NA,
+         PeakCaller = "bed")
+
+metadata
+
+```
+
+# Diffbind: create object, apply blacklist, get counts (consensus peaks)
+
+```{r}
+
+# create a DiffBind object
+peaks  <- dba(sampleSheet=metadata)
+# apply blacklist
+peaks  <- dba.blacklist(peaks)
+
+# define the rows in the form of a consensus peak set
+# form the binding matrix using the consensus peak and computing overlapping read counts for each peak in each sample, whether or not it was called as a peak in that sample
+# default behavior
+# make the consensus peak set using peaks identified in at least two samples
+counts <- dba.count(peaks, bRemoveDuplicates = TRUE, bParallel = FALSE, summit = 1000)
+
+# consensus peak set represents genomic intervals identified as peaks in one or more samples.
+# choice of consensus peak set can vary, often use peaks identified in at least two samples (default)
+
+```
+
+# Look for batch effects
+
+```{r}
+
+plot(counts)
+
+p <- dba.plotPCA(counts, attributes = c(DBA_TISSUE, DBA_CONDITION))
+
+pdf("../figures/pca_cells_time.pdf")
+print(p)
+dev.off()
+
+p
+
+```
+
+# MA plots (pre-normalization)
+
+```{r}
+
+# MA plots show how the fold changes between conditions are distributed as the mean concentration of reads counts increases
+
+# each of the consensus site is a point (smoothed), while the the X-axis orders them according to the mean number of overlapping read counts for the consensus site
+# the Y-axis shows the log2 fold change
+# points above the 0-fold line (blue) demonstrate greater enrichment of reads in the 1st title condition, while point below the 0-fold line are more enriched in the 2nd title condition
+# the red curve is a loess fit showing the overall trend in the data
+
+dba.plotMA(counts, bNormalized=FALSE, sub="Non-Normalized", contrast=list(CD57_pos=counts$masks$CD57pos_DP_NN_CD8, CD57_neg=counts$masks$CD57neg_DP_NN_CD8))
+
+dba.plotMA(counts, bNormalized=FALSE, sub="Non-Normalized", contrast=list(CD57_pos=counts$masks$CD57pos_DP_NN_CD8, DN=counts$masks$DN_NN_CD8))
+
+dba.plotMA(counts, bNormalized=FALSE, sub="Non-Normalized", contrast=list(CD57_neg=counts$masks$CD57neg_DP_NN_CD8, DN=counts$masks$DN_NN_CD8))
+
+# compare plots when bNormalized=TRUE?
+
+```
+
+# Look at the raw and normalized read counts in the dba.report() by setting bCounts=TRUE and comparing bNormalized=TRUE and bNormalized=FALSE
+
+# Model
+
+```{r}
+
+model <- dba.contrast(counts, categories = c(DBA_TISSUE))
+
+model <- dba.analyze(model)
+
+dba.show(model,bContrasts=TRUE)
+
+db <- dba.report(model)
+# obtain differential sites
+db
+# conc = mean concentration of reads across samples (log2)
+# fold: log2 fold change (DESeq2)
+# FDR: multiple-testing corrected significance value
+
+```
+
+# Re-show MA plots with differential sites superimposed
+
+```{r}
+
+dba.plotMA(model, contrast = 1)
+
+dba.plotMA(model, contrast = 2)
+
+dba.plotMA(model, contrast = 3)
+
+```
+
+# Volcano plots
+
+```{r}
+
+dba.plotVolcano(model, contrast = 1)
+
+dba.plotVolcano(model, contrast = 2)
+
+dba.plotVolcano(model, contrast = 3)
+
+```
+
+# Normalize data, re-analyze norm data
+
+```{r}
+
+# didn't have spike-ins, safest normalization is background=TRUE , normalize=DBA_NORM_NATIVE, using background reads and native normalization method
+
+model_norm <- dba.normalize(model, method=DBA_ALL_METHODS, library=DBA_LIBSIZE_FULL, normalize=DBA_NORM_LIB, background=FALSE)
+
+model_norm  <- dba.analyze(model_norm, method = DBA_ALL_METHODS)
+
+```
+
+# Save RDS to continue work locally
+
+```{r}
+
+saveRDS(model_norm, "../saved_data/normalized_data.rds")
+
+```
+
+# Prepare peak annotater function
+
+```{r}
+
+library(ChIPseeker)
+
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+
+bed.annot = annotatePeak(model_norm, tssRegion=c(-3000, 3000),TxDb=txdb, annoDb="org.Hs.eg.db")
+
+annot_peaks=as.data.frame(bed.annot)
+
+```
+
+# More Erin code, should be able to just follow along for Volcano plots for 3 cell type combo comparisons
+
+```{r}
+
+https://github.com/BenaroyaResearch/Witkop_T1DAL_2023/blob/b54cb30b8f05cd2bd6ea924bd829db800b887da1/ATAC_Scripts_for_reference/P452_3_T1DAL_Diffbind_Analysis_revised.R#L124
+
+```
+
+# Alternative work to show volcano plots with gene names instead of locations
+
+```{r}
+
+dba.plotHeatmap(model)
+
+# export data table (dba.report(th = 1))
+# annotate data somehow... to get gene names from peak locations
+# make new volcano plot
+
+```
+
+# Alternative volcano plot ideas
+
+```{r}
+mutateddf <- mutate(yourdataframe, sig=ifelse(output$padj<0.1, "padj<0.1", "Not Sig")) #Will have different colors depending on significance
+input <- cbind(gene=rownames(mutateddf ), mutateddf ) #convert the rownames to a column
+volc = ggplot(input, aes(log2FoldChange, -log10(pvalue))) + #volcanoplot with log2Foldchange versus pvalue
+    geom_point(aes(col=sig)) + #add points colored by significance
+    scale_color_manual(values=c("black", "red")) + 
+    ggtitle("Your title here") #e.g. 'Volcanoplot DESeq2'
+volc+geom_text_repel(data=head(input, 20), aes(label=gene)) #adding text for the top 20 genes
+#ggsave("Volcanoplot.jpeg", device="jpeg") #In case you want to easily save to disk
+volc
+
+BiocManager::install('EnhancedVolcano')
+
+```
