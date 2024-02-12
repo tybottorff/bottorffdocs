@@ -238,6 +238,24 @@ model_norm <- readRDS("../saved_data/normalized_data.rds")
 
 ```
 
+# Make heatmap
+
+```{r}
+
+p <- dba.plotHeatmap(model_norm,  correlations=FALSE, scale="row",
+                colSideCols = list(DBA_CONDITION = c("black","grey"),
+                                   DBA_FACTOR = c("#93a24eff","#ba4d4cc7","#7497d9ff"),
+                                   DBA_REPLICATE = c("grey20","grey40","grey60","grey80")), 
+                margin = 2)
+
+pdf("../figures/heatmap_clustering.pdf")
+print(p)
+dev.off()
+
+p
+
+```
+
 # Annotate peaks
 
 ```{r}
