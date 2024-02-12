@@ -1,0 +1,100 @@
+---
+title: "Interconnected lineage trajectories link conventional and NK-like exhausted CD8+ T cells beneficial in T1D"
+output: pdf_document
+---
+
+ - data reproduction of Erin Witkop's ATAC-seq
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ChIPQC)
+library(rtracklayer)
+library(DT)
+library(dplyr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Create list of peak .bed files
+
+```{r}
+
+peak_dir <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/peaks/"
+
+narrow_peak_files <- list.files(peak_dir, pattern = "\\_peaks-narrow.bed$", full.names = TRUE)
+# broad regions of open chromatin
+
+summit_peak_files <- list.files(peak_dir, pattern = "\\_peaks-summit.bed$", full.names = TRUE)
+# precise regions of open chromatin
+
+```
+
+# Work with narrow .bed and sorted .bam files from 1 libID on chr20
+
+ - blacklist .bed import error
+
+```{r}
+
+#blkList <- rtracklayer::import("../raw_data/ENCFF269URO.bed.gz")
+openRegionPeaks <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/peaks/lib82437_AAAMVKNHV_macs2_peaks-narrow.bed"
+
+qcRes <- ChIPQCsample("/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/lib82437_AAAMVKNHV_star_alignments_shifted_sorted.bam", 
+    peaks = openRegionPeaks, annotation = "hg38", chromosomes = "20",
+    #blacklist = blkList, 
+    verboseT = FALSE)
+
+```
+
+# QC for 1 libID for chr20
+
+```{r}
+
+QCmetrics(qcRes) %>% t %>% data.frame %>% dplyr:::select(Reads, starts_with(c("Filt")), 
+    starts_with(c("RiP")), starts_with(c("RiBL"))) %>% datatable(rownames = NULL)
+
+flagtagcounts(qcRes) %>% t %>% data.frame %>% mutate(Dup_Percent = (DuplicateByChIPQC/Mapped) * 
+    100) %>% dplyr:::select(Mapped, Dup_Percent) %>% datatable(rownames = NULL)
+
+# 22.65% duplication
+
+```
+
+# Annotate open regions for 1 libID for chr20
+
+ - issues with ChIPseeker install
+
+```{r}
+
+library(ChIPseeker)
+qcResAnno <- annotatePeak(qcRes, TxDb = TxDb.Hsapiens.UCSC.hg38.knownGene)
+qcResAnno
+plotAnnoPie(qcResAnno)
+
+```
+
+# Notes
+ - Erin code: https://github.com/BenaroyaResearch/Witkop_T1DAL_2023/tree/main
+ - Stephan advice: use /shiftedAlignments as bamfiles; /peaks contains peak files
