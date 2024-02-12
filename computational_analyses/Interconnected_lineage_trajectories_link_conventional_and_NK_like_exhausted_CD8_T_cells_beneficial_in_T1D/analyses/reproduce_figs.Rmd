@@ -24,6 +24,9 @@ library(soGGi)
 library(BiocParallel)
 register(SerialParam())
 library(DiffBind)
+library(ChIPseeker)
+library(org.Hs.eg.db)
+library(tidyr)
 
 ```
 
@@ -217,53 +220,149 @@ saveRDS(model_norm, "../saved_data/normalized_data.rds")
 
 ```
 
-# Prepare peak annotater function
+# Read in RDS to continue locally
 
 ```{r}
 
-library(ChIPseeker)
+model_norm <- readRDS("../saved_data/normalized_data.rds")
+
+```
+
+# Annotate peaks
+
+```{r}
+
+# get peaks out of dba object
+peaks <- dba.peakset(model_norm, bRetrieve = TRUE)
+# could use dba.report() for just differentially bound peaks
+
+# add chr to seqnames to get annotatePeak function working
+new_seqnames <- paste0("chr", seqlevels(peaks))
+new_names_vector <- setNames(new_seqnames, seqlevels(peaks))
+peaks_with_new_seq_level <- renameSeqlevels(peaks, new_names_vector)
 
 txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
 
-bed.annot = annotatePeak(model_norm, tssRegion=c(-3000, 3000),TxDb=txdb, annoDb="org.Hs.eg.db")
+bed.annot = annotatePeak(peaks_with_new_seq_level, tssRegion=c(-3000, 3000),TxDb=txdb, annoDb="org.Hs.eg.db")
 
 annot_peaks=as.data.frame(bed.annot)
 
-```
-
-# More Erin code, should be able to just follow along for Volcano plots for 3 cell type combo comparisons
-
-```{r}
-
-https://github.com/BenaroyaResearch/Witkop_T1DAL_2023/blob/b54cb30b8f05cd2bd6ea924bd829db800b887da1/ATAC_Scripts_for_reference/P452_3_T1DAL_Diffbind_Analysis_revised.R#L124
+annot_peaks
 
 ```
 
-# Alternative work to show volcano plots with gene names instead of locations
+# Pie graph of peak annotations
+
+ - most (~60% of) peaks are close to (<= 1 kb from) promoters
 
 ```{r}
 
-dba.plotHeatmap(model)
+p <- plotAnnoPie(bed.annot)
 
-# export data table (dba.report(th = 1))
-# annotate data somehow... to get gene names from peak locations
-# make new volcano plot
+pdf("../figures/gene_anno_pie.pdf")
+print(p)
+dev.off()
+
+p
 
 ```
 
-# Alternative volcano plot ideas
+# Combine gene annotations with diffbind results to make new volcano plots
 
 ```{r}
-mutateddf <- mutate(yourdataframe, sig=ifelse(output$padj<0.1, "padj<0.1", "Not Sig")) #Will have different colors depending on significance
-input <- cbind(gene=rownames(mutateddf ), mutateddf ) #convert the rownames to a column
-volc = ggplot(input, aes(log2FoldChange, -log10(pvalue))) + #volcanoplot with log2Foldchange versus pvalue
-    geom_point(aes(col=sig)) + #add points colored by significance
-    scale_color_manual(values=c("black", "red")) + 
-    ggtitle("Your title here") #e.g. 'Volcanoplot DESeq2'
-volc+geom_text_repel(data=head(input, 20), aes(label=gene)) #adding text for the top 20 genes
-#ggsave("Volcanoplot.jpeg", device="jpeg") #In case you want to easily save to disk
-volc
 
-BiocManager::install('EnhancedVolcano')
+anno_data <- annot_peaks %>%
+  dplyr::select(seqnames, start, end, strand, width, geneChr, geneStart, geneEnd, geneLength, geneStrand, geneId, transcriptId, distanceToTSS, ENSEMBL, SYMBOL, GENENAME) %>%
+  mutate(seqnames = gsub("chr", "", seqnames))
+
+contrast_1_report <- dba.report(model_norm, method=DBA_EDGER,
+                                              contrast = 1,  
+                                              bUsePval = FALSE,
+                                              th=1) %>%
+                     as_tibble() %>%
+                     left_join(anno_data, by = c("seqnames", "start", "end", "width", "strand"))
+
+contrast_2_report <- dba.report(model_norm, method=DBA_EDGER,
+                                              contrast = 2,  
+                                              bUsePval = FALSE,
+                                              th=1) %>%
+                     as_tibble() %>%
+                     left_join(anno_data, by = c("seqnames", "start", "end", "width", "strand"))
+
+contrast_3_report <- dba.report(model_norm, method=DBA_EDGER,
+                                              contrast = 3,  
+                                              bUsePval = FALSE,
+                                              th=1) %>%
+                     as_tibble() %>%
+                     left_join(anno_data, by = c("seqnames", "start", "end", "width", "strand"))
+
+```
+
+# Make new volcano plots (compare to Erin's figure 1C and 2A)
+
+```{r}
+
+contrast_2_report <- contrast_2_report %>%
+  mutate(group = case_when(
+           p.value < 0.05 & Fold < 0 ~ "DN",
+           p.value < 0.05 & Fold > 0 ~ "CD57+",
+           p.value > 0.05 ~ "NS"
+         ))
+
+p <- ggplot(contrast_2_report, aes(x = Fold, y = -log10(p.value), color = group)) +
+  geom_point(alpha = 0.25, size = 0.1) +
+  labs(x = "Log2 Fold Change",
+       y = "-log10(p value)") +
+  geom_text_repel(data = contrast_2_report %>% filter(SYMBOL %in% c("GZMB", "NCR1", "GZMH", "KLRF1", "CD244", "TOX", "CTLA4", "SLAMF6", "NKG7", "TBX21", "PDCD1", "HAVCR2", "KLRG1", "LAG3")), aes(label = SYMBOL)) +
+  scale_color_manual(values = c("NS" = "grey", "CD57+" = "darkgreen", "DN" = "lightblue"))
+
+# contrast 2 is pos vs. DN
+
+p
+
+ggsave("../figures/CD57_pos_vs_DN_volcano.svg", p)
+
+contrast_3_report <- contrast_3_report %>%
+  mutate(group = case_when(
+    # backwards > and < because of -Fold below
+           p.value < 0.05 & Fold > 0 ~ "DN",
+           p.value < 0.05 & Fold < 0 ~ "PD-1+",
+           p.value > 0.05 ~ "NS"
+         ))
+
+# contrast 3 is neg vs. DN
+
+p <- ggplot(contrast_3_report, aes(x = -Fold, y = -log10(p.value), color = group)) +
+  # negative fold because contrast order was backwards (i.e. DN vs. negative not negative vs. DN)
+  geom_point(alpha = 0.25, size = 0.1) +
+  labs(x = "Log2 Fold Change",
+       y = "-log10(p value)") +
+  geom_text_repel(data = contrast_3_report %>% filter(SYMBOL %in% c("GZMB", "NCR1", "GZMH", "KLRF1", "CD244", "TOX", "CTLA4", "SLAMF6", "NKG7", "TBX21", "PDCD1", "HAVCR2", "KLRG1", "LAG3")), aes(label = SYMBOL)) +
+  scale_color_manual(values = c("NS" = "grey", "PD-1+" = "red", "DN" = "lightblue"))
+
+p
+
+ggsave("../figures/CD57_neg_vs_DN_volcano.svg", p)
+
+contrast_1_report <- contrast_1_report %>%
+  mutate(group = case_when(
+           p.value < 0.05 & Fold < 0 ~ "PD-1+",
+           p.value < 0.05 & Fold > 0 ~ "CD57+",
+           p.value > 0.05 ~ "NS"
+         ))
+
+# contrast 1 is CD57+ vs. CD57-
+
+p <- ggplot(contrast_1_report, aes(x = Fold, y = -log10(p.value), color = group)) +
+  # negative fold because contrast order was backwards (i.e. DN vs. negative not negative vs. DN)
+  geom_point(alpha = 0.25, size = 0.1) +
+  labs(x = "Log2 Fold Change",
+       y = "-log10(p value)") +
+  geom_text_repel(data = contrast_1_report %>% filter(SYMBOL %in% c("B3GAT1", "NCR1", "KIR2DL3", "KIR3DL2", "KLRF1", "NCAM1")), aes(label = SYMBOL)) +
+  scale_color_manual(values = c("NS" = "grey", "PD-1+" = "red", "CD57+" = "darkgreen"))
+
+p
+
+ggsave("../figures/CD57_pos_vs_CD57_neg_volcano.svg", p)
 
 ```
