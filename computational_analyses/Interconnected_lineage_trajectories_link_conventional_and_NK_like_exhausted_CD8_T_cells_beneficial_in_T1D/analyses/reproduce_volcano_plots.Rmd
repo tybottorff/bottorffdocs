@@ -102,6 +102,14 @@ metadata
 
 ```{r}
 
+# summary of DiffBind protocol here (and previous assumed steps)
+# constructs a consensus read count matrix from replicate peak sets of m query regions by n samples
+# ATAC fragment pileup from aligned paired-end data, then builds a local bias track through a series of parameters to estimate background noise, and finally compares ATAC signal to the local background at each genomic bp using a Poisson test
+# Significant nearby regions are then merged into a peak
+# DiffBind then calculates linear scaling factors from either the total number of reads in each library, which assumes that true global differences may be expected and technical bias is small, or the total number of reads in queried peak regions, which should eliminate global differences in favor of reducing any technical biases
+# The count matrix with normalization factors is then subject to the DESeq2 framework of dispersion estimation and nega- tive binomial generalized linear model (GLM) fitting for hypothesis testing, according to the design matrix.
+# full library size normalization
+
 # create a DiffBind object
 peaks  <- dba(sampleSheet=metadata)
 # apply blacklist
@@ -137,6 +145,8 @@ p
 # MA plots (pre-normalization)
 
 ```{r}
+
+# MA plots are a type of Bland–Altman plot applied to genomic data; MA plots depict global pat- terns of measurements compared between two samples, where each tested genomic feature is quantified by the difference between the two groups as the y-axis (M) and signal intensity as the x-axis
 
 # MA plots show how the fold changes between conditions are distributed as the mean concentration of reads counts increases
 
