@@ -165,6 +165,9 @@
  - probe DNA accessibility with hyperactive Tn5 transposase (inserts sequencing adapters into accessible chromatin regions, sequencing reads used to infer regions of increased accesibility, can also map transcription factor binding and nucleosome positions)
  - alternative to DNase-seq for chromatin accessibility and MNase-seq for nucleosome positioning
  - ATAC-seq can use less cells than other methods and can assay multiple chromatin features at the same time (i.e. nucleosome, TF binding, chromatin accessibility)
+# ATAC-seq normalization method can significantly affect differential accessibility analysis and interpretation
+ - takehome: should use multiple normalization methods to compare results
+ - differentially accessible regions are tricky to call because of variability in transposition reaction efficiency, among other reasons
 # Attention network for predicting T cell receptor-peptide binding can associate attention with interpretable protein structural properties
  - machine learning model based on modified version of Transformer, source-target attention neural network
 # Autoantibody profiles in patients with immune checkpoint inhibitor-induced neurological immune related adverse events
@@ -2316,6 +2319,8 @@
  - ST2 (IL-33 receptor) is present in multiple isoforms including membrane-bound ST2L and soluble sST2 (may be decoy for IL-33)
  - ST2 participates in activation of antigen-primed Th2 cells
  - ST2 implicated in inflammatory conditions
+# The JAK-STAT pathway as a therapeutic strategy in cancer patients with immune checkpoint inhibitor-induced colitis: a narrative review
+ - JAK-STAT inhibition helps ICI colitis, perhaps through modulation of CD8 Trms
 # The nexus of dynamic T cell states and immune checkpoint blockade therapy in the periphery and tumor microenvironment
 ## Abstract
  - *de novo* priming of antigen-specific cytotoxic T cells in peripheral blood occurs throughout course of ICB (rather than reinvigoration of pre-ICB-existing tumor infiltrating exhausted lymphocytes), possible that local expansion of antigen-specific T cells within tumor also important though
