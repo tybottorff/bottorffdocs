@@ -84,7 +84,7 @@ flagtagcounts(qcRes) %>% t %>% data.frame %>% mutate(Dup_Percent = (DuplicateByC
 
 # Annotate open regions for 1 libID for chr20
 
- - issues with ChIPseeker install
+ - issues with ChIPseeker install on srv-rstudio server (installs locally fine)
 
 ```{r}
 
@@ -94,7 +94,3 @@ qcResAnno
 plotAnnoPie(qcResAnno)
 
 ```
-
-# Notes
- - Erin code: https://github.com/BenaroyaResearch/Witkop_T1DAL_2023/tree/main
- - Stephan advice: use /shiftedAlignments as bamfiles; /peaks contains peak files

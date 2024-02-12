@@ -156,10 +156,6 @@ chr1_list <- lapply(bam_files[1:2], read_chr_1)
 
 ```
 
-```{r}
-chr1_list[[1]]@elementMetadata$libid
-```
-
 # Prep df to plot read fragment length distribution for chr 1 mapping reads from 2 sorted .bam files
 
 ```{r}
@@ -286,14 +282,5 @@ ATACQC$PCRbottleneckCoefficient_2
 
 # Investigate 3' and 5' bias
 
-# Plot encichment around TF start site
+# Plot enrichment around TF start site
  - run P452_3_TSSe_biometal.R to calculate transcription factor start site enrichment
-
-library(soGGi)
-
-library(TxDb.Hsapiens.UCSC.hg38.knownGene)
-TxDb.Hsapiens.UCSC.hg38.knownGene
-
-# Notes
- - Erin code: https://github.com/BenaroyaResearch/Witkop_T1DAL_2023/tree/main
- - Stephan advice: use /shiftedAlignments as bamfiles; /peaks contains peak files
