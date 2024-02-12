@@ -109,4 +109,12 @@ contrast_3_report <- dba.report(model_norm, method=DBA_EDGER,
 
 ```
 
-# Transcription factor analysis
+# Mean coverage plots for specific genes for each of 3 cell type groups
+
+ - NCR1, KLRF1, KIR3DL2, KIR2DL3
+
+```{r}
+
+
+
+```
