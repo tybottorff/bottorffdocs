@@ -247,9 +247,9 @@ diNuc <- regionPlot(bamFile = "/mnt/bioinformatics/pipeline/Illumina/220802_VH00
 
 ```
 
-# ATACQC library
+# ATACQC library QC
 
- - crashes currently
+ - crashes easily
 
 ```{r}
 

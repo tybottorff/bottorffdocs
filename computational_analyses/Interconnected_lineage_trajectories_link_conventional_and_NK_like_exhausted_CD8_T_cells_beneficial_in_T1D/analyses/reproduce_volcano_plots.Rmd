@@ -80,7 +80,7 @@ peak_files <- list.files(peaks_dir, pattern = "*peaks-narrow.bed$", full.names =
 
 metadata$Peaks <- peak_files
 
-# csv with cols SampleID, Tissue, Factor, Condition, Treatment, Replicate, bamReads (path), ControlID, bamControl, Peaks (bed path), PeakCaller (bed for all?)
+# metadata df with cols SampleID, Tissue, Factor, Condition, Treatment, Replicate, bamReads (path), ControlID, bamControl, Peaks (bed path), PeakCaller (bed for all?)
 # might need few more cols...
 
 metadata <- metadata %>%
@@ -95,6 +95,8 @@ metadata <- metadata %>%
          PeakCaller = "bed")
 
 metadata
+
+write.csv("../saved_data/samplesheet.csv", metadata)
 
 ```
 

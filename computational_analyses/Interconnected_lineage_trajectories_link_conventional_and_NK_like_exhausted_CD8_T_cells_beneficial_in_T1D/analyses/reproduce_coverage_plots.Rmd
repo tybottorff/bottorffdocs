@@ -59,6 +59,71 @@ model_norm <- readRDS("../saved_data/normalized_data.rds")
 
 ```{r}
 
+# 
+
 #work from /mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/bigWigs/mean_bigWigs/ ?
+
+## create sample metadata for first three samples (one sample per condition for example)
+#peak_plot_sample_data = dplyr::data_frame(
+#  sample_id = samplesheet_P452_3$Sample_ID, 
+#  condition = factor(samplesheet_P452_3$Condition, 
+#                     levels = c("CD57_pos_DP", "CD57_minus_DP",  "DN_non_naive"),
+#                     labels = c("CD57+", "PD-1+",  "DN")), 
+#  scaling_factor = 1, 
+#  bigWig = paste0("/Volumes/Bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/bigWigs/", samplesheet_P452_3$libId, "_scaled.bigWig"))
+#
+#
+#track_data = dplyr::mutate(peak_plot_sample_data, track_id = condition, colour_group = condition)
+#
+## extract exon and cds information as Granges objects
+#edb <- EnsDb.Hsapiens.v86 
+#exons = exonsBy(edb, by = "tx",use.names = TRUE)
+#cdss = cdsBy(edb,by = "tx",use.names = TRUE)
+#txlength = transcriptLengths(edb)
+#
+#### Plot NCR1
+#
+## extract metadata for gene
+#ncr1_metadata <- transcripts(edb,  columns = c("seq_name","gene_id", "tx_id", "gene_name", "seq_strand", "tx_biotype", "tx_start","tx_end"),
+#                             filter = GeneNameFilter("NCR1", condition = "startsWith"),
+#                             return.type = "data.frame")
+#ncr1_metadata <- ncr1_metadata %>%  dplyr:: filter(tx_biotype == "protein_coding" & seq_name == 19) %>%
+#  dplyr::rename(transcript_id = tx_id, 
+#                chr=seq_name, 
+#                strand = seq_strand) %>% dplyr::select(-chr, -tx_biotype) %>% as_tibble()
+#summary(ncr1_metadata)
+#
+## extract exon info for genes of interest
+#ncr1_exons_ids <- ncr1_metadata$transcript_id
+#ncr1_exons <- exons[ncr1_exons_ids]
+#ncr1_cds <-  cdss[ncr1_exons_ids]
+#
+#names(ncr1_exons)
+#names(ncr1_cds)
+#
+## find the longest transcript for the ncr1 gene
+#ncr1_lengths <- txlength[txlength$tx_id %in%  ncr1_exons_ids,]
+#ncr1_length_top <- ncr1_lengths  %>% top_n(1, tx_len)
+#
+### UNFORTUNATELY to get this figure in the correct form I had to hard code in changes to the function in place
+## plotting function explicitly sets FPM as y-axis label, change this in place in the makeCoveragePlot function 
+#trace('makeCoveragePlot', edit = T, where = asNamespace("wiggleplotr"))
+## set explicitly to "Mean Normalized Counts" and add to theme(text = element_text(size = 50)), scale_y_continuous(limits = c(0, 100)), strip.text.y = element_blank())
+#trace('plotTranscriptStructure', edit = T, where = asNamespace("wiggleplotr"))
+## add text = element_text(size = 45) to the theme object for the plot, change transcript label size to 10, strip.text.y = element_blank()),
+## strip background to element_blank also, xlab("")
+## change transcript plot colors to be gray and black, change axis title to distance from start (bp), changed transcript_label 
+##trace('plotCoverage', edit = T, where = asNamespace("wiggleplotr"))
+#
+## only need to run this once per session
+#
+## generate mean coverage plot using wiggplotR
+#ncr1_mean_coverage <- plotCoverage(ncr1_exons[ncr1_length_top$tx_id], ncr1_cds[ncr1_length_top$tx_id], ncr1_metadata, track_data =track_data,
+#                                   flanking_length = c(3000, 50),
+#                                   mean_only = TRUE, 
+#                                   transcript_label = FALSE,
+#                                   heights = c(0.8, 0.2),
+#                                   # # DN non naive= 7497d9ff, Pd1 = ba4d4cc7, CD57= 93a24eff 
+#                                   fill_palette = c("#93a24eff" , "#ba4d4cc7", "#7497d9ff"))
 
 ```
