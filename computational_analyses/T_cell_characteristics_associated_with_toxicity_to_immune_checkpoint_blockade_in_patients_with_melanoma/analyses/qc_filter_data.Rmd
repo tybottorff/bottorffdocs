@@ -42,9 +42,9 @@ theme_set(
 
 ```{r}
 
-supp_data_1 <- read_excel("../raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1")
+supp_data_1 <- read_excel("../raw_data/41591_2021_1623_MOESM3_ESM.xlsx", sheet = "cleaned_table_s1")
 
-supp_data_2 <- read_excel("../raw_data/supp_tables.xlsx", sheet = "cleaned_table_s3") %>%
+supp_data_2 <- read_excel("../raw_data/41591_2021_1623_MOESM3_ESM.xlsx", sheet = "cleaned_table_s3") %>%
   mutate(`Highest irAE grade` = as.character(`Highest irAE grade`)) %>%
   rename(`ICI Regimen` = `ICI regimen`)
 

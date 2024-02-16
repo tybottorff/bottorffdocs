@@ -40,7 +40,7 @@ theme_set(
 
 ```
 
-# Read in TCR, BCR data
+# Read in TCR data
 
 ```{r}
 
@@ -62,258 +62,20 @@ file_names <- c(
   "../raw_data/GSM5694809_YUTORY_TCR.csv.gz",
   "../raw_data/GSM5694807_YUTAUR_TCR.csv.gz",
   "../raw_data/GSM5694813_YUNANCY_TCR.csv.gz"
-#  "../raw_data/GSM5694821_YUPIXEL_BCR.csv.gz",
-#  "../raw_data/GSM5694822_YUROD_BCR.csv.gz",
-#  "../raw_data/GSM5694823_YUTAUR_BCR.csv.gz",
-#  "../raw_data/GSM5694814_YUCARD_BCR.csv.gz",
-#  "../raw_data/GSM5694824_YUTHEA_BCR.csv.gz",
-#  "../raw_data/GSM5694815_YUENZO_BCR.csv.gz",
-#  "../raw_data/GSM5694825_YUTORY_BCR.csv.gz",
-#  "../raw_data/GSM5694816_YUFUB_BCR.csv.gz",
-#  "../raw_data/GSM5694826_YUVARDO_BCR.csv.gz",
-#  "../raw_data/GSM5694817_YUFURL_BCR.csv.gz",
-#  "../raw_data/GSM5694818_YUGRUS_BCR.csv.gz",
-#  "../raw_data/GSM5694819_YUHERN_BCR.csv.gz",
-#  "../raw_data/GSM5694820_YUKEND_BCR.csv.gz"
 )
 
 ## List of patient IDs we want to include
-#selected_patient_IDs <- c(
-#  "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
-#  "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
-#  "YUTORY", "YUHERN", "YUROD"
-#)
+selected_patient_IDs <- c(
+  "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
+  "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
+  "YUTORY", "YUHERN", "YUROD"
+)
 
 # Filter the list of file names to include only selected patients
-#selected_files <- file_names[sapply(file_names, function(file_name) {
-#  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
-#  patient_ID %in% selected_patient_IDs
-#})]
-
-# Create a mapping of patient.ID to their respective suffixes
-#suffix_mapping <- data.frame(
-#  patient.ID = c(
-#    "YUCARD", "YUPIXEL", "YUENZO", "YUKEND", "YUTHEA", 
-#    "YUFUB", "YUTAUR", "YUVARDO", "YUGRUS", "YUFURL", 
-#    "YUTORY", "YUHERN", "YUROD"
-#  ),
-#  suffix = c(
-#    ".1_1", ".1_2", ".1_3", ".1_4", ".1_5", ".1_6", ".1_7", ".1_8", ".1_9", ".1_10", ".1_11", ".1_12", #".1_13"
-#  )
-#)
-
-# Create an empty data frame to store the combined data
-combined_data <- data.frame()
-
-# Process each file and append it to the combined_data data frame
-for (file_name in file_names) {
-  # Read the CSV file
-  data <- read_csv(file_name)
-  
-  # Extract patient ID and CR type (TCR or BCR) from the file name
+selected_files <- file_names[sapply(file_names, function(file_name) {
   patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
-  
-  # Find the suffix based on patient ID from the mapping
-  #suffix <- suffix_mapping$suffix[suffix_mapping$patient.ID == patient_ID]
-  
-  # Add the suffix to the "Barcode" column
-  #data$Barcode <- paste(data$Barcode, suffix, sep = "")
-  
-  CR_type <- ifelse(grepl("_TCR", file_name), "TCR", "BCR")
-  
-  # Add patient ID and CR type as new columns
-  data$patient.ID <- patient_ID
-  data$CR.type <- CR_type
-  
-  # Append the data to the combined_data data frame
-  combined_data <- bind_rows(combined_data, data)
-}
-
-# Remove duplicate rows based on the "Barcode" column
-#combined_data <- combined_data %>%
-#  distinct(Barcode, .keep_all = TRUE)
-
-# Set row names based on the "Barcode" column
-#rownames(combined_data) <- combined_data$Barcode
-
-#combined_data <- combined_data %>% select(-Barcode)
-
-combined_data
-
-```
-
-# Prep hydrophobicity calculator
-
-```{r}
-
-# Define the amino acids and their corresponding Eisenberg hydrophobicity values
-amino_acids <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
-hydrophobicity_values <- c(0.620, -2.530, -0.780, -0.900, 0.290, -0.850, -0.740, 0.480, -0.400, 1.380, 1.060, -1.500, 0.640, 1.190, 0.120, -0.180, -0.050, 0.81, 0.26, 1.08)
-
-# Create a data frame
-hydrophobicity_df <- data.frame(Amino_Acid = amino_acids, Hydrophobicity = hydrophobicity_values)
-
-hydrophobicity_df
-
-calculate_hydrophobicity <- function(sequence, hydrophobicity_df) {
-  sequence <- toupper(sequence)
-  # Calculate the hydrophobicity scores for each amino acid, and sum them
-  scores <- sapply(strsplit(sequence, '')[[1]], function(aa) {
-    match_aa <- match(aa, hydrophobicity_df$Amino_Acid)
-    if (!is.na(match_aa)) {
-      return(hydrophobicity_df$Hydrophobicity[match_aa])
-    } else {
-      # If an amino acid is not found, return NA
-      return(NA)
-    }
-  })
-  # If there are any NAs in the scores, return NA; otherwise, return the sum
-  if (any(is.na(scores))) {
-    return(NA)
-  } else {
-    return(sum(scores))
-  }
-}
-
-```
-
-# Bring in irAE severity
-
-```{r}
-
-irae_severity <- read_excel("../raw_data/supp_tables.xlsx", sheet = "cleaned_table_s1") %>%
-  select(`Patient ID`, `Highest irAE grade`) %>%
-  mutate(severe_irae = if_else(`Highest irAE grade` %in% c(3,4), "Yes", "No")) %>%
-  select(-`Highest irAE grade`) %>%
-  rename(patient.ID = `Patient ID`)
-
-irae_severity
-
-```
-
-# Analyze TR CDR3 length and hydrophobicity as a function of severe irAE development
-
-```{r}
-
-length_hydrophobicity_df <- combined_data %>%
-  select(Chain, `CDR3 AA Sequence`, patient.ID) %>%
-  mutate(CDR3_aa_length = nchar(`CDR3 AA Sequence`)) %>%
-  rowwise() %>%
-  mutate(CDR3_hydrophobicity = calculate_hydrophobicity(`CDR3 AA Sequence`, hydrophobicity_df)) %>%
-  ungroup() %>%
-  select(-`CDR3 AA Sequence`) %>%
-  left_join(irae_severity, by = "patient.ID") %>%
-  select(-patient.ID) %>%
-  gather(key = "Category", value = "Value", -severe_irae, -Chain)
-
-length_hydrophobicity_df
-
-```
-
-# Plot analysis
-
-```{r}
-
-custom_labeller <- as_labeller(c("CDR3_aa_length" = "CDR3\nAA length", "CDR3_hydrophobicity" = "CDR3\nhydrophobicity"))
-
-# Create the box plot with facets
-ggplot(length_hydrophobicity_df, aes(x = Chain, y = Value, color = severe_irae)) +
-  geom_boxplot() +
-  facet_wrap(~ Category, scales = "free_y", labeller = custom_labeller) +
-  labs(x = "Chain", y = "Value")
-
-```
-
-```{r}
-
-combined_data %>%
-  group_by(Barcode) %>%
-  # filter for 1 alpha and 1 beta chain per barcode (easiest way to start)
-  filter(sum(Chain == "TRA") == 1 & sum(Chain == "TRB") == 1) %>%
-  ungroup() %>%
-  arrange(Barcode)
-
-```
-
-# Prep for stitchr
-
-```{r}
-
-stitchr_df <- combined_data %>%
-  group_by(Barcode) %>%
-  # filter for 1 alpha and 1 beta chain per barcode (easiest way to start)
-  filter(sum(Chain == "TRA") == 1 & sum(Chain == "TRB") == 1) %>%
-  ungroup() %>%
-  filter(Chain %in% c("TRA", "TRB")) %>%
-  select(-CR.type, -`CDR3 NT Sequence`, -`D gene`, -patient.ID) %>%
-  rename(TCR_name = Barcode,
-         CDR3 = `CDR3 AA Sequence`,
-         V = `V gene`,
-         J = `J gene`,
-         C = `C gene`) %>%
-  pivot_wider(names_from = Chain, values_from = c(V, J, C, CDR3)) %>%
-  # rename, reorder, create cols for stitchr
-  rename(TRAV = V_TRA, TRAJ = J_TRA, TRBV = V_TRB, TRBJ = J_TRB, TRAC = C_TRA, TRBC = C_TRB, TRA_CDR3 = CDR3_TRA, TRB_CDR3 = CDR3_TRB) %>%
-  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
-  mutate(TRA_leader	= NA,
-         TRB_leader =NA,
-         Linker = NA,
-         Link_order = NA,
-         TRA_5_prime_seq = NA,
-         TRA_3_prime_seq = NA,
-         TRB_5_prime_seq = NA,
-         TRB_3_prime_seq = NA) %>%
-  mutate(across(all_of(c("TRAV", "TRAJ", "TRBV", "TRBJ", "TRAC", "TRBC")), ~ifelse(!stringr::str_detect(., "\\*01$"), paste0(., "*01"), .)))
-
-# I could add *01 or *% to end of gene names to specify specific allele or all alleles to stitch, but this doesn't get me any more barcodes/cells TCRs stitched (just more possibilities per cell/barcode)
-
-stitchr_df
-
-write.table(stitchr_df, file = "../saved_data/vdjseq_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
-
-```
-
-# Investigate stitchr errors
-
-```{r}
-
-stitchr_errors <- read_tsv("../saved_data/stitchr_out.tsv") %>%
-  mutate(alpha_fail = is.na(TRA_nt),
-         beta_fail = is.na(TRB_nt)) %>%
-  select(TCR_name, TRA_nt, beta_fail, alpha_fail, TRA_CDR3, TRAV) %>%
-  filter(beta_fail == FALSE)
-
-stitchr_errors
-
-# so it does look like failed alpha stitching TRAVs don't have allele specified, and successful ones do (same for beta...) BUT I thought I tried stitching with *01 allele specified for all and didn't recover any more barcodes...
-
-# worth retrying thimble/stitchr with *01 and rechecking errors...
-
-```
-
-# Prep IGoR input
-
-```{r}
-
-stitchr_output_alpha_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
-  filter(!(is.na(TRA_nt)))
-
-stitchr_output_alpha_df
-
-write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
-
-stitchr_output_beta_df <- read_tsv("../saved_data/stitchr_out.tsv") %>%
-  filter(!(is.na(TRB_nt)))
-
-stitchr_output_beta_df
-
-write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
-
-```
-
-# Prep IMGT/HighV-Quest input
-
-```{r}
+  patient_ID %in% selected_patient_IDs
+})]
 
 # Create a mapping of patient.ID to their respective suffixes
 suffix_mapping <- data.frame(
@@ -327,106 +89,173 @@ suffix_mapping <- data.frame(
   )
 )
 
-fasta_df_alpha <- read_tsv("../saved_data/stitchr_out.tsv") %>%
+# Create an empty data frame to store the combined data
+combined_data <- data.frame()
+
+# Process each file and append it to the combined_data data frame
+for (file_name in file_names) {
+  # Read the CSV file
+  data <- read_csv(file_name)
+  
+  # Extract patient ID and CR type (TCR or BCR) from the file name
+  patient_ID <- gsub(".*_(Y[A-Z]+)_.*", "\\1", file_name)
+  
+  # Find the suffix based on patient ID from the mapping
+  suffix <- suffix_mapping$suffix[suffix_mapping$patient.ID == patient_ID]
+  
+  # Add the suffix to the "Barcode" column
+  data$Barcode <- paste(data$Barcode, suffix, sep = "")
+  
+  # Add patient ID
+  data$patient.ID <- patient_ID
+
+  # Append the data to the combined_data data frame
+  combined_data <- bind_rows(combined_data, data)
+}
+
+combined_data <- combined_data %>%
+  # take 1 chain per barcode per patient, don't have more data to not just choose randomly (like UMI count or something)
+  group_by(Barcode, patient.ID, Chain) %>%
+  slice(1) %>%
+  ungroup() %>%
+  rename(v_gene = 'V gene',
+         d_gene = 'D gene',
+         j_gene = 'J gene',
+         c_gene = 'C gene',
+         cdr3 = 'CDR3 AA Sequence',
+         cdr3_nt = 'CDR3 NT Sequence') %>%
+  pivot_wider(id_cols = c(Barcode, patient.ID), names_from = "Chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt")) %>%
+  # remove duplicate rows based on the "Barcode" column
+  distinct(Barcode, .keep_all = TRUE)
+
+# Set row names based on the "Barcode" column
+rownames(combined_data) <- combined_data$Barcode
+
+metadata <- combined_data %>%
+  select(-Barcode)
+
+write.csv(metadata, "../saved_data/tcr_metadata.csv")
+
+combined_data <- combined_data %>%
+  rename(TCR_name = Barcode)
+
+```
+
+# Prep for stitchr
+
+```{r}
+
+bad_alpha <- combined_data %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter((is.na(TRAV)) | (is.na(TRAJ)) | (is.na(TRAC)) | (is.na(TRA_CDR3)))
+
+stitchr_alpha_data <- combined_data %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_alpha$TCR_name)) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_alpha_data
+
+# 5273 rows
+
+write.table(stitchr_alpha_data, file = "../saved_data/tcrseq_tra_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+bad_beta <- combined_data %>%
+    rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter((is.na(TRBV)) | (is.na(TRBJ)) | (is.na(TRBC)) | (is.na(TRB_CDR3)))
+
+stitchr_beta_data <- combined_data %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_beta$TCR_name)) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_beta_data
+
+# 6958 rows
+
+write.table(stitchr_beta_data, file = "../saved_data/tcrseq_trb_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+```
+
+# Prep IGoR input
+
+```{r}
+
+stitchr_output_alpha_df <- read_tsv("../saved_data/stitchr_tra_out.tsv") %>%
   filter(!(is.na(TRA_nt)),
-         Chain == "TRA") %>%
-  rename(Barcode = TCR_name) %>%
-  left_join(combined_data, by = "Barcode") %>%
-  mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID], sep = "")) %>%
-  ungroup()
+         nchar(TRA_nt) > 1)
 
-fasta_df_alpha
+stitchr_output_alpha_df
 
-# Function to convert a data frame to FASTA format
-df_to_fasta_alpha <- function(df, output_file) {
-  # Open/create the output file for writing
-  fasta_file <- file(output_file, "w")
-  
-  # Iterate through rows of the data frame
-  for (i in 1:nrow(df)) {
-    # Combine name columns and add a suffix numbering
-    label <- df$Barcode[i]
+# 5037 TCRs
 
-    # Write the sequence and label to the FASTA file
-    writeLines(paste(">", label), con = fasta_file)
-    writeLines(df$TRA_nt[i], con = fasta_file)
-  }
-  
-  # Close the output file
-  close(fasta_file)
-}
+write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
 
-# Call the function to convert the data frame to FASTA format
-df_to_fasta_alpha(fasta_df_alpha, "../saved_data/vdjseq_alpha.fasta")
-
-fasta_df_beta <- read_tsv("../saved_data/stitchr_out.tsv") %>%
+stitchr_output_beta_df <- read_tsv("../saved_data/stitchr_trb_out.tsv") %>%
   filter(!(is.na(TRB_nt)),
-         Chain == "TRB") %>%
-  rename(Barcode = TCR_name) %>%
-  left_join(combined_data, by = "Barcode") %>%
-  mutate(Barcode = paste(Barcode, suffix_mapping$suffix[suffix_mapping$patient.ID == patient.ID], sep = "")) %>%
-  ungroup()
+         nchar(TRB_nt) > 1)
 
-fasta_df_beta
+stitchr_output_beta_df
 
-# Function to convert a data frame to FASTA format
-df_to_fasta_beta <- function(df, output_file) {
-  # Open/create the output file for writing
-  fasta_file <- file(output_file, "w")
-  
-  # Iterate through rows of the data frame
-  for (i in 1:nrow(df)) {
-    # Combine name columns and add a suffix numbering
-    label <- df$Barcode[i]
+# 6807 TCRs
 
-    # Write the sequence and label to the FASTA file
-    writeLines(paste(">", label), con = fasta_file)
-    writeLines(df$TRB_nt[i], con = fasta_file)
-  }
-  
-  # Close the output file
-  close(fasta_file)
-}
-
-# Call the function to convert the data frame to FASTA format
-df_to_fasta_beta(fasta_df_beta, "../saved_data/vdjseq_beta.fasta")
+write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
 
 ```
 
-# Analyze IMGT/HighV-Quest output 8: V region nt mutation statistics
+# Read in IGoR output
 
 ```{r}
 
-imgt_df_8_alpha <- read.table("../saved_data/IMGT_HIGHV_QUEST/alpha/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
-  select(-Sequence.number) %>%
-  rename(Barcode = Sequence.ID)
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
+  mutate(patient_group = case_when(
+    startsWith(Patient_ID, "A") ~ "ici_no_irae",
+    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(patient_group, irAE, chain, pgen, barcode, cdr3) %>%
+  filter(chain == "TRA",
+         pgen != "NaN")
 
-colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"] <- paste0(colnames(imgt_df_8_alpha)[colnames(imgt_df_8_alpha) != "Barcode"], "_alpha")
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
+  mutate(patient_group = case_when(
+    startsWith(Patient_ID, "A") ~ "ici_no_irae",
+    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(Patient_ID, patient_group, irAE, chain, pgen, barcode, cdr3) %>%
+  filter(chain == "TRB",
+         pgen != "NaN") %>%
+  full_join(igor_alpha, by = c("barcode", "chain", "patient_group", "pgen", "cdr3", "irAE"))
 
-imgt_df_8_beta <- read.table("../saved_data/IMGT_HIGHV_QUEST/beta/8_V-REGION-nt-mutation-statistics.txt", header = TRUE, sep = "\t") %>%
-  select(-Sequence.number) %>%
-  rename(Barcode = Sequence.ID)
-
-colnames(imgt_df_8_beta)[colnames(imgt_df_8_beta) != "Barcode"] <- paste0(colnames(imgt_df_8_beta)[colnames(imgt_df_8_beta) != "Barcode"], "_beta")
-  
-imgt_df_8 <- imgt_df_8_alpha %>%
-  full_join(imgt_df_8_beta, by = "Barcode") %>%
-  # too many columns, focus on CDR3 ones for now
-  select(matches("^CDR3|^Barcode"))
-
-# join with patient ID to get severe_irAE yes/no --> plots
-# join with cell_type for barcodes with suffixes (i.e. scRNAseq paired barcodes) --> plots (expecting I lost too many to make useful UMAP overlays)
-
-imgt_df_8
-
-```
-
-# Analyze IMGT/HighV-Quest output 6: junction data
-
-```{r}
-
-#imgt_df_6_alpha <- read.table("../saved_data/IMGT_HIGHV_QUEST/alpha/6_Junction.txt", header = TRUE, sep = "\t")
-
-#imgt_df_6_alpha
+igor_combined
 
 ```

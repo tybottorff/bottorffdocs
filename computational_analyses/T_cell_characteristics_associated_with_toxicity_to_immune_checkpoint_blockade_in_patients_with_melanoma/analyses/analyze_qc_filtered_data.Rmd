@@ -9,22 +9,13 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Install necessary packages
-
-```{r}
-
-#remotes::install_github("mojaveazure/seurat-disk")
-
-#install.packages('BiocManager')
-#BiocManager::install('limma')
-
-```
-
 # Load necessary libraries
 
 ```{r}
 
 library(Seurat)
+library(SeuratDisk)
+library(Matrix)
 library(ggplot2)
 library(patchwork)
 library(dplyr)
@@ -57,32 +48,81 @@ melanoma_T_cells_filtered <- readRDS("../saved_data/batch_a_filtered.rds")
 
 ```
 
-# Split data by sample before integrating by finding anchors
+# Split data by sample, prepare (normalize, find variable features, etc.) before integrating by finding anchors
 
 ```{r}
 
-# split the dataset into a list of 13 seurat objects (for each patient sample)
+# split the dataset into a list of seurat objects (for each patient sample)
 melanoma_T_cells_filtered.list <- SplitObject(melanoma_T_cells_filtered, split.by = "patient.ID")
 
 # normalize and identify variable features for each dataset independently
-melanoma_T_cells_filtered.list <- lapply(X = melanoma_T_cells_filtered.list, FUN = function(x) {
-    x <- NormalizeData(x)
-    x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
-})
-
-# select features that are repeatedly variable across datasets for integration
-features <- SelectIntegrationFeatures(object.list = melanoma_T_cells_filtered.list)
+melanoma_T_cells_filtered.list <- lapply(X = melanoma_T_cells_filtered.list, FUN = SCTransform, method = "glmGamPoi")
 
 ```
 
-# Integrate via anchors
+# Find integration features
 
 ```{r}
 
-immune.anchors <- FindIntegrationAnchors(object.list = melanoma_T_cells_filtered.list, anchor.features = features)
+# select features that are repeatedly variable across datasets for integration
+features <- SelectIntegrationFeatures(object.list = melanoma_T_cells_filtered.list, nfeatures = 3000)
 
+# prep step
+melanoma_T_cells_filtered.list <- PrepSCTIntegration(object.list = melanoma_T_cells_filtered.list, anchor.features = features)
+
+# run PCA to allow rpca use later
+melanoma_T_cells_filtered.list <- lapply(X = melanoma_T_cells_filtered.list, FUN = RunPCA, features = features)
+
+```
+
+# Randomly select a single sample per group to use as a reference
+
+```{r}
+
+# Set a random seed for reproducibility
+set.seed(123)
+
+metadata <- melanoma_T_cells_filtered@meta.data %>%
+  group_by(patient.ID, `Severe.irAE.status..1.Yes..0.No.`) %>%
+  slice(1) %>%
+  select(patient.ID, `Severe.irAE.status..1.Yes..0.No.`) %>%
+  rename(irAE = `Severe.irAE.status..1.Yes..0.No.`)
+
+# Randomly sample one Seurat object from each irAE group
+
+randomly_selected_seurat <- metadata %>%
+  group_by(irAE) %>%
+  sample_n(1) %>%
+  ungroup()
+
+randomly_selected_seurat
+
+```
+
+# Find integration anchors using the above single sample/group as references
+
+```{r}
+
+# first integrates these references, then aligns other samples within each group to that integrated reference
 # this command creates an 'integrated' data assay
-immune.combined <- IntegrateData(anchorset = immune.anchors)
+
+immune.anchors <- FindIntegrationAnchors(object.list = melanoma_T_cells_filtered.list, reference = which(names(melanoma_T_cells_filtered.list) %in% randomly_selected_seurat$patient.ID), normalization.method = "SCT", anchor.features = features, reduction = "rpca", k.anchor = 10, dims = 1:30)
+
+```
+
+# Integrate the data
+
+```{r}
+
+immune.combined <- IntegrateData(anchorset = immune.anchors, normalization.method = "SCT")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/integrated.rds")
 
 ```
 
@@ -99,362 +139,152 @@ immune.combined <- ScaleData(immune.combined, verbose = FALSE)
 
 ```
 
-# PCA using 2000 most variable genes and top 30 PCs
+# Do dimensional reduction, clustering
 
 ```{r}
 
 immune.combined <- RunPCA(immune.combined, npcs = 30, verbose = FALSE)
-
-```
-
-# UMAP using 2000 most variable genes and top 30 PCs
-
-```{r}
-
 immune.combined <- RunUMAP(immune.combined, reduction = "pca", dims = 1:30)
-
-```
-
-# Find clusters
-
-```{r}
-
 immune.combined <- FindNeighbors(immune.combined, reduction = "pca", dims = 1:30)
 immune.combined <- FindClusters(immune.combined, resolution = 3)
 
-# resolution parameter of 3, see 28 instead of 37 clusters
-
 ```
 
-# Visualize UMAP by patient ID
+# Read in reference to use for mapping
 
 ```{r}
 
-DimPlot(immune.combined, reduction = "umap", group.by = "patient.ID", dims = c(2, 1))
-
-ggsave("../figures/umap_patient_id.svg")
+reference <- LoadH5Seurat("../../pbmc_multimodal.h5seurat")
 
 ```
 
-# Visualize UMAP by cluster
+# Find reference transfer anchors
 
 ```{r}
 
-DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE)
-
-ggsave("../figures/umap_cluster.svg")
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = immune.combined,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50
+)
 
 ```
 
-# Find cluster biomarkers
+# Map reference onto my object
 
 ```{r}
 
-# find markers for every cluster compared to all remaining cells
-immune.markers <- FindAllMarkers(immune.combined)
-#immune.markers <- FindAllMarkers(immune.combined, only.pos = FALSE, min.pct = 0.1, logfc.threshold = 0.25)
+immune.combined <- MapQuery(
+  anchorset = anchors,
+  query = immune.combined,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca",
+  reduction.model = "wnn.umap"
+)
 
 ```
 
-# Look at relevant cluster biomarkers for cells to filter out (RBCs/platelets)
+# Plot mapping results
 
 ```{r}
 
-immune.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("HPP", "PPBP", "CD62P", "PAC-1", "CD63", "CD41", "CD61", "CD63", "CD71", "CD235A")) %>%
-  arrange(gene)
+p1 = DimPlot(immune.combined, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(immune.combined, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
 
 ```
 
-# Plot marker distribution across clusters to identify RBCs and platelets
+# Re-look at just T cells
 
 ```{r}
 
-VlnPlot(immune.combined, features = c("CD63"), pt.size = 0)
-# PPBPhi = platelets
-# HBBhi = RBCs
+just_T_cells <- immune.combined[, immune.combined@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & immune.combined@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
 
-immune.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("CD63")) %>%
-  arrange(cluster)
 
-# 28 highest and off UMAP
+
+just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
+just_T_cells <- RunUMAP(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindNeighbors(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindClusters(just_T_cells, resolution = 3)
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = just_T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50,
+  recompute.residuals = FALSE
+)
+just_T_cells <- MapQuery(
+  anchorset = anchors,
+  query = just_T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca", 
+  reduction.model = "wnn.umap"
+)
+
+p1 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
 
 ```
 
-# Name cell types for clusters (RBC/platlet vs. other)
+# Look at just T cells
 
 ```{r}
 
-new.cluster.ids <- c("Other",
-                     # 0
-                     
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     
-                     "Other",
-                     # 10
-                     
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     
-                     "Other",
-                     # 20
-                     
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "Other",
-                     "RBC/platelet",
-                     
-                     "Other")
-                     # 29
-
-names(new.cluster.ids) <- levels(immune.combined)
-immune.combined <- RenameIdents(immune.combined, new.cluster.ids)
+just_T_cells <- just_T_cells[, just_T_cells@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & just_T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
 
 ```
 
-# Plot UMAP with cell clusters
+# Iterate through more T cell filtering
 
 ```{r}
 
-DimPlot(immune.combined, reduction = "umap", label = TRUE, pt.size = 0.5)
-ggsave("../figures/umap_cell_type.svg")
-
-```
-
-# Eliminate RBCs/platelets
-
-```{r}
-
-no_rbcs_platelets <- immune.combined[, !(immune.combined@active.ident %in% c("RBC/platelet"))]
-
-```
-
-# Repeat dimensional reduction (PCA, UMAP) and FindClusters since filtering out RBCs, platelets
-
-```{r}
-
-no_rbcs_platelets <- RunPCA(no_rbcs_platelets, npcs = 30, verbose = FALSE)
-no_rbcs_platelets <- RunUMAP(no_rbcs_platelets, reduction = "pca", dims = 1:30)
-no_rbcs_platelets <- FindNeighbors(no_rbcs_platelets, reduction = "pca", dims = 1:30)
-no_rbcs_platelets <- FindClusters(no_rbcs_platelets, resolution = 3)
-
-```
-
-# Visualize UMAP by cluster
-
-```{r}
-
-DimPlot(no_rbcs_platelets, reduction = "umap", label = TRUE, repel = TRUE)
-
-ggsave("../figures/umap_cluster_no_rbcs.svg")
-
-```
-
-# Find markers for every cluster compared to all remaining cells
-
-```{r}
-
-no_rbcs_platelets.markers <- FindAllMarkers(no_rbcs_platelets)
-
-```
-
-# Look at relevant cluster biomarkers
-
-```{r}
-
-no_rbcs_platelets.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY", "IL7R", "CD14", "FCGR3A", "FCER1A", "MS4A1")) %>%
-  arrange(gene)
-
-```
-
-# Plot marker distribution across clusters to identify CD4/8 T cells, T/NKTs, NKs
-
-```{r}
-
-# CD3D/CD3Ehi and CD8A/CD8Bhi and NKG7/GNLYlo = CD8 T cells
-# CD3D/CD3Ehi non-CD8 T cells with high IL7R expression and low NKG7/GNLY = CD4 T cells
-# T/NKT: high expression of CD3D/E and GNLY/NKG7 that were not annotated as CD4/CD8 T cells
-# NKG7/GNLYhi and CD3D/CD3Elo = NK cells
-
-#3D: 0, 2, 5, 12, 13, 17, 20-23
-#3E: 0, 2, 5, 9-13, 17, 20-23, 25?
-#8A: 17, 20, 21
-#8B: 17, 20, 21
-#NKG7: 9-12, 17, 20, 21
-#GNLY: 9-12, 17, 20, 21
-#IL7R: 0, 2, 5, 13, 17, 22, 23, 25?
-
-# CD4s: 0, 2, 5, 13, 22, 23, 25?
-
-# CD8s: 21
-
-# T/NKTs: 12, 17, 20
-
-# NKs: 9-11
-
-VlnPlot(no_rbcs_platelets, features = c("CD8A", "CD8B"), pt.size = 0)
-
-no_rbcs_platelets.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("CD3D", "CD3E", "CD8A", "CD8B", "NKG7", "GNLY")) %>%
-  arrange(cluster)
-
-```
-
-# Plot marker distribution across clusters to identify DCs
-
-```{r}
-
-VlnPlot(no_rbcs_platelets, features = c("FCER1A"), pt.size = 0)
-# FCER1Ahi = dendritic cells (DCs)
-
-# 26
-
-no_rbcs_platelets.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("FCER1A")) %>%
-  arrange(cluster)
-
-```
-
-# Plot marker distribution across clusters to identify B cells
-
-```{r}
-
-VlnPlot(no_rbcs_platelets, features = c("MS4A1"), pt.size = 0)
-# MS4A1hi = B cells
-
-# 1, 7, 15, 18
-
-no_rbcs_platelets.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("MS4A1")) %>%
-  arrange(cluster)
-
-```
-
-# Plot marker distribution across clusters to identify monocytes
-
-```{r}
-
-VlnPlot(no_rbcs_platelets, features = c("CD14"), pt.size = 0)
-# CD14 or FCGR3Ahi = monocytes
-
-# CD14hi = 3, 4, 6, 14, 19, 24, 27
-# FCGR3Ahi = 8, 16
-
-# 3, 4, 6, 8, 14, 16, 19, 24, 27
-
-no_rbcs_platelets.markers %>%
-  group_by(cluster) %>%
-  filter(gene %in% c("FCGR3A", "CD14")) %>%
-  arrange(cluster)
-
-```
-
-# Name cell types for clusters
-
-```{r}
-
-new.cluster.ids <- c("CD4 T cells",
-                     # 0
-                     
-                     "B cells",
-                     "CD4 T cells",
-                     "Monocytes",
-                     "Monocytes",
-                     "CD4 T cells",
-                     "Monocytes",
-                     "B cells",
-                     "Monocytes",
-                     "NKs",
-                     
-                     "NKs",
-                     # 10
-                     
-                     "NKs",
-                     "T/NKT",
-                     "CD4 T cells",
-                     "Monocytes",
-                     "B cells",
-                     "Monocytes",
-                     "T/NKT",
-                     "B cells",
-                     "Monocytes",
-                     
-                     "T/NKT",
-                     # 20
-                     
-                     "CD8 T cells",
-                     "CD4 T cells",
-                     "CD4 T cells",
-                     "Monocytes",
-                     "CD4 T cells",
-                     "DCs",
-                     
-                     "Monocytes")
-                     # 27)
-
-names(new.cluster.ids) <- levels(no_rbcs_platelets)
-no_rbcs_platelets <- RenameIdents(no_rbcs_platelets, new.cluster.ids)
-
-```
-
-# Plot UMAP with cell clusters
-
-```{r}
-
-DimPlot(no_rbcs_platelets, reduction = "umap", label = TRUE, pt.size = 0.5)
-ggsave("../figures/umap_cell_type_no_rbcs.svg")
-
-```
-
-# Plot marker distribution across cell type assigned clusters
-
-```{r}
-
-VlnPlot(no_rbcs_platelets, features = c("IL7R", "GNLY", "NKG7", "CD14"), pt.size = 0, ncol = 2)
-
-ggsave("../figures/IL7R_GNLY_NKG7_CD14_across_cell_types_no_rbcs.svg")
-
-VlnPlot(no_rbcs_platelets, features = c("MS4A1", "FCER1A", "CD8A", "CD8B"), pt.size = 0, ncol = 2)
-
-ggsave("../figures/MS4A1_FCER1A_CD8A_CD8B_across_cell_types_no_rbcs.svg")
-
-VlnPlot(no_rbcs_platelets, features = c("CD3D", "CD3E", "HBB", "PPBP"), pt.size = 0, ncol = 2)
-
-ggsave("../figures/CD3D_CD3E_HBB_PPBP_across_cell_types_no_rbcs.svg")
-
-```
-
-# Save cell type clustered, RBC/platelet filtered Seurat object
-
-```{r}
-
-saveRDS(no_rbcs_platelets, file="../saved_data/rbc_platelet_filtered_cell_type_clustered.rds")
+just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
+just_T_cells <- RunUMAP(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindNeighbors(just_T_cells, reduction = "pca", dims = 1:30)
+just_T_cells <- FindClusters(just_T_cells, resolution = 3)
+anchors <- FindTransferAnchors(
+  reference = reference,
+  query = just_T_cells,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50,
+  recompute.residuals = FALSE
+)
+just_T_cells <- MapQuery(
+  anchorset = anchors,
+  query = just_T_cells,
+  reference = reference,
+  refdata = list(
+    celltype.l1 = "celltype.l1",
+    celltype.l2 = "celltype.l2",
+    predicted_ADT = "ADT"
+  ),
+  reference.reduction = "pca", 
+  reduction.model = "wnn.umap"
+)
+
+p1 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+p2 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
+
+p1 + p2
 
 ```
