@@ -27,6 +27,10 @@
  - main targets of recipient immune response against allograft are donor MHC antigens on allogenic tissue
  - recognition of mismatched MHC antigens leads to allograft rejection
  - allorecognition can occur directly and/or indirectly: directly refers to recognition of intact donor MHC molecules on donor cells (APC)s, indirectly refers to presentation of processed antigens by recipient APCs to recipient T cells
+# Altered interactions between circulating and tissue-resident CD8 T cells with the colonic mucosa define colitis associated with immune checkpoint inhibitors
+ - paired colon mucosal biopsy and blood from 13 patients with ICB colitis, 8 healthy controls, 8 with ICB no colitis
+ - RNA, TCR, among other data!
+ - TCR sharing between periphery and colon
 # Amino acid similarity accounts for T cell crossreactivity and for "holes" in the T cell repertoire
  - analyze HIV epitope SLFNTVATL (SFL9)
  - biochemically similar amino acid substitutions in peptide don't drastically alter TCR-pMHC recognition
@@ -571,9 +575,9 @@
  - **CTLA-4 blockade induces expansion of ICOS<sup>+</sup> Th1-like CD4<sup>+</sup> effector T cells, also engages specific subsets of exhausted-like CD8<sup>+</sup> T cells**
  - **different ICI target different T cell subsets**
 # Distinct immune-effector and metabolic profile of CD8<sup>+</sup> T cells in patients with autoimmune polyarthritis induced by therapy with immune checkpoint inhibitors
- - CD8s from irAE patients show lower activation, effector function, homing, exhaustion, apoptosis, reduced release of cytotoxic and proinflammatory immune mediators
- - higher glycolytic rate and ATP production from irAE CD8s
- - **metabolic remodeling from OXPHOS to aerobic glycolysis is hallmark of CD8 activation**
+ - **CD8s from irAE patients show lower activation, effector function, homing, exhaustion, apoptosis, reduced release of cytotoxic and proinflammatory immune mediators**
+ - **higher glycolytic rate and ATP production from irAE CD8s**
+ - metabolic remodeling from OXPHOS to aerobic glycolysis is hallmark of CD8 activation
 # Distinct immune signatures indicative of treatment response and immune-related adverse events in melanoma patients under immune checkpoint inhibitor therapy
  - flow cytometric analyses of 15 patients with stage IV melanoma
  - responders characterized by enhanced PD-1 expression on CD8<sup>+</sup> T cells immediately before treatment
@@ -1291,8 +1295,8 @@
 # Integrative analysis of risk factors for immune-related adverse events of checkpoint blockade therapy in cancer
  - allelic variation of *HLA-B* correlated with irAE risk
 # Interferon-gamma-producing CD8<sup>+</sup> tissue resident memory T cells are a targetable hallmark of immune checkpoint inhibitor-colitis
- - CD8 Trms dominant activated T cell subset in ICI colitis, activation correlates with ICI colitis severity
- - activated CD8 Trms express high levels of checkpoint inhibitor, interferon-gamma transcripts
+ - **CD8 Trms dominant activated T cell subset in ICI colitis, activation correlates with ICI colitis severity**
+ - **activated CD8 Trms express high levels of checkpoint inhibitor, interferon-gamma transcripts**
 # Interpreting T cell crossreactivity through structure: implications for TCR-based cancer immunotherapy
 ## Abstract
  - melanoma-specific T cells crossreacting with healthy heart/nervous tissue, crossreactivity
@@ -1342,6 +1346,9 @@
  - hypophysitis most common endocrine irAE after CTLA-4 blockade, rarely observed with PD-1 blockade
 # Landscape of stimulation-responsive chromatin across diverse human immune cells
  - previous literature: ~90% of GWAS hits for contributors to autoimmunity risk lie in non-coding regions (presumably act by altering gene regulation)
+# Learning predictive signatures of HLA type from T-cell repertoires
+ - trained model to predict HLA type based on TCR repertoire
+ - different HLA types have different TCR repertoire features (CDR3 length, V gene usage...)
 # Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
 ## Abstract
  - scRNAseq + TCR-seq of tumor, normal, and lymph tissue in patients with lung cancer after ICI
@@ -2526,6 +2533,26 @@
 # Unveiling immune checkpoint regulation: exploring the power of *in vivo* CRISPR screenings in cancer immunotherapy
  - many genetic variants are "passenger gene alterations" that don't harbor any functional significance but can elicit immunoediting when presented as neoepitopes
  - method: transduce cancer cells into mice, analyze sgRNA abundance in surviving tumors via deep sequencing
+# Updates in the pathogenesis and management of immune-related enterocolitis, hepatitis, and cardiovascular toxicities
+ - pathophysiology of irAEs distinct from autoimmune conditions
+ - surprisingly, given fear of immune modulation to treat irAEs reducing antitumor response (like corticosteroids inducing apoptosis of proliferating T cells), some immunomodulatory agents might help antitumor response (like TNFα inhibition that may help prevent TIL death)
+## Colitis
+ - distinct from IBD
+ - activated memory CD8 T cells, MAITs associated with ICI colitis and not with UC
+ - Trms increased following ICI, less pronounced in IBD
+## Hepatits
+ - CD8 CTLs in periphery and liver microenvironment with increased granzyme/perforin expression associated with hepatitis
+ - clonal expansion of Th1 and Th17 CD4s
+ - suppression of Tregs
+ - liver uniquely has high antigen load (portal circulation), relies on immune tolerance maintenance
+## Myocarditis
+ - clonal expansion of autoreactive CD8s specific for α-myosin in skeletal/cardiac muscle
+# Urinary T cells are detected in patients with immune checkpoint inhibitor-associated immune nephritis that are clonotypically identical to kidney T cell infiltrates
+ - acute kidney injury in ~20% of ICI patients
+ - 2-5% ICI patients develop irAE nephritis
+ - urinary immune cells correlate with kidney pathology in other autoimmune renal diseases
+ - detect T cells in urine in patients with irAE nephritis (flow cytometry)
+ - TCR analysis: enrichment of kidney TCRs in urine
 # Using surface hydrophobicity together with empirical potentials to identify protein-protein binding sites. Application to the interactions of E-cadherins
  - **not sure why yet and surprising to me, but apparently hydrophobic interactions are generally the strongest for protein binding BUT don't necessarily provide specificity that comes from other residues**
  - **idea is that hydrophobic residues provide affinity and polar/charged ones provide specificity via a more limited set of specific favorable structures**
@@ -2580,6 +2607,9 @@
  - CXCL9 was absent in non-responding patients before therapy
  - increase of CXCL9 levels was observed at 1 and 3 months of therapy for all patients, although higher CXCL9 amounts were present in stable and responding compared to non-responding patients
  - reduced number of regulatory T lymphocytes in responding patients
+# Whole-body CD8<sup>+</sup> T cell visualization before and during cancer immunotherapy: a phase 1/2 trial
+ - heterogeneity in CD8 T cell distribution within/between patients
+ - higher TIL associated with better response to ICB
 # Why must T cells be cross-reactive?
  - TCR repertoire dwarfed by potential foreign antigens
  - > 7,000 allelic variants of HLA locus in human population
