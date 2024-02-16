@@ -1,8 +1,12 @@
-# Find publicly available data (**scRNAseq + TCRseq**, like 10X) to mine
+# Find publicly available data (cell typing data + TCRseq) to mine
 ## Data shortlist
 ### Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis
+ - mined
 ### Insight into immune profile associated with vitiligo onset and anti-tumoral response in melanoma patients receiving anti-PD-1 immunotherapy
  - no RNA data but there is flow data for cell typing?
+ - GEO: GSE229557
+### Urinary T cells are detected in patients with immune checkpoint inhibitor-associated immune nephritis that are clonotypically identical to kidney T cell infiltrates
+ - TCR + flow, can't find data though...
 ### Interleukin 21 drives CXCR6+ CD8+ T cell mediators in Autoimmune Checkpoint Inhibitor Thyroiditis
  - no healthy control T cell data
 ### Distinct molecular and immune hallmarks of inflammatory arthritis induced by immune checkpoint inhibitors for cancer therapy
