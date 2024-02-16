@@ -45,7 +45,7 @@ theme_set(
 ```{r}
 
 tcrs <- read.csv("../saved_data/tcr_seq_features.csv") %>%
-  select(Patient_ID, predicted.celltype.l1, predicted.celltype.l2, irAE, barcode, Chain, v_gene, j_gene, c_gene, cdr3, cdr3_nt)
+  dplyr::select(Patient_ID, predicted.celltype.l1, predicted.celltype.l2, irAE, barcode, Chain, v_gene, j_gene, c_gene, cdr3, cdr3_nt)
 
 tcrs
 
