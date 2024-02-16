@@ -61,11 +61,11 @@ rna_metadata
 
 patient_barcode_connect <- rna_metadata %>%
   group_by(orig.ident) %>%
-  slice(1) %>%
+  dplyr::slice(1) %>%
   ungroup() %>%
   mutate(patient = sub("-.*", "", orig.ident),
          barcode_num = sub(".*_", "", barcode)) %>%
-  select(patient, barcode_num)
+  dplyr::select(patient, barcode_num)
 
 patient_barcode_connect
 
@@ -76,8 +76,8 @@ patient_barcode_connect
 ```{r}
 
 tcr <- read.csv("../raw_data/tcr/GSE144469_TCR_filtered_contig_annotations_all.csv") %>%
-  select(-X) %>%
-  filter(high_confidence == "True",
+  dplyr::select(-X) %>%
+  dplyr::filter(high_confidence == "True",
          productive == "True",
          cdr3 != "None",
          !(is.na(cdr3)),
@@ -87,26 +87,33 @@ tcr <- read.csv("../raw_data/tcr/GSE144469_TCR_filtered_contig_annotations_all.c
          full_length == "True",
          is_cell == "True",
          chain != "Multi") %>%
-  select(-is_cell, -high_confidence, -length, -full_length, -productive, -raw_clonotype_id, -raw_consensus_id, -contig_id) %>%
+  dplyr::select(-is_cell, -high_confidence, -length, -full_length, -productive, -raw_clonotype_id, -raw_consensus_id, -contig_id) %>%
   # if a cell had two or more qualified chains of the same type, keep only that chain with the highest UMI count
   group_by(barcode, chain) %>%
   arrange(-umis) %>%
-  slice(1) %>%
+  dplyr::slice(1) %>%
   ungroup() %>%
-  select(-reads, -umis) %>%
+  dplyr::select(-reads, -umis) %>%
   pivot_wider(names_from = "chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt")) %>%
   mutate(patient = sub(".*-", "", barcode)) %>%
   left_join(patient_barcode_connect, by = "patient") %>%
   mutate(barcode = sub("-.*", "-1_", barcode)) %>%
-  mutate(barcode = paste(barcode, barcode_num, sep = "")) %>%
-  as.data.frame()
+  mutate(barcode = paste(barcode, barcode_num, sep = ""))
 
 rownames(tcr) <- tcr$barcode
 
 tcr <- tcr %>%
-  select(-barcode)
+  dplyr::select(-barcode)
 
 tcr
+
+```
+
+# Write TCR csv
+
+```{r}
+
+write.csv(tcr, "../saved_data/tcrs.csv")
 
 ```
 

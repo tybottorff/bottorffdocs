@@ -1,0 +1,97 @@
+---
+title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in TCRseq data
+
+```{r}
+
+tra_tcrs <- read.csv("../saved_data/tcrs.csv") %>%
+  dplyr::select(-X) %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$") %>%
+  dplyr::filter(Chain == "TRA") %>%
+  dplyr::select(cdr3, v_gene, patient) %>%
+  dplyr::rename(cdr3aa = cdr3,
+         v_family = v_gene,
+         Patient = patient) %>%
+  dplyr::filter(!(is.na(cdr3aa)),
+         !(is.na(v_family)))
+
+tra_tcrs
+
+write.table(tra_tcrs, "../saved_data/alpha_tcrs_for_hla_typing.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+trb_tcrs <- read.csv("../saved_data/tcrs.csv") %>%
+  dplyr::select(-X) %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$") %>%
+  dplyr::filter(Chain == "TRB") %>%
+  dplyr::select(cdr3, v_gene, patient) %>%
+  dplyr::rename(cdr3aa = cdr3,
+         v_family = v_gene,
+         Patient = patient) %>%
+  dplyr::filter(!(is.na(cdr3aa)),
+         !(is.na(v_family)))
+
+trb_tcrs
+
+write.table(trb_tcrs, "../saved_data/beta_tcrs_for_hla_typing.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+```
+
+# Inspect HLA typing results
+
+ - barely any confidently typed HLAs (only 1 HLA allele each for 2 patients...)
+
+```{r}
+
+hla_types <- read_tsv("../saved_data/hla_typing.tsv") %>%
+  arrange(Final_classification) %>%
+  arrange(-as.numeric(Probability))
+
+hla_types
+
+# AUC: closer to 1 means better discrimination
+# accuracy: correctness
+# precision: true positive / all positive
+# sensitivity: actual positive identified
+# specificity: actual negative identified
+
+```

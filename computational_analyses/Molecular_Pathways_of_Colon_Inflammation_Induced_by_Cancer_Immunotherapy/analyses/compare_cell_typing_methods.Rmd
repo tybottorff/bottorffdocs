@@ -198,7 +198,7 @@ seurat_mapping <- as_tibble(rna@meta.data)
 seurat_mapping$barcode <- rownames(rna@meta.data)
 
 seurat_mapping <- seurat_mapping %>%
-  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2))) %>%
+  #mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2))) %>%
   dplyr::select(barcode, predicted.celltype.l2) %>%
   dplyr::rename(seurat_label = predicted.celltype.l2)
 
@@ -210,6 +210,20 @@ mapping_summary <- mapping_results %>%
   group_by(hpca_singler_label, blueprint_singler_label, seurat_label) %>%
   summarize(count = n()) %>%
   arrange(-count)
+
+```
+
+# Count perfect, ok, and bad matches
+
+```{r}
+
+all_agree <- mapping_results %>%
+  filter(hpca_singler_label == blueprint_singler_label & hpca_singler_label == seurat_label)
+
+two_of_three_agree <- mapping_results %>%
+  filter(hpca_singler_label == blueprint_singler_label & hpca_singler_label == seurat_label)
+
+all_diff <- 
 
 ```
 
