@@ -25,6 +25,7 @@ library(BiocParallel)
 register(SerialParam())
 library(DiffBind)
 library(tidyr)
+library(EnsDb.Hsapiens.v86)
 
 ```
 
@@ -53,77 +54,326 @@ model_norm <- readRDS("../saved_data/normalized_data.rds")
 
 ```
 
-# Mean coverage plots for specific genes for each of 3 cell type groups
-
- - NCR1, KLRF1, KIR3DL2, KIR2DL3
+# Read in data, prep for coverage plots
 
 ```{r}
 
-# 
+samplesheet <- read.csv("../saved_data/samplesheet.csv")
 
-#work from /mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/bigWigs/mean_bigWigs/ ?
+# create sample metadata for first three samples (one sample per condition for example)
+peak_plot_sample_data = dplyr::data_frame(
+  sample_id = factor(samplesheet$SampleID), 
+  condition = factor(samplesheet$Tissue, 
+                     levels = c("CD57pos_DP_NN_CD8", "CD57neg_DP_NN_CD8",  "DN_NN_CD8"),
+                     labels = c("CD57+", "PD-1+",  "DN")), 
+  scaling_factor = 1, 
+  bigWig = paste0("/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/bigWigs/", "lib", samplesheet$SampleID, "_scaled.bigWig"), package = "wiggleplotr")
 
-## create sample metadata for first three samples (one sample per condition for example)
-#peak_plot_sample_data = dplyr::data_frame(
-#  sample_id = samplesheet_P452_3$Sample_ID, 
-#  condition = factor(samplesheet_P452_3$Condition, 
-#                     levels = c("CD57_pos_DP", "CD57_minus_DP",  "DN_non_naive"),
-#                     labels = c("CD57+", "PD-1+",  "DN")), 
-#  scaling_factor = 1, 
-#  bigWig = paste0("/Volumes/Bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/bigWigs/", samplesheet_P452_3$libId, "_scaled.bigWig"))
-#
-#
-#track_data = dplyr::mutate(peak_plot_sample_data, track_id = condition, colour_group = condition)
-#
-## extract exon and cds information as Granges objects
-#edb <- EnsDb.Hsapiens.v86 
-#exons = exonsBy(edb, by = "tx",use.names = TRUE)
-#cdss = cdsBy(edb,by = "tx",use.names = TRUE)
-#txlength = transcriptLengths(edb)
-#
-#### Plot NCR1
-#
-## extract metadata for gene
-#ncr1_metadata <- transcripts(edb,  columns = c("seq_name","gene_id", "tx_id", "gene_name", "seq_strand", "tx_biotype", "tx_start","tx_end"),
-#                             filter = GeneNameFilter("NCR1", condition = "startsWith"),
-#                             return.type = "data.frame")
-#ncr1_metadata <- ncr1_metadata %>%  dplyr:: filter(tx_biotype == "protein_coding" & seq_name == 19) %>%
-#  dplyr::rename(transcript_id = tx_id, 
-#                chr=seq_name, 
-#                strand = seq_strand) %>% dplyr::select(-chr, -tx_biotype) %>% as_tibble()
-#summary(ncr1_metadata)
-#
-## extract exon info for genes of interest
-#ncr1_exons_ids <- ncr1_metadata$transcript_id
-#ncr1_exons <- exons[ncr1_exons_ids]
-#ncr1_cds <-  cdss[ncr1_exons_ids]
-#
-#names(ncr1_exons)
-#names(ncr1_cds)
-#
-## find the longest transcript for the ncr1 gene
-#ncr1_lengths <- txlength[txlength$tx_id %in%  ncr1_exons_ids,]
-#ncr1_length_top <- ncr1_lengths  %>% top_n(1, tx_len)
-#
-### UNFORTUNATELY to get this figure in the correct form I had to hard code in changes to the function in place
-## plotting function explicitly sets FPM as y-axis label, change this in place in the makeCoveragePlot function 
-#trace('makeCoveragePlot', edit = T, where = asNamespace("wiggleplotr"))
-## set explicitly to "Mean Normalized Counts" and add to theme(text = element_text(size = 50)), scale_y_continuous(limits = c(0, 100)), strip.text.y = element_blank())
-#trace('plotTranscriptStructure', edit = T, where = asNamespace("wiggleplotr"))
-## add text = element_text(size = 45) to the theme object for the plot, change transcript label size to 10, strip.text.y = element_blank()),
-## strip background to element_blank also, xlab("")
-## change transcript plot colors to be gray and black, change axis title to distance from start (bp), changed transcript_label 
-##trace('plotCoverage', edit = T, where = asNamespace("wiggleplotr"))
-#
-## only need to run this once per session
-#
-## generate mean coverage plot using wiggplotR
-#ncr1_mean_coverage <- plotCoverage(ncr1_exons[ncr1_length_top$tx_id], ncr1_cds[ncr1_length_top$tx_id], ncr1_metadata, track_data =track_data,
-#                                   flanking_length = c(3000, 50),
-#                                   mean_only = TRUE, 
-#                                   transcript_label = FALSE,
-#                                   heights = c(0.8, 0.2),
-#                                   # # DN non naive= 7497d9ff, Pd1 = ba4d4cc7, CD57= 93a24eff 
-#                                   fill_palette = c("#93a24eff" , "#ba4d4cc7", "#7497d9ff"))
+track_data = dplyr::mutate(peak_plot_sample_data, track_id = as.factor(condition), colour_group = condition)
+
+# extract exon and cds information as Granges objects
+edb <- EnsDb.Hsapiens.v86
+exons = exonsBy(edb, by = "tx",use.names = TRUE)
+cdss = cdsBy(edb,by = "tx",use.names = TRUE)
+txlength = transcriptLengths(edb)
+
+```
+
+# Prepare for NCR1 mean coverage plot
+
+```{r}
+
+# extract metadata for gene
+ncr1_metadata <- transcripts(edb,  columns = c("seq_name","gene_id", "tx_id", "gene_name", "seq_strand", "tx_biotype", "tx_start","tx_end"),
+                             filter = GeneNameFilter("NCR1", condition = "startsWith"),
+                             return.type = "data.frame")
+ncr1_metadata <- ncr1_metadata %>%  dplyr:: filter(tx_biotype == "protein_coding" & seq_name == 19) %>%
+  dplyr::rename(transcript_id = tx_id, 
+                chr=seq_name, 
+                strand = seq_strand) %>% dplyr::select(-chr, -tx_biotype) %>% as_tibble()
+summary(ncr1_metadata)
+
+# extract exon info for genes of interest
+ncr1_exons_ids <- ncr1_metadata$transcript_id
+ncr1_exons <- exons[ncr1_exons_ids]
+ncr1_cds <-  cdss[ncr1_exons_ids]
+
+names(ncr1_exons)
+names(ncr1_cds)
+
+# find the longest transcript for the ncr1 gene
+ncr1_lengths <- txlength[txlength$tx_id %in%  ncr1_exons_ids,]
+ncr1_length_top <- ncr1_lengths  %>% top_n(1, tx_len)
+
+```
+
+# Fix aesthetics (once per session, just copy these in)
+
+1) make coverage plot
+
+function (coverage_df, limits, alpha, fill_palette, coverage_type) 
+{
+    coverage_plot = ggplot(coverage_df, aes_(~bins, ~coverage, 
+        group = ~sample_id, alpha = ~alpha)) + geom_blank() + 
+        theme_light()
+    if (coverage_type == "line") {
+        coverage_plot = coverage_plot + geom_line(aes_(colour = ~colour_group), 
+            alpha = alpha, position = "identity")
+    }
+    else if (coverage_type == "area") {
+        coverage_plot = coverage_plot + geom_area(aes_(fill = ~colour_group), 
+            alpha = alpha, position = "identity")
+    }
+    else if (coverage_type == "both") {
+        coverage_plot = coverage_plot + geom_area(aes_(fill = ~colour_group), 
+            alpha = alpha, position = "identity") + geom_line(aes_(colour = ~colour_group), 
+            alpha = alpha, position = "identity")
+    }
+    else {
+        stop("Coverage type not supported.")
+    }
+    coverage_plot = coverage_plot + facet_grid(track_id ~ .) + 
+        dataTrackTheme() + scale_x_continuous(expand = c(0, 0)) + 
+        scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) + 
+        coord_cartesian(xlim = limits) + scale_color_manual(values = fill_palette) + 
+        scale_fill_manual(values = fill_palette) + ylab("Mean Normalized Counts") +
+        theme(text = element_text(size = 10), strip.text.y = element_blank())
+    return(coverage_plot)
+}
+
+2) plot structure
+
+function (exons_df, limits = NA, connect_exons = TRUE, xlabel = "Distance from gene start (bp)", 
+    transcript_label = TRUE) 
+{
+    transcript_annot = dplyr::group_by_(exons_df, ~transcript_id) %>% 
+        dplyr::filter_(~feature_type == "exon") %>% dplyr::arrange_("transcript_id", 
+        "start") %>% dplyr::filter(row_number() == 1)
+    plot = ggplot(exons_df) + geom_blank()
+    if (connect_exons) {
+        plot = plot + geom_line(aes_(x = ~start, y = ~transcript_rank, 
+            group = ~transcript_rank, color = ~feature_type))
+    }
+    plot = plot + geom_rect(aes_(xmin = ~start, xmax = ~end, 
+        ymax = ~transcript_rank + 0.25, ymin = ~transcript_rank - 
+            0.25, fill = ~feature_type)) + theme_light() + theme(plot.margin = unit(c(0, 
+        1, 1, 1), "line"), axis.title.y = element_blank(), axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank(), legend.position = "none", 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        strip.text.y = element_text(colour = "grey10"), strip.background = element_rect(fill = "grey85")) + 
+        xlab(xlabel) + facet_grid(type ~ .) + scale_y_continuous(expand = c(0.2, 
+        0.15)) + scale_fill_manual(values = c("#2c7bb6", "#abd9e9")) + 
+        scale_colour_manual(values = c("#2c7bb6", "#abd9e9")) + 
+        theme(text = element_text(size = 10), strip.text.y = element_blank(), 
+            strip.background = element_blank())
+    if (all(!is.na(limits))) {
+        plot = plot + scale_x_continuous(expand = c(0, 0)) + 
+            coord_cartesian(xlim = limits)
+    }
+    if (transcript_label) {
+        plot = plot + geom_text(aes_(x = ~start, y = ~transcript_rank + 
+            0.3, label = ~transcript_label), data = transcript_annot, 
+            hjust = 0, vjust = 0, size = 10)
+    }
+    return(plot)
+}
+
+```{r}
+
+trace('makeCoveragePlot', edit = T, where = asNamespace("wiggleplotr"))
+
+trace('plotTranscriptStructure', edit = T, where = asNamespace("wiggleplotr"))
+
+#trace('plotCoverage', edit = T, where = asNamespace("wiggleplotr"))
+
+```
+
+# Generate NCR1 mean coverage plot
+
+```{r}
+
+# generate mean coverage plot using wiggplotR
+ncr1_mean_coverage <- plotCoverage(ncr1_exons[ncr1_length_top$tx_id], ncr1_cds[ncr1_length_top$tx_id], ncr1_metadata, track_data = track_data,
+                                   flanking_length = c(3000, 50),
+                                   mean_only = TRUE, 
+                                   transcript_label = FALSE,
+                                   heights = c(0.8, 0.2),
+                                   # DN non naive= 7497d9ff, Pd1 = ba4d4cc7, CD57= 93a24eff 
+                                   fill_palette = c("#93a24eff" , "#ba4d4cc7", "#7497d9ff"))
+
+```
+
+# Display NCR1 mean coverage plot
+
+```{r}
+
+ncr1_mean_coverage
+
+```
+
+# Prepare for KIR2DL3 mean coverage plot
+
+```{r}
+
+# extract metadata for gene
+KIR2DL3_metadata <- transcripts(edb,  columns = c("seq_name","gene_id", "tx_id", "gene_name", "seq_strand", "tx_biotype", "tx_start","tx_end"),
+                             filter = GeneNameFilter("KIR2DL3", condition = "startsWith"),
+                             return.type = "data.frame")
+KIR2DL3_metadata <- KIR2DL3_metadata %>%  dplyr:: filter(tx_biotype == "protein_coding" & seq_name == 19) %>%
+  dplyr::rename(transcript_id = tx_id, 
+                chr=seq_name, 
+                strand = seq_strand) %>% dplyr::select(-chr, -tx_biotype) %>% as_tibble()
+summary(KIR2DL3_metadata)
+
+# extract exon info for genes of interest
+KIR2DL3_exons_ids <- KIR2DL3_metadata$transcript_id
+KIR2DL3_exons <- exons[KIR2DL3_exons_ids]
+KIR2DL3_cds <-  cdss[KIR2DL3_exons_ids]
+
+names(KIR2DL3_exons)
+names(KIR2DL3_cds)
+
+# find the longest transcript for the ncr1 gene
+KIR2DL3_lengths <- txlength[txlength$tx_id %in%  KIR2DL3_exons_ids,]
+KIR2DL3_length_top <- KIR2DL3_lengths  %>% top_n(1, tx_len)
+
+```
+
+# Generate KIR2DL3 mean coverage plot
+
+```{r}
+
+# generate mean coverage plot using wiggplotR
+KIR2DL3_mean_coverage <- plotCoverage(KIR2DL3_exons[KIR2DL3_length_top$tx_id], KIR2DL3_cds[KIR2DL3_length_top$tx_id], KIR2DL3_metadata, track_data = track_data,
+                                   flanking_length = c(3000, 50),
+                                   mean_only = TRUE, 
+                                   transcript_label = FALSE,
+                                   heights = c(0.8, 0.2),
+                                   # DN non naive= 7497d9ff, Pd1 = ba4d4cc7, CD57= 93a24eff 
+                                   fill_palette = c("#93a24eff" , "#ba4d4cc7", "#7497d9ff"))
+
+```
+
+# Display KIR2DL3 mean coverage plot
+
+```{r}
+
+KIR2DL3_mean_coverage
+
+```
+
+# Prepare for KIR3DL2 mean coverage plot
+
+```{r}
+
+# extract metadata for gene
+KIR3DL2_metadata <- transcripts(edb,  columns = c("seq_name","gene_id", "tx_id", "gene_name", "seq_strand", "tx_biotype", "tx_start","tx_end"),
+                             filter = GeneNameFilter("KIR3DL2", condition = "startsWith"),
+                             return.type = "data.frame")
+KIR3DL2_metadata <- KIR3DL2_metadata %>%  dplyr:: filter(tx_biotype == "protein_coding" & seq_name == 19) %>%
+  dplyr::rename(transcript_id = tx_id, 
+                chr=seq_name, 
+                strand = seq_strand) %>% dplyr::select(-chr, -tx_biotype) %>% as_tibble()
+summary(KIR3DL2_metadata)
+
+# extract exon info for genes of interest
+KIR3DL2_exons_ids <- KIR3DL2_metadata$transcript_id
+KIR3DL2_exons <- exons[KIR3DL2_exons_ids]
+KIR3DL2_cds <-  cdss[KIR3DL2_exons_ids]
+
+names(KIR3DL2_exons)
+names(KIR3DL2_cds)
+
+# find the longest transcript for the ncr1 gene
+KIR3DL2_lengths <- txlength[txlength$tx_id %in%  KIR3DL2_exons_ids,]
+KIR3DL2_length_top <- KIR3DL2_lengths  %>% top_n(1, tx_len)
+
+```
+
+# Generate KIR3DL2 mean coverage plot
+
+```{r}
+
+# generate mean coverage plot using wiggplotR
+KIR3DL2_mean_coverage <- plotCoverage(KIR3DL2_exons[KIR3DL2_length_top$tx_id], KIR3DL2_cds[KIR3DL2_length_top$tx_id], KIR3DL2_metadata, track_data = track_data,
+                                   flanking_length = c(3000, 50),
+                                   mean_only = TRUE, 
+                                   transcript_label = FALSE,
+                                   heights = c(0.8, 0.2),
+                                   # DN non naive= 7497d9ff, Pd1 = ba4d4cc7, CD57= 93a24eff 
+                                   fill_palette = c("#93a24eff" , "#ba4d4cc7", "#7497d9ff"))
+
+```
+
+# Display KIR3DL2 mean coverage plot
+
+```{r}
+
+KIR3DL2_mean_coverage
+
+```
+
+# Prepare for KLRF1 mean coverage plot
+
+```{r}
+
+# extract metadata for gene
+KLRF1_metadata <- transcripts(edb,  columns = c("seq_name","gene_id", "tx_id", "gene_name", "seq_strand", "tx_biotype", "tx_start","tx_end"),
+                             filter = GeneNameFilter("KLRF1", condition = "startsWith"),
+                             return.type = "data.frame")
+KLRF1_metadata <- KLRF1_metadata %>%  dplyr:: filter(tx_biotype == "protein_coding" & seq_name == 12) %>%
+  dplyr::rename(transcript_id = tx_id, 
+                chr=seq_name, 
+                strand = seq_strand) %>% dplyr::select(-chr, -tx_biotype) %>% as_tibble()
+summary(KLRF1_metadata)
+
+# extract exon info for genes of interest
+KLRF1_exons_ids <- KLRF1_metadata$transcript_id
+KLRF1_exons <- exons[KLRF1_exons_ids]
+KLRF1_cds <-  cdss[KLRF1_exons_ids]
+
+names(KLRF1_exons)
+names(KLRF1_cds)
+
+# find the longest transcript for the ncr1 gene
+KLRF1_lengths <- txlength[txlength$tx_id %in%  KLRF1_exons_ids,]
+KLRF1_length_top <- KLRF1_lengths  %>% top_n(1, tx_len)
+
+```
+
+# Generate KLRF1 mean coverage plot
+
+```{r}
+
+# generate mean coverage plot using wiggplotR
+KLRF1_mean_coverage <- plotCoverage(KLRF1_exons[KLRF1_length_top$tx_id], KLRF1_cds[KLRF1_length_top$tx_id], KLRF1_metadata, track_data = track_data,
+                                   flanking_length = c(3000, 50),
+                                   mean_only = TRUE, 
+                                   transcript_label = FALSE,
+                                   heights = c(0.8, 0.2),
+                                   # DN non naive= 7497d9ff, Pd1 = ba4d4cc7, CD57= 93a24eff 
+                                   fill_palette = c("#93a24eff" , "#ba4d4cc7", "#7497d9ff"))
+
+```
+
+# Display KLRF1 mean coverage plot
+
+```{r}
+
+KLRF1_mean_coverage
+
+```
+
+# Combine and export all three plots for FIGURE 2C
+
+```{r}
+
+cowplot::plot_grid(ncr1_mean_coverage,KLRF1_mean_coverage ,KIR3DL2_mean_coverage, KIR2DL3_mean_coverage,
+                   labels = c("NCR1","KLRF1", "KIR3DL2","KIR2DL3"),
+                   label_size = 10,
+                   ncol = 4, nrow = 1, align = "hv",
+                   label_x = 0.3,
+                   label_y = 1.1) +
+  theme(plot.margin = unit(c(1, 1, 1, 1), "cm"))
 
 ```
