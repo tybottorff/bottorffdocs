@@ -126,6 +126,7 @@ hpca_mapping <- hpca_mapping %>%
     hpca_singler_label == "T_cell:CD4+_central_memory" ~ "CD4 TCM",
     hpca_singler_label == "T_cell:CD4+_effector_memory" ~ "CD4 TEM",
     hpca_singler_label == "T_cell:Treg:Naive" ~ "Treg",
+    hpca_singler_label == "NK_cell" ~ "NK cells",
     TRUE ~ hpca_singler_label  # Keep other values unchanged
   ))
 
@@ -138,7 +139,7 @@ hpca_mapping
 ```{r}
 
 pred.blueprint <- SingleR(test = test_assay, ref = blueprint, assay.type.test=1,
-    labels = ref.se$label.fine)
+    labels = blueprint$label.fine)
 
 ```
 
@@ -169,12 +170,10 @@ blueprint_mapping
 
 # Map cells to dice, inspect mapping
 
- - SingleR test doesn't work currently
-
 ```{r}
 
 pred.dice <- SingleR(test = test_assay, ref = dice, assay.type.test=1,
-    labels = ref.se$label.fine)
+    labels = dice$label.fine)
 
 # Inspect mapping from dice
 
@@ -183,8 +182,14 @@ dice_mapping <- as_tibble(pred.dice)
 dice_mapping$barcode <- rownames(pred.dice)
 
 dice_mapping <- dice_mapping %>%
-  dplyr::select(barcode, labels)
-
+  dplyr::select(barcode, labels) %>%
+  dplyr::rename(dice_singler_label = labels) %>%
+  mutate(dice_singler_label = case_when(
+    dice_singler_label == "T cells, CD4+, naive" ~ "CD4 Naive",
+    dice_singler_label == "T cells, CD8+, naive" ~ "CD8 Naive",
+    TRUE ~ dice_singler_label  # Keep other values unchanged
+  ))
+  
 dice_mapping
 
 ```
@@ -204,12 +209,15 @@ seurat_mapping <- seurat_mapping %>%
 
 mapping_results <- hpca_mapping %>%
   full_join(blueprint_mapping, by = "barcode") %>%
-  full_join(seurat_mapping, by = "barcode")
+  full_join(seurat_mapping, by = "barcode") %>%
+  full_join(dice_mapping, by = "barcode")
 
 mapping_summary <- mapping_results %>%
-  group_by(hpca_singler_label, blueprint_singler_label, seurat_label) %>%
+  group_by(hpca_singler_label, blueprint_singler_label, dice_singler_label, seurat_label) %>%
   summarize(count = n()) %>%
   arrange(-count)
+
+mapping_summary
 
 ```
 
@@ -218,53 +226,54 @@ mapping_summary <- mapping_results %>%
 ```{r}
 
 all_agree <- mapping_results %>%
-  filter(hpca_singler_label == blueprint_singler_label & hpca_singler_label == seurat_label)
+  dplyr::filter(hpca_singler_label == blueprint_singler_label & hpca_singler_label == seurat_label & hpca_singler_label == dice_singler_label)
+  # 0
 
-two_of_three_agree <- mapping_results %>%
-  filter(hpca_singler_label == blueprint_singler_label & hpca_singler_label == seurat_label)
+non_dice_agree <- mapping_results %>%
+  dplyr::filter(hpca_singler_label == blueprint_singler_label & hpca_singler_label == seurat_label & hpca_singler_label != dice_singler_label)
+  # 7298
 
-all_diff <- 
+non_seurat_agree <- mapping_results %>%
+  dplyr::filter(hpca_singler_label == blueprint_singler_label & hpca_singler_label != seurat_label & hpca_singler_label == dice_singler_label)
+  # 1161
 
-```
+non_blue_agree <- mapping_results %>%
+  dplyr::filter(hpca_singler_label != blueprint_singler_label & hpca_singler_label == seurat_label & hpca_singler_label == dice_singler_label)
+  # 153
 
-# Make Sankey plot for cell typing across methods/references
+non_hpca_agree <- mapping_results %>%
+  dplyr::filter(blueprint_singler_label != hpca_singler_label & blueprint_singler_label == seurat_label & blueprint_singler_label == dice_singler_label)
+  # 0
 
-```{r}
+dice_and_blue_agree <- mapping_results %>%
+  dplyr::filter(blueprint_singler_label != hpca_singler_label & blueprint_singler_label != seurat_label & blueprint_singler_label == dice_singler_label & seurat_label != hpca_singler_label & seurat_label != dice_singler_label & hpca_singler_label != dice_singler_label)
+# 646
 
-sankey_nodes <- data.frame(nodes = unique(c(unique(mapping_results$hpca_singler_label),
-                                            #unique(mapping_results$blueprint_singler_label),
-                                            unique(mapping_results$seurat_label))))
+dice_and_seurat_agree <- mapping_results %>%
+  dplyr::filter(blueprint_singler_label != hpca_singler_label & blueprint_singler_label != seurat_label & blueprint_singler_label != dice_singler_label & seurat_label != hpca_singler_label & seurat_label == dice_singler_label & hpca_singler_label != dice_singler_label)
+# 464
 
-counts <- table(mapping_results$hpca_singler_label,
-                #mapping_results$blueprint_singler_label,
-                mapping_results$seurat_label)
+dice_and_hpca_agree <- mapping_results %>%
+  dplyr::filter(blueprint_singler_label != hpca_singler_label & blueprint_singler_label != seurat_label & blueprint_singler_label != dice_singler_label & seurat_label != hpca_singler_label & seurat_label != dice_singler_label & hpca_singler_label == dice_singler_label)
+# 1954
 
-links <- as.data.frame(counts)
+blue_and_seurat_agree <- mapping_results %>%
+  dplyr::filter(blueprint_singler_label != hpca_singler_label & blueprint_singler_label == seurat_label & blueprint_singler_label != dice_singler_label & seurat_label != hpca_singler_label & seurat_label != dice_singler_label & hpca_singler_label != dice_singler_label)
+# 12370
 
-colnames(links) <- c("hpca_singler_label",
-                     #"blueprint_singler_label",
-                     "seurat_label",
-                     "Count")
+blue_and_hpca_agree <- mapping_results %>%
+  dplyr::filter(blueprint_singler_label == hpca_singler_label & blueprint_singler_label != seurat_label & blueprint_singler_label != dice_singler_label & seurat_label != hpca_singler_label & seurat_label != dice_singler_label & hpca_singler_label != dice_singler_label)
+# 4972
 
-links <- links %>%
-  arrange(-Count) %>%
-  head(20)
+hpca_and_seurat_agree <- mapping_results %>%
+  dplyr::filter(blueprint_singler_label != hpca_singler_label & blueprint_singler_label != seurat_label & blueprint_singler_label != dice_singler_label & seurat_label == hpca_singler_label & seurat_label != dice_singler_label & hpca_singler_label != dice_singler_label)
+# 6344
 
-links
-
-sankey_nodes <- sankey_nodes %>%
-  dplyr::filter(nodes %in% links$hpca_singler_label |
-                #nodes %in% links$blueprint_singler_label |
-                nodes %in% links$seurat_label) %>%
-  mutate(row_number = row_number())
-
-links$hpca_singler_label <- sankey_nodes$row_number[match(links$hpca_singler_label, sankey_nodes$nodes)] - 1
-#links$blueprint_singler_label <- sankey_nodes$row_number[match(links$blueprint_singler_label, sankey_nodes$nodes)] - 1
-links$seurat_label <- sankey_nodes$row_number[match(links$seurat_label, sankey_nodes$nodes)] - 1
-
-p <- sankeyNetwork(Links = links, Nodes = sankey_nodes, Source = "hpca_singler_label",
-             Target = "seurat_label", Value = "Count", NodeID = "nodes", fontSize = 12, nodeWidth = 30)
-p
+# 51396 cells
+# all 4 methods agree: 0
+# 3/4 methods agree: 8612
+# 2/4 methods agree: 26750
+# all 4 methods different: 16034
 
 ```
 
@@ -272,14 +281,12 @@ p
 
 ```{r}
 
-redo <- CreateSeuratObject(GetAssayData(JoinLayers(rna@assays$RNA)))
-
-redo <- SCTransform(redo)
-
-redo
-# had issues in python with counts in old .loom, so trying to remake simpler seurat (with normalized data layer) to export as .loom
-
-SaveLoom(redo, "../saved_data/T_cells.loom", overwrite = TRUE)
-# needs non-empty data layer to run, i.e. needs normalized. counts
+SaveH5Seurat(
+  rna,
+  filename = "../saved_data/T_cells.h5Seurat",
+  overwrite = TRUE)
+Convert(
+  source = file.path("../saved_data/T_cells.h5Seurat"),
+  dest = "h5ad", assay = "RNA")
 
 ```
