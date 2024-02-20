@@ -96,7 +96,7 @@ metadata <- metadata %>%
 
 metadata
 
-write.csv("../saved_data/samplesheet.csv", metadata)
+write.csv(metadata, "../saved_data/samplesheet.csv")
 
 ```
 
