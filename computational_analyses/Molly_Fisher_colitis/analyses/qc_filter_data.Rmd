@@ -297,6 +297,14 @@ length(colnames(colon_t_cells_filtered)) # 76,291 cells left behind in filtered 
 
 ```
 
+# Save QC filtered RDS
+
+```{r}
+
+saveRDS(colon_t_cells_filtered, "../saved_data/qc_filtered.rds")
+
+```
+
 # Count cells by sample after QC filtering
 
 ```{r}
