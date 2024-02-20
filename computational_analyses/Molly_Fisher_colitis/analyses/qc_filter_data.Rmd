@@ -37,13 +37,30 @@ theme_set(
 
 ```
 
-# Read in RNAseq data
+# Metadata
 
 ```{r}
 
-# GEX, TCR for CD45 scRNA colon. also GEX, TCR for scRNA PBMC
+metadata <- data.frame(
+  patient_id = c("MC_2", "SIC_13", "SIC_19", "SIC_31", "SIC_32", "SIC_36", "SIC_40", "SIC_43", "SIC_53", "MC_1", "MC_9", "SIC_71", "SIC_89", "SIC_76", "SIC_94", "SIC_97", "SIC_100", "SIC_100", "SIC_109", "SIC_121", "SIC_126", "SIC_134", "SIC_140", "SIC_141", "SIC_172", "SIC_186", "SIC_187", "SIC_188", "SIC_196"),
+  simplified_patient_id = c("HC7", "HC1", "IHC3", "IHC4", "C7", "C8", "C9", "C10", "IHC5", "HC6", "HC8", "C11", "C12", "C14", "IHC6", "C13", "C1", "C1", "IHC1", "C2", "C3", "C4", "C5", "C6", "IHC2", "HC2", "HC3", "HC4", "HC5")) %>%
+  mutate(group = case_when(
+    startsWith(simplified_patient_id, "H") ~ "No ICI",
+    startsWith(simplified_patient_id, "I") ~ "ICI no colitis",
+    startsWith(simplified_patient_id, "C") ~ "ICI colitis"))
 
-# healthy controls, ICI no colitis, ICI colitis
+filtered_metadata <- metadata %>%
+  filter(group != "No ICI")
+
+filtered_metadata
+
+# C14 depleted for B cells
+
+```
+
+# Get file names for CD45 sorted/pos ICI samples (just colon tissue)
+
+```{r}
 
 # Path to the directory containing your samples
 base_dir <- "../raw_data/rna/"
@@ -51,11 +68,30 @@ base_dir <- "../raw_data/rna/"
 # List all subdirectories in the base directory
 sample_directories <- list.dirs(base_dir, full.names = TRUE, recursive = FALSE)
 
+filter_filenames <- function(file_names, values) {
+  pattern <- paste0(values, collapse = '|')
+  
+  # look for ICI files that are CD45 sorted
+  matching_files <- file_names[grepl(pattern, file_names) & grepl("CD45", file_names)]
+  
+  return(matching_files)
+}
+
+filtered_files <- filter_filenames(sample_directories, filtered_metadata$patient_id)
+
+filtered_files
+
+```
+
+# Read in RNAseq data from colon tissue from ICI patients
+
+```{r}
+
 # Create a list to store Seurat objects
 seurat_objects_list <- list()
 
 # Loop through each sample directory
-for (sample_dir in sample_directories[1:2]) {
+for (sample_dir in filtered_files) {
   # Extract the sample name from the directory path
   sample_name <- tools::file_path_sans_ext(basename(sample_dir))
 
@@ -80,9 +116,19 @@ colon_t_cells <- merge(seurat_objects_list[[1]], y = seurat_objects_list[-1])
 
 ```
 
+# Save merged Seurat RDS
+
+```{r}
+
+saveRDS(colon_t_cells, "../saved_data/merged.rds")
+
+```
+
 # Calculate percent mitochondrial, ribosomal, hemoglobin features
 
 ```{r}
+
+colon_t_cells <- readRDS("../saved_data/merged.rds")
 
 colon_t_cells[["percent_mito"]] <- PercentageFeatureSet(colon_t_cells, pattern = "^MT-")
 colon_t_cells[["percent_ribo"]] <- PercentageFeatureSet(colon_t_cells, pattern = "^RP[SL]")
@@ -94,11 +140,11 @@ colon_t_cells[["percent_hb"]] <- PercentageFeatureSet(colon_t_cells, pattern = "
 
 ```{r}
 
-length(colnames(colon_t_cells)) # 142,069 cells
+length(colnames(colon_t_cells)) # 17,694,720 cells
 
 ```
 
-# Count cells per each of the 38 samples
+# Count cells per each of the 24 samples
 
 ```{r}
 
@@ -145,9 +191,9 @@ VlnPlot(colon_t_cells, features = c("percent_mito"), pt.size = 0) +
 
 qcMetricsThresholds <-
   c(
-    "nFeature_RNA_min" = 200,
+    "nFeature_RNA_min" = 500,
     
-    "percent_mito" = 11
+    "percent_mito" = 30
   )
 
 ```
@@ -160,7 +206,8 @@ nFeature_RNA_QC <- ggplot(colon_t_cells@meta.data, mapping = aes(x = nFeature_RN
   geom_density(mapping = aes(color = orig.ident), size = 0.5) +
   scale_x_log10() +
   geom_vline(xintercept = qcMetricsThresholds["nFeature_RNA_min"],
-             color = "red", linetype = "dashed")
+             color = "red", linetype = "dashed") +
+  theme(legend.text = element_blank())
 ggsave(nFeature_RNA_QC, file = "../figures/nFeature_RNA.svg")
 
 nFeature_RNA_QC
@@ -173,7 +220,8 @@ nFeature_RNA_QC
 
 nCount_RNA_QC <- ggplot(colon_t_cells@meta.data, mapping = aes(x = nCount_RNA)) +
   geom_density(mapping = aes(color = orig.ident), size = 0.5) +
-  scale_x_log10()
+  scale_x_log10() +
+  theme(legend.text = element_blank())
 ggsave(nCount_RNA_QC, file = "../figures/nCount_RNA.svg")
 
 nCount_RNA_QC
@@ -189,7 +237,8 @@ percent_mt_QC <- ggplot(colon_t_cells@meta.data, mapping = aes(x = percent_mito 
   scale_x_log10() +
   geom_vline(xintercept = qcMetricsThresholds["percent_mito"],
              color = "red", linetype = "dashed") +
-  xlab("percent_mito (with pseudocount)")
+  xlab("percent_mito (with pseudocount)") +
+  theme(legend.text = element_blank())
 ggsave(percent_mt_QC, file = "../figures/percent_mt.svg")
 
 percent_mt_QC
@@ -203,7 +252,8 @@ percent_mt_QC
 percent_rb_QC <- ggplot(colon_t_cells@meta.data, mapping = aes(x = percent_ribo + 1/length(colnames(colon_t_cells)))) +
   geom_density(mapping = aes(color = orig.ident), size = 0.5) +
   scale_x_log10() +
-  xlab("percent_ribo (with pseudocount)")
+  xlab("percent_ribo (with pseudocount)") +
+  theme(legend.text = element_blank())
 ggsave(percent_rb_QC, file = "../figures/percent_rb.svg")
 
 percent_rb_QC
@@ -217,7 +267,8 @@ percent_rb_QC
 percent_hb_QC <- ggplot(colon_t_cells@meta.data, mapping = aes(x = percent_hb + 1/length(colnames(colon_t_cells)))) +
   geom_density(mapping = aes(color = orig.ident), size = 0.5) +
   scale_x_log10() +
-  xlab("percent_hb (with pseudocount)")
+  xlab("percent_hb (with pseudocount)") +
+  theme(legend.text = element_blank())
 
 ggsave(percent_hb_QC, file = "../figures/percent_hb.svg")
 
@@ -237,12 +288,12 @@ cellsKeep <-
       colon_t_cells, expression = percent_mito <= qcMetricsThresholds["percent_mito"]))
 cellsDrop <-
   setdiff(colnames(colon_t_cells), cellsKeep)
-length(cellsDrop) # 12,766 cells dropped from analysis
+length(cellsDrop) # 17,618,429 cells dropped from analysis
 
 colon_t_cells_filtered <-
   subset(colon_t_cells, cells = cellsKeep)
 
-length(colnames(colon_t_cells_filtered)) # 129,303 cells left behind in filtered data
+length(colnames(colon_t_cells_filtered)) # 76,291 cells left behind in filtered data, expected ~85k based on their figure 1
 
 ```
 
@@ -251,46 +302,6 @@ length(colnames(colon_t_cells_filtered)) # 129,303 cells left behind in filtered
 ```{r}
 
 cell_capture <- colon_t_cells_filtered@meta.data %>%
-  group_by(orig.ident) %>%
-  dplyr::count()
-
-cell_capture %>% arrange(n)
-
-```
-
-# Normalize cell numbers across samples
-
-```{r}
-
-num_random_barcodes = 2251
-
-set.seed(123)
-
-# Get the list of unique orig.ident groups
-unique_orig_idents <- unique(colon_t_cells_filtered$orig.ident)
-
-# Initialize an empty list to store the subset Seurat objects
-subset_seurat_list <- list()
-
-# Loop through each orig.ident group
-for (orig_ident in unique_orig_idents) {
-  # Get the barcodes for the current orig.ident
-  current_barcodes <- colnames(colon_t_cells_filtered)[colon_t_cells_filtered$orig.ident == orig_ident]
-  
-  # Randomly choose 2000 barcodes
-  random_barcodes <- sample(current_barcodes, num_random_barcodes)
-  
-  # Subset the Seurat object to the randomly chosen barcodes
-  subset_seurat <- subset(colon_t_cells_filtered, cells = random_barcodes)
-  
-  # Append the subset Seurat object to the list
-  subset_seurat_list[[orig_ident]] <- subset_seurat
-}
-
-# Merge the first element with a sublist of the rest excluding the first element
-colon_t_cells_filtered_downsampled <- merge(subset_seurat_list[[1]], y = subset_seurat_list[-1])
-
-cell_capture <- colon_t_cells_filtered_downsampled@meta.data %>%
   group_by(orig.ident) %>%
   dplyr::count()
 
