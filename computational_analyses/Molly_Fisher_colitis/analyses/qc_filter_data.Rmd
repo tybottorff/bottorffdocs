@@ -56,6 +56,8 @@ filtered_metadata
 
 # C14 depleted for B cells
 
+write.csv(filtered_metadata, "../saved_data/metadata.csv")
+
 ```
 
 # Get file names for CD45 sorted/pos ICI samples (just colon tissue)
