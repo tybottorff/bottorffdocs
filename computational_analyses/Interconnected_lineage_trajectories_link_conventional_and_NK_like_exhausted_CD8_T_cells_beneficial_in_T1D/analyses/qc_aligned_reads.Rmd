@@ -21,6 +21,7 @@ library(Rsubread)
 library(ATACseqQC)
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 library(soGGi)
+library(stringr)
 
 ```
 
@@ -227,23 +228,59 @@ ggsave("../figures/chr1_mapq_scores.svg", p)
 
 ```
 
-# Plot signal over TSSs (expect nucleosome free regions at TSSs of active genes, nucleosome signal enriched next to TSS) for 1 .bam file
-
- - error: "Error in DataFrame(..., check.names = FALSE) :  different row counts implied by arguments"
+# Get TSS enrichment
 
 ```{r}
 
-TSSs <- resize(genes(TxDb.Hsapiens.UCSC.hg38.knownGene), fix = "start", 1)
-TSSs
+# Get transcript and sequence information from human genome to get transcription start site info
+txs <- transcripts(TxDb.Hsapiens.UCSC.hg38.knownGene)
+seqlevelsStyle(txs) <- "NCBI" 
+seqinformation <- seqinfo(TxDb.Hsapiens.UCSC.hg38.knownGene)
+which <- as(seqinformation, "GRanges")
 
-# Nucleosome free
-nucFree <- regionPlot(bamFile = "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/lib82438_AAAMVKNHV_star_alignments_shifted_sorted.bam", testRanges = TSSs, style = "point", format = "bam", paired = TRUE, minFragmentLength = 0, maxFragmentLength = 100, forceFragment = 50)
+TSSdistance_axis = seq(-950, 1000, by = 50)
 
-# Mononucleosome
-monoNuc <- regionPlot(bamFile = "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/lib82438_AAAMVKNHV_star_alignments_shifted_sorted.bam", testRanges = TSSs, style = "point", format = "bam", paired = TRUE, minFragmentLength = 180, maxFragmentLength = 240, forceFragment = 80)
+chromosomes = paste0(seq(1,23))
 
-# Dinucleosome
-diNuc <- regionPlot(bamFile = "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/shiftedAlignments/lib82438_AAAMVKNHV_star_alignments_shifted_sorted.bam", testRanges = TSSs, style = "point", format = "bam", paired = TRUE, minFragmentLength = 315, maxFragmentLength = 437, forceFragment = 160)
+# Function to get the TSSe score
+getTSSEscore <- function(alignmentFile){
+  
+  libId <- str_extract(alignmentFile, "lib[0-9]+")
+  print(sprintf("Processing %s ...", libId))
+  bamfile <- alignmentFile
+  # reading the GAlignments takes a long time
+  gln <- readGAlignments(bamfile)
+  tsse <- TSSEscore(gln, txs, seqlev = chromosomes, width = 50, step = 50)
+  rm(gln)
+  
+  TSSElib = data.frame(TSSdistance_axis, tsse$values)
+  colnames(TSSElib) <- c("distanceToTSS", "aggregateTSSscore")
+  TSSElib$libId = libId
+  TSSElib$TSSEscore <- tsse$TSSEscore
+  
+  return(TSSElib)
+}
+
+# Run on just first library for now
+TSSEList <- lapply(bam_files[0:1], function(x) getTSSEscore(x)) 
+TSSEComb <- bind_rows(TSSEList)
+
+```
+
+# Plot TSS enrichment
+
+```{r}
+
+ggplot(TSSEComb, aes(x = distanceToTSS-25,y = aggregateTSSscore, color = libId))+
+  geom_line()+
+  labs(x = "distance to TSS (bp)", y = "aggregate TSS score", color = "") + 
+  theme(text = element_text(size = 13)) +
+  theme(legend.position="right") + 
+  theme(legend.direction='vertical') +
+  #facet_wrap(. ~ Sort_short + Timepoint) +
+  scale_x_continuous(limits = c(-900, 900))
+
+# fragments from the NFR are expected to be enriched around the transcription start site (TSS) of genes
 
 ```
 
@@ -281,6 +318,3 @@ ATACQC$PCRbottleneckCoefficient_2
 # Investigate median CV coverage
 
 # Investigate 3' and 5' bias
-
-# Plot enrichment around TF start site
- - run P452_3_TSSe_biometal.R to calculate transcription factor start site enrichment
