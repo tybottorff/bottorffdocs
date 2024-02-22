@@ -1,0 +1,788 @@
+---
+title: "Molly Fisher Thomas colitis data"
+output: pdf_document
+---
+
+ - data mining of https://villani.mgh.harvard.edu/ircolitis/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SeuratDisk)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(scales)
+library(tidyr)
+library(ComplexHeatmap)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in cell type data
+
+```{r}
+
+no_colitis_ids <- read.csv("../saved_data/metadata.csv") %>%
+  filter(group == "ICI no colitis")
+
+colitis_ids <- read.csv("../saved_data/metadata.csv") %>%
+  filter(group == "ICI colitis")
+
+rna_metadata <- read.csv("../saved_data/rna_metadata.csv") %>%
+  # update Trms based on marker analysis elsewhere
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(0, 1, 3, 4, 7, 8, 14, 18, 21, 23, 28) & predicted.celltype.l1 == "CD4 T", "CD4 Trm", if_else(seurat_clusters %in% c(0, 1, 3, 4, 7, 8, 14, 18, 21, 23, 28) & predicted.celltype.l1 == "CD8 T", "CD8 Trm", predicted.celltype.l2))) %>%
+  select(barcode, orig.ident, patient_id, predicted.celltype.l1, predicted.celltype.l2) %>%
+  # get logical cell types, most are fine
+  filter(
+    case_when(
+      predicted.celltype.l1 == "CD4 T" & str_detect(predicted.celltype.l2, "CD4") | predicted.celltype.l2 == "Treg" ~ TRUE,
+      predicted.celltype.l1 == "CD8 T" & str_detect(predicted.celltype.l2, "CD8") ~ TRUE,
+      predicted.celltype.l1 == "other T" & predicted.celltype.l2 %in% c("MAIT", "dnT") ~ TRUE,
+      TRUE ~ FALSE)) %>%
+  mutate(group = if_else(patient_id %in% no_colitis_ids$patient_id, "ICI no colitis", if_else(patient_id %in% colitis_ids$patient_id, "ICI colitis", NA))) %>%
+  # get rid of some healthy control data that sneaked in
+  filter(!(is.na(group)))
+
+rna_metadata
+
+```
+
+# Read in IGoR output, combine with cell type and irAE group data
+
+```{r}
+
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(rna_metadata, by = "barcode") %>%
+  select(barcode, orig.ident, patient_id, TRAV, TRAJ, TRAC, TRBV, TRBJ, TRBC, TRA_CDR3, TRB_CDR3, pgen, predicted.celltype.l1, predicted.celltype.l2, group) %>%
+  filter(pgen != "NaN") %>%
+  rename(TRA_pgen = pgen)
+
+full_data <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(rna_metadata, by = "barcode") %>%
+  select(barcode, orig.ident, patient_id, TRAV, TRAJ, TRAC, TRBV, TRBJ, TRBC, TRA_CDR3, TRB_CDR3, pgen, predicted.celltype.l1, predicted.celltype.l2, group) %>%
+  filter(pgen != "NaN") %>%
+  rename(TRB_pgen = pgen) %>%
+  full_join(igor_alpha, by = c("barcode", "orig.ident", "patient_id", "predicted.celltype.l1", "predicted.celltype.l2", "group", "TRA_CDR3", "TRB_CDR3", "TRAV", "TRAJ", "TRAC", "TRBV", "TRBJ", "TRBC")) %>%
+  rename(TRA_v_gene = TRAV,
+         TRA_j_gene = TRAJ,
+         TRA_c_gene = TRAC,
+         TRB_v_gene = TRBV,
+         TRB_j_gene = TRBJ,
+         TRB_c_gene = TRBC) %>%
+  pivot_longer(cols = matches("^(TRA|TRB)"),
+               names_to = c("Chain", ".value"),
+               names_pattern = "^(TRA|TRB)_(.*)$") %>%
+  rename(cdr3 = CDR3) %>%
+  filter(nchar(cdr3) > 1)
+
+full_data
+
+```
+
+# Prep hydrophobicity calculator
+
+```{r}
+
+# Define the amino acids and their corresponding Eisenberg hydrophobicity values
+amino_acids <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
+hydrophobicity_values <- c(0.620, -2.530, -0.780, -0.900, 0.290, -0.850, -0.740, 0.480, -0.400, 1.380, 1.060, -1.500, 0.640, 1.190, 0.120, -0.180, -0.050, 0.81, 0.26, 1.08)
+
+# Create a data frame
+hydrophobicity_df <- data.frame(Amino_Acid = amino_acids, Hydrophobicity = hydrophobicity_values)
+
+hydrophobicity_df
+
+calculate_hydrophobicity <- function(sequence, hydrophobicity_df) {
+  sequence <- toupper(sequence)
+  # Calculate the hydrophobicity scores for each amino acid, and sum them
+  scores <- sapply(strsplit(sequence, '')[[1]], function(aa) {
+    match_aa <- match(aa, hydrophobicity_df$Amino_Acid)
+    if (!is.na(match_aa)) {
+      return(hydrophobicity_df$Hydrophobicity[match_aa])
+    } else {
+      # If an amino acid is not found, return NA
+      return(NA)
+    }
+  })
+  # If there are any NAs in the scores, return NA; otherwise, return the sum
+  if (any(is.na(scores))) {
+    return(NA)
+  } else {
+    return(sum(scores))
+  }
+}
+
+```
+
+# Calculate CDR3 features
+
+```{r}
+
+combined_data <- full_data %>%
+  mutate(cdr3_length = nchar(cdr3)) %>%
+  rowwise() %>%
+  mutate(cdr3_hydrophobicity = calculate_hydrophobicity(cdr3, hydrophobicity_df)) %>%
+  ungroup()
+
+write.csv(combined_data, "../saved_data/rna_tcr.csv")
+
+combined_data
+
+```
+
+# Examine patient sampling depth bias
+
+```{r}
+
+seq_depth <- rna_metadata %>%
+  group_by(orig.ident, patient_id, group) %>%
+  summarize(seq_depth = n()) %>%
+  arrange(seq_depth)
+
+seq_depth
+
+# choose ~36/2 seqs to downsample, ~/2 to get equal numbers of each Chain (TRA and TRB)
+
+```
+
+# Downsample
+
+```{r}
+
+desired_rows_per_patient <- 8
+
+set.seed(4562)
+
+downsampled_df <- combined_data %>%
+  group_by(orig.ident, Chain) %>%
+  sample_n(desired_rows_per_patient, replace = FALSE) %>%
+  ungroup()
+
+downsampled_df
+
+write.csv(downsampled_df, "../saved_data/downsampled_df.csv")
+
+```
+
+# Calculate expansion from full clonotype
+
+```{r}
+
+expansion_df <- combined_data %>%
+  pivot_wider(id_cols = c(barcode, patient_id, group, predicted.celltype.l1, predicted.celltype.l2), names_from = "Chain", values_from = c("v_gene", "j_gene", "c_gene", "cdr3", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
+  filter(!(is.na(v_gene_TRA)),
+         !(is.na(j_gene_TRA)),
+         !(is.na(cdr3_TRA)),
+         !(is.na(v_gene_TRB)),
+         !(is.na(j_gene_TRB)),
+         !(is.na(cdr3_TRB))) %>%
+  mutate(clonotype = paste(v_gene_TRA, v_gene_TRB, j_gene_TRA, j_gene_TRB, cdr3_TRA, cdr3_TRB, sep = "_")) %>%
+  group_by(patient_id, clonotype) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$")
+
+# just throw out ~5k seqs that aren't paired TRA/TRB?
+# don't really want to do this given I don't have a ton of seqs here...
+
+expansion_df
+
+```
+
+# Prep data for summary plots (normalized method)
+
+```{r}
+
+prepped_data <- expansion_df %>%
+  filter(group != "no ICI") %>%
+  # normalize by sequencing depth
+  left_join(seq_depth, by = c("patient_id", "group")) %>%
+  mutate(normalized_count = count / seq_depth) %>%
+  ## look at just unique clonotypes from each patient
+  group_by(patient_id, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
+  group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%
+  arrange(-normalized_count) %>%
+  mutate(chunk_size = ceiling(n() * 0.05),
+         chunk = 5*ceiling(row_number() / chunk_size))
+
+prepped_data
+
+```
+
+# Define test functions
+
+```{r}
+
+# Function to perform the test within a specific bin of clonotype abundances
+perform_wilcox_test <- function(data, cutoff) {
+  result <- data %>%
+    filter(chunk == cutoff) %>%
+    group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%    
+    summarize(
+      p_val_pgen = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(pgen ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_hydrophobicity = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_length = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
+        }
+      }
+    ) %>%
+    ungroup()
+  
+  return(result)
+}
+
+# Function to perform the test cumulativley up to a specific bin of clonotype abundances
+perform_wilcox_test_cumulatively <- function(data, cutoff) {
+  result <- data %>%
+    filter(chunk <= cutoff) %>%
+    group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%    
+    summarize(
+      p_val_pgen = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(pgen ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_hydrophobicity = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_length = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
+        }
+      }
+    ) %>%
+    ungroup()
+  
+  return(result)
+}
+
+```
+
+# Perform wilcox rank sum tests within chunks of 5% clonotypes (normalized method)
+
+```{r}
+
+# List to store results
+results_list <- list()
+
+# Iterate through chunk cutoffs
+for (num in 1:5) {
+  result <- prepped_data %>%
+    perform_wilcox_test_cumulatively(cutoff = num*5)
+
+  results_list[[as.character(num*5)]] <- result
+}
+
+# Combine results into a single dataframe
+results_df <- bind_rows(results_list, .id = "Chunk")
+
+results_df <- results_df %>%
+  pivot_longer(cols = c("p_val_pgen", "p_val_cdr3_length", "p_val_cdr3_hydrophobicity"), names_to = "p_val") %>%
+  rename(p_val_category = p_val) %>%
+  mutate(p_val_category = gsub("p_val_", "", p_val_category)) %>%
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category)) %>%
+  # adjust pvals for multiple comparisons
+  mutate(value = p.adjust(value, method = "BH")) %>%
+  arrange(value)
+
+results_df
+
+```
+
+# Make heatmap (normalized method)
+
+```{r}
+
+top_results <- results_df %>%
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
+
+filtered_results_df <- results_df %>%
+  filter(category %in% top_results$category) %>%
+  mutate(log_val = -log10(value))
+
+filtered_results_df$Chunk <- factor(filtered_results_df$Chunk, levels = c("5", "10", "15", "20", "25"))
+
+heatmap_df <- filtered_results_df %>%
+  select(-value, -category) %>%
+  rename(value = log_val) %>%
+  mutate(p_val_category = case_when(
+    p_val_category == "pgen" ~ "Probability of generation",
+    p_val_category == "cdr3_length" ~ "CDR3 length (AAs)",
+    p_val_category == "cdr3_hydrophobicity" ~ "CDR3 hydrophobicity"
+  )) %>%
+  mutate(predicted.celltype.l2 = gsub("CD4 |CD8 ", "", predicted.celltype.l2))
+
+heatmap_df
+
+# Prepare the data in matrix form
+heatmap_data <- reshape2::dcast(heatmap_df, predicted.celltype.l1 + predicted.celltype.l2 + p_val_category + Chain ~ Chunk, value.var = "value")
+
+# Extract value columns
+mat <- as.matrix(heatmap_data[, -(1:4)])
+
+# Set row names
+rownames(mat) <- paste(heatmap_data$predicted.celltype.l1, heatmap_data$predicted.celltype.l2, heatmap_data$p_val_category, heatmap_data$Chain, sep = "_")
+
+# Create a matrix of annotations
+chain_annotations <- cbind(
+  Chain = heatmap_data$Chain
+)
+
+# Create a matrix of annotations
+type_annotations <- cbind(
+  "Cell type" = heatmap_data$predicted.celltype.l1
+)
+
+# Create a matrix of annotations
+subtype_annotations <- cbind(
+  "Cell subtype" = heatmap_data$predicted.celltype.l2
+)
+
+# Create a matrix of annotations
+feature_annotations <- cbind(
+  Feature = heatmap_data$p_val_category
+)
+
+# Plot the heatmap without clustering
+Heatmap(mat,
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
+        right_annotation = rowAnnotation("Cell type" = type_annotations,
+                                         "Cell subtype" = subtype_annotations,
+                                         Chain = chain_annotations,
+                                         Feature = feature_annotations,
+                                         col = list("Cell type" = c("CD4 T" = "#fde725", "CD8 T" = "#21918c", "other T" = "#440154"),
+                                                    "Chain" = c("TRA" = "#fde725", "TRB" = "#440154"),
+                                                    "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725", "Trm" = "black"),
+                                                    "Feature" = c("CDR3 length (AAs)" = "#21918c", "CDR3 hydrophobicity" = "#fde725", "Probability of generation" = "#440154"))),
+        show_row_names = FALSE,
+        column_title = "Clonotypes bins\n(% of repertoire across patients)",
+        column_title_side = "bottom",
+        heatmap_legend_param = list(title = "Wilcox padj val (-log10) for\nyes vs. no colitis irAE"),
+        layer_fun = function(j, i, x, y, width, height, fill) {
+          v = pindex(mat, i, j)
+          l = v > -log10(0.05) & v < -log10(0.01) & !is.na(v)
+          if (any(l)) {
+            grid.text("*", x[l], y[l], gp = gpar(fontsize = 10))
+          }
+          q = v > -log10(0.01) & !is.na(v)
+          if (any(q)) {
+            grid.text("**", x[q], y[q], gp = gpar(fontsize = 10))
+          }
+        }
+      )
+
+```
+
+# Prep data for summary plots (downsampled method)
+
+```{r}
+
+prepped_data_downsampled <- downsampled_df %>%
+  filter(group != "no ICI") %>%
+  left_join(expansion_df, by = c("barcode", "Chain", "patient_id", "predicted.celltype.l1", "predicted.celltype.l2", "group", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
+  group_by(patient_id, clonotype, Chain) %>%
+  # look at just unique clonotypes (CDR3 AA - VJ) from each patient
+  dplyr::slice(1) %>%
+  ungroup() %>%
+  group_by(predicted.celltype.l1, predicted.celltype.l2, Chain) %>%
+  arrange(-count) %>%
+  mutate(chunk_size = ceiling(n() * 0.05),
+         chunk = 5*ceiling(row_number() / chunk_size))
+
+prepped_data_downsampled
+
+```
+
+# Perform wilcox rank sum tests within chunks of 5% clonotypes (downsampled method)
+
+```{r}
+
+# List to store results
+results_list_downsampled <- list()
+
+# Iterate through chunk cutoffs
+for (num in 1:5) {
+  result <- prepped_data_downsampled %>%
+    perform_wilcox_test_cumulatively(cutoff = num*5)
+
+  results_list_downsampled[[as.character(num*5)]] <- result
+}
+
+# Combine results into a single dataframe
+results_df_downsampled <- bind_rows(results_list_downsampled, .id = "Chunk")
+
+results_df_downsampled <- results_df_downsampled %>%
+  pivot_longer(cols = c("p_val_pgen", "p_val_cdr3_length", "p_val_cdr3_hydrophobicity"), names_to = "p_val") %>%
+  rename(p_val_category = p_val) %>%
+  mutate(p_val_category = gsub("p_val_", "", p_val_category)) %>%
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category)) %>%
+  # adjust pvals for multiple comparisons
+  mutate(value = p.adjust(value, method = "BH")) %>%
+  arrange(value)
+
+results_df_downsampled
+
+```
+
+# Make heatmap (downsampled method)
+
+```{r}
+
+top_results_downsampled <- results_df_downsampled %>%
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
+
+filtered_results_df_downsampled <- results_df_downsampled %>%
+  filter(category %in% top_results_downsampled$category) %>%
+  mutate(log_val = -log10(value))
+
+filtered_results_df_downsampled$Chunk <- factor(filtered_results_df_downsampled$Chunk, levels = c("5", "10", "15", "20", "25"))
+
+heatmap_df_downsampled <- filtered_results_df_downsampled %>%
+  select(-value, -category) %>%
+  rename(value = log_val) %>%
+  mutate(p_val_category = case_when(
+    p_val_category == "pgen" ~ "Probability of generation",
+    p_val_category == "cdr3_length" ~ "CDR3 length (AAs)",
+    p_val_category == "cdr3_hydrophobicity" ~ "CDR3 hydrophobicity"
+  )) %>%
+  mutate(predicted.celltype.l2 = gsub("CD4 |CD8 ", "", predicted.celltype.l2))
+
+heatmap_df_downsampled
+
+# Prepare the data in matrix form
+heatmap_data_downsampled <- reshape2::dcast(heatmap_df_downsampled, predicted.celltype.l1 + predicted.celltype.l2 + p_val_category + Chain ~ Chunk, value.var = "value")
+
+# Extract value columns
+mat_downsampled <- as.matrix(heatmap_data_downsampled[, -(1:4)])
+
+# Set row names
+rownames(mat_downsampled) <- paste(heatmap_data_downsampled$predicted.celltype.l1, heatmap_data_downsampled$predicted.celltype.l2, heatmap_data_downsampled$p_val_category, heatmap_data_downsampled$Chain, sep = "_")
+
+# Create a matrix of annotations
+chain_annotations_downsampled <- cbind(
+  Chain = heatmap_data_downsampled$Chain
+)
+
+# Create a matrix of annotations
+type_annotations_downsampled <- cbind(
+  "Cell type" = heatmap_data_downsampled$predicted.celltype.l1
+)
+
+# Create a matrix of annotations
+subtype_annotations_downsampled <- cbind(
+  "Cell subtype" = heatmap_data_downsampled$predicted.celltype.l2
+)
+
+# Create a matrix of annotations
+feature_annotations_downsampled <- cbind(
+  Feature = heatmap_data_downsampled$p_val_category
+)
+
+# highlight rows of interest
+#which_row_highlight = which(grepl("CD8 T_TEM_Probability of generation_TRB", rownames(mat_downsampled)))
+
+#split = data.frame(x = c(rep("A", which_row_highlight - 1), "B", rep("C", nrow(mat_downsampled) - which_row_highlight)))
+
+# Plot the heatmap without clustering
+Heatmap(mat_downsampled,
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
+        right_annotation = rowAnnotation("Cell type" = type_annotations_downsampled,
+                                         "Cell subtype" = subtype_annotations_downsampled,
+                                         Chain = chain_annotations_downsampled,
+                                         Feature = feature_annotations_downsampled,
+                                         col = list("Cell type" = c("CD4 T" = "#fde725", "CD8 T" = "#21918c", "other T" = "#440154"),
+                                                    "Chain" = c("TRA" = "#fde725", "TRB" = "#440154"),
+                                                    "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725", "Trm" = "black"),
+                                                    "Feature" = c("CDR3 length (AAs)" = "#21918c", "CDR3 hydrophobicity" = "#fde725", "Probability of generation" = "#440154"))),
+        show_row_names = FALSE,
+        column_title = "Clonotypes bins\n(% of repertoire across patients)",
+        column_title_side = "bottom",
+        heatmap_legend_param = list(title = "Wilcox padj val (-log10) for\nyes vs. no colitis irAE"))
+
+```
+
+# Prep data for summary plots (per patient method)
+
+```{r}
+
+prepped_data_per_patient <- expansion_df %>%
+  filter(group != "no ICI") %>%
+  group_by(patient_id, clonotype, Chain) %>%
+  # look at just unique clonotypes (CDR3 AA - VJ) from each patient
+  dplyr::slice(1) %>%
+  ungroup() %>%
+  group_by(predicted.celltype.l1, predicted.celltype.l2, Chain, patient_id) %>%
+  arrange(-count) %>%
+  mutate(chunk_size = ceiling(n() * 0.05),
+         chunk = 5*ceiling(row_number() / chunk_size))
+
+prepped_data_per_patient
+
+```
+
+# Perform wilcox rank sum tests within chunks of 5% clonotypes (per patient method)
+
+```{r}
+
+# List to store results
+results_list_per_patient <- list()
+
+# Iterate through chunk cutoffs
+for (num in 1:5) {
+  result <- prepped_data_per_patient %>%
+    perform_wilcox_test_cumulatively(cutoff = num*5)
+
+  results_list_per_patient[[as.character(num*5)]] <- result
+}
+
+# Combine results into a single dataframe
+results_df_per_patient <- bind_rows(results_list_per_patient, .id = "Chunk")
+
+results_df_per_patient <- results_df_per_patient %>%
+  pivot_longer(cols = c("p_val_pgen", "p_val_cdr3_length", "p_val_cdr3_hydrophobicity"), names_to = "p_val") %>%
+  rename(p_val_category = p_val) %>%
+  mutate(p_val_category = gsub("p_val_", "", p_val_category)) %>%
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category)) %>%
+  # adjust pvals for multiple comparisons
+  mutate(value = p.adjust(value, method = "BH")) %>%
+  arrange(value)
+
+results_df_per_patient
+
+```
+
+# Make heatmap (per patient method)
+
+```{r}
+
+top_results_per_patient <- results_df_per_patient %>%
+  mutate(category = paste(predicted.celltype.l2, Chain, p_val_category))
+
+filtered_results_df_per_patient <- results_df_per_patient %>%
+  filter(category %in% top_results_per_patient$category) %>%
+  mutate(log_val = -log10(value))
+
+filtered_results_df_per_patient$Chunk <- factor(filtered_results_df_per_patient$Chunk, levels = c("5", "10", "15", "20", "25"))
+
+heatmap_df_per_patient <- filtered_results_df_per_patient %>%
+  select(-value, -category) %>%
+  rename(value = log_val) %>%
+  mutate(p_val_category = case_when(
+    p_val_category == "pgen" ~ "Probability of generation",
+    p_val_category == "cdr3_length" ~ "CDR3 length (AAs)",
+    p_val_category == "cdr3_hydrophobicity" ~ "CDR3 hydrophobicity"
+  )) %>%
+  mutate(predicted.celltype.l2 = gsub("CD4 |CD8 ", "", predicted.celltype.l2))
+
+heatmap_df_per_patient
+
+# Prepare the data in matrix form
+heatmap_data_per_patient <- reshape2::dcast(heatmap_df_per_patient, predicted.celltype.l1 + predicted.celltype.l2 + p_val_category + Chain ~ Chunk, value.var = "value")
+
+# Extract value columns
+mat_per_patient <- as.matrix(heatmap_data_per_patient[, -(1:4)])
+
+# Set row names
+rownames(mat_per_patient) <- paste(heatmap_data_per_patient$predicted.celltype.l1, heatmap_data_per_patient$predicted.celltype.l2, heatmap_data_per_patient$p_val_category, heatmap_data_per_patient$Chain, sep = "_")
+
+# Create a matrix of annotations
+chain_annotations_per_patient <- cbind(
+  Chain = heatmap_data_per_patient$Chain
+)
+
+# Create a matrix of annotations
+type_annotations_per_patient <- cbind(
+  "Cell type" = heatmap_data_per_patient$predicted.celltype.l1
+)
+
+# Create a matrix of annotations
+subtype_annotations_per_patient <- cbind(
+  "Cell subtype" = heatmap_data_per_patient$predicted.celltype.l2
+)
+
+# Create a matrix of annotations
+feature_annotations_per_patient <- cbind(
+  Feature = heatmap_data_per_patient$p_val_category
+)
+
+# highlight rows of interest
+#which_row_highlight = which(grepl("CD8 T_TEM_Probability of generation_TRB", rownames(mat_per_patient)))
+
+#split = data.frame(x = c(rep("A", which_row_highlight - 1), "B", rep("C", nrow(mat_per_patient) - which_row_highlight)))
+
+# Plot the heatmap without clustering
+Heatmap(mat_per_patient,
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
+        right_annotation = rowAnnotation("Cell type" = type_annotations_per_patient,
+                                         "Cell subtype" = subtype_annotations_per_patient,
+                                         Chain = chain_annotations_per_patient,
+                                         Feature = feature_annotations_per_patient,
+                                         col = list("Cell type" = c("CD4 T" = "#fde725", "CD8 T" = "#21918c", "other T" = "#440154"),
+                                                    "Chain" = c("TRA" = "#fde725", "TRB" = "#440154"),
+                                                    "Cell subtype" = c("dnT" = "#440154", "Treg" = "#46327e", "Proliferating" = "#1fa187", "TCM" = "#277f8e",   "TEM" = "#365c8d", "Naive" = "#4ac16d", "MAIT" = "#a0da39", "CTL" = "#fde725", "Trm" = "black"),
+                                                    "Feature" = c("CDR3 length (AAs)" = "#21918c", "CDR3 hydrophobicity" = "#fde725", "Probability of generation" = "#440154"))),
+        show_row_names = FALSE,
+        column_title = "Clonotypes bins\n(% of repertoire across patients)",
+        column_title_side = "bottom",
+        heatmap_legend_param = list(title = "Wilcox padj val (-log10) for\nyes vs. no colitis irAE"))
+
+```
+
+# Make box plots for specific features at specific chunks
+
+```{r}
+
+cd8_trm_tra_15 <- prepped_data %>%
+  filter(predicted.celltype.l2 == "CD8 Trm" & chunk %in% c("5", "10", "15")) %>%
+  mutate(pgen = log10(pgen),
+         new_chunk = 15,
+         method = "Normalized by\nclonotype depth")
+
+cd8_trm_tra_20 <- prepped_data %>%
+  filter(predicted.celltype.l2 == "CD8 Trm" & chunk %in% c("5", "10", "15", "20")) %>%
+  mutate(pgen = log10(pgen),
+         new_chunk = 20,
+         method = "Normalized by\nclonotype depth")
+
+cd8_trm_tra_15_per_patient <- prepped_data_per_patient %>%
+  filter(predicted.celltype.l2 == "CD8 Trm" & chunk %in% c("5", "10", "15")) %>%
+  mutate(pgen = log10(pgen),
+         new_chunk = 15,
+         method = "Per patient")
+
+cd8_trm_tra_20_per_patient <- prepped_data_per_patient %>%
+  filter(predicted.celltype.l2 == "CD8 Trm" & chunk %in% c("5", "10", "15", "20")) %>%
+  mutate(pgen = log10(pgen),
+         new_chunk = 20,
+         method = "Per patient")
+
+cd8_trm_tra <- cd8_trm_tra_15 %>%
+  full_join(cd8_trm_tra_20) %>%
+  full_join(cd8_trm_tra_15_per_patient) %>%
+  full_join(cd8_trm_tra_20_per_patient)
+
+cd8_trm_tra$group <- factor(cd8_trm_tra$group, levels = c("ICI no colitis", "ICI colitis"))
+
+cd8_trm_tra %>%
+  group_by(new_chunk, group, method) %>%
+  summarize(count = n())
+
+plot <- ggplot(cd8_trm_tra, aes(x = as.factor(new_chunk), y = pgen, fill = group)) +
+  geom_boxplot() +
+  facet_wrap(~method + Chain) +
+  labs(x = "Clonotype bins (% of\nrepertoire across patients)", y = "pgen (log10)") +
+  theme(strip.text = element_text(size = 12))
+
+plot
+
+ggsave("../figures/cd8_trm_pgen.svg", width = 6, height = 7)
+
+```
+
+# Perform feature tests between irAE groups for all unique TCRs within each cell type, chain combo
+
+```{r}
+
+all_tcrs <- expansion_df %>%
+  ## look at just unique clonotypes from each patient
+  group_by(patient_id, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
+  filter(group != "no ICI") %>%
+  group_by(predicted.celltype.l2, Chain) %>%
+  summarize(
+      p_val_pgen = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(pgen ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_hydrophobicity = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
+        }
+      },
+      p_val_cdr3_length = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
+        }
+      }
+    ) %>%
+  pivot_longer(cols = matches("^(p_val)"),
+               names_to = c(".value", "Feature"),
+               names_pattern = "^(p_val)_(.*)$") %>%
+  # adjust pvals for multiple comparisons
+  mutate(p_val = p.adjust(p_val, method = "BH")) %>%
+  arrange(p_val)
+
+all_tcrs
+
+# CD8 Trm CDR3 length and pgen
+# CD4 Trm CDR3 length
+# CD8 proliferating pgen
+
+```

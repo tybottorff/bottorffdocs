@@ -1,0 +1,277 @@
+---
+title: "Molly Fisher Thomas colitis data"
+output: pdf_document
+---
+
+ - data mining of https://villani.mgh.harvard.edu/ircolitis/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SeuratDisk)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(scales)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in TCR data
+
+```{r}
+
+dir_path <- "../raw_data/tcr"
+
+csv_files <- list.files(path = dir_path, pattern = "all_contig_annotations.csv", full.names = TRUE, recursive = TRUE)
+
+combined_data <- lapply(csv_files, function(file) {
+  data <- read.csv(file)
+  data$filename <- str_extract(file, "(?<=tcr/).*?(?=/all)")
+  data$patient_id <- str_replace(str_extract(data$filename, ".*(?=Colon)"), "_$", "")
+  return(data)
+})
+
+combined_data <- do.call(rbind, combined_data)
+
+combined_data
+
+```
+
+# Import barcode suffixes
+
+```{r}
+
+#seurat_meta <- readRDS("../saved_data/T_cells.rds")@meta.data
+
+seurat_meta$barcode <- rownames(seurat_meta)
+
+prepped_meta <- seurat_meta %>%
+  mutate(suffix = str_extract(barcode, "(?<=_)[0-9]+$")) %>%
+  mutate(patient_id = str_extract(orig.ident, "^SIC_\\d+")) %>%
+  mutate(orig.ident = gsub("_GEX", "", orig.ident))
+
+write.csv(prepped_meta, "../saved_data/rna_metadata.csv")
+
+prepped_meta
+
+```
+
+# Filter for TCRs of interest, add suffixes to barcodes
+
+```{r}
+
+metadata <- read.csv("../saved_data/metadata.csv")
+
+filtered_data <- combined_data %>%
+  # filter for TCRs of interest
+  filter(patient_id %in% metadata$patient_id) %>%
+  filter(str_detect(filename, "CD45")) %>%
+  # standardize orig.ident names
+  mutate(filename = gsub("_TCR", "", filename)) %>%
+  rename(orig.ident = filename) %>%
+  # paste suffixes onto barcodes based on orig.ident
+  mutate(barcode = case_when(
+    orig.ident == "SIC_100_Colon_332_CD45sort_5p" ~ paste(barcode, 1, sep = "_"),
+    orig.ident == "SIC_109_Colon_368_CD45pos_5p" ~ paste(barcode, 2, sep = "_"),
+    orig.ident == "SIC_121_Colon_382_CD45pos_5p" ~ paste(barcode, 3, sep = "_"),
+    orig.ident == "SIC_126_Colon_398_CD45pos_5p" ~ paste(barcode, 4, sep = "_"),
+    orig.ident == "SIC_134_Colon_417_CD45pos_5p" ~ paste(barcode, 5, sep = "_"),
+    orig.ident == "SIC_140_Colon_441_CD45sort_5p" ~ paste(barcode, 6, sep = "_"),
+    orig.ident == "SIC_141_Colon_438_CD45pos_5p_A" ~ paste(barcode, 7, sep = "_"),
+    orig.ident == "SIC_141_Colon_438_CD45pos_5p_B" ~ paste(barcode, 8, sep = "_"),
+    orig.ident == "SIC_172_Colon_529_CD45sort_5p" ~ paste(barcode, 9, sep = "_"),
+    orig.ident == "SIC_196_Colon_612_CD45sort_5p_A" ~ paste(barcode, 10, sep = "_"),
+    orig.ident == "SIC_196_Colon_612_CD45sort_5p_B" ~ paste(barcode, 11, sep = "_"),
+    orig.ident == "SIC_31_Colon_128_CD45sort_5p" ~ paste(barcode, 12, sep = "_"),
+    orig.ident == "SIC_36_Colon_140_CD45pos_3p" ~ paste(barcode, 13, sep = "_"),
+    orig.ident == "SIC_36_Colon_140_CD45sort_3p" ~ paste(barcode, 14, sep = "_"),
+    orig.ident == "SIC_40_Colon_155_CD45pos_3p" ~ paste(barcode, 15, sep = "_"),
+    orig.ident == "SIC_40_Colon_282_CD45pos_5p" ~ paste(barcode, 16, sep = "_"),
+    orig.ident == "SIC_43_LeftColon-uninflamed_157_CD45pos_3p" ~ paste(barcode, 17, sep = "_"),
+    orig.ident == "SIC_43_RectosigmoidColon_157_CD45pos_3p" ~ paste(barcode, 18, sep = "_"),
+    orig.ident == "SIC_53_Colon_182_CD45pos_3p" ~ paste(barcode, 19, sep = "_"),
+    orig.ident == "SIC_71_Colon_241_CD45sort_5p" ~ paste(barcode, 20, sep = "_"),
+    orig.ident == "SIC_76_Colon_273_CD45pos_5p" ~ paste(barcode, 21, sep = "_"),
+    orig.ident == "SIC_89_Colon_310_CD45pos_5p" ~ paste(barcode, 22, sep = "_"),
+    orig.ident == "SIC_94_Colon_340_CD45pos_5p" ~ paste(barcode, 23, sep = "_"),
+    orig.ident == "SIC_97_Colon_318_CD45pos_5p" ~ paste(barcode, 24, sep = "_"))) %>%
+  # choose TCR with highest UMI count per barcode/chain
+  group_by(barcode, chain) %>%
+  arrange(-umis) %>%
+  slice(1) %>%
+  ungroup() %>%
+  # just get data with TCR and RNA cell type (inner join)
+  inner_join(prepped_meta, by = c("barcode", "orig.ident", "patient_id")) %>%
+  # filter for good TCRs
+  filter(is_cell == "True",
+         high_confidence == "True",
+         productive == "True",
+         full_length == "True",
+         cdr3 != "None") %>%
+  pivot_wider(id_cols = c(barcode, predicted.celltype.l1, predicted.celltype.l2, orig.ident), names_from = "chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt")) %>%
+  rename(TCR_name = barcode)
+
+filtered_data
+
+```
+
+# Prepare for stitching
+
+```{r}
+
+bad_alpha <- filtered_data %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter_at(vars(starts_with("TRA")), any_vars(. == "None" | is.na(.)))
+
+stitchr_alpha_data <- filtered_data %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_alpha$TCR_name)) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_alpha_data
+
+# 13,271 rows
+
+write.table(stitchr_alpha_data, file = "../saved_data/tcrseq_tra_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+bad_beta <- filtered_data %>%
+    rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter_at(vars(starts_with("TRB")), any_vars(. == "None" | is.na(.)))
+
+stitchr_beta_data <- filtered_data %>%
+  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
+  filter(!(TCR_name %in% bad_beta$TCR_name)) %>%
+  mutate(TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA)
+
+stitchr_beta_data
+
+# 16,099 rows
+
+write.table(stitchr_beta_data, file = "../saved_data/tcrseq_trb_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+```
+
+# Read in stitchr output
+
+```{r}
+
+stitchr_alpha_output <- read.delim("../saved_data/stitchr_tra_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_alpha_output
+
+stitchr_beta_output <- read.delim("../saved_data/stitchr_trb_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_beta_output
+
+stitchr_output <- stitchr_alpha_output %>%
+  full_join(stitchr_beta_output, by = colnames(stitchr_alpha_output))
+
+stitchr_output
+
+```
+
+# Prep IGoR input
+
+```{r}
+
+stitchr_output_alpha_df <- stitchr_output %>%
+  filter(!(is.na(TRA_nt)),
+         nchar(TRA_nt) > 1)
+
+stitchr_output_alpha_df
+# 13,268 rows
+
+write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
+
+stitchr_output_beta_df <- stitchr_output %>%
+  filter(!(is.na(TRB_nt)),
+         nchar(TRB_nt) > 1)
+
+stitchr_output_beta_df
+# 16,058 rows
+
+write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
+
+```
+
+# Read in IGoR output
+
+```{r}
+
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
+  mutate(patient_group = case_when(
+    startsWith(Patient_ID, "A") ~ "ici_no_irae",
+    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(patient_group, irAE, chain, pgen, barcode, cdr3) %>%
+  filter(chain == "TRA",
+         pgen != "NaN")
+
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(barcode = TCR_name) %>%
+  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
+  mutate(patient_group = case_when(
+    startsWith(Patient_ID, "A") ~ "ici_no_irae",
+    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
+    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
+  mutate(irAE = case_when(
+    startsWith(Patient_ID, "A") ~ "No",
+    startsWith(Patient_ID, "B") ~ "Yes",
+    startsWith(Patient_ID, "M") ~ "Yes")) %>%
+  select(Patient_ID, patient_group, irAE, chain, pgen, barcode, cdr3) %>%
+  filter(chain == "TRB",
+         pgen != "NaN") %>%
+  full_join(igor_alpha, by = c("barcode", "chain", "patient_group", "pgen", "cdr3", "irAE"))
+
+igor_combined
+
+```

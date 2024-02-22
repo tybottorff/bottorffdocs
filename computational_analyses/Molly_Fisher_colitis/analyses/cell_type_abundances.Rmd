@@ -1,0 +1,137 @@
+---
+title: "Molly Fisher Thomas colitis data"
+output: pdf_document
+---
+
+ - data mining of https://villani.mgh.harvard.edu/ircolitis/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(SeuratDisk)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(scales)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RDS of T cells
+
+```{r}
+
+T_cells <- readRDS("../saved_data/T_cells.rds")
+
+```
+
+# Extract metadata, filter for logical cell types, get groups
+
+```{r}
+
+metadata <- T_cells@meta.data %>%
+  # get logical cell types
+  filter(
+    case_when(
+      predicted.celltype.l1 == "CD4 T" & str_detect(predicted.celltype.l2, "CD4") | predicted.celltype.l2 == "Treg" ~ TRUE,
+      predicted.celltype.l1 == "CD8 T" & str_detect(predicted.celltype.l2, "CD8") ~ TRUE,
+      predicted.celltype.l1 == "other T" & predicted.celltype.l2 %in% c("MAIT", "dnT") ~ TRUE,
+      TRUE ~ FALSE)) %>%
+  # get Trms from marker analysis (elsewhere)
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(0, 1, 3, 4, 7, 8, 14, 18, 21, 23, 28) & predicted.celltype.l1 == "CD4 T", "CD4 Trm", if_else(seurat_clusters %in% c(0, 1, 3, 4, 7, 8, 14, 18, 21, 23, 28) & predicted.celltype.l1 == "CD8 T", "CD8 Trm", predicted.celltype.l2))) %>%
+  mutate(patient_id = paste("SIC", gsub("^SIC_(\\d+)_.*", "\\1", orig.ident), sep = "_")) %>%
+  mutate(simplified_patient_id = case_when(
+    patient_id == "MC_2" ~ "HC7",
+    patient_id == "SIC_13" ~ "HC1",
+    patient_id == "SIC_19" ~ "IHC3",
+    patient_id == "SIC_31" ~ "IHC4",
+    patient_id == "SIC_32" ~ "C7",
+    patient_id == "SIC_36" ~ "C8",
+    patient_id == "SIC_40" ~ "C9",
+    patient_id == "SIC_43" ~ "C10",
+    patient_id == "SIC_53" ~ "IHC5",
+    patient_id == "MC_1" ~ "HC6",
+    patient_id == "MC_9" ~ "HC8",
+    patient_id == "SIC_71" ~ "C11",
+    patient_id == "SIC_89" ~ "C12",
+    patient_id == "SIC_76" ~ "C14",
+    patient_id == "SIC_94" ~ "IHC6",
+    patient_id == "SIC_97" ~ "C13",
+    patient_id == "SIC_100" ~ "C1",
+    patient_id == "SIC_100" ~ "C1",
+    patient_id == "SIC_109" ~ "IHC1",
+    patient_id == "SIC_121" ~ "C2",
+    patient_id == "SIC_126" ~ "C3",
+    patient_id == "SIC_134" ~ "C4",
+    patient_id == "SIC_140" ~ "C5",
+    patient_id == "SIC_141" ~ "C6",
+    patient_id == "SIC_172" ~ "IHC2",
+    patient_id == "SIC_186" ~ "HC2",
+    patient_id == "SIC_187" ~ "HC3",
+    patient_id == "SIC_188" ~ "HC4",
+    patient_id == "SIC_196" ~ "HC5")) %>%
+  mutate(group = case_when(
+    startsWith(simplified_patient_id, "H") ~ "No ICI",
+    startsWith(simplified_patient_id, "I") ~ "ICI no colitis",
+    startsWith(simplified_patient_id, "C") ~ "ICI colitis"))
+
+metadata$barcode <- rownames(metadata)
+
+metadata
+
+```
+
+# Analyze cell type abundances by group
+
+```{r}
+
+cell_type_abundances <- metadata %>%
+  filter(group != "No ICI") %>%
+  group_by(predicted.celltype.l2, group, simplified_patient_id) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(simplified_patient_id) %>%
+  mutate(normalized_count = count / sum(count))
+  
+cell_type_abundances
+
+cell_type_abundances$group <- factor(cell_type_abundances$group, levels = c("ICI no colitis", "ICI colitis"))
+
+ggplot(cell_type_abundances, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = group)) +
+  geom_boxplot() +
+  labs(x = "", fill = "Group", y = "T cell proportion\n(log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+test_data <- cell_type_abundances %>%
+  group_by(predicted.celltype.l2) %>%
+  summarize(p_val = wilcox.test(normalized_count ~ group)$p.value) %>%
+  mutate(padj = p.adjust(p_val, method = "BH")) %>%
+  arrange(padj)
+
+test_data
+
+```

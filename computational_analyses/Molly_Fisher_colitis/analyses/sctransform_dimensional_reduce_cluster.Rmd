@@ -1,0 +1,206 @@
+---
+title: "Molly Fisher Thomas colitis data"
+output: pdf_document
+---
+
+ - data mining of https://villani.mgh.harvard.edu/ircolitis/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RDS of QC filtered data
+
+```{r}
+
+colon_t_cells_filtered <- readRDS("../saved_data/qc_filtered.rds")
+
+```
+
+
+# Split data by sample, prepare (normalize, find variable features, etc.) before integrating by finding anchors
+
+```{r}
+
+# split the dataset into a list of seurat objects (for each patient sample)
+colon_t_cells_filtered.list <- SplitObject(colon_t_cells_filtered, split.by = "orig.ident")
+
+# normalize and identify variable features for each dataset independently
+colon_t_cells_filtered.list <- lapply(X = colon_t_cells_filtered.list, FUN = SCTransform, method = "glmGamPoi")
+
+```
+
+# Find integration features
+
+```{r}
+
+# select features that are repeatedly variable across datasets for integration
+features <- SelectIntegrationFeatures(object.list = colon_t_cells_filtered.list, nfeatures = 3000)
+
+# prep step
+colon_t_cells_filtered.list <- PrepSCTIntegration(object.list = colon_t_cells_filtered.list, anchor.features = features)
+
+# run PCA to allow rpca use later
+colon_t_cells_filtered.list <- lapply(X = colon_t_cells_filtered.list, FUN = RunPCA, features = features)
+
+```
+
+# Recreate metadata
+
+```{r}
+
+metadata <- data.frame(
+  patient_id = c("MC_2", "SIC_13", "SIC_19", "SIC_31", "SIC_32", "SIC_36", "SIC_40", "SIC_43", "SIC_53", "MC_1", "MC_9", "SIC_71", "SIC_89", "SIC_76", "SIC_94", "SIC_97", "SIC_100", "SIC_100", "SIC_109", "SIC_121", "SIC_126", "SIC_134", "SIC_140", "SIC_141", "SIC_172", "SIC_186", "SIC_187", "SIC_188", "SIC_196"),
+  simplified_patient_id = c("HC7", "HC1", "IHC3", "IHC4", "C7", "C8", "C9", "C10", "IHC5", "HC6", "HC8", "C11", "C12", "C14", "IHC6", "C13", "C1", "C1", "IHC1", "C2", "C3", "C4", "C5", "C6", "IHC2", "HC2", "HC3", "HC4", "HC5")) %>%
+  mutate(group = case_when(
+    startsWith(simplified_patient_id, "H") ~ "No ICI",
+    startsWith(simplified_patient_id, "I") ~ "ICI no colitis",
+    startsWith(simplified_patient_id, "C") ~ "ICI colitis"))
+
+filtered_metadata <- metadata %>%
+  filter(group != "No ICI")
+
+filtered_metadata
+
+```
+
+# Randomly select a single sample per group to use as a reference
+
+```{r}
+
+# Set a random seed for reproducibility
+set.seed(123)
+
+# Randomly sample one Seurat object from each group
+randomly_selected_seurat <- filtered_metadata %>%
+  group_by(group) %>%
+  sample_n(1) %>%
+  ungroup() %>%
+  select(patient_id)
+
+randomly_selected_seurat
+
+```
+
+# Find integration anchors using the above single sample/group as references
+
+```{r}
+
+# first integrates these references, then aligns other samples within each group to that integrated reference
+# this command creates an 'integrated' data assay
+
+immune.anchors <- FindIntegrationAnchors(object.list = colon_t_cells_filtered.list, reference = which(names(colon_t_cells_filtered.list) %in% c("SIC_141_Colon_438_CD45pos_5p_GEX_A", "SIC_53_Colon_182_CD45pos_3p_GEX")), normalization.method = "SCT", anchor.features = features, reduction = "rpca", k.anchor = 10, dims = 1:30)
+
+```
+
+# Integrate the data
+
+```{r}
+
+immune.combined <- IntegrateData(anchorset = immune.anchors, normalization.method = "SCT")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/integrated.rds")
+
+```
+
+# Specify integration, scale data
+
+```{r}
+
+# specify that we will perform downstream analysis on the corrected data note that the
+# original unmodified data still resides in the 'RNA' assay
+DefaultAssay(immune.combined) <- "integrated"
+
+# scale data
+immune.combined <- ScaleData(immune.combined, verbose = FALSE)
+
+```
+
+# PCA using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined <- RunPCA(immune.combined, npcs = 30, verbose = FALSE)
+
+```
+
+# UMAP using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined <- RunUMAP(immune.combined, reduction = "pca", dims = 1:30)
+
+```
+
+# Find clusters
+
+```{r}
+
+immune.combined <- FindNeighbors(immune.combined, reduction = "pca", dims = 1:30)
+immune.combined <- FindClusters(immune.combined, resolution = 3)
+
+```
+
+# Visualize UMAP by patient ID
+
+```{r}
+
+plot <- DimPlot(immune.combined, reduction = "umap", group.by = "orig.ident", shuffle = TRUE, seed = 400) + theme(legend.position="none")
+
+plot
+
+ggsave("../figures/umap_patient_id.svg", plot, device = "svg")
+
+```
+
+# Visualize UMAP by cluster
+
+```{r}
+
+DimPlot(immune.combined, reduction = "umap", label = TRUE, repel = TRUE)
+
+ggsave("../figures/umap_cluster.svg")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/integrated_transformed_reduced_clustered.rds")
+
+```
