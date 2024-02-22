@@ -98,9 +98,10 @@ tcr <- read.csv("../raw_data/tcr/GSE144469_TCR_filtered_contig_annotations_all.c
   mutate(patient = sub(".*-", "", barcode)) %>%
   left_join(patient_barcode_connect, by = "patient") %>%
   mutate(barcode = sub("-.*", "-1_", barcode)) %>%
-  mutate(barcode = paste(barcode, barcode_num, sep = ""))
+  mutate(barcode = paste(barcode, barcode_num, sep = "")) %>%
+  as.data.frame()
 
-rownames(tcr) <- tcr$barcode
+row.names(tcr) <- tcr$barcode
 
 tcr <- tcr %>%
   dplyr::select(-barcode)
