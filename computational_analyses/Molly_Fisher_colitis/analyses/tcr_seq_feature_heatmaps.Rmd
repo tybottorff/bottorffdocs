@@ -781,8 +781,8 @@ all_tcrs <- expansion_df %>%
 
 all_tcrs
 
-# CD8 Trm CDR3 length and pgen
-# CD4 Trm CDR3 length
-# CD8 proliferating pgen
+# CD8 Trm TRB CDR3 length and pgen
+# CD4 Trm TRA CDR3 length
+# CD8 proliferating TRB pgen
 
 ```
