@@ -277,16 +277,13 @@ hpca_and_seurat_agree <- mapping_results %>%
 
 ```
 
-# Write object to use for unicell deconvolve (python)
+# Write object to use for unicell deconvolve (in python)
 
 ```{r}
 
-SaveH5Seurat(
-  rna,
-  filename = "../saved_data/T_cells.h5Seurat",
-  overwrite = TRUE)
-Convert(
-  source = file.path("../saved_data/T_cells.h5Seurat"),
-  dest = "h5ad", assay = "RNA")
+rna.sce <- as.SingleCellExperiment(CreateSeuratObject(rna@assays$SCT))
+
+sceasy::convertFormat(rna.sce, from="sce", to="anndata",
+                       outFile='../saved_data/t_cells_rna.h5ad')
 
 ```
