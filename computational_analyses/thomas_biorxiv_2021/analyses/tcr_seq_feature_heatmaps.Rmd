@@ -167,6 +167,8 @@ seq_depth <- rna_metadata %>%
 
 seq_depth
 
+write.csv(seq_depth, "../saved_data/seq_depth.csv")
+
 # choose ~36/2 seqs to downsample, ~/2 to get equal numbers of each Chain (TRA and TRB)
 
 ```
@@ -214,6 +216,8 @@ expansion_df <- combined_data %>%
 # don't really want to do this given I don't have a ton of seqs here...
 
 expansion_df
+
+write.csv(expansion_df, "../saved_data/pre_feature_heatmap_data.csv")
 
 ```
 

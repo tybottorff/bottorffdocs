@@ -112,6 +112,8 @@ cd4_cell_abundance_df
 
 cd4_cell_abundance_df$group <- factor(cd4_cell_abundance_df$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
 
+write.csv(cd4_cell_abundance_df, "../saved_data/cd4_abundances.csv")
+
 ggplot(cd4_cell_abundance_df %>% filter(predicted.celltype.l2 %in% c("Treg", "CD4 TEM", "CD4 TCM", "CD4 Trm", "CD4 Proliferating")), aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = group)) +
   geom_boxplot() +
   labs(x = "", fill = "group", y = "CD4 T cell\nproportion (log10)") +

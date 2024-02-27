@@ -168,6 +168,8 @@ seq_depth <- combined_data %>%
 
 seq_depth
 
+write.csv(seq_depth, "../saved_data/seq_depth.csv")
+
 # Choose ~2512/2 seqs from non B10 samples to downsample all to 2449/2
 
 ```
@@ -216,6 +218,8 @@ combined_data <- combined_data %>%
 # just throw out ~5k seqs that aren't paired TRA/TRB?
 
 combined_data
+
+write.csv(combined_data, "../saved_data/pre_feature_heatmap_data.csv")
 
 ```
 
