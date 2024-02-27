@@ -209,8 +209,6 @@ p1 + p2
 
 just_T_cells <- immune.combined[, immune.combined@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & immune.combined@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
 
-
-
 just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
 just_T_cells <- RunUMAP(just_T_cells, reduction = "pca", dims = 1:30)
 just_T_cells <- FindNeighbors(just_T_cells, reduction = "pca", dims = 1:30)
