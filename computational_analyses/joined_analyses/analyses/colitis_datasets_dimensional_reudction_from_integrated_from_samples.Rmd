@@ -1,0 +1,124 @@
+---
+title: "Joined analyses from both colitis datasets"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(ggpubr)
+library(Seurat)
+library(Matrix)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+immune.combined <- readRDS("../saved_data/integrated_colitis_datasets.rds")
+
+```
+
+# Specify integration, scale data
+
+```{r}
+
+# specify that we will perform downstream analysis on the corrected data note that the
+# original unmodified data still resides in the 'RNA' assay
+DefaultAssay(immune.combined) <- "integrated"
+
+# scale data
+immune.combined <- ScaleData(immune.combined, verbose = FALSE)
+
+```
+
+# Remove TCR genes
+
+ - these dominate clustering
+
+```{r}
+
+# regex to match TCR gene names
+tcr_gene_regex <- "^TR[ABCDG][VDJC]"
+
+# Extract TCR genes using the regex
+tcr_genes <- grep(tcr_gene_regex, rownames(immune.combined), value = TRUE)
+
+tcr_genes
+
+tcr_genes_not_matching <- setdiff(rownames(immune.combined), tcr_genes)
+
+# Filter out TCR genes from the Seurat object
+immune.combined_no_tcr_genes <- subset(immune.combined, features = tcr_genes_not_matching)
+
+```
+
+# PCA using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined_no_tcr_genes <- RunPCA(immune.combined_no_tcr_genes, npcs = 30, verbose = FALSE)
+
+```
+
+# UMAP using 2000 most variable genes and top 30 PCs
+
+```{r}
+
+immune.combined_no_tcr_genes <- RunUMAP(immune.combined_no_tcr_genes, reduction = "pca", dims = 1:30)
+
+```
+
+# Find clusters
+
+```{r}
+
+immune.combined_no_tcr_genes <- FindNeighbors(immune.combined_no_tcr_genes, reduction = "pca", dims = 1:30)
+immune.combined_no_tcr_genes <- FindClusters(immune.combined_no_tcr_genes, resolution = 3)
+
+```
+
+# Visualize UMAP by dataset
+
+```{r}
+
+DimPlot(immune.combined_no_tcr_genes, reduction = "umap", group.by = "dataset", shuffle = TRUE, seed = 123)
+
+ggsave("../figures/umap_dataset.svg")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined_no_tcr_genes, "../saved_data/integrated_transformed_reduced_clustered_colitis_datasets.rds")
+
+```

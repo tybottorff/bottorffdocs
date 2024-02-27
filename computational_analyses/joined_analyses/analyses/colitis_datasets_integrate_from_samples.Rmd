@@ -1,0 +1,178 @@
+---
+title: "Joined analyses from both colitis datasets"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(ggpubr)
+library(Seurat)
+library(Matrix)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+old_colitis <- readRDS("../../Molecular_Pathways_of_Colon_Inflammation_Induced_by_Cancer_Immunotherapy/saved_data/qc_filtered.rds")
+
+new_colitis <- readRDS("../../Molly_Fisher_colitis/saved_data/qc_filtered.rds")
+
+```
+
+# Mark metadata for datasets
+
+```{r}
+
+old_colitis$dataset <- as.factor("2020_cell_luoma")
+
+new_colitis$dataset <- as.factor("2021_biorxiv_thomas")
+
+```
+
+# Split data by sample
+
+```{r}
+
+# split datasets into lists of seurat objects (for each patient sample)
+old_colitis.list <- SplitObject(old_colitis, split.by = "orig.ident")
+new_colitis.list <- SplitObject(new_colitis, split.by = "orig.ident")
+
+```
+
+# Remove HCs to save on computational time
+
+```{r}
+
+old_colitis.list <- old_colitis.list[!grepl("^CT", names(old_colitis.list))]
+new_colitis.list <- new_colitis.list[!grepl("SIC_196", names(new_colitis.list))]
+
+```
+
+# Join lists, prepare (normalize, find variable features, etc.) before integrating by finding anchors
+
+```{r}
+
+# join lists
+colon_qc.list <- c(old_colitis.list, new_colitis.list)
+
+colon_qc.list <- lapply(colon_qc.list, function(seurat_obj) {
+  seurat_obj$orig.ident <- as.factor(seurat_obj$orig.ident)
+  return(seurat_obj)
+})
+
+# normalize and identify variable features for each dataset independently
+
+colon_qc.list <- lapply(colon_qc.list, function(seurat_obj) {
+  SCTransform(seurat_obj, method = "glmGamPoi", vars.to.regress = "orig.ident")
+})
+
+```
+
+# Find integration features
+
+```{r}
+
+# select features that are repeatedly variable across datasets for integration
+features <- SelectIntegrationFeatures(object.list = colon_qc.list, nfeatures = 3000)
+
+# prep step
+colon_qc.list <- PrepSCTIntegration(object.list = colon_qc.list, anchor.features = features)
+
+# run PCA to allow rpca use later
+colon_qc.list <- lapply(X = colon_qc.list, FUN = RunPCA, features = features)
+
+```
+
+# Randomly select a single sample per group per dataset to use as a reference
+
+```{r}
+
+new_colitis_metadata <- data.frame(
+  id = c("MC_2", "SIC_13", "SIC_19", "SIC_31", "SIC_32", "SIC_36", "SIC_40", "SIC_43", "SIC_53", "MC_1", "MC_9", "SIC_71", "SIC_89", "SIC_76", "SIC_94", "SIC_97", "SIC_100", "SIC_100", "SIC_109", "SIC_121", "SIC_126", "SIC_134", "SIC_140", "SIC_141", "SIC_172", "SIC_186", "SIC_187", "SIC_188", "SIC_196"),
+  simplified_id = c("HC7", "HC1", "IHC3", "IHC4", "C7", "C8", "C9", "C10", "IHC5", "HC6", "HC8", "C11", "C12", "C14", "IHC6", "C13", "C1", "C1", "IHC1", "C2", "C3", "C4", "C5", "C6", "IHC2", "HC2", "HC3", "HC4", "HC5")) %>%
+  mutate(group = case_when(
+    startsWith(simplified_id, "H") ~ "No ICI",
+    startsWith(simplified_id, "I") ~ "ICI no colitis",
+    startsWith(simplified_id, "C") ~ "ICI colitis"))
+
+seurat_info <- data.frame(name = names(colon_qc.list)) %>%
+  mutate(id = sub("(SIC_\\d+)_.*", "\\1", sub("-.*", "", name))) %>%
+  mutate(dataset = if_else(startsWith(name, "SIC"), "2021_biorxiv_thomas", "2020_cell_luoma")) %>%
+  left_join(new_colitis_metadata, by = "id") %>%
+  mutate(group = case_when(
+    startsWith(id, "CT") ~ "No ICI",
+    startsWith(id, "C") ~ "ICI colitis",
+    startsWith(id, "NC") ~ "ICI no colitis",
+    startsWith(id, "SIC") ~ group))
+
+seurat_info
+
+# Set a random seed for reproducibility
+set.seed(123)
+
+# Randomly sample one Seurat object from each dataset and group
+randomly_selected_seurat <- seurat_info %>%
+  group_by(dataset, group) %>%
+  sample_n(1) %>%
+  ungroup()
+
+randomly_selected_seurat
+
+```
+
+# Find integration anchors using the above single sample/group as references
+
+```{r}
+
+# first integrates these references, then aligns other samples within each group to that integrated reference
+# this command creates an 'integrated' data assay
+
+immune.anchors <- FindIntegrationAnchors(object.list = colon_qc.list, reference = which(names(colon_qc.list) %in% randomly_selected_seurat$name), normalization.method = "SCT", anchor.features = features, reduction = "rpca", k.anchor = 10, dims = 1:30)
+
+```
+
+# Integrate the data
+
+```{r}
+
+immune.combined <- IntegrateData(anchorset = immune.anchors, normalization.method = "SCT")
+
+```
+
+# Save RDS
+
+```{r}
+
+saveRDS(immune.combined, "../saved_data/integrated_colitis_datasets.rds")
+
+```
+
