@@ -45,7 +45,8 @@ theme_set(
 
 ```{r}
 
-tcr_rna <- read.csv("../saved_data/rna_tcr.csv")
+tcr_rna <- read.csv("../saved_data/rna_tcr.csv") %>%
+  rename(barcode = X)
 
 tcr_rna
 
@@ -123,7 +124,10 @@ calculate_hydrophobicity <- function(sequence, hydrophobicity_df) {
 ```{r}
 
 combined_data <- tcr_rna %>%
-  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2))) %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$") %>%
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(3, 7, 9, 15, 16, 25, 27) & predicted.celltype.l1 == "CD4 T", "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16, 25, 27) & predicted.celltype.l1 == "CD8 T", "CD8 Trm", predicted.celltype.l2))) %>%
   filter(
     case_when(
       predicted.celltype.l1 == "CD4 T" & str_detect(predicted.celltype.l2, "CD4") | predicted.celltype.l2 == "Treg" ~ TRUE,
@@ -141,7 +145,6 @@ combined_data <- tcr_rna %>%
     startsWith(patient, "NC") ~ "ICI no colitis")) %>%
   mutate(cdr3_length = nchar(cdr3)) %>%
   ungroup() %>%
-  select(-X) %>%
   left_join(pgen, by = c("barcode", "Chain")) %>%
   rowwise() %>%
   mutate(cdr3_hydrophobicity = calculate_hydrophobicity(cdr3, hydrophobicity_df)) %>%

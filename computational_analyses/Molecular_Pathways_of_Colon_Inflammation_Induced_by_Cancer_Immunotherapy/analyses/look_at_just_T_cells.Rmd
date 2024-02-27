@@ -313,7 +313,7 @@ VlnPlot(just_T_cells, features = c("CD69"), pt.size = 0)
 ```{r}
 
 t_cell_metadata <- just_T_cells@meta.data %>%
-  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(25, 27), "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16), "CD8 Trm", predicted.celltype.l2)))
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(3, 7, 9, 15, 16, 25, 27) & predicted.celltype.l1 == "CD4 T", "CD4 Trm", if_else(seurat_clusters %in% c(3, 7, 9, 15, 16, 25, 27) & predicted.celltype.l1 == "CD8 T", "CD8 Trm", predicted.celltype.l2)))
 
 t_cell_metadata
 
