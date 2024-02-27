@@ -1,0 +1,6 @@
+*.rds
+*.h5seurat
+*.tar
+*.h5
+*.gz
+*.mtx
