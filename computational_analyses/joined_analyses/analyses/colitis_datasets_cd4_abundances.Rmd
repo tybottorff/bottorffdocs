@@ -1,0 +1,82 @@
+---
+title: "Joined analyses of colitis datasets"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(Seurat)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+cd4s_luoma <- read.csv("../../luoma_cell_2020/saved_data/cd4_abundances.csv") %>%
+  mutate(dataset = "2020_cell_luoma")
+
+cd4s_thomas <- read.csv("../../thomas_biorxiv_2021/saved_data/cd4_abundances.csv") %>%
+  mutate(dataset = "2021_biorxiv_thomas") %>%
+  rename(patient = simplified_patient_id)
+
+cd4s <- cd4s_luoma %>%
+  full_join(cd4s_thomas) %>%
+  select(-c(X, count))
+
+cd4s
+
+```
+
+# Make a plot of cell type abundances within each patient by irAE group (normalized by seq depth)
+
+```{r}
+
+cd4s$group <- factor(cd4s$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
+
+ggplot(cd4s %>% filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD4 TEM", "CD4 TCM")), aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = group)) +
+  geom_boxplot() +
+  labs(x = "", fill = "group", y = "CD4 T cell\nproportion (log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+cd4s %>%
+  group_by(predicted.celltype.l2) %>%
+  summarize(p_val = wilcox.test(normalized_count ~ group)$p.value) %>%
+  mutate(adj_p_val = p.adjust(p_val, method = "BH")) %>%
+  arrange(adj_p_val) %>%
+  print()
+
+# padj
+# CD4 prolif: 0.006
+# CD4 TEM: 0.008
+# CD4 TCM: 0.02
+
+```
