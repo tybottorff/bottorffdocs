@@ -137,6 +137,9 @@
  - ICIs can unleash T cells with subsequent production of pro-inflammatory cytokines like interferon γ, TNF, can result in excessive off-tumor inflammation and autoimmunity
 # Association between immune-related adverse events and efficacy and changes in the relative eosinophil count among patients with advanced urothelial carcinoma treated by pembrolizumab
  - irAEs associated with higher objective response rate, longer survival
+# Association between immune-related adverse events during anti-PD-1 therapy and tumor mutaitonal burden
+ - higher irAE risk with higher number of somatic mutations/megabase DNA (TMB), explaining ~50% of irAE risk here
+ - **model here: perhaps with more neoantigens (with higher TMB), more often activate T cells that can crossreact against more different self-antigens, basically tumor with more different antigens leading to more often off-target T cell activation against self**
 # Association between immune-related thyroid dysfunction and efficacy of immune checkpoint inhibitors - a systematic review and meta analysis
  - 47 studies
  - thyroid irAE during ICI associated with improved anti tumor response despite tumor origin heterogeneity
@@ -234,6 +237,12 @@
  - **cross-reactivity need not result from sequence similarity (3D structural similarity more important than 1D sequence similarity)**
 # AXL receptor tyrosine kinase inhibition improves the anti-tumor effects of CD8<sup>+</sup> T cells by inducing CD103<sup>+</sup> dendritic cell-mediated T cell priming
  - AXL inhibited clonal expansion of tumor-specific CD8<sup>+</sup> T cells
+# Baseline risk factors associated with immune-related adverse events and atezolizumab
+ - **pneumonitis mainly in patients with lung cancer**, hypothyroidism more in renal cell carcinoma patients
+ - risk factors mostly organ-specific, like elevated liver enzymes for hepatitis and TSH for thyroiditis
+ - ethnicity associated with rash, hepatitis, pneumonitis
+# Baseline serum autoantibody signatures predict recurrence and toxicity in melanoma patients receiving adjuvant immune checkpoint blockade
+ - title summary
 # B cells as biomarkers: predicting immune checkpoint therapy adverse events
  - association between early therapy-induced changes in circulating B cells (decreased B cells, increased plasmablasts and CD21<sup>low</sup>PD-1<sup>+</sup> memory B cells) and an increased risk of high-grade irAEs in patients treated with ICB
 # B cell-specific MHC class II deletion reveals multiple nonredundant roles for B cell antigen presentation in murine lupus
@@ -714,11 +723,16 @@
 # Early changes in the circulating T cells are associated with clinical outcomes after PD-L1 blockade by durvalumab in advanced NSCLC patients
  - previous literature: increases in T cells after PD-L1 blockade
  - patients with higher TCR diversity on day 15 had better responses
+# Early increase of circulating transitional B cells and autoantibodies to joint-related proteins in patients with metastatic melanoma developing checkpoint inhibitor-induced inflammatory arthritis
+ - CD19<sup>+</sup> B cell proportions higher in patients with irAEs
 # Early rise in brain damage markers and high ICOS expression in CD4<sup>+</sup> and CD8<sup>+</sup> T cells during checkpoint inhibitor-induced encephalomyelitis
  - ICOS expression on T cells mirrored severity of encephalomyelitis over course of recovery, also see ICOS expression on T cells of other patients with severe irAEs (moreso than in patients without irAEs)
 # Effective use of latent semantic indexing and computational linguistics in biological and biomedical applications
  - LSI = latent semantic indexing, computational linguistics technique, outperforms Boolean text searches and co-occurrence models at information retrieval, dimensional reduction technique used to compare concepts/topics among collection of terms
  - clustering genes/proteins into GO groups/signaling pathways relies on curation of these groups/pathways, could be supplemented by LSI/LSA (latent semantic analysis)
+# Effect of age on the risk of immune-related adverse events in patients receiving immune checkpoint inhibitors
+ - older adults had higher irAE risk in almost all organs
+ - age-related irAE risk genes: ECM organiztion, JNK regulation, myeloid cell genes
 # Effects of thymic selection of the T cell repertoire on HLA-class I associated control of HIV infection
  - HLA-B57 allele enriched in those with restricted HIV replication without therapy
  - **HLA-B57 restricted T cells are more crossreactive to mutants of target epitopes, this HLA allele also associated with autoimmunity**
@@ -817,6 +831,10 @@
  - endocrine/pneumonitis irAEs more common in younger patients, skin irAEs more common in older patients
  - thyroid irAEs more common in women, neurological, dermal, vascular irAEs more common in men
  - germline variants associated with irAE development: *GABRP*, *DSC2*, *BAZ2B*, *ZPLD1*, *MIR548AB*, *SEMA5A*, *LOC105374704*, *CDH6*, *OSBPL6*, *AGPS*...
+# Germline immunomodulatory expression quantitative trait loci (ieQTLs) associated with immune-related toxicity from checkpoint inhibition
+ - exploration of link between germline genetic variants controlling expression of immunomodulatory genes and irAE risk in melanoma patients treated with CTLA-4 blockade
+ - results: variant allele linked to increased expression of *SYK* associated with increased risk of irAEs, not associated with response to CTLA-4 blockade
+ - SYK involved in T/B cell expansion, pSYK increased in autoimmunity
 # Germline variants associated with toxicity to immune checkpoint blockade
 ## Abstract
  - GWAS of 1,751 patients on ICIs across 12 cancer types
@@ -936,6 +954,8 @@
  - HLA class I and II genes code for cell surface glycoproteins important for antigen presentation and self-recognition by immune cells
  - HLA class I heterodimers consist of α-heavy chain (encoded by *HLA-A/B/C*) and small β-microglobulin
  - HLA class II heterodimers (α and β chains) specified by genes in HLA-D region (*DPA/B1*, *DQA/B1*, *DRB1/A*)
+# HLA-A*03 and response to immune checkpoint blockade in cancer: an epidemiological study
+ - HLA-A*03 associated with reduced survival after ICB, perhaps this allele impairs priming and effector T cell function
 # HLA-dependent variation in SARS-CoV-2 CD8<sup>+</sup> T cell crossreactivity with human coronaviruses
 ## Abstract
  - human coronaviruses (HCoVs) cause common cold
@@ -971,6 +991,9 @@
  - as previously seen
 ### Negative selection against many peptides results in TCR sequences with peptide contact residues enriched in weakly interacting amino acids
  - when there are many peptides in thymus, CDR3s of TCRs enriched in amino acids that interact weakly with other amino acids, strong interactions in the case where there are few peptides in thymus
+# Human leukocyte antigen genotype association with the development of immune-related adverse events in patients with non-small cell lung cancer treated with single agent immunotherapy
+ - **homozygosity at >= 1 HLA-I locus associated with reduced irAE risk, perhaps due to less diverse peptide presentation i.e. less self-peptides presented**
+ - HLA-A3 supertype (incuding various similar HLA-A alleles) associated with increased irAE risk
 # Human T cell development, localization, and function throughout life
 ## Changes in T cells throughout life
  - early life (infancy and early childhood): most T cells are naive, also Tregs, greatest number of new antigens are encountered, naïve T cells play key protective roles in fending off pathogens, Treg cells are critical for developing tolerance to innocuous and ubiquitous antigens, and long-term reserves of memory T cells are established
@@ -1202,6 +1225,9 @@
 # Immunogenicity of somatic mutations in human gastrointestinal cancers
  - tumor-infiltrating leukocytes from 9/10 patients with metastatic gastrointestinal cancers contained CD4<sup>+</sup> and/or CD8<sup>+</sup> T cells recognizing 1-3 neo-epitopes from somatic mutations expressed in their own tumors
  - **takehome: surprisingly few neo-epitopes of cancer recognized by immune system, guessing that cancer has many more than 1-3 neo-epitopes, but perhaps I'm mistaken**
+# Immunogenic variations predict immune-related adverse events for PD-1/PD-L1 inhibitors
+ - *MAPK* and *PTPRC* (*CD45*) variants may predict irAEs
+ - *ARAD1* and *IL6* variants likely predict severe irAEs
 # Immunosensitivity mediated by downregulated AKT1-SKP2 induces anti-PD-1-associated thyroid immune injury
  - although female hormones suspected to cause susceptibility to immune injury, dividing female patients by age (to look at pre/post menopausal females) didn't yield any differences
 # Immunotherapy in oncology and the kidneys: a clinical review of the evaluation and management of kidney immune-related adverse events
@@ -1311,6 +1337,10 @@
  - **TCR footprint: general docking mode of TCR to cognate pMHC, germline bias i.e. TCR recognizes conserved MHC residues**
 # Interesting possibilities to improve the safety and efficacy of ipilimumab (Yervoy)
  - target ICI to tumor with streptavidin-biotin technology (anti-tumor antibody conjugated to streptavidin and biotin-labeled anti-CTLA-4 antibody for example)
+# Intestinal toxicity to CTLA-4 blockade driven by IL-6 and myeloid infiltration
+ - mouse and human
+ - microbiome dysbiosis as driving mechanism for irAEs
+ - immune signature of CTLA-4 blockade-mediated irAEs: colonic neutrophil accumulation, systemic IL-6 release (IL-6 blockade can prevent irAEs perhaps)
 # Intratumoral CD4<sup>+</sup> T cells mediate anti-tumor cytotoxicity in human bladder cancer
 ## Abstract
  - scRNAseq and paired TCRseq of 7 patients, bladder tumor and non-malignant tissue
@@ -1387,6 +1417,8 @@
  - hypothesis: reduce irAEs with hyperthermia to increase numbers of effector lymphocytes
  - irAEs similar to an auto-graft vs. host disease reactions following allogenic bone marrow transplantation
  - perhaps try lower dose of ICIs
+# Lower frequencies of circulating suppressive regulatory T cells and higher frequencies of CD4<sup>+</sup> naive T cells at baseline are associated with severe immune-related adverse events in immune checkpoint inhibitor-treated melanoma
+ - severe irAE patients had higher frequencies of CD4 naive T cells, lower frequencies of CD16<sup>+</sup> NK cells at all time points, lower frequencies of TIGIT<sup>+</sup> Tregs at baseline, higher frequencies of CD38<sup>+</sup> CD4 TCMs and CD39<sup>+</sup> HLA-DR<sup>+</sup> CD8 TCMs at peak irAE time
 # Low TCR binding strength results in increased progenitor-like CD8<sup>+</sup> tumor-infiltrating lymphocytes
  - TILs with low TCR affinity to tumor-associated antigen had progenitor-like phenotypes and increased quiescence, higher affinity TCR TILs had more cell division and faster progression to T-cell exhaustion programs
 # Machine learning analysis of the T cell receptor repertoire identifies sequence features of self-reactivity
@@ -1623,6 +1655,9 @@
  - changing dosages to minimize irAEs while keeping anti-tumor response
 # Overcoming immune checkpoint blockade resistance in solid tumors with intermittent ITK inhibition
  - dampening TCR signaling with ITK inhibitor can confer ICB sensitivity to ICB resistant solid tumors
+# Pan-cancer analysis reveals alternative splicing characteristics associated with immune-related adverse events elicited by checkpoint immunotherapy
+ - expression levels of some splicing factors correlates ok with irAE risk
+ - **doesn't seem to be the case here that alternative splicing (as a source of neoantigens) is increased in irAE patients and irAEs were caused by increased neoantigen load, so their model instead is that splicing's effects on irAE risk instead perhaps due to altered protein function i.e. alternative splice variant has different function that leads to irAEs**
 # Pan-MHC and cross-species prediction of T cell receptor-antigen binding
  - new AI assisted method
 # Patient HLA class I genotype influences cancer response to checkpoint blockade immunotherapy
@@ -1699,6 +1734,9 @@
 # Predictive biomarkers of immune checkpoint inhibitor-based mono- and combination therapies for hepatocellular carcinoma
  - pre-treatment tumoral PD-L1 expression level (higher associated with longer survival)
  - pre-treatment intratumoral CD38<sup>+</sup> proportion (higher associated with longer survival)
+# Preexisting autoantibodies as predictor of immune related adverse events (irAEs) for advanced solid tumors treated with immune checkpoint inhibitors (ICIs)
+ - autoantibody panel: anti-neutrophil cytoplasmic, anti-nuclear, rheumatoid factor, anti-thyroid peroxidase, and anti-thyroglobulin
+ - more frequent severe irAEs in patients with preexisting autoantibodies, irAEs occur earlier in those with preexisting autoantibodies
 # Preserving the CTLA-4 checkpoint for safer and more effective cancer immunotherapy
  - previous literature: irAEs and cancer immunotherapeutic effects (CITE) are distinct and therapeutically separatable, former attributable to CTLA-4 blockade and latter to selective depletion of Tregs in TME, **not sure of evidence for this**
  - here, they argue for safer and more effective CTLA-4-targeting immune therapy via preservation (not inhibition) of CTLA-4 checkpoint while still depleting Tregs in TME
@@ -1827,6 +1865,8 @@
  - TCR is composed of four distinct signal transducing subunits (CD3-γ, -δ, -ε, and ζ) that contain either one (CD3-γ, -δ, -ε) or three (-ζ) signaling motifs (ITAMs) within their intracytoplasmic domains
 # Safety, outcomes and T cell characteristics in patients with relapsed or refractory MDS or CMML treated with atezolizumab in combination with guadecitabine
  - hypothesis: resistance to hypomethylating agents (HMAs) in patients with myelodysplastic syndrome (MDS) and chronic myelomonocytic leukemia (CMML) overcome by combining PD-L1 blockade with HMA
+# Serum cytokines predict efficacy and toxicity, but are not useful for disease monitoring in lung cancer treated with PD-(L)1 inhibitors
+ - baseline levels of IL-1β and angiogenin associated with irAEs
 # Serum immune modulators associated with immune-related toxicities and efficacy of atezolizumab in patients with non-small cell lung cancer
  - high baseline levels of B cell-activating factor (BAFF) associated with irAE development
  - increased ICOS levels during first therapeutic cycle associated with survival
