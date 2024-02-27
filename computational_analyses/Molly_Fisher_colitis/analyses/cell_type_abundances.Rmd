@@ -108,30 +108,60 @@ metadata
 
 ```{r}
 
-cell_type_abundances <- metadata %>%
-  filter(group != "No ICI") %>%
+cd4_cell_type_abundances <- metadata %>%
+  filter(group != "No ICI",
+         predicted.celltype.l1 == "CD4 T") %>%
   group_by(predicted.celltype.l2, group, simplified_patient_id) %>%
   summarize(count = n()) %>%
   ungroup() %>%
   group_by(simplified_patient_id) %>%
   mutate(normalized_count = count / sum(count))
   
-cell_type_abundances
+cd4_cell_type_abundances
 
-cell_type_abundances$group <- factor(cell_type_abundances$group, levels = c("ICI no colitis", "ICI colitis"))
+cd4_cell_type_abundances$group <- factor(cd4_cell_type_abundances$group, levels = c("ICI no colitis", "ICI colitis"))
 
-ggplot(cell_type_abundances, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = group)) +
+ggplot(cd4_cell_type_abundances %>% filter(predicted.celltype.l2 %in% c("Treg", "CD4 TEM")), aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = group)) +
   geom_boxplot() +
-  labs(x = "", fill = "Group", y = "T cell proportion\n(log10)") +
+  labs(x = "", fill = "Group", y = "CD4 T cell\nproportion (log10)") +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
-test_data <- cell_type_abundances %>%
+cd4_cell_type_abundances %>%
   group_by(predicted.celltype.l2) %>%
   summarize(p_val = wilcox.test(normalized_count ~ group)$p.value) %>%
   mutate(padj = p.adjust(p_val, method = "BH")) %>%
-  arrange(padj)
+  arrange(padj) %>%
+  print()
 
-test_data
+# padj
+# Treg: 0.003
+# CD4 TEM: 0.07
+
+cd8_cell_type_abundances <- metadata %>%
+  filter(group != "No ICI",
+         predicted.celltype.l1 == "CD8 T") %>%
+  group_by(predicted.celltype.l2, group, simplified_patient_id) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(simplified_patient_id) %>%
+  mutate(normalized_count = count / sum(count))
+  
+cd8_cell_type_abundances
+
+cd8_cell_type_abundances$group <- factor(cd8_cell_type_abundances$group, levels = c("ICI no colitis", "ICI colitis"))
+
+ggplot(cd8_cell_type_abundances, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = group)) +
+  geom_boxplot() +
+  labs(x = "", fill = "Group", y = "T cell\nproportion (log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+cd8_cell_type_abundances %>%
+  group_by(predicted.celltype.l2) %>%
+  summarize(p_val = wilcox.test(normalized_count ~ group)$p.value) %>%
+  mutate(padj = p.adjust(p_val, method = "BH")) %>%
+  arrange(padj) %>%
+  print()
 
 ```

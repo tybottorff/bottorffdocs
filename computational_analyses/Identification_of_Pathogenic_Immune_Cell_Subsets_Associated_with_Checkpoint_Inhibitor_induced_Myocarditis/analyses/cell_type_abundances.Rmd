@@ -68,20 +68,50 @@ print(chi_square_result)
 
 ```{r}
 
-cell_abundance_df <- feature_df %>%
+cd4_cell_abundance_df <- feature_df %>%
+  filter(predicted.celltype.l1 == "CD4 T",
+         predicted.celltype.l2 != "CD4 CTL") %>%
   group_by(Patient_ID, predicted.celltype.l2, irAE) %>%
   summarize(count = n()) %>%
   ungroup() %>%
   group_by(Patient_ID) %>%
-  mutate(normalized_count = count / sum(count)) %>%
-  # filter for just subtypes of interest
-  filter(predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Proliferating", "CD8 Trm", "CD4 Trm", "CD4 TEM", "CD4 TCM", "CD8 TEM", "CD8 TCM", "CD4 Naive", "CD8 Naive"))
+  mutate(normalized_count = count / sum(count))
 
-cell_abundance_df
+cd4_cell_abundance_df
 
-ggplot(cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = irAE)) +
+cd4_cell_abundance_df %>%
+  group_by(predicted.celltype.l2) %>%
+  summarize(p_val = wilcox.test(normalized_count ~ irAE)$p.value) %>%
+  mutate(adj_p_val = p.adjust(p_val, method = "BH")) %>%
+  arrange(adj_p_val) %>%
+  print()
+
+ggplot(cd4_cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = irAE)) +
   geom_boxplot() +
-  labs(x = "", fill = "irAE", y = "T cell proportion\n(log10)") +
+  labs(x = "", fill = "irAE", y = "CD4 T cell\nproportion (log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+cd8_cell_abundance_df <- feature_df %>%
+  filter(predicted.celltype.l1 == "CD8 T") %>%
+  group_by(Patient_ID, predicted.celltype.l2, irAE) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(Patient_ID) %>%
+  mutate(normalized_count = count / sum(count))
+
+cd8_cell_abundance_df
+
+cd8_cell_abundance_df %>%
+  group_by(predicted.celltype.l2) %>%
+  summarize(p_val = wilcox.test(normalized_count ~ irAE)$p.value) %>%
+  mutate(adj_p_val = p.adjust(p_val, method = "BH")) %>%
+  arrange(adj_p_val) %>%
+  print()
+
+ggplot(cd8_cell_abundance_df, aes(x = predicted.celltype.l2, y = log10(normalized_count), fill = irAE)) +
+  geom_boxplot() +
+  labs(x = "", fill = "irAE", y = "CD4 T cell\nproportion (log10)") +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
