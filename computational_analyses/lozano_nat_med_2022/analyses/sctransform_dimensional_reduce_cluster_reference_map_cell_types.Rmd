@@ -191,7 +191,7 @@ immune.combined <- MapQuery(
 
 ```
 
-# Plot mapping results
+# Plot mapping results and save rds of T cells
 
 ```{r}
 
@@ -201,56 +201,15 @@ p2 = DimPlot(immune.combined, reduction = "umap", group.by = "predicted.celltype
 
 p1 + p2
 
+just_T_cells <- immune.combined[, immune.combined@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & immune.combined@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
+
+saveRDS(just_T_cells, "../saved_data/first_pass_reference_mapped.rds")
+
 ```
 
 # Re-look at just T cells
 
-```{r}
-
-just_T_cells <- immune.combined[, immune.combined@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & immune.combined@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
-
-just_T_cells <- RunPCA(just_T_cells, npcs = 30, verbose = FALSE)
-just_T_cells <- RunUMAP(just_T_cells, reduction = "pca", dims = 1:30)
-just_T_cells <- FindNeighbors(just_T_cells, reduction = "pca", dims = 1:30)
-just_T_cells <- FindClusters(just_T_cells, resolution = 3)
-anchors <- FindTransferAnchors(
-  reference = reference,
-  query = just_T_cells,
-  normalization.method = "SCT",
-  reference.reduction = "pca",
-  dims = 1:50,
-  recompute.residuals = FALSE
-)
-just_T_cells <- MapQuery(
-  anchorset = anchors,
-  query = just_T_cells,
-  reference = reference,
-  refdata = list(
-    celltype.l1 = "celltype.l1",
-    celltype.l2 = "celltype.l2",
-    predicted_ADT = "ADT"
-  ),
-  reference.reduction = "pca", 
-  reduction.model = "wnn.umap"
-)
-
-p1 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l1", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
-
-p2 = DimPlot(just_T_cells, reduction = "umap", group.by = "predicted.celltype.l2", label = TRUE, label.size = 3 , repel = TRUE) + NoLegend()
-
-p1 + p2
-
-```
-
-# Look at just T cells
-
-```{r}
-
-just_T_cells <- just_T_cells[, just_T_cells@meta.data$predicted.celltype.l1 %in% c("CD4 T", "CD8 T", "other T") & just_T_cells@meta.data$predicted.celltype.l2 %in% c("CD8 TEM", "CD4 TEM", "CD8 TCM", "CD4 TCM", "Treg", "CD4 Naive", "CD8 Naive",  "dnT", "CD4 Proliferating", "CD8 Proliferating", "MAIT", "CD4 CTL", "CD8 CTL")]
-
-```
-
-# Iterate through more T cell filtering
+ - this doesn't work currently I think due to having subsetted and using Seurat v5
 
 ```{r}
 
