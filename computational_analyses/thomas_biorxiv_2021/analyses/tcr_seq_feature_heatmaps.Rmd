@@ -177,12 +177,21 @@ write.csv(seq_depth, "../saved_data/seq_depth.csv")
 
 ```{r}
 
-desired_rows_per_patient <- 8
+filtered_seq_depth <- seq_depth %>%
+  # instead of downsampling to minimum group size throw out smallest groups
+  filter(seq_depth > 643)
+
+filtered_seq_depth
+
+desired_rows_per_patient <- 600/2
+# ~/2 to get equal numbers of each Chain (TRA and TRB)
 
 set.seed(4562)
 
+# Downsample the dataframe
 downsampled_df <- combined_data %>%
-  group_by(orig.ident, Chain) %>%
+  filter(patient_id %in% filtered_seq_depth$patient_id & orig.ident %in% filtered_seq_depth$orig.ident) %>%
+  group_by(patient_id, Chain) %>%
   sample_n(desired_rows_per_patient, replace = FALSE) %>%
   ungroup()
 
@@ -197,7 +206,7 @@ write.csv(downsampled_df, "../saved_data/downsampled_df.csv")
 ```{r}
 
 expansion_df <- combined_data %>%
-  pivot_wider(id_cols = c(barcode, patient_id, group, predicted.celltype.l1, predicted.celltype.l2), names_from = "Chain", values_from = c("v_gene", "j_gene", "c_gene", "cdr3", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
+  pivot_wider(id_cols = c(barcode, patient_id, orig.ident, group, predicted.celltype.l1, predicted.celltype.l2), names_from = "Chain", values_from = c("v_gene", "j_gene", "c_gene", "cdr3", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
   filter(!(is.na(v_gene_TRA)),
          !(is.na(j_gene_TRA)),
          !(is.na(cdr3_TRA)),
@@ -228,7 +237,7 @@ write.csv(expansion_df, "../saved_data/pre_feature_heatmap_data.csv")
 prepped_data <- expansion_df %>%
   filter(group != "no ICI") %>%
   # normalize by sequencing depth
-  left_join(seq_depth, by = c("patient_id", "group")) %>%
+  left_join(seq_depth, by = c("patient_id", "group", "orig.ident")) %>%
   mutate(normalized_count = count / seq_depth) %>%
   ## look at just unique clonotypes from each patient
   group_by(patient_id, clonotype, Chain) %>%
