@@ -128,6 +128,8 @@ combined_data <- combined_data %>%
   # remove duplicate rows based on the "Barcode" column
   distinct(Barcode, .keep_all = TRUE)
 
+barcoded_combined_data <- combined_data
+
 # Set row names based on the "Barcode" column
 rownames(combined_data) <- combined_data$Barcode
 
@@ -223,39 +225,35 @@ write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", ro
 
 # Read in IGoR output
 
+
 ```{r}
+
+barcoded_combined_data <- barcoded_combined_data %>%
+  rename(barcode = Barcode)
 
 igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
   rename(barcode = TCR_name) %>%
-  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
-  mutate(patient_group = case_when(
-    startsWith(Patient_ID, "A") ~ "ici_no_irae",
-    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
-    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
-  mutate(irAE = case_when(
-    startsWith(Patient_ID, "A") ~ "No",
-    startsWith(Patient_ID, "B") ~ "Yes",
-    startsWith(Patient_ID, "M") ~ "Yes")) %>%
-  select(patient_group, irAE, chain, pgen, barcode, cdr3) %>%
-  filter(chain == "TRA",
+  left_join(barcoded_combined_data, by = "barcode") %>%
+  select(barcode, patient.ID, v_gene_TRA, v_gene_TRB, j_gene_TRA, j_gene_TRB, c_gene_TRA, c_gene_TRB, cdr3_TRA, cdr3_TRB, pgen) %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$") %>%
+  filter(Chain == "TRA",
          pgen != "NaN")
 
 igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
   rename(barcode = TCR_name) %>%
-  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
-  mutate(patient_group = case_when(
-    startsWith(Patient_ID, "A") ~ "ici_no_irae",
-    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
-    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
-  mutate(irAE = case_when(
-    startsWith(Patient_ID, "A") ~ "No",
-    startsWith(Patient_ID, "B") ~ "Yes",
-    startsWith(Patient_ID, "M") ~ "Yes")) %>%
-  select(Patient_ID, patient_group, irAE, chain, pgen, barcode, cdr3) %>%
-  filter(chain == "TRB",
+  left_join(barcoded_combined_data, by = "barcode") %>%
+  select(barcode, patient.ID, v_gene_TRA, v_gene_TRB, j_gene_TRA, j_gene_TRB, c_gene_TRA, c_gene_TRB, cdr3_TRA, cdr3_TRB, pgen) %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$") %>%
+  filter(Chain == "TRB",
          pgen != "NaN") %>%
-  full_join(igor_alpha, by = c("barcode", "chain", "patient_group", "pgen", "cdr3", "irAE"))
+  full_join(igor_alpha, by = c("barcode", "patient.ID", "v_gene", "j_gene", "c_gene", "Chain", "pgen", "cdr3"))
 
 igor_combined
+
+write.csv(igor_combined, "../saved_data/tcr_metadata_with_pgen.csv")
 
 ```
