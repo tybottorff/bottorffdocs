@@ -2,14 +2,21 @@
 ## Data shortlist
 ### Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis
  - mined
+### PD-1 prevents pathogenicity of effector CD8 T cells that infiltrate skin under homeostatic conditions
+ - GEO: GSE229279
+ - TCR and RNA though for skin biopsies...
+ - low n is the issue (n ~= 2 for HC, n ~= 3 for irAE? low whatever numbers are)
 ### Insight into immune profile associated with vitiligo onset and anti-tumoral response in melanoma patients receiving anti-PD-1 immunotherapy
- - no RNA data but there is flow data for cell typing?
+ - flow data but not done on same samples as used for TCRseq
  - GEO: GSE229557
+### Immune profile associated to vitiligo onset in melanoma patients undergoing treatment with checkpoint inhibitors gives insight into the raising of the adverse event and of the effective anti-tumor response
+ - don't think there's cell typing, only TCRseq
 ### Urinary T cells are detected in patients with immune checkpoint inhibitor-associated immune nephritis that are clonotypically identical to kidney T cell infiltrates
  - TCR + flow, can't find data though...
 ### Interleukin 21 drives CXCR6+ CD8+ T cell mediators in Autoimmune Checkpoint Inhibitor Thyroiditis
- - no healthy control T cell data
+ - no healthy control T cell data, could only compare between autoimmune and irAE thyroiditis
 ### Distinct molecular and immune hallmarks of inflammatory arthritis induced by immune checkpoint inhibitors for cancer therapy
+ - only irAE data no HC?
  - can't find TCRseq data, emailed for help 11.30.23 (Nurieva) & 12.14.23 (Wang)
 ### Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
  - only 3 patients
@@ -24,10 +31,6 @@
 ### Dynamic single-cell mapping unveils Epstein‒Barr virus-imprinted T-cell exhaustion and on-treatment response
  - can't find their data accessibility statement & no irAE data (emailed for both 10.23.23 and 11.30.23)
 ### https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE220313
- - not published yet
-
-# Briefly reproduce their findings
- - UMAP of cell (sub)types
 
 # Mine their data for...
 ## Does ICB induce expansion of T cells?
