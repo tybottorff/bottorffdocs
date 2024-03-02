@@ -467,6 +467,8 @@
 # Consensus disease definitions for neurologic immune-related adverse events of immune checkpoint inhibitors
  - neurologic irAE indicence rate: 1-12%
  - CNS (meningitis, encephalitis, demyelinating syndrome, vasculitis) and PNS (neuropathy, NMJ disorders, myopathy)
+# Contribution of the skin-gut axis to immune-related adverse events with multi-system involvement
+ - skin irAEs may predict other irAEs
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - co-expression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -889,6 +891,12 @@
  - other methods generally fall into cell-based normalization (estimate cell-specific global size factor to normalize all genes in same cell, pool cells to estimate more robust size factors then deconvolve pooled size factors to get cell-specific size factors) and gene-based normalization (parametric modeling of individual genes, **like Pearson residuals method SCTransform**, perform adjustments individually for each group of genes with different sequencing depths or different ranges of abundance levels)
 ## Feature selection and dimension reduction
  - identify few latent variables that explain the most variance in data
+# Gut microbiota diversity and composition in predicting immunotherapy response and immunotherapy-related colitis in melanoma patients: a systematic review
+ - Firmicutes phylum associated with good response to ICB and irAE colitis, Bacteroidales family associated with poor response to ICB, *Bacteroidetes* enrichment associated with irAE colitis resistance
+ - higher gut microbiota diversity associated with more favorable response to ICB
+# Gut microbiota signatures are associaed with toxicity to combined CTLA-4 and PD-1 blockade
+ - **severe irAE associated with more diverse baseline peripheral T cell repertoire, also more expanded clones (pre to on-treatment expanded) in severe irAE group**
+ - upregulation of mucosal IL-1β in colitis samples, more abudant *Bacteroides intestinalis* as well
 # Facts and hopes for prediction, diagnosis, and treatment of immune-related adverse events
  - factors associated with irAEs: pre-existing autoimmune disease, sex, BMI, response to ICI, circulating cytokines and immune cells, genetic variants, microbiome
 # FDA approves anti-CD3 antibody to delay type 1 diabetes onset
@@ -1112,6 +1120,8 @@
 # Immune dysfunction revealed by digital spatial profiling of immuno-oncology markers in progressive states of renal cell carcinoma and in brain metastases
  - lower immune checkpoint inhibitor (TIM-3, CTLA-4), cytolytic (GZMA, GZMB), and T cell activation (CD25) protein expression in metastases compared with primary tumors
  - metastases macrophages less M1-like, inflammatory markers (HLA-DR, CD127)
+# Immune-related adverse events after immune checkpoint blockade-based therapy are associated with improved survival in advanced sarcomas
+ - gene expression analyzes of baseline tumor samples: patients with iraEs had more tumor-infiltrating DCs, CD8 Ts, and Tregs, upregulation of immune/inflammatory pathways, so association between immune "hotness" of tumor and irAEs, **I wonder why TIL abundances would be related to irAEs, perhaps TIL abundances correlate with general PBMC/irAE-infiltrating lymphocyte abundances, or they say rather that irAE development is linked to pre-existing immune response (to tumor)**
 # Immune-related adverse events and survival among patients with metastatic NSCLC treated with immune checkpoint inhibitors
  - irAE development associated with improved anti-tumor response
 # Immune-Related Adverse Events and Their Association With the Effectiveness of PD-1/PD-L1 Inhibitors in Non-Small Cell Lung Cancer: A Real-World Study From China
@@ -1246,9 +1256,9 @@
  - results not really cleanly supporting either model
  - **diverse repertoires are important in limiting the magnitude of immune escape but may also promote self-reactive clones and induce host inflammation**
 # Improvement of PD-1 blockade efficacy and elimination of immune-related gastrointestinal adverse effect by mTOR inhibitor
- - ICB induces colitis in melanoma patients, promotes infiltration of CD8<sup>+</sup> effector T cells into colitic lesions
+ - ICB induces colitis in some melanoma patients, promotes infiltration of CD8<sup>+</sup> effector T cells into colitic lesions
  - see PI3K-AKT-mTOR pathway activated in CD8<sup>+</sup> effector T cells of colitic lesions
- - CD8<sup>+</sup> T cells may already be present in healthy tissues, perhaps why some tissues get more irAEs (more tissue resident immune cells in skin and colon?)
+ - CD8<sup>+</sup> T cells may already be present in healthy tissues, **perhaps why some tissues get more irAEs (more tissue resident immune cells in skin and colon?)**
  - alternative hypothesis: shared antigens between tumor and self, tumor infiltrating T cells leak into bloodstream and target self-antigens
 # Improving CAR-T immunotherapy: overcoming the challenges of T cell exhaustion
  - **CAR (chimeric antigen receptor) allows modified T cells to mount antigen-specific immune response to cells bearing CAR target antigen independently of MHC**
@@ -1318,11 +1328,20 @@
 # Integrated single-cell profiling dissects cell-state-specific enhancer landscapes of human tumor-infiltrating CD8<sup>+</sup> T cells
  - common chromatin trajectory underlies TIL dysfunction
  - molecular continuum from pre-T<sub>EX</sub> to terminally exhausted T cells (continuous increase in *CXCL13*, *TOX1/2*, inhibitory receptor activity)
+# Integrative analysis of gut microbiome and host transcriptomes reveals associations between treatment outcomes and immunotherapy-induced colitis
+ - DNA repair and cell cycle genes enriched in responders, innate immune response, NFAT, IFN‐γ signaling enriched in non-responders
+ - association between GI irAE and ICI response
+ - ICB response and GI irAE associated with *Enterobacteriaceae taxa*, tRNA metabolism, RNP complex biogenesis pathways in colon
 # Integrative analysis of risk factors for immune-related adverse events of checkpoint blockade therapy in cancer
  - allelic variation of *HLA-B* correlated with irAE risk
 # Interferon-gamma-producing CD8<sup>+</sup> tissue resident memory T cells are a targetable hallmark of immune checkpoint inhibitor-colitis
  - **CD8 Trms dominant activated T cell subset in ICI colitis, activation correlates with ICI colitis severity**
  - **activated CD8 Trms express high levels of checkpoint inhibitor, interferon-gamma transcripts**
+# Interleukin-6 blockade abrogates immunotherapy toxicity and promotes tumor immunity
+ - IL-6 expression, neutrophil and chemotactic markers higher in colitis than normal intestinal tissue
+ - Th17 cells more prevalent than Th1 cells in irAE enterocolitis tissue
+ - CTLA-4 blockade induced stronger Th17 memory in colitis than PD-1 blockade, tracks with CTLA-4 having more/worse irAEs
+ - neutrophil recruitment via chemokines from Th17 cells associated with autoimmune diseases, so that tracks with irAE colitis here
 # Interpreting T cell crossreactivity through structure: implications for TCR-based cancer immunotherapy
 ## Abstract
  - melanoma-specific T cells crossreacting with healthy heart/nervous tissue, crossreactivity
@@ -1340,7 +1359,8 @@
 # Intestinal toxicity to CTLA-4 blockade driven by IL-6 and myeloid infiltration
  - mouse and human
  - microbiome dysbiosis as driving mechanism for irAEs
- - immune signature of CTLA-4 blockade-mediated irAEs: colonic neutrophil accumulation, systemic IL-6 release (IL-6 blockade can prevent irAEs perhaps)
+ - immune signature of CTLA-4 blockade-mediated irAEs: colonic neutrophil accumulation, systemic IL-6 release (IL-6 blockade can prevent irAEs perhaps), **this IL-6 being associated with (gut) irAEs I've read about elsewhere so it seems solid**
+ - also see more Tregs in colitis
 # Intratumoral CD4<sup>+</sup> T cells mediate anti-tumor cytotoxicity in human bladder cancer
 ## Abstract
  - scRNAseq and paired TCRseq of 7 patients, bladder tumor and non-malignant tissue
@@ -1399,7 +1419,8 @@
  - see lymph nodes enriched for naive and TCF1 CD8 T cells, adjacent normal regions enriched for effector CD8 T cells
  - exhausted CD8<sup>+</sup> T cell clusters enriched in tumor regions
  - enriched naive, Treg, and follicular helper CD4<sup>+</sup> T cells in lymph nodes, effector CD4 T cells enriched n adjacent normal regions, CD4 Tregs and follicular helper T cells enriched in tumor
-### Transcriptional signatures of progressive CD8<sup>+</sup> T cell exhaustion across organs
+# Lipidomics reveals immune-related adverse events in NSCLC patients receiving immune checkpoint inhibitor
+ - not sure of significance of some lipid metabolites predicting irAE..., **perhaps relation is via signal transduction/membrane remodeling**
 # Liver mediated adaptive immune tolerance
  - liver is immunologically tolerant, equipped to limit hypersensitivity to food-derived antigens, bacterial products, can easily accept allografts
  - persistent infection of liver with pathogen usually results in tolerance
@@ -1865,6 +1886,9 @@
  - TCR is composed of four distinct signal transducing subunits (CD3-γ, -δ, -ε, and ζ) that contain either one (CD3-γ, -δ, -ε) or three (-ζ) signaling motifs (ITAMs) within their intracytoplasmic domains
 # Safety, outcomes and T cell characteristics in patients with relapsed or refractory MDS or CMML treated with atezolizumab in combination with guadecitabine
  - hypothesis: resistance to hypomethylating agents (HMAs) in patients with myelodysplastic syndrome (MDS) and chronic myelomonocytic leukemia (CMML) overcome by combining PD-L1 blockade with HMA
+# scRNAseq defines dynamic T cell subsets in longitudinal colon and peripheral blood samples in immune checkpoint inhibitor-induced colitis
+ - n = 1 but has PBMC and colon scRNA/TCR data...
+ - colon Trm, also circulating T cells, driving inflammation in colon
 # Serum cytokines predict efficacy and toxicity, but are not useful for disease monitoring in lung cancer treated with PD-(L)1 inhibitors
  - baseline levels of IL-1β and angiogenin associated with irAEs
 # Serum immune modulators associated with immune-related toxicities and efficacy of atezolizumab in patients with non-small cell lung cancer
@@ -1873,6 +1897,8 @@
 # Sharing of T cell receptors in antigen-specific responses is driven by convergent recombination
  - convergent recombination, rather than recombination bias or selection, drives publicity
  - potential causes of publicity: self tolerance restricts capacity of TCRs to recognize some epitopes, different conformations of peptides in MHC groove (flat or prominent), degenerate binders
+# Significance of the autoantibody assay in predicting the development of immune-related adverse events in patients receiving atezolizumab plus bevacizumab combination therapy for unresectable hepatocellular carcinoma
+ - irAE patients more likely to have autoantibody and to have complete ICB-response
 # Simultaneous epitope and transcriptome measurement in single cells
  - cellular indexing of transcriptomes and epitopes by sequencing (CITE-seq), oligonucleotide-labeled antibodies are used to integrate cellular protein and transcriptome measurements into a single cell readout
  - DNA oligonucleotide conjugated to antibody can be measured by sequencing as digital readout of protein abundance
