@@ -200,7 +200,7 @@ write.csv(downsampled_df, "../saved_data/downsampled_df.csv")
 ```{r}
 
 combined_data <- combined_data %>%
-  pivot_wider(id_cols = c(barcode, patient, group, predicted.celltype.l1, predicted.celltype.l2), names_from = "Chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
+  pivot_wider(id_cols = c(barcode, patient, group, predicted.celltype.l1, predicted.celltype.l2, seurat_clusters), names_from = "Chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt", "pgen", "cdr3_length", "cdr3_hydrophobicity")) %>%
   filter(!(is.na(v_gene_TRA)),
          !(is.na(j_gene_TRA)),
          !(is.na(cdr3_TRA)),
@@ -232,7 +232,7 @@ prepped_data <- combined_data %>%
   # normalize by sequencing depth
   left_join(seq_depth, by = c("patient", "group")) %>%
   mutate(normalized_count = count / seq_depth) %>%
-  ## look at just unique clonotypes from each patient
+  # look at just unique clonotypes from each patient
   group_by(patient, clonotype, Chain) %>%
   dplyr::slice(1) %>%
   ungroup() %>%
@@ -780,8 +780,8 @@ ggplot(cd8_trm_tra, aes(x = as.factor(new_chunk), y = pgen, fill = group)) +
 ```{r}
 
 converged_tcrs <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
-  left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "group", "cdr3_nt", "c_gene", "patient")) %>%
-  ## look at just unique clonotypes from each patient
+  left_join(combined_data, by = c("barcode", "Chain", "cdr3", "v_gene", "d_gene", "j_gene", "predicted.celltype.l1", "predicted.celltype.l2", "group", "c_gene", "patient")) %>%
+  # look at just unique clonotypes from each patient
   group_by(patient, clonotype, Chain) %>%
   dplyr::slice(1) %>%
   ungroup() %>%
@@ -1002,5 +1002,51 @@ plot <- ggplot(prepped_data, aes(x = as.factor(chunk), y = log10(pgen))) +
 plot
 
 ggsave(plot, file = "../figures/expansion_vs_pgen.svg", height = 10)
+
+```
+
+# Test for TCR feature differences within each Seurat cluster
+
+```{r}
+
+cluster_feature_analysis <- combined_data %>%
+  # look at just unique clonotypes from each patient
+  group_by(patient, clonotype, Chain) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
+  filter(group != "no ICI") %>%
+  group_by(seurat_clusters) %>%
+  summarize(
+    p_val_pgen = {
+      if(length(unique(group)) != 2 | any(table(group) == 1)) {
+        NA
+      } else {
+        wilcox.test(pgen ~ group, exact = FALSE)$p.value
+      }
+    },
+    p_val_cdr3_hydrophobicity = {
+      if(length(unique(group)) != 2 | any(table(group) == 1)) {
+        NA
+      } else {
+        wilcox.test(cdr3_hydrophobicity ~ group, exact = FALSE)$p.value
+      }
+    },
+    p_val_cdr3_length = {
+      if(length(unique(group)) != 2 | any(table(group) == 1)) {
+        NA
+      } else {
+        wilcox.test(cdr3_length ~ group, exact = FALSE)$p.value
+      }
+    }
+  ) %>%
+  pivot_longer(cols = matches("^(p_val)")) %>%
+  mutate(value = p.adjust(value, method = "BH")) %>%
+  #filter(value < 0.05) %>%
+  arrange(seurat_clusters) %>%
+  rename(padj = value,
+         feature = name) %>%
+  mutate(feature = gsub("p_val_", "", feature))
+
+cluster_feature_analysis
 
 ```
