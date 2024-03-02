@@ -2,6 +2,11 @@
 ## Data shortlist
 ### Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis
  - mined
+### Gut microbiota signatures are associated with toxicity to combined CTLA-4 and PD-1 blockade
+ - only TCR no cell typing, but does have pre- and post-ICB TCRseq and they did see diversity differences by irAE group
+### ScRNA-seq defines dynamic T-cell subsets in longitudinal colon and peripheral blood samples in immune checkpoint inhibitor-induced colitis
+ - n = 1 but pre/post ICB scRNA/TCR
+ - also can't find raw data (emailed for it on 3.1.24)
 ### PD-1 prevents pathogenicity of effector CD8 T cells that infiltrate skin under homeostatic conditions
  - GEO: GSE229279
  - TCR and RNA though for skin biopsies...
