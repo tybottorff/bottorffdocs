@@ -287,6 +287,17 @@
  - exhaustion is now recognized to have a dynamic progression from a long-lived "pre-exhausted stem-like progenitor" (more responsive likely to re-invigoration by ICB) to a "terminally exhausted" state
  - **CD28 is a prerequisite for optimal T cell re-invigoration following PD1 blockade, CD28 primary target downstream of PD1-mediated inhibitory signaling**
  - **main finding: signatures of heterogeneous tumor infiltrating TRM and “pre-exhausted” long-lived effector-memory CD8<sup>+</sup> T cells were associated with better ICB response only in the presence of CD28**
+# CD4<sup>+</sup> T cell activation distinguishes response to anti-PD-L1<sup>+</sup> anti-CTLA-4 therapy from anti-PD-L1 monotherapy
+## Highlights and summary
+ - adding CTLA-4 blockade to PD-L1 blockade promotes CD4 T expansion
+ - pre-existing T1 immunity predicts expansion upon combination ICB
+ - head and neck squamous cell carcinoma patients
+ - single cell profiling of on- versus pre-treatment samples
+ - PD-L1 blockade triggers CD8 T expansion, combination ICB triggers expansion of CD4s (Th1 phenotype) and CD8s
+ - CTLA-4 blockade, not PD-L1 blockade, induces trafficking of CD4 naive/CM from tumor-draining lymph nodes via blood to tumor
+## Discussion
+ - intratumoral T cell expansion correlates with tumor shrinkage after 1 cycle of ICB (surrogate for early response to ICB)
+ - **perhaps since CTLA-4 blockade is associated with more irAEs, it's the CD4 T expansion that's important for irAEs**
 # CD4<sup>+</sup> T cells are essential for the development of destructive thyroiditis induced by anti-PD-1 antibody in thyroglobulin-immunized mice
 ## Abstract
  - PD-1 blockade in thyroglobulin-immunized mice induces destructive thyroiditis, prevented by previous depletion of CD4<sup>+</sup> T cells and partially prevented by previous depletion of CD8<sup>+</sup> T cells
@@ -333,6 +344,8 @@
  - CDR3 length distributions do not correlate with genetic variability of the CDR3 region; the most constrained CDR3 length distributions are those of the α and β chains, yet they are highly variable genetically
 # CDR3 sequences in IgA nephropathy are shorter and exhibit reduced diversity
  - B cells
+# Cellular alterations in immune checkpoint inhibitor therapy-related cardiac dysfunction
+ - perhaps underlying conditions aggrevated from ICB to induce cardiac irAE
 # Changes of peripheral T cell subsets in melanoma patients with immune-related adverse events
 ## T cell changes in patients with severe irAEs receiving anti-PD-1 monotherapy
  - no clear differences
