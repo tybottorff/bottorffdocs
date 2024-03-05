@@ -182,7 +182,7 @@ dice_mapping <- as_tibble(pred.dice)
 dice_mapping$barcode <- rownames(pred.dice)
 
 dice_mapping <- dice_mapping %>%
-  dplyr::select(barcode, labels) %>%
+  #dplyr::select(barcode, labels) %>%
   dplyr::rename(dice_singler_label = labels) %>%
   mutate(dice_singler_label = case_when(
     dice_singler_label == "T cells, CD4+, naive" ~ "CD4 Naive",
@@ -191,6 +191,24 @@ dice_mapping <- dice_mapping %>%
   ))
   
 dice_mapping
+
+```
+
+# Inspect scores for dice mapping
+
+```{r}
+
+plotScoreHeatmap(pred.dice)
+
+plotDeltaDistribution(pred.dice)
+
+```
+
+# Export dice mapping results (contains Th subsets)
+
+```{r}
+
+write.csv(dice_mapping, "../saved_data/singler_dice_ref_cell_typing.csv")
 
 ```
 
