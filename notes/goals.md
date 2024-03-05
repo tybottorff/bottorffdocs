@@ -6,7 +6,8 @@
  - only TCR no cell typing, but does have pre- and post-ICB TCRseq and they did see diversity differences by irAE group
 ### ScRNA-seq defines dynamic T-cell subsets in longitudinal colon and peripheral blood samples in immune checkpoint inhibitor-induced colitis
  - n = 1 but pre/post ICB scRNA/TCR
- - also can't find raw data (emailed for it on 3.1.24)
+ - data link: https://yale.box.com/s/jouprcgfyjhd3godf920bawhltwicqay
+ - email info: "...one patient with 3 colon tissue samples and 4 blood samples (a 5th blood was excluded from our analysis due to quality issues). The files also include a second patient with milder colitis who only had blood sequenced (not published). Details are in an excel file in Box. Note that the blood samples for the 2 patients were pooled prior to sequencing and the data were then disentangled based on genotype using Vireo. You’ll want to use the data in the “Vireo Results” folder as these are annotated by patient"
 ### PD-1 prevents pathogenicity of effector CD8 T cells that infiltrate skin under homeostatic conditions
  - GEO: GSE229279
  - TCR and RNA though for skin biopsies...
