@@ -1,0 +1,151 @@
+---
+title: "Thomas bioRxiv"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+library(vegan)
+library(scales)
+library(SeuratData)
+library(SeuratDisk)
+library(SingleR)
+library(SingleCellExperiment)
+library(EnsDb.Hsapiens.v86)
+library(celldex)
+library(networkD3)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+rna <- readRDS("../saved_data/T_cells.rds")
+
+rna
+
+```
+# Read in SingleR (dice reference) cell type mappings
+
+```{r}
+
+dice_mapping <- read.csv("../saved_data/singler_dice_ref_cell_typing.csv")
+
+```
+
+# Combine dice mappings with metadata
+
+```{r}
+
+no_colitis_ids <- read.csv("../saved_data/metadata.csv") %>%
+  dplyr::filter(group == "ICI no colitis")
+
+colitis_ids <- read.csv("../saved_data/metadata.csv") %>%
+  dplyr::filter(group == "ICI colitis")
+
+metadata <- rna@meta.data
+
+metadata$barcode <- rownames(metadata)
+
+combined_data <- metadata %>%
+  mutate(predicted.celltype.l2 = if_else(seurat_clusters %in% c(0, 1, 3, 4, 7, 8, 14, 18, 21, 23, 28) & predicted.celltype.l1 == "CD4 T", "CD4 Trm", if_else(seurat_clusters %in% c(0, 1, 3, 4, 7, 8, 14, 18, 21, 23, 28) & predicted.celltype.l1 == "CD8 T", "CD8 Trm", predicted.celltype.l2))) %>%
+  left_join(dice_mapping, by = "barcode") %>%
+  dplyr::select(barcode, orig.ident, predicted.celltype.l1, predicted.celltype.l1.score, predicted.celltype.l2, predicted.celltype.l2.score, dice_singler_label) %>%
+  # filter for cells where Seurat and SingleR at least kind of agree (i.e. I'm interested in Th17 so filter for CD4s)
+  dplyr::filter(predicted.celltype.l1 == "CD4 T" & predicted.celltype.l2 %in% c("CD4 TCM", "CD4 TEM", "Treg", "CD4 Trm", "CD4 Naive", "CD4 Proliferating", "CD4 CTL") & dice_singler_label %in% c("T cells, CD4+, Th17", "T cells, CD4+, Th1_17", "T cells, CD4+, Th2", "T cells, CD4+, Th1", "T cells, CD4+, memory TREG", "T cells, CD4+, naive TREG", "T cells, CD4+, TFH", "T cells, CD4+, naive, stimulated", "CD4 Naive")) %>%
+  mutate(patient_id = str_extract(orig.ident, "SIC_\\d+")) %>%
+  mutate(group = if_else(patient_id %in% no_colitis_ids$patient_id, "ICI no colitis", if_else(patient_id %in% colitis_ids$patient_id, "ICI colitis", NA))) %>%
+  # get rid of some healthy control data
+  dplyr::filter(!(is.na(group)))
+
+combined_data
+
+```
+
+# Check marker expression for Th1/17 cells
+
+```{r}
+
+# Th17: Th17: CCR4/6, CD3/4, CD8-, CD14-, CD19-, IL-1 RI, IL-6 R alpha, IL-21/23 R, TGF-beta RII, Batf, IRF4, ROR alpha, ROR gamma t/RORC2, STAT3, CCL20/MIP-3 alpha, IL-17A/F, IL-21/22/26
+# Th1: CCR1/5, CD3/4, CD8-, CD14-, CD19-, CXCR3, IFN-gamma R1/CD119, IFN-gamma R2, IL-12 R beta 2, IL-18 R alpha, IL-27 R alpha, STAT1/4, T-bet, IFN-gamma, IL-2, TNF-alpha/beta
+
+```
+
+# See if there are more Th17 cells in irAE patients
+
+```{r}
+
+cd4_abundances <- combined_data %>%
+  group_by(patient_id, group, dice_singler_label) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id) %>%
+  mutate(normalized_count = count / sum(count)) %>%
+  ungroup()
+
+cd4_abundances
+
+cd4_abundances$group <- factor(cd4_abundances$group, levels = c("no ICI", "ICI no colitis", "ICI colitis"))
+
+ggplot(cd4_abundances, aes(x = dice_singler_label, y = log10(normalized_count), fill = group)) +
+  geom_boxplot() +
+  labs(x = "", fill = "group", y = "CD4 T cell\nproportion (log10)") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.5)), breaks = pretty_breaks(n = 3)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+cd4_abundances %>%
+  group_by(dice_singler_label) %>%
+  summarize(p_val = wilcox.test(normalized_count ~ group)$p.value) %>%
+  mutate(adj_p_val = p.adjust(p_val, method = "BH")) %>%
+  arrange(adj_p_val) %>%
+  print()
+
+# padj
+# memory Treg: 0.03
+
+```
+
+# Compare SingleR and Seurat Treg labels
+
+```{r}
+
+combined_data %>%
+  dplyr::filter(dice_singler_label %in% c("T cells, CD4+, memory TREG")) %>%
+  group_by(predicted.celltype.l2, dice_singler_label) %>%
+  summarize(count = n(),
+            avg_score = mean(predicted.celltype.l2.score)) %>%
+  arrange(-count) %>%
+  ungroup()
+
+```

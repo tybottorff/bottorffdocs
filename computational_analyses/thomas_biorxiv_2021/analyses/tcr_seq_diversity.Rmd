@@ -1,0 +1,178 @@
+---
+title: "Thomas new colitis dataset"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+library(vegan)
+library(scales)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in data
+
+```{r}
+
+rna_tcr <- read.csv("../saved_data/rna_tcr.csv")
+
+rna_tcr
+
+```
+
+# Analyze diversity via Shannon entropy
+
+ - no differences
+
+```{r}
+
+cdr3_amino_acid_diversity_df <- rna_tcr %>%
+  filter(!(is.na(cdr3)),
+         Chain != "Multi",
+         group != "no ICI") %>%
+  group_by(cdr3, v_gene, j_gene, Chain, patient_id, group, predicted.celltype.l2) %>%
+  mutate(cdr3_amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, Chain, predicted.celltype.l2) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr3_amino_acid_count, index = "shannon"),
+         inv_shannon = 1/diversity(cdr3_amino_acid_count)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(Chain, group, patient_id, shannon, inv_shannon, predicted.celltype.l2) %>%
+  group_by(Chain, predicted.celltype.l2) %>%
+  summarize(
+      p_val_diversity = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(shannon ~ group, exact = FALSE)$p.value
+        }
+      }) %>%
+  ungroup() %>%
+  mutate(p_val_diversity = p.adjust(p_val_diversity, method = "BH")) %>%
+  arrange(p_val_diversity)
+
+cdr3_amino_acid_diversity_df
+
+# Shannon entropy: 0 means monoclonal, higher means polyclonal, weights richness (total # of unique clones) over evenness
+
+```
+
+# Examine sampling depth bias by chain, cell type
+
+```{r}
+
+downsampled_df <- rna_tcr %>%
+  group_by(group, Chain, predicted.celltype.l2) %>%
+  filter(group != "no ICI") %>%
+  mutate(seq_depth = n()) %>%
+  ungroup () %>%
+  group_by(Chain, predicted.celltype.l2) %>%
+  mutate(across_group_seq_depth = min(seq_depth)) %>%
+  ungroup() %>%
+  group_by(predicted.celltype.l2, Chain, group) %>%
+  sample_n(min(across_group_seq_depth), replace = FALSE)
+
+downsampled_df
+
+```
+
+# Re-test diversity differences when downsampling more abundance group (irAE or no irAE) to count of less abundant one for each cell type/chain combo
+
+ - CD4 TCM/TEM TRA/TRB borderline but still nothing significant
+
+```{r}
+
+downsampled_cdr3_amino_acid_diversity_df <- downsampled_df %>%
+  filter(!(is.na(cdr3)),
+         Chain != "Multi",
+         group != "no ICI") %>%
+  group_by(cdr3, v_gene, j_gene,  Chain, patient_id, group, predicted.celltype.l2) %>%
+  mutate(cdr3_amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, Chain, predicted.celltype.l2) %>%
+  # Calculate Shannon diversity index (H)
+  mutate(shannon = diversity(cdr3_amino_acid_count, index = "shannon"),
+         inv_shannon = 1/diversity(cdr3_amino_acid_count)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(Chain, group, patient_id, shannon, inv_shannon, predicted.celltype.l2) %>%
+  group_by(Chain, predicted.celltype.l2) %>%
+  summarize(
+      p_val_diversity = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(shannon ~ group, exact = FALSE)$p.value
+        }
+      }) %>%
+  ungroup() %>%
+  mutate(p_val_diversity = p.adjust(p_val_diversity, method = "BH")) %>%
+  arrange(p_val_diversity)
+
+downsampled_cdr3_amino_acid_diversity_df
+
+```
+
+# Analyze diversity via Gini-Simpson index
+
+```{r}
+
+cdr3_amino_acid_diversity_df <- rna_tcr %>%
+  filter(!(is.na(cdr3)),
+         Chain != "Multi",
+         group != "no ICI") %>%
+  group_by(cdr3, v_gene, j_gene, Chain, patient_id, group, predicted.celltype.l2) %>%
+  mutate(cdr3_amino_acid_count = n()) %>%
+  ungroup() %>%
+  group_by(patient_id, Chain, predicted.celltype.l2) %>%
+  # Calculate Gini-Simpson index
+  mutate(gini = GiniSimpson(as.factor(cdr3_amino_acid_count))) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(Chain, group, patient_id, gini, predicted.celltype.l2) %>%
+  group_by(Chain, predicted.celltype.l2) %>%
+  summarize(
+      p_val_diversity = {
+        if(length(unique(group)) != 2 | any(table(group) == 1)) {
+          NA
+        } else {
+          wilcox.test(shannon ~ group, exact = FALSE)$p.value
+        }
+      }) %>%
+  ungroup() %>%
+  mutate(p_val_diversity = p.adjust(p_val_diveristy, method = "BH")) %>%
+  arrange(p_val_diversity)
+
+```
