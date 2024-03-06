@@ -308,6 +308,8 @@
 ## Discussion
  - mouse destructive thyroiditis only induced by PD-1 blockade with prior immunization with thyroglobulin, so there's an involvement of activated memory cells specific for thyroglobulin in irAEs (memory CD4<sup>+</sup> T cells induced by previous immunization with thyroglobulin activated by PD-1 blockade and cause irAE)
  - CD4<sup>+</sup> T cells can show cytotoxic characteristics in some chronic inflammatory diseases and cancer
+# CD4 T cells and toxicity from immune checkpoint blockade
+ - review of a paper I've read
 # CD8<sup>+</sup> CD103<sup>+</sup> PD1<sup>+</sup> TIM3<sup>+</sup> T cells in glioblastoma microenvironment correlate with prognosis
  - Trm cells
 # CD8<sup>+</sup> lymphocyte infiltration is a specific feature of colitis induced by immune checkpoint inhibitors
@@ -471,6 +473,9 @@
  - see more sharing between myocarditis tissue TCRs and lung tumor TCRs (~10%) vs. hepatitis tissue TCRs and myocarditis tissue TCRs (~1%)
  - see more T cells in myocarditis tissue (mostly CD4<sup>+</sup>) than hepatitis tissue
  - perhaps related to hepatiits being steroid responsive, myocarditis being steroid refractory
+# Comparing anti-tumor and anti-self immunity in a patient with melanoma receiving immune checkpoint blockade
+ - irAE tissues overexpressed immunosuppression genes (*CSF1R*, *IL10RA*, *IL27/EBI3*, *FOXP3*, *KLRG1*, *SOCS1*, *TGFB1*, *IL1B*, *PTGER1/EP1*, *PTGER4/EP4*), **not sure of mechanism here besides potentially more Tregs as I've seen elsewhere higher Tregs in irAE (which I don't have a good hypothesis for really)**, may have implications for ICB resistance
+ - **TCRseq didn't find common TCR repertoires between tumor and irAE sites, arguing against shared antigen recognition between tumor and self, although they may have just not detected rare/small subset of overlapping TCRs; their figure on this was a little confusing to me as they did clustering of TCR repertoires across sites vs. just counting % shared TCRs between sites or something more intuitive**
 # Complete and early response to cemiplimab associated to severe immune toxicity in advanced cervical cancer: a case report
  - potential supplementary evidence for irAE association with ICB response
 # Complimentary mechanisms of dual checkpoint blockade expand unique T cell repertoires and activate adaptive anti-tumor immunity in triple-negative breast tumors
@@ -490,6 +495,10 @@
  - some propose correlation between vitiligo occurrence and clinical response in melanoma patients receiving immunotherapy, but most studies have included heterogeneous patient and treatment settings
  - goal: investigate correlation between vitiligo occurrence and clinical benefit of immunotherapy
  - results: vitiligo occurrence correlated with favorable clinical outcome
+# CrossDome: an interactive R package to predict cross-reactivity risk using immunopeptidomics databases
+ - both peptide- and TCR-centered predictions
+ - **more focused on peptide-based vaccines or adoptive T cell therapy rather than ICB, perhaps still useful though for me**
+ - alanine/X scans can provide an initial assessment of T cell crossreactivity potential (guides proteomic searches for similar peptide motifs)
 # Crossreactivity of SARS-CoV-2 and influenza A-specific T cells in individuals exposed to SARS-CoV-2
 ## Abstract
  - geographical association between high influenza vaccination rates and lower incidences of SARS-CoV-2 infection (crossreactive T cells)
@@ -742,6 +751,9 @@
  - CD19<sup>+</sup> B cell proportions higher in patients with irAEs
 # Early rise in brain damage markers and high ICOS expression in CD4<sup>+</sup> and CD8<sup>+</sup> T cells during checkpoint inhibitor-induced encephalomyelitis
  - ICOS expression on T cells mirrored severity of encephalomyelitis over course of recovery, also see ICOS expression on T cells of other patients with severe irAEs (moreso than in patients without irAEs)
+# Editorial: quantification and prediction of T cell crossreactivity through experimental and computational methods
+ - crossreactivity is the basis for heterologous immunity
+ - computational tools for predicting crossreactivity: MatchTope (structure-based clustering of pMHCs likely to be recognized by same TCR), PepSim (also looks at pMHC structure for similarities), CrossDome (predicts risk for off-target toxicity in immunotherapy)
 # Effective use of latent semantic indexing and computational linguistics in biological and biomedical applications
  - LSI = latent semantic indexing, computational linguistics technique, outperforms Boolean text searches and co-occurrence models at information retrieval, dimensional reduction technique used to compare concepts/topics among collection of terms
  - clustering genes/proteins into GO groups/signaling pathways relies on curation of these groups/pathways, could be supplemented by LSI/LSA (latent semantic analysis)
@@ -943,6 +955,8 @@
  - tumor mutational burden (total number of distinct mutations per coding area of tumor genome) helps explain ICB response (higher burden for example in environmental DNA damage associated melanoma, lung/bladder cancer better response with more neoantigens)
 # Hierarchical transcriptional network governing heterogeneous T cell exhaustion and its implications for immune checkpoint blockade
  - PD-1 stabilizes TCF-1<sup>+</sup> Tex precursor pool (that maintains a chronically stimulated Tex pool)
+# High IGKC-expressing intratumoral plasma cells predict response to immune checkpoint blockade
+ - potential new dataset
 # High-throughput and single cell T cell receptor sequencing technologies
 ## Introduction
  - diversity (D) gene segment only contributes to TCRβ
@@ -1259,6 +1273,8 @@
 # Immunotherapy-mediated thyroid dysfunction: genetic risk and impact on outcomes with PD-1 blockade in non-small cell lung cancer
  - thyroid irAE associated with anti-tumor response
  - genetic risk for hypothyroidism associated with risk of developing thyroid irAEs
+# Impact of aging on immune-related adverse events generated by anti-programmed death (ligand) PD-(L)1 therapies
+ - older people get more irAEs, perhaps related to higher levels of autoantibodies in older people
 # Improved survival with T cell clonotype stability after anti-CTLA-4 treatment in cancer patients
 # Abstract
  - **CTLA-4 blockade results in both expansion and loss of T cell clonotypes, global turnover of T cell repertoire**
@@ -1755,6 +1771,10 @@
  - CD40: costimulatory molecule that drives DCs and TAMs (tumor associated macrophages) to prime T cells
  - FAP: fibroblast activation protein, upregulated in tumor in response to radiation (which can be taken advantage of for drug delivery to TME via FAP-CD40 DARPin)
  - FAP-CD40 DARPin: uses FAP and CD40 binding domains to cross-link and activate CD40 specifically in tumor
+# Predicting crossreactivity and antigen specificity of T cell receptors
+ - TCRs can also recognize non-peptide antigens
+ - a single TCR can recognize 10<sup>4</sup> to 10<sup>7</sup> epitopes but once it reacts with one the probability of it reacting with another reduces to ~10<sup>-4</sup>, **not sure why that is**
+ - **as memory T cells are more sensitive han naive T cells (can be stimulated at ~50x lower [peptide]), tolerance can breakdown if naive self-reactive T cells are stimulated in crossreactive manner to foreign peptide**
 # Predicting response and toxicity to PD-1 inhibition using serum autoantibodies identified from immuno-mass spectrometry
  - Thyroglobulin (Tg) and thyroid peroxidase (TPO) candidate autoantibody targets, higher levels of autoantibodies targeting these proteins associated with irAEs
 # Predictive and sensitive biomarkers for thyroid dysfunctions during treatment with immune-checkpoint inhibitors
@@ -2018,6 +2038,10 @@
  - leader sequence/signal peptide just refers to signal for TCR to be trafficked to cell membrane
 # Structural basis for T cell recognition of cancer neoantigens and implications for predicting neoepitope immunogenicity
  - oncogenic mutations can improve antigen presentation by strengthening pMHC binding, mutation can also be detected by direct interactions with TCR
+# Structure-based, rational design of T cell receptors
+ - TCRs have constant domains (anchor to cell membrane) and variable domains (interact with pMHC)
+ - CDRs come from hypervariable regions of V domains
+ - CDR1/2 interact mostly with MHC
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
  - ICI-induced inflammatory arthritis has been reported
