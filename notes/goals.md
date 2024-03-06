@@ -1,5 +1,7 @@
 # Find publicly available data (cell typing data + TCRseq) to mine
 ## Data shortlist
+### CD4<sup>+</sup> T cell activation distinguishes response to anti-PD-L1<sup>+</sup> anti-CTLA4 therapy from anti-PD-L1 monotherapy
+ - no irAE tracking (author responded, definitely no irAE tracking)
 ### Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis
  - mined
 ### Gut microbiota signatures are associated with toxicity to combined CTLA-4 and PD-1 blockade
