@@ -308,6 +308,9 @@
 ## Discussion
  - mouse destructive thyroiditis only induced by PD-1 blockade with prior immunization with thyroglobulin, so there's an involvement of activated memory cells specific for thyroglobulin in irAEs (memory CD4<sup>+</sup> T cells induced by previous immunization with thyroglobulin activated by PD-1 blockade and cause irAE)
  - CD4<sup>+</sup> T cells can show cytotoxic characteristics in some chronic inflammatory diseases and cancer
+# CD49a expression defines tissue-resident CD8<sup>+</sup> T cells poised for cytotoxic function in human skin
+ - cytotoxic function including IFN-γ production, driven by IL-15
+ - CD49a<sup>-</sup> CD8 Trms produce IL-17
 # CD4 T cells and toxicity from immune checkpoint blockade
  - review of a paper I've read
 # CD8<sup>+</sup> CD103<sup>+</sup> PD1<sup>+</sup> TIM3<sup>+</sup> T cells in glioblastoma microenvironment correlate with prognosis
@@ -462,6 +465,10 @@
  - expansion didn't derive from pre-existing TIL clones but rather from novel clonotypes not previously observed in the same tumor (clonal replacement)
  - pre-existing tumor-specific T cells may have limited reinvigoration capacity due to chronic activation/exhaustion (epigenetic remodeling); the T cell response to checkpoint blockade derives from a distinct repertoire of T cell clones that may have just recently entered the tumor
  - **novel T cell clones could derive from lymphoid organs or rare unexpanded clones within TME/tumor periphery that weren't exhausted**
+# Colon immune-related adverse events: anti-CTLA-4 and anti-PD-1 blockade induce distinct immunopathological entities
+ - **PD-1 blockade colitis seems more CD8 T, CTLA-4 blockade colitis seems more CD4 T (lamina propria)**
+ - no differences in mucosal Tregs between ICB drugs and IBD
+ - higher numbers of activated ICOS<sup>+</sup> CD4 Ts in CTLA-4 blockade colitis vs. IBD
 # Comparative analyses of CDR3 regions in paired human αβ CD8 T cells
  - CDR3 length among paired αβ TCRs had a fairly narrow distribution due to random assortment of CDR3 length in alpha and beta chains
  - nucleotide deletions among CDR3 regions were positively correlated with insertions in both α and β TCRs
@@ -763,6 +770,10 @@
 # Effects of thymic selection of the T cell repertoire on HLA-class I associated control of HIV infection
  - HLA-B57 allele enriched in those with restricted HIV replication without therapy
  - **HLA-B57 restricted T cells are more crossreactive to mutants of target epitopes, this HLA allele also associated with autoimmunity**
+# Egress of resident memory T cells from tissue with neoadjuvant immunotherapy: implications for systemic anti-tumor immunity
+ - Trms express adhesion molecules and embed within tissues
+ - **Trm promotion in tumors sequesters tumor-specific T cells out of circulation, this can limit systemic antitumor immunity**
+ - **immunotherapy can promote egress of Trms from tumors into circulation**
 # Elevated circulating memory T cells precede immunotherapy toxicities in melanoma
  - summary of a paper I've already read (*T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma*)
 # Elucidating the heterogeneity of immunotherapy response and immune-related toxicities by longitudinal ctDNA and immune cell compartemtn tracking in lung cancer
@@ -828,6 +839,9 @@
  - **duodenitis blocked by antibody to integrin α 4 β 7 (LPAM-1) which blocks T cell infiltraton into GI tract, suggesting that GI toxicity resulted from circulating T cells trafficked to GI tract following expansion elsewhere i.e. in the tumor perhaps**
 # Exhaust the exhausters: targeting regulatory T cells in the tumor microenvironment
  - Tregs can suppress anti-tumor immunity
+# Expansion of pathogenic cardiac macrophages in immune checkpoint inhibitor myocarditis
+ - murine model (*CTLA4+/- Pdc1-/-*)
+ - increased levels of CCR2<sup>+</sup> monocyte-derived macrophages and CD8 T cells
 # Expression of MHC class II in T cells is associated with increased HIV-1 expression
  - CD4 primary HIV-1 infection receptor, expressed on T cells, monocytes, macrophages, DCs
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
@@ -1364,8 +1378,9 @@
 # Integrative analysis of risk factors for immune-related adverse events of checkpoint blockade therapy in cancer
  - allelic variation of *HLA-B* correlated with irAE risk
 # Interferon-gamma-producing CD8<sup>+</sup> tissue resident memory T cells are a targetable hallmark of immune checkpoint inhibitor-colitis
- - **CD8 Trms dominant activated T cell subset in ICI colitis, activation correlates with ICI colitis severity**
+ - **CD8 Trms (*IFNG* and inhibitor checkpoint-expressing) dominant activated T cell subset in ICI colitis, activation correlates with ICI colitis severity**
  - **activated CD8 Trms express high levels of checkpoint inhibitor, interferon-gamma transcripts**
+ - similar between combination ICB and PD-1 blockade
 # Interleukin-6 blockade abrogates immunotherapy toxicity and promotes tumor immunity
  - IL-6 expression, neutrophil and chemotactic markers higher in colitis than normal intestinal tissue
  - Th17 cells more prevalent than Th1 cells in irAE enterocolitis tissue
@@ -1402,12 +1417,19 @@
 ## Discussion
  - origin of cytotoxic CD4<sup>+</sup> T cells: doesn't seem to arise from Tregs (no clonotype sharing), perhaps from other CD4<sup>+</sup> T cells (shared clones)
 # Intratumoral dendritic cell-CD4<sup>+</sup> T cell helper cell niches enable CD8<sup>+</sup> T cell differentiation following PD-1 blockade in hepatocellular carcinoma
+## Abstract
  - ICB response correlated with clonal expansion of intratumoral CXCL13<sup>+</sup> CH25H<sup>+</sup> IL-21<sup>+</sup> PD-1<sup>+</sup> CD4<sup>+</sup> T helper cells and granzyme K<sup>+</sup> PD-1<sup>+</sup> effector-like CD8<sup>+</sup> T cells
  - terminally exhausted CD39<sup>high</sup> TOX<sup>high</sup> PD-1<sup>high</sup> CD8<sup>+</sup> T cells dominate in nonresponders
+ - PD-1<sup>+</sup> TCF-1<sup>+</sup> (progenitor exhausted) CD8<sup>+</sup> T cells shared clones mostly with effector-like cells in responders or terminally exhausted cells in nonresponders, so local CD8<sup>+</sup> differentiation induced by ICB
+## Main
+ - T cells can be in core of tumor (T cell rich) or in stroma (T cell excluded), or not in TME at all (T cell low)
 # Intratumoral expression levels of *PD-L1*, *GZMA*, and *HLA-A* along with oligoclonal T cell expansion associate with response to nivolumab in metastatic melanoma
  - *PD-L2* expression levels also correlate with response to nivolumab
  - Th1 response dominance in responders (higher *TBX21/GATA3* ratio)
  - see oligoclonal T cell expansion in responders' TILs
+# Intratumoral Tcf1<sup>+</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells with stem-like properties promote tumor control in response to vaccination and checkpoint blockade immunotherapy
+ - mostly mouse
+ - human (and mouse) tumors house ~undifferentiated Tcf1<sup>+</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells that have stem-like properties (expansion, regeneration, differentiation), differentiate into Tcf1<sup>-</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells upon ICB
 # Inverse vaccination, the opposite of Jenner's concept, for therapy of autoimmunity
  - Jenner invented vaccination in 1796
  - autoimmunity treatment includes immunosuppression via anti-CD20 monoclonal antibody (B cells marked by CD20), anti-CD52 mAb (WBCs marked by CD52), similarly reduce transplant rejection with mAbs against CD3 (T cells marked by CD3), can also disrupt lymphocyte ingress into tissue via integrin blockade or impeded egress of lymphocytes out of lymph nodes via spingosine phosphate receptor modulation
@@ -1447,7 +1469,7 @@
  - are certain specific T cell phenotypes enriched in regions containing viable tumor cells?
  - see lymph nodes enriched for naive and TCF1 CD8 T cells, adjacent normal regions enriched for effector CD8 T cells
  - exhausted CD8<sup>+</sup> T cell clusters enriched in tumor regions
- - enriched naive, Treg, and follicular helper CD4<sup>+</sup> T cells in lymph nodes, effector CD4 T cells enriched n adjacent normal regions, CD4 Tregs and follicular helper T cells enriched in tumor
+ - enriched naive, Treg, and follicular helper CD4<sup>+</sup> T cells in lymph nodes, effector CD4 T cells enriched in adjacent normal regions, CD4 Tregs and follicular helper T cells enriched in tumor
 # Lipidomics reveals immune-related adverse events in NSCLC patients receiving immune checkpoint inhibitor
  - not sure of significance of some lipid metabolites predicting irAE..., **perhaps relation is via signal transduction/membrane remodeling**
 # Liver mediated adaptive immune tolerance
@@ -2234,9 +2256,9 @@
  - TCRB chain profiling
  - increased baseline TCR sequence diversity associated with ICB response
 # T cells specific for alpha-myosin drive immunotherapy related myocarditis
- - mice
+ - mice (*Pdcd1-/-Ctla4+/-*, recapitulates features of ICB myocarditis in humans)
  - CD8<sup>+</sup> dominant cell population in immune infiltrate in heart and drive myocarditis (anti-CD8 antibody rescues mice)
- - alpha-myosin antigen source for three MHCI restricted TCRs from mice with myocarditis
+ - alpha-myosin antigen target of three MHCI restricted TCRs from mice with myocarditis
  - **peripheral blood from three humans with ICI-myocarditis were expanded by alpha-myosin peptides, these alpha-myosin expanded T cells shared TCR clonotypes with diseased heart and skeletal muscle infiltrates**
 # T cell tolerance: central and peripheral
 ## Summary
@@ -2603,6 +2625,10 @@
  - FoxP3 is main Treg transcription factor, associated with high CD25 expression
  - Tregs defined as CD3<sup>+</sup>CD4<sup>+</sup>CD25<sup>high</sup>FoxP3<sup>+</sup>CD127<sup>low</sup>
  - Tregs can develop in thymus (tTregs, express FoxP3, high autoaffinity TCR, provide tolerance to autoantigens) or peripherally (pTregs, prevent local inflammation in presence of exogenous antigens) from effector cells
+# Tumor invasion in the central airway is a risk factor for early-onset checkpoint inhibitor pneumonitis in patients with non-small cell lung cancer
+ - pneumonitis irAE that develops earlier is more severe
+ - tumor invasion into central airway may be a source of inflammation, contributing to pneumonitis
+ - patients with tumor invasion into central airway may have higher levels of systemic inflamamtion
 # Tumor-reactive CD8<sup>+</sup> T cells enter a TCF1<sup>+</sup>PD1<sup>-</sup> dysfunctional state
  - self/shared antigens (SSA): tumor antigens aberrantly expressed but not mutated i.e. shared with normal tissue
  - tumor-specific antigens: mutated proteins or oncogenic viral proteins
