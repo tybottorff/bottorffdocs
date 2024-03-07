@@ -1,5 +1,11 @@
 # Find publicly available data (cell typing data + TCRseq) to mine
 ## Data shortlist
+### Intratumoral dendritic cell–CD4+ T helper cell niches enable CD8+ T cell differentiation following PD-1 blockade in hepatocellular carcinoma
+ - no irAE info, emailed for it (3.7.24)
+### Prior antibiotic administration disrupts anti-PD-1 responses in advanced gastric cancer by altering the gut microbiome and systemic immune response
+ - no irAE info, emailed for it (3.7.24)
+### Clonally expanded CD38hi cytotoxic CD8 T cells define the T cell infiltrate in checkpoint inhibitor-associated arthritis
+ - no healthy controls
 ### CD4<sup>+</sup> T cell activation distinguishes response to anti-PD-L1<sup>+</sup> anti-CTLA4 therapy from anti-PD-L1 monotherapy
  - no irAE tracking (author responded, definitely no irAE tracking)
 ### Identification of Pathogenic Immune Cell Subsets Associated with Checkpoint Inhibitor-induced Myocarditis
