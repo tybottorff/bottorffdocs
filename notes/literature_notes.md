@@ -1162,7 +1162,7 @@
  - lower immune checkpoint inhibitor (TIM-3, CTLA-4), cytolytic (GZMA, GZMB), and T cell activation (CD25) protein expression in metastases compared with primary tumors
  - metastases macrophages less M1-like, inflammatory markers (HLA-DR, CD127)
 # Immune-related adverse events after immune checkpoint blockade-based therapy are associated with improved survival in advanced sarcomas
- - gene expression analyzes of baseline tumor samples: patients with iraEs had more tumor-infiltrating DCs, CD8 Ts, and Tregs, upregulation of immune/inflammatory pathways, so association between immune "hotness" of tumor and irAEs, **I wonder why TIL abundances would be related to irAEs, perhaps TIL abundances correlate with general PBMC/irAE-infiltrating lymphocyte abundances, or they say rather that irAE development is linked to pre-existing immune response (to tumor)**
+ - gene expression analyzes of baseline tumor samples: patients with irAEs had more tumor-infiltrating DCs, CD8 Ts, and Tregs, upregulation of immune/inflammatory pathways, so association between immune "hotness" of tumor and irAEs, **I wonder why TIL abundances would be related to irAEs, perhaps TIL abundances correlate with general PBMC/irAE-infiltrating lymphocyte abundances, or they say rather that irAE development is linked to pre-existing immune response (to tumor)**
 # Immune-related adverse events and survival among patients with metastatic NSCLC treated with immune checkpoint inhibitors
  - irAE development associated with improved anti-tumor response
 # Immune-Related Adverse Events and Their Association With the Effectiveness of PD-1/PD-L1 Inhibitors in Non-Small Cell Lung Cancer: A Real-World Study From China
