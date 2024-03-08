@@ -19,6 +19,10 @@ library(ggplot2)
 library(dplyr)
 library(stringr)
 library(tidyr)
+library(clusterProfiler)
+library(enrichplot)
+library("org.Hs.eg.db", character.only = TRUE)
+library(BiocParallel)
 
 ```
 
@@ -565,5 +569,198 @@ cd4_prolif_ici_pseudobulk_degs <- FindMarkers(object = cd4_prolif_ici_pseudobulk
                          ident.2 = "ICI no colitis")
 
 cd4_prolif_ici_pseudobulk_degs
+
+```
+
+# DEGs for cell types with differences between irAE groups, finding DEGs between these cell types and all other cell types to nail down what these cell types really are
+
+```{r}
+
+cd4s <- subset(just_T_cells, subset = predicted.celltype.l1 == "CD4 T" & predicted.celltype.l2 %in% c("Treg", "CD4 TEM", "CD4 TCM", "CD4 Naive", "CD4 Proliferating", "CD4 CTL"))
+
+metadata <- cd4s@meta.data %>%
+  mutate(is_cd4_tem = if_else(predicted.celltype.l2 == "CD4 TEM", "CD4 TEM", "Not CD4 TEM"),
+         is_cd4_prolif = if_else(predicted.celltype.l2 == "CD4 Proliferating", "CD4 Proliferating", "Not CD4 Proliferating"),
+         is_cd4_tcm = if_else(predicted.celltype.l2 == "CD4 TCM", "CD4 TCM", "Not CD4 TCM"))
+
+metadata
+
+cd4s$is_cd4_tem <- metadata$is_cd4_tem
+cd4s$is_cd4_prolif <- metadata$is_cd4_prolif
+cd4s$is_cd4_tcm <- metadata$is_cd4_tcm
+
+cd4_tem_pseudobulk <- AggregateExpression(cd4s, assays = "SCT", return.seurat = T, group.by = c("orig.ident", "is_cd4_tem"))
+
+cd4_tem_pseudobulk$is_cd4_tem <- factor(cd4_tem_pseudobulk$is_cd4_tem, levels = c("CD4 TEM", "Not CD4 TEM"))
+
+Idents(cd4_tem_pseudobulk) <- "is_cd4_tem"
+
+Idents(cd4_tem_pseudobulk)
+
+cd4_tem_pseudobulk_degs <- FindMarkers(object = cd4_tem_pseudobulk, 
+                         ident.1 = "CD4 TEM", 
+                         ident.2 = "Not CD4 TEM") %>%
+  arrange(p_val_adj)
+
+cd4_tem_pseudobulk_degs
+
+cd4_prolif_pseudobulk <- AggregateExpression(cd4s, assays = "SCT", return.seurat = T, group.by = c("orig.ident", "is_cd4_prolif"))
+
+cd4_prolif_pseudobulk$is_cd4_prolif <- factor(cd4_prolif_pseudobulk$is_cd4_prolif, levels = c("CD4 Proliferating", "Not CD4 Proliferating"))
+
+Idents(cd4_prolif_pseudobulk) <- "is_cd4_prolif"
+
+Idents(cd4_prolif_pseudobulk)
+
+cd4_prolif_pseudobulk_degs <- FindMarkers(object = cd4_prolif_pseudobulk, 
+                         ident.1 = "CD4 Proliferating", 
+                         ident.2 = "Not CD4 Proliferating") %>%
+  arrange(p_val_adj)
+
+cd4_prolif_pseudobulk_degs
+
+cd4_tcm_pseudobulk <- AggregateExpression(cd4s, assays = "SCT", return.seurat = T, group.by = c("orig.ident", "is_cd4_tcm"))
+
+cd4_tcm_pseudobulk$is_cd4_tcm <- factor(cd4_tcm_pseudobulk$is_cd4_tcm, levels = c("CD4 TCM", "Not CD4 TCM"))
+
+Idents(cd4_tcm_pseudobulk) <- "is_cd4_tcm"
+
+Idents(cd4_tcm_pseudobulk)
+
+cd4_tcm_pseudobulk_degs <- FindMarkers(object = cd4_tcm_pseudobulk, 
+                         ident.1 = "CD4 TCM", 
+                         ident.2 = "Not CD4 TCM") %>%
+  arrange(p_val_adj)
+
+cd4_tcm_pseudobulk_degs
+
+```
+
+# Try to work from DEGs to get a better sense of what these cell types really are using GSEA: CD4 TEMs
+
+```{r}
+
+cd4_tem_pseudobulk_degs
+
+original_gene_list_tem <- cd4_tem_pseudobulk_degs$avg_log2FC
+names(original_gene_list_tem) <- rownames(cd4_tem_pseudobulk_degs)
+gene_list_tem <- na.omit(original_gene_list_tem)
+gene_list_tem = sort(gene_list_tem, decreasing = TRUE)
+
+gene_list_tem
+
+gse_tem <- gseGO(geneList=gene_list_tem, 
+             ont ="ALL", 
+             keyType = "SYMBOL", 
+             nPerm = 10000, 
+             minGSSize = 3, 
+             maxGSSize = 800, 
+             pvalueCutoff = 0.05, 
+             verbose = TRUE, 
+             OrgDb = org.Hs.eg.db, 
+             pAdjustMethod = "none")
+
+dotplot(gse_tem, showCategory=10, split=".sign", font.size = 5) + facet_grid(.~.sign)
+
+```
+
+# Try to work from DEGs to get a better sense of what these cell types really are using GSEA: CD4 proliferating
+
+```{r}
+
+cd4_prolif_pseudobulk_degs
+
+original_gene_list_prolif <- cd4_prolif_pseudobulk_degs$avg_log2FC
+names(original_gene_list_prolif) <- rownames(cd4_prolif_pseudobulk_degs)
+gene_list_prolif <- na.omit(original_gene_list_prolif)
+gene_list_prolif = sort(gene_list_prolif, decreasing = TRUE)
+
+gene_list_prolif
+
+gse_prolif <- gseGO(geneList=gene_list_prolif, 
+             ont ="ALL", 
+             keyType = "SYMBOL", 
+             nPerm = 10000, 
+             minGSSize = 3, 
+             maxGSSize = 800, 
+             pvalueCutoff = 0.05, 
+             verbose = TRUE, 
+             OrgDb = org.Hs.eg.db, 
+             pAdjustMethod = "none")
+
+dotplot(gse_prolif, showCategory=10, split=".sign", font.size = 5) + facet_grid(.~.sign)
+
+# cell cycle does pop up activated that's a good sign
+
+```
+
+# Try to work from DEGs to get a better sense of what these cell types really are using GSEA: CD4 TCMs
+
+```{r}
+
+cd4_tcm_pseudobulk_degs
+
+original_gene_list_tcm <- cd4_tcm_pseudobulk_degs$avg_log2FC
+names(original_gene_list_tcm) <- rownames(cd4_tcm_pseudobulk_degs)
+gene_list_tcm <- na.omit(original_gene_list_tcm)
+gene_list_tcm = sort(gene_list_tcm, decreasing = TRUE)
+
+gene_list_tcm
+
+gse_tcm <- gseGO(geneList=gene_list_tcm, 
+             ont ="ALL", 
+             keyType = "SYMBOL", 
+             nPerm = 10000, 
+             minGSSize = 3, 
+             maxGSSize = 800, 
+             pvalueCutoff = 0.05, 
+             verbose = TRUE, 
+             OrgDb = org.Hs.eg.db, 
+             pAdjustMethod = "none")
+
+dotplot(gse_tcm, showCategory=10, split=".sign", font.size = 5) + facet_grid(.~.sign)
+
+# IL-6 production activated could be interesting as that's associated with irAEs and TCMs were slightly higher in colitis group
+
+```
+
+# Look at specific memory markers
+
+```{r}
+
+#cd4s <- subset(just_T_cells, subset = predicted.celltype.l2 %in% c("Treg", "CD4 TEM", "CD4 TCM"))
+
+#VlnPlot(cd4s, features = c("PRF1", "GZMB", "KLRG1"), group.by = "predicted.celltype.l2", pt.size = 0)
+
+#VlnPlot(cd4s, features = c("CCR7", "CD28", "CD27"), group.by = "predicted.celltype.l2", pt.size = 0)
+
+#VlnPlot(cd4s, features = c("FOXP3", "CTLA4", "ICOS", "BCL2"), group.by = "predicted.celltype.l2", pt.size = 0)
+
+VlnPlot(cd4s, features = c("CD28", "ICOS", "FAS", "SELL"), group.by = "predicted.celltype.l2", pt.size = 0)
+
+# can't find: CD122
+
+# TEM: KLRG1, CD43, CD95, TNF
+# TCM: CD45RA, CCR7, CD62L, CD127, CD122, CD28, IL-2
+# Memory Treg: CD25, CD27, FOXP3, CTLA4, CD127-, ICOS, BCL-2, Ki67-
+
+# expected conclusions
+# KLRG1 yes higher in TEM
+# BCL2 higher in Treg
+# CCR7 yes higher in TCM
+# CD27 yes higher in Treg
+# FOXP3 yes abundantly clearly higher in Treg
+# CTLA4 higher in Treg but also present in TCM
+# KI67 low for all, only high for proliferating cells
+# CD25 (IL2RA) high in Tregs
+
+# unexpected conclusions, kind of support Treg/TCM overlap
+# CD28 high in TCM but also in Tregs
+# ICOS not higher in Treg, same in TCM/Treg
+# CD95 (Fas) not higher in TCM, higher in Treg
+# CD62L (SELL) highest in Treg not TCM (TCM kinda high though)
+
+# CD127 (IL7R) higher in TEM not TCM... low in Treg though
+# CD43 (SPN) not really higher in TCM
 
 ```
