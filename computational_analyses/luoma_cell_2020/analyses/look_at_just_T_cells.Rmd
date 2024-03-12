@@ -720,7 +720,7 @@ gse_tcm <- gseGO(geneList=gene_list_tcm,
 
 dotplot(gse_tcm, showCategory=10, split=".sign", font.size = 5) + facet_grid(.~.sign)
 
-# IL-6 production activated could be interesting as that's associated with irAEs and TCMs were slightly higher in colitis group
+# IL-6 production activated could be interesting as that's associated with irAEs and TCMs were (very) slightly higher in colitis group
 
 ```
 
@@ -762,5 +762,87 @@ VlnPlot(cd4s, features = c("CD28", "ICOS", "FAS", "SELL"), group.by = "predicted
 
 # CD127 (IL7R) higher in TEM not TCM... low in Treg though
 # CD43 (SPN) not really higher in TCM
+
+```
+
+# Prepare Seurat object with SingleR (Dice ref) cell label metadata
+
+```{r}
+
+singler_dice_labels <- read.csv("../saved_data/singler_dice_ref_cell_typing.csv") %>%
+  dplyr::select(-X)
+
+singler_dice_labels
+
+t_cell_metadata <- as_tibble(just_T_cells@meta.data)
+
+t_cell_metadata$barcode <- colnames(just_T_cells)
+
+t_cell_metadata <- t_cell_metadata %>%
+  left_join(singler_dice_labels, by = "barcode")
+
+t_cell_metadata
+
+just_T_cells <- AddMetaData(just_T_cells, metadata = t_cell_metadata)
+
+```
+
+# Re-do DEG GSEA analysis from SingleR (Dice ref) cell labels instead of from Seurat ref cell labels
+
+```{r}
+
+cd4s <- subset(just_T_cells, subset = predicted.celltype.l1 == "CD4 T" & predicted.celltype.l2 %in% c("Treg", "CD4 TEM", "CD4 TCM", "CD4 Naive", "CD4 Proliferating", "CD4 CTL") & dice_singler_label %in% c("T cells, CD4+, Th1", "T cells, CD4+, Th2", "T cells, CD4+, Th17", "T cells, CD4+, memory TREG", "CD4 Naive", "T cells, CD4+, naive TREG", "T cells, CD4+, Th1_17", "T cells, CD4+, TFH", "T cells, CD4+, naive, stimulated"))
+
+metadata <- cd4s@meta.data %>%
+  mutate(is_mem_treg = if_else(dice_singler_label == "T cells, CD4+, memory TREG", "Memory Treg", "Not memory Treg"))
+
+metadata
+
+cd4s$is_mem_treg <- metadata$is_mem_treg
+
+cd4_mem_treg_pseudobulk <- AggregateExpression(cd4s, assays = "SCT", return.seurat = T, group.by = c("orig.ident", "is_mem_treg"))
+
+cd4_mem_treg_pseudobulk$is_mem_treg <- factor(cd4_mem_treg_pseudobulk$is_mem_treg, levels = c("Memory Treg", "Not memory Treg"))
+
+Idents(cd4_mem_treg_pseudobulk) <- "is_mem_treg"
+
+Idents(cd4_mem_treg_pseudobulk)
+
+cd4_mem_treg_pseudobulk_degs <- FindMarkers(object = cd4_mem_treg_pseudobulk, 
+                         ident.1 = "Memory Treg", 
+                         ident.2 = "Not memory Treg") %>%
+  arrange(p_val_adj)
+
+cd4_mem_treg_pseudobulk_degs
+
+original_gene_list_mem_treg <- cd4_mem_treg_pseudobulk_degs$avg_log2FC
+names(original_gene_list_mem_treg) <- rownames(cd4_mem_treg_pseudobulk_degs)
+gene_list_mem_treg <- na.omit(original_gene_list_mem_treg)
+gene_list_mem_treg = sort(gene_list_mem_treg, decreasing = TRUE)
+
+gene_list_mem_treg
+
+gse_mem_treg <- gseGO(geneList=gene_list_mem_treg, 
+             ont ="ALL", 
+             keyType = "SYMBOL", 
+             nPerm = 10000, 
+             minGSSize = 3, 
+             maxGSSize = 800, 
+             pvalueCutoff = 0.05, 
+             verbose = TRUE, 
+             OrgDb = org.Hs.eg.db, 
+             pAdjustMethod = "none")
+
+dotplot(gse_mem_treg, showCategory=10, split=".sign", font.size = 5) + facet_grid(.~.sign)
+
+```
+
+# Look at Ki67 in SingleR (Dice ref) subsets
+
+```{r}
+
+VlnPlot(cd4s, features = c("MCM2", "MCM4", "MCM5"), group.by = "predicted.celltype.l2", pt.size = 0)
+
+VlnPlot(cd4s, features = c("HDAC9", "CCNG2"), group.by = "dice_singler_label", pt.size = 0)
 
 ```
