@@ -76,6 +76,9 @@
  - cathepsins (lysosomal proteases) and thymus-specific serine protease alter MHC ligand repertoire presented to T cells during development, helps positive selection
 ### Antigen presentation in the medulla
  - transcriptional noise (low level transcription of any gene) may expose developing thymocytes to antigenic diversity of peripheral tissue (tissue-restricted antigens) without those peripheral antigens needing to be transited to thymus, not just inherent leaky gene expression but rather promiscuous gene expression and a distinct property of medullary thymic epithelial cells (1-3% of these cells express a particular tissue-restricted antigen but the cells get replace weekly changing topology of antigen expression in medulla)
+# Anti-integrin αvβ6 autoantibodies are a potential biomarker for ulcerative colitis-like immune checkpoint inhibitor-induced colitis
+ - αvβ6 autoantibodies in > 90% of patients with UC, and a subset of ICI-colitis is similar to UC
+ - see αvβ6 autoantibodies in ~30% of ICI-colitis patients and they have UC-like colitis (~2% of controls have these autoantibodies)
 # Anti-PD-1 and anti-CTLA-4 therapies in cancer: mechanisms of action, efficacy, and limitations
 ## Cancers evade and inhibit immune responses
  - cytokines (like IL-12) also help effective T cell stimulation
@@ -180,6 +183,9 @@
 # Autoantibody profiles in patients with immune checkpoint inhibitor-induced neurological immune related adverse events
  - higher prevalence of neuromuscular autoantibodies in irAE patients (63% had autoantibodies vs. 7% in no irAE group)
  - brain-reactive autoantibodies in 45% of irAE patients (20% of controls at baseline, but 7 controls developed *de novo* brain-reactive autoantibodies after ICI so no difference between irAE groups)
+# Autoimmune dilated cardiomyopathy in PD-1 receptor-deficient mice
+ - PD-1 prevents autoimmunity, here PD-1 KO leads to cardiomyocyte death
+ - PD-L1 constitutively expressed in heart and kidney, as well as on APCs, likely that heart cells downregulate proliferation of autoreactive lymphocytes
 # Autoimmune panels as predictors of toxicity in patients treated with immune checkpoint inhibitors (ALERT)
  - auto antigen microarray to profile autoantibodies related to irAEs in patients receiving ICI
  - greater number of IgG and IgM reactivites in pre-ICI in patients vs. healthy controls
@@ -287,6 +293,8 @@
  - exhaustion is now recognized to have a dynamic progression from a long-lived "pre-exhausted stem-like progenitor" (more responsive likely to re-invigoration by ICB) to a "terminally exhausted" state
  - **CD28 is a prerequisite for optimal T cell re-invigoration following PD1 blockade, CD28 primary target downstream of PD1-mediated inhibitory signaling**
  - **main finding: signatures of heterogeneous tumor infiltrating TRM and “pre-exhausted” long-lived effector-memory CD8<sup>+</sup> T cells were associated with better ICB response only in the presence of CD28**
+# CD103<sup>+</sup> tumor-resident CD8<sup>+</sup> T cells are associated with improved survival in immunotherapy-naive melanoma patients and expand significantly during anti-PD-1 treatment
+ - supporting evidence for strong literature conclusion of ICB inducing expansion of (CD8) T cells
 # CD4<sup>+</sup> T cell activation distinguishes response to anti-PD-L1<sup>+</sup> anti-CTLA-4 therapy from anti-PD-L1 monotherapy
 ## Highlights and summary
  - adding CTLA-4 blockade to PD-L1 blockade promotes CD4 T expansion
@@ -544,6 +552,9 @@
  - high mitochondrial count fraction could also just mean that the cell is very active in cellular respiration though
  - low counts/genes could also just mean quiescent cells
  - high counts/genes could also just mean large cells
+# CXCR5<sup>+</sup> CD8 T cells: potential immunotherapy targets or drivers of immune-mediated adverse events?
+ - CXCR5<sup>+</sup> CD8 T cells are cytotoxic but also associate with B cells to effect their function (so these CD8s are similar to CD4 Tfhs)
+ - tumors express CXCR5 and produce its ligand CXCL13 to recruit B/T cells into TME (**not sure of advantage of tumor doing this**)
 # Cysteine and hydrophobic residues in CDR3 serve as distinct T cell self-reactivity indices
  - rare thymocytes survive strong self-antigen enagement and differentiate into type A precursors of CD8αα<sup>+</sup> intestinal interepithelial lymphocytes (IELs) or CD4<sup>+</sup> Tregs in thymic medulla
  - Tregs enriched with hydrophobic amino acids at positions 6 and 7 of CDR3 in TCRβ chain
@@ -567,6 +578,8 @@
  - identify MHC-presented peptide ligands by combining TCR selection of highly diverse yeast-displayed peptide-MHC libraries with deep sequencing
  - structural conservation of the TCR interaction surface, not surprising
  - alloreactivity: ability of TCR to bind multiple MHCs
+# Defining CD8<sup>+</sup> T cells that provide the proliferative burst after PD-1 therapy
+ - virus-specific CD8s (ICOS<sup>+</sup> CD28<sup>+</sup>) proliferate after PD-1 blockade in mice chronically infected with LCMV
 # Defining the memory CD8 T cell
  - effector (T<sub>em</sub>, CD62L<sup>low</sup>CCR7<sup>low</sup>) and central (T<sub>cm</sub>, CD62L<sup>high</sup>CCR7<sup>high</sup>) memory T cells
  - CCR7/CD62L expression on T<sub>cm</sub> cells facilitates homing to secondary lymph organs, while T<sub>em</sub> cells are more cytolytic and express integrins and chemokine receptors to localize to inflamed tissue
@@ -674,6 +687,13 @@
 ## Discussion
  - epiMMRd tumor gene expression of key genes could vary (more than in "static" mutational sense) across cells/time
  - NK cells may play a larger role in epiMMRd anti-tumor response as they can efficiently mount cytotoxic responses in a neoantigen-independent manner (lower tumor mutational burden for epiMMRd than mutMMRd)
+# Distinct pretreatment innate immune landscape and posttreatment T cell responses underlie immunotherapy-induced colitis
+ - increased baseline circulating monocytes in colitis patients, monocytic infiltration at normal/inflamed colon regions
+ - **greater expansion of T cells following ICB in colitis patients, expansion of CD8 Trms (locally induced) and Th1 CD4s (systemic i.e. recruited from blood)**
+ - **surprisingly don't see T cell expansion differences between ICB responders/nonresponders**
+ - **evidence here supports Th1 immunity driving ICI-colitis**
+ - **specificity of T cells driving colitis likely autoantigens or commensal microbial antigens**
+ - **vedolizumab (irAE treatment drug) likely works by blocking recruitment of systemically expanded Th1 cells via α4β7 integrin block**
 # Divergent clonal differentiation trajectories establish CD8<sup>+</sup> memory T cell heterogeneity during acute viral infections in humans
 ## Abstract
  - decrease in human CD8<sup>+</sup> T cell clonal diversity from acute (days 10-30) to memory phase (days 90-150 for early memory, day 500+ for late memory)
@@ -969,6 +989,8 @@
  - tumor mutational burden (total number of distinct mutations per coding area of tumor genome) helps explain ICB response (higher burden for example in environmental DNA damage associated melanoma, lung/bladder cancer better response with more neoantigens)
 # Hierarchical transcriptional network governing heterogeneous T cell exhaustion and its implications for immune checkpoint blockade
  - PD-1 stabilizes TCF-1<sup>+</sup> Tex precursor pool (that maintains a chronically stimulated Tex pool)
+# High-affinity oligoclonal TCRs define effective adoptive T cell therapy targeting mutant KRAS-G12D
+ - only mutant G12D but not WT peptides stabilized HLA-C*08:02 (critical anchor salt bridge to HLA-C), so instance of no/less crossreactivity between TCR and WT/mutant peptide
 # High IGKC-expressing intratumoral plasma cells predict response to immune checkpoint blockade
  - potential new dataset
 # High-throughput and single cell T cell receptor sequencing technologies
@@ -1129,10 +1151,14 @@
  - thyroid irAE development associated with prolonged survival in NSCLC patients
  - higher incidence of thyroid irAEs for patients with anti-thyroid antibodies at baseline
  - T cells involved in destructive thyroiditis, perhaps moreso CD4 T cells
+# Immune checkpoint inhibitors associated cardiovascular immune-related adverse events
+ - cardiac specific autoreactive T cells underlie cardiac irAE
 # Immune checkpoint inhibitors associated granulomatous small vessel vasculitis accompanied with tubulointerstitial nephritis: a case report
  - tubulointerstitial nephritis (TIN): most common renal irAE
  - case report of 65 year old man with acute kidney injury from ICI
  - T cell infiltration in kidney biopsy (CD8<sup>+</sup> T cells and CD163<sup>+</sup> macrophages, few Tregs)
+# Immune checkpoint inhibitors unleash pathogenic immune responses against the microbiota
+ - **skin commensals can unleash aberrant commensal-specific T cell responses in ICI therapy, leading to skin irAEs**
 # Immune checkpoint inhibitor use in patients with cancer and pre-existing autoimmune diseases
  - **TNF or IL-6 inhibitors may help ICIs with anti-tumor response while also preventing severe irAEs**
  - link between autoimmunity and cancer: chronic inflammation and immunosuppression can lead to cancer, cancer can also lead to autoimmunity (paraneoplastic syndrome: manifestations in organs distant from tumor)
@@ -1316,6 +1342,8 @@
  - hematologic irAEs present earlier, gastrointestinal, dermatologic, musculoskeletal irAEs present later
  - history of autoimmune disorder increases irAE risk
  - chemotherapy in combination with ICI increases irAE risk
+# Incidence and severity of immune-related hepatitis after dual checkpoint therapy is linked to younger age independent of herpes virus immunity
+ - **surprising given other literature showing increased irAE incidences in older patients**
 # Incidence of Endocrine Dysfunction Following the Use of Different Immune Checkpoint Inhibitor Regimens
  - high incidence of endocrine dysfunction (hypo/hyper-thyroidism) in patients receiving ICI (immune checkpoint inhibitor) regimens, higher with combination therapy
 # Incidence of immune-related adverse events and its association with treatment outcomes: the MD Anderson Cancer Center experience
@@ -1381,6 +1409,9 @@
  - **CD8 Trms (*IFNG* and inhibitor checkpoint-expressing) dominant activated T cell subset in ICI colitis, activation correlates with ICI colitis severity**
  - **activated CD8 Trms express high levels of checkpoint inhibitor, interferon-gamma transcripts**
  - similar between combination ICB and PD-1 blockade
+# Interleukin-2 signaling in the regulation of T cell biology in autoimmunity and cancer
+ - CD25 (IL-2Rα) heightens receptor affinity for IL-2
+ - IL-2R signaling reinvigorates exhausted CD8s in response to ICB
 # Interleukin-6 blockade abrogates immunotherapy toxicity and promotes tumor immunity
  - IL-6 expression, neutrophil and chemotactic markers higher in colitis than normal intestinal tissue
  - Th17 cells more prevalent than Th1 cells in irAE enterocolitis tissue
@@ -1445,6 +1476,11 @@
  - HLA-DR4 associated with increased T1D irAE risk
 # Is autoimmunity the Achilles' heel of cancer immunotherapy
  - hypophysitis most common endocrine irAE after CTLA-4 blockade, rarely observed with PD-1 blockade
+# Lactate modulates RNA splicing to promote CTLA-4 expression in tumor-infiltrating regulatory T cells
+ - lactate uptake by Tregs contributes to efficacy of CTLA-4 blockade
+ - RNA splicing machinery correlated with tumor-infiltrating Treg cell signatures
+ - spliceosome component USP39 maintains Treg cell function via CTLA-4
+ - lactate modulates Foxp3-dependent RNA-splicing-mediated CTLA-4 expression
 # Landscape of stimulation-responsive chromatin across diverse human immune cells
  - previous literature: ~90% of GWAS hits for contributors to autoimmunity risk lie in non-coding regions (presumably act by altering gene regulation)
 # Learning predictive signatures of HLA type from T-cell repertoires
@@ -1696,6 +1732,8 @@
  - CD4<sup>+</sup> T cells that recognize neoantigens express *CXCL13* and are subdivided into clusters expressing memory and T follicular helper markers, cytolytic markers, inhibitory receptors, and IFN-γ
 # Network-based machine learning approach to predict immunotherapy response in cancer patients
  - tumor mutation burden improves model
+# Neurologic autoimmunity and immune checkpoint inhibitors
+ - mostly pre-ICI predictors studied here
 # New biomarkers exploration and nomogram construction of prognostic and immune-related adverse events of advanced non-small cell lung cancer patients receiving immune checkpoint inhibitors
 ## Abstract
  - CD3<sup>+</sup> CD56<sup>+</sup> CD16<sup>+</sup> NKT-like cells correlated with progression free survival and severe irAE development in NSCLC patients receiving ICI
@@ -1799,6 +1837,9 @@
  - **as memory T cells are more sensitive han naive T cells (can be stimulated at ~50x lower [peptide]), tolerance can breakdown if naive self-reactive T cells are stimulated in crossreactive manner to foreign peptide**
 # Predicting response and toxicity to PD-1 inhibition using serum autoantibodies identified from immuno-mass spectrometry
  - Thyroglobulin (Tg) and thyroid peroxidase (TPO) candidate autoantibody targets, higher levels of autoantibodies targeting these proteins associated with irAEs
+# Prediction of tumor-reactive T cell receptors from scRNA-seq data for personalized T cell therapy
+ - previous approaches to get tumor-reactive TCRs: analyze tumor mutations, predict T cell activating neoantigens, enrich TIL cultures for tumor-reactive T cells
+ - here, they instead combine high-throughput TCR cloning and reactivity validation to train a machine learning model that identifies tumor-reactive TILs in antigen-agnostic manner based on single-TIL RNAseq
 # Predictive and sensitive biomarkers for thyroid dysfunctions during treatment with immune-checkpoint inhibitors
  - early increase in serum thyroglobulin levels and thyroid autoantibodies associated with thyroid irAE
 # Predictive biomarkers for checkpoint inhibitor immune-related adverse events
@@ -2058,6 +2099,11 @@
  - Gaussian-like distribution in length pattern, given large number of small effects (random mechanism of junction diversity) acting additively and independently on CDR3 length
 # Stitchr: stitching coding TCR nucleotide sequences from V/J/CDR3 information
  - leader sequence/signal peptide just refers to signal for TCR to be trafficked to cell membrane
+# Structural basis for self-discrimination by neoantigen-specific TCRs
+ - mouse study
+ - **high functional avidity/structural affinity is a feature of neoantigen-reactive TCRs, perhaps necessary to recognize tumor cells that are selected to have low density of antigens on their cell surface (to try and evade immune system) and/or perhaps related to differentiation between neoantigen peptide on tumor cells and WT peptide on healthy cells**
+ - **unknown questions: how do some neoantigen-reactive TCRs selectively recognize mutated peptides and not crossreact with WT peptides while others crossreact a lot? why are non-synonymous mutations rarely recognized by TCRs?**
+ - **crossreactivity may be determined by MHC discrimination i.e. it's MHC presenting peptide that actually matters for TCR discerning self vs. tumor vs. the peptide mutation mattering**
 # Structural basis for T cell recognition of cancer neoantigens and implications for predicting neoepitope immunogenicity
  - oncogenic mutations can improve antigen presentation by strengthening pMHC binding, mutation can also be detected by direct interactions with TCR
 # Structure-based, rational design of T cell receptors
@@ -2101,6 +2147,8 @@
  - dominant T cell clonotype in Melan-A-reactive TIL persisted following remission, also responds to a wide range of cancer cell lines not expressing Melan A, suggesting response to widely expressed tumor associated antigens
 # Targeting PI3Kα increases the efficacy of anti-PD-1 antibody in cervical cancer
  - *PIK3CA* mutation results in increase PD-L1 levels, repression of CD8<sup>+</sup> T cell differentiation in cervical cancer
+# Targeting T regulatory (Treg) cells in immunotherapy-resistant cancers
+ - high abundance of Tregs associated with resistance to ICB
 # T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma
 ## Abstract
  - irAEs in 10-60% of patients with melanoma treated with ICI
@@ -2453,6 +2501,9 @@
  - ST2 implicated in inflammatory conditions
 # The JAK-STAT pathway as a therapeutic strategy in cancer patients with immune checkpoint inhibitor-induced colitis: a narrative review
  - JAK-STAT inhibition helps ICI colitis, perhaps through modulation of CD8 Trms
+# The loss of CTLA-4 leads to massive lymphoproliferation and fatal multiorgan tissue destruction, revealing a critical negative regulatory role of CTLA-4
+ - previous studies had suggested both positive and negative roles for CTLA-4 in T cell activation, **not sure if any activation roles are still thought to be true**
+ - CTLA-4 mouse KO leads to lymphoproliferative disease, lymphocyte infiltration into tissue, tissue destruction, severe myocarditis and pancreatitis, death by 3-4 weeks of age
 # The nexus of dynamic T cell states and immune checkpoint blockade therapy in the periphery and tumor microenvironment
 ## Abstract
  - *de novo* priming of antigen-specific cytotoxic T cells in peripheral blood occurs throughout course of ICB (rather than reinvigoration of pre-ICB-existing tumor infiltrating exhausted lymphocytes), possible that local expansion of antigen-specific T cells within tumor also important though
@@ -2625,6 +2676,7 @@
  - FoxP3 is main Treg transcription factor, associated with high CD25 expression
  - Tregs defined as CD3<sup>+</sup>CD4<sup>+</sup>CD25<sup>high</sup>FoxP3<sup>+</sup>CD127<sup>low</sup>
  - Tregs can develop in thymus (tTregs, express FoxP3, high autoaffinity TCR, provide tolerance to autoantigens) or peripherally (pTregs, prevent local inflammation in presence of exogenous antigens) from effector cells
+# Tumor immunotherapies by immune checkpoint inhibitors (ICIs); the pros and cons
 # Tumor invasion in the central airway is a risk factor for early-onset checkpoint inhibitor pneumonitis in patients with non-small cell lung cancer
  - pneumonitis irAE that develops earlier is more severe
  - tumor invasion into central airway may be a source of inflammation, contributing to pneumonitis
