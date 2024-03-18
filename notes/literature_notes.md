@@ -269,6 +269,9 @@
  - **baseline markers: peripheral blood lymphocyte counts > 2,000, lower % PD-1 expression on T cells, lower % Tregs, lower IL-6/8 levels, higher IL-17 levels, autoantibodies, some HLA alleles, among other things all associated with more irAEs**
  - **on treatment markers: increased leukocyte count, clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality, increased IL-6 levels, among other things all associated with more irAEs**
  - **takehome for me: on treatment markers including clonal expansion of more T cell clones, more newly emerging T cell clones, decline in T cell clonality all very interestingly associated with more irAEs**
+# Biomarkers on melanoma patient T cells associated with ipilimumab treatment
+ - **increased proliferation (Ki67) for CD4 and CD8 T cells, also see ICOS and Gata3 up for both CD4/CD8, EOMES/granzyme B up for CD8s, decreased CCR7/CD25 on CD8s**
+ - **decreased Ki67 CD8s associated with irAE, this is unlike most other proliferation literature I've read...**
 # Biomarkers for immune checkpoint inhibitor-mediated tumor response and adverse events
  - **irAE incidence does depend on tumor type, melanoma has higher frequency of skin and gastrointestinal irAEs but lower frequency of pneumonia compared to NSCLC patients, dermatitis, arthritis, and myalgia more common in melanoma patients than renal cell carcinoma patients, pneumonitis and dyspnea less common in melanoma**
 # Blocking IL-17A enhances tumor response to anti-PD-1 immunotherapy in microsatellite stable colorectal cancer
@@ -692,6 +695,14 @@
 ## Discussion
  - epiMMRd tumor gene expression of key genes could vary (more than in "static" mutational sense) across cells/time
  - NK cells may play a larger role in epiMMRd anti-tumor response as they can efficiently mount cytotoxic responses in a neoantigen-independent manner (lower tumor mutational burden for epiMMRd than mutMMRd)
+# Distinct molecular and immune hallmarks of inflammatory arthritis induced by immune checkpoint inhibitors for cancer therapy
+ - prior literature: ICB drug matters (CTLA-4 blockade has more colitis, skin toxicities and more irAEs in general, PD-1 blockade has more pneumonitis, hypothyroidism, vitiligo)
+ - **proliferating (cycling) T cells up in synovial fluid compared to PBMCs in arthritis-irAE patients, as were Tregs among other cells**
+ - review for me: IFNγ (Th1/Tc1), IL-4 (Th2/Tc2), IL-17 (Th17/Tc17), IL-10 (Tregs), Il-21 (Tfh), Tc meaning CD8 (cytotoxic T)
+ - Th1 (IFNγ)-CD8 T axis in blood and inflammed joints of arthritis-irAE patients
+ - CX3CR1<sup>high</sup> CD8 T cells in blood and CXCR3<sup>high</sup> CD8 T cells in synovial fluid (joints) are highly clonally expanded and share TCR repertoires
+ - arthritis after combination ICB has enhanced Th17 and transient Th1/17 signatures
+ - **Tregs seem more suppressive/effector in synovial fluid than in blood, surprising but consistent with Tregs up in irAE tissue it seems, perhaps it means that T cells in irAE tissue are more resistant to Treg suppression and/or irAE tissue Tregs might have different targets they are suppressing**
 # Distinct pretreatment innate immune landscape and posttreatment T cell responses underlie immunotherapy-induced colitis
  - increased baseline circulating monocytes in colitis patients, monocytic infiltration at normal/inflamed colon regions
  - **greater expansion of T cells following ICB in colitis patients, expansion of CD8 Trms (locally induced) and Th1 CD4s (systemic i.e. recruited from blood)**
@@ -1148,6 +1159,11 @@
  - TCR sequences are diverse
  - here, they define the minimal requirements for TCR antigen specificity through analysis of TCR sequences using a panel of pMHC tetramer sorted cells and structural data
  - GLIPH algorithm: grouping of lymphocyte interactions by paratrope hotspots, clusters TCRs with high probability of sharing specificity owing to conserved motifs and similarity of CDR3 sequences
+# IL-2 delivery by engineered mesenchmal stem cells re-invigorates CD8<sup>+</sup> T cells to overcome immunotherapy resistance in cancer
+ - mice
+ - engineered MSCs to deliver IL-2 mutein dimer to TILs to activate and expand pre-existing CD8 TILs
+ - insufficient IL-2 limits CD8 TIL expansion as tumors progress
+ - expanded TILs also exit through draining LN to control distal tumor(s)
 # IL7 genetic variation and toxicity to immune checkpoint blockade in patients with melanoma
  - minor allele carries of *Il7* intron have increased severe irAE risk
 # Immune checkpoint inhibitor-induced myocarditis with myositis/myasthenia gravis overlap syndrome: a systematic review of cases
@@ -1363,6 +1379,8 @@
 # Incidence of immune-related adverse events and its association with treatment outcomes: the MD Anderson Cancer Center experience
  - 34% of 290 patients had irAEs
  - severe irAEs associated with improved overall survival
+# Increased circulating levels of CRP and IL-6 and decreased frequencies of T and B lymphocyte subsets are associated with immune-related adverse events during combination therapy with PD-1 inhibitors for liver cancer
+ - irAE patients (especially those with severe irAEs) had higher levels of CRP and IL-6, lower levels of non-NK lymphocytes
 # Induction of neoantigen-specific cytotoxic T cells and construction of T cell receptor co-engineered T cells for ovarian cancer
 ## Abstract
  - neoantigens implicated as major target of anticancer cytotoxic T cells
@@ -1543,6 +1561,9 @@
  - severe irAE patients had higher frequencies of CD4 naive T cells, lower frequencies of CD16<sup>+</sup> NK cells at all time points, lower frequencies of TIGIT<sup>+</sup> Tregs at baseline, higher frequencies of CD38<sup>+</sup> CD4 TCMs and CD39<sup>+</sup> HLA-DR<sup>+</sup> CD8 TCMs at peak irAE time
 # Low TCR binding strength results in increased progenitor-like CD8<sup>+</sup> tumor-infiltrating lymphocytes
  - TILs with low TCR affinity to tumor-associated antigen had progenitor-like phenotypes and increased quiescence, higher affinity TCR TILs had more cell division and faster progression to T-cell exhaustion programs
+# m<sup>6</sup>A mRNA methylation controls T cell homeostatis by targeting IL-7/STAT5/SOCS pathway
+ - m<sup>6</sup>A is the most common and abundant mRNA modification
+ - KO of m<sup>6</sup>A writer protein METTL3 in mouse T cells disrupts T cell homeostasis and differentiation
 # Machine learning analysis of the T cell receptor repertoire identifies sequence features of self-reactivity
  - train model on mice data
  - TRBs
@@ -1726,6 +1747,8 @@
  - TCR α may make multiple rearrangements on each chromosome
 # Multisystem immune-related adverse events associated with immune checkpoint inhibitors for treatment of non-small cell lung cancer
  - multisystem irAEs associated with improved survival from ICIs in NSCLC (adjusting for treatment duration)
+# Myocarditis in Cynomolgus monkeys following treatment with immune checkpoint inhibitors
+ - **increased proliferation of CD4 and CD8 T cells, increased in activated T cells and TCMs in blood, spleen, lymph nodes**
 # Negative binomial additive model for RNA-Seq data analysis
 ## Methods for differential expression analysis
  - DESeq2, edgeR (based on negative binomial regression to model gene counts)
@@ -1845,6 +1868,9 @@
  - **apparently possible to identify antitumor TCRs from TIL transcriptomic state, and here they extend that to PBMCs?**
 ## Results
  - circulating tumor reactive T cells: lower expression of cytotoxic molecules, higher expression of T cell activation genes, memory quiescence, tissue residency, inhibitory markers
+# Polyamine metabolism is a central determinant of helper T cell lineage fidelity
+ - polyamine synthesis undergoes profound changes during T cell activation, along with other metabolic changes
+ - polyamine metabolism governs CD4 lineage commitment
 # Positive correlation of peripheral CD8<sup>+</sup> T lymphocytes with immune-related adverse events and combinatorial prognostic value in advanced non-small cell lung cancer patients receiving immune checkpoint inhibitors
  - baseline level of peripheral CD8 Ts risk factor for irAE onset, also associated with longer survival
 # Potentiating local and abscopal antitumor efficacy through radiation with FAP-CD40 DARPin and anti-PD1 therapy
