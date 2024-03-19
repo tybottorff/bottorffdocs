@@ -1,0 +1,48 @@
+---
+title: "P576-1 - ITN ATAC study"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Rsamtools)
+library(ggplot2)
+library(dplyr)
+library(GenomicAlignments)
+library(Rsubread)
+library(ATACseqQC)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(soGGi)
+library(stringr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Excluding failed QC samples, merge bam files by study group. difficult to deal with different peak widths across samples, Erin did consensus peaks (which IS WRONG, this means fixed list of peaks that are all 400 bp wide doesn't take into account longer ones, looks for peak overlaps b/w samples, kind of works but is dangerous because it washes out signal). INSTEAD combine data and instead of consensus peaks MERGE data manually into one big bam file per study group (pile up reads)
+merging (bed/sam tools) goes well COMMAND LINE, but keep code here for completeness
+
+# Re-do peak calling on those merged bam files) to get new peaks (WAY better peaks, more representative of what we're looking for). THEN merge these peak files together into 1 big merged peaks file
+
+# Re-run QC
