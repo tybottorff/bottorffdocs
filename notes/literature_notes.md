@@ -901,6 +901,11 @@
  - perhaps different disease risk conferred by particular MHC alleles is due to differences in presented peptides or differences in stabilities of MHC molecules
  - **1-5% of T cells have γ (*TRG*) and δ (*TRD*) chains instead of α (*TRA*) and β (*TRB*) ones, only β and δ chains also have diversity (D) genes recombined in VDJ recombination (α and γ just have VJ recombination)**
  - **during V(D)J recombination, joints between segments are partially digested and nucleotides are randomly added (i.e. N region) to form highly variable and non-germline-encoded complementarity-determining regions 3 (CDR3) loop that recognizes peptides, CDR1/2 loops of TCR form contacts with MHC and are encoded by V genes**
+# Genome-wide analysis identifies NR4A1 as a key mediator of T cell dysfunction
+ - **they say T cells become dysfunctional when they encounter self antigens, perhaps because this is always a chronic stimulation then, i.e. leading to exhaustion?**
+ - mice
+ - NR4A1 (TF) expressed highly in tolerant T cells, OE of NR4A1 inhibits Teff differentiation, KO of NR4A1 overcomes tolerance and exagerates Teff function and enhances anti-tumor/chronic virus immunity
+ - NR4A1 promotes H3K27ac, activating tolerance genes
 # Genome-wide CRISPR screens of T cell exhaustion identify chromatin remodeling factors that limit T cell persistence
  - chronic stimulation assay
  - *in vivo* validation of screen results (perturbation of INO80 and BAF chromatin remodeling complexes improves T cell persistence in tumors)
@@ -1960,6 +1965,8 @@
 ### TiRP explains T<sub>reg</sub> plasticity in the tumor microenvironment
  - previous literature: naive T thymic emigrants can be peripherally induced to adopt regulatory phenotype, and T<sub>regs</sub> can lose *FOXP3* expression and adopt pro-inflammatory phenotype (exT<sub>regs</sub>), expanded clones observed as both T<sub>regs</sub> and conventional T cells may represent such lineages (mixed clones)
  - hypothesis: TCR features of these mixed clones may be intermediate, increasing conversion susceptibility
+# Reversal of immune-checkpoint inhibitor fulminant myocarditis using personalized-dose-adjusted abatacept and ruxolitinib: proof of concept
+ - Abatacept: CTLA-4 fusion protein targeting CD86 on APCs, leads to global T cell anergy
 # Reversing T cell exhaustion in cancer: lessons learned from PD-1/PD-L1 immune checkpoint blockade
  - PD-1<sup>low</sup> T cells more responsive to PD-1 blockade than PD-1<sup>high</sup> T cells, consistent with Tpex more responsive than Tex
  - secondary lymphoid tissues (like LNs) are important for PD-1 blockade, **removing tumor-draining LN compromises efficacy of ICB**
@@ -2129,6 +2136,13 @@
  - D-J joining happens first, then V-D-J joining for TCR β
  - CDR1-2 in V gene, CDR3 at junction of V, (D), and J
  - first sequencing-based techniques to look at CDR3 looked at CDR3 length distributions (electrophoresis of PCR fragments from amplifying across CDR3), Gaussian (normal) distribution with polyclonal TCRs and skewed with clonal enrichment
+# Single cell transcriptomics identifies pathogenic T-helper 17.1 cells and pro-inflammatory monocytes in immune checkpoint inhibitor-related pneumonitis
+ - enrichment of CD4s and CD8s in ICI-pneumonitis bronchoalveolar lavage fluid, also DCs enriched
+ - enriched CD4s showed increased pathogenic Th 17.1, type 1 Tregs, naive-like cells, high expression of *TBX21* (T-bet), RORC, IFN-γ, *IL-17A*, *CSF2*, cytotoxicity genes
+ - enriched CD8s: TEMs
+ - myeloid cells in ICI-pneumonitis samples: depleted of anti-inflammatory resident alveolar macrophages, enriched for pro-inflammatory monocytes (M1-like)
+ - feedforward loop between Th17.1 cells (produce GM-CSF) and pro-inflammatory monocytes (respond to GM-CSF, produce IL-23 that Th17.1 respond to) seen here, also characterized in different autoimmune diseases
+ - **they don't specifically have proliferating T clusters (although they do see higher activation which may be functionally redundant), so I can see if proliferating (CD4) T cells are up in pneumonitis**
 # SLC7A7 is a prognostic biomarker correlated with immune infiltrates in non-small cell lung cancer
  - SLC7A7 expression associated with poor overall survival in lung cancer patients, positively correlated with immune cell infiltration
 # Society for immunotherapy of cancer (SITC) consensus definitions for immune checkpoint inhibitor-associated immune-related adverse events (irAEs) terminology
@@ -2676,6 +2690,12 @@
  - **possible sources of irAEs: aggravation of silent pre-existing autoimmune condition, neo-autoimmune or inflammatory disorder due to breakdown of self-tolerance, disruption of immune homeostasis in tissue (not sure exactly what this means), bystander self-tissue damage (on target, off tumor response), undesired reactions to checkpoint blockade (expression of co-inhibitory molecules on non-T cells for instance)**
  - **similarities between pathogenic, inflammation-driving Th17 (and Th1) cells and exhausted T cells could be exploited to treat cancer without inducing irAEs: PDPN expressed on Th17 cells and negatively regulates Th17 pathogenicity, PDPN also part of co-inhibitory gene module upregulated in cancer; PROCR also expressed in Th17 cells (also negatively regulates pathogenicity via repressing IL-1R) and exhausted T cells (PROCR deficiency inhibits tumor growth)**
  - another idea to limit irAEs from ICI is to treat the autoimmune side effects, for example with TNF blockade (which can even enhance ICI efficacy in targeting tumor beyond limiting irAEs, **not sure of mechanism here**)
+# Thymus alterations and susceptibility to immune checkpoint inhibitor myocarditis
+ - ICI treatment of thymic epithelial tumors more frequently associated with ICI myocarditis than other tumor types
+ - ICI myocarditis more severe and occurs earlier in patients with thymic epithelial tumors vs. other cancer types
+ - higher anti-acetylcholine antibody levels (proxy for thymic autoimmunity) in ICI myocarditis patients
+ - tracks with association between thymic epithelial tumors and autoimmune diseases
+ - hyperplastic thymus (oval shape and convex margin) associated with ICI myocardiits even pre-ICI
 # TIGIT<sup>+</sup> NK cells in combination with specific gut microbiota features predict response to checkpoint inhibitor therapy in melanoma patients
  - TIGIT upregulated in T cells and CD56<sup>high</sup> NK cells of ICB responders
  - bacterial taxa associated with response (like *Ruminococcus torques*) or failure (like *Barnesiella intestinihominis*) to ICB
