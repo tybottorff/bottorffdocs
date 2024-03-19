@@ -11,15 +11,42 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
-library(Rsamtools)
-library(ggplot2)
+library(knitr)
 library(dplyr)
-library(GenomicAlignments)
-library(Rsubread)
-library(ATACseqQC)
-library(TxDb.Hsapiens.UCSC.hg38.knownGene)
-library(soGGi)
+library(ggplot2)
+library(ggthemes)
+library(ggbeeswarm)
+library(viridis)
 library(stringr)
+library(readxl)
+library(kableExtra)
+library(RColorBrewer)
+library(plotly)
+library(tidyr)
+library(gtools)
+library(corrplot)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(stringr) # string processing
+library(dplyr) # dataframe handling
+library(readxl) # load excel files
+library(ggplot2); # plotting
+library(circlize) # get the color gradient function (color ramp) for heatmaps
+library(apird)
+library(ATACseqQC)
+library(GenomicAlignments)
+library(chromVAR)
+library(soGGi)
+library(DiffBind)
+library(EnsDb.Hsapiens.v86) # this is used for annotation data
+library(readr)
+library(edgeR)
+library(ComplexHeatmap)
+library(ChIPpeakAnno)
+library(ggrepel)
+library(ggpubr)
+library(ggvenn)
+library(msigdbr)
+library(fgsea)
 
 ```
 
@@ -44,12 +71,17 @@ theme_set(
 
 ```{r}
 
-baseDir <- getwd()
+# set base directory to folder above current analyses folder
+baseDir <- gsub("/analyses$", "", getwd())
+
+# saved data directory
 dataDir <- function(fname) {
-  return (file.path(baseDir,'../raw_data', fname))
+  return (file.path(baseDir,'saved_data', fname))
 }
+
+# figures directory
 plotDir <- function(fname) {
-  return (file.path(baseDir,'../figures', fname))
+  return (file.path(baseDir,'figures', fname))
 }
 
 projects = c("P576-1")
@@ -93,9 +125,9 @@ if (file.exists(pathToDataFile)) {
 
 annotations = dplyr::select(annotations, -c("studyGroup", "donorId"))
 
-donorKey = data.frame(testID = c(),
-                      studyGroup = c(),
-                      sex = c()
+donorKey = data.frame(testID = c("xpb1020740416", "xpb184727720", "xpb330116592", "xpb43423629", "xpb689481616", "xpb842527707", "xpb846719829", "xpb851902364", "xpb92768395", "xpb98176920", "xpb99368178", "xpb99638795" ),
+                      studyGroup = c("flaring", "healthy", "healthy", "non-flaring", "healthy", "healthy", "non-flaring", "healthy", "non-flaring", "flaring", "flaring", "non-flaring" ),
+                      sex = c("female", "female", "female", "female", "male", "female", "female", "female", "female", "female", "female", "female" )
 )
 
 annotations = merge(annotations, donorKey, by = "testID")
@@ -121,11 +153,28 @@ table(design$donorId, design$studyGroup)
 
 ```
 
+# Setup colors
+
+```{r}
+
+myPalette = c('#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000')
+
+colors.cellType = c("#388F50","#9861DB", "#FF3333")
+names(colors.cellType) <- unique(design$cellType)
+
+colors.studyGroup = c("#FF6457", "#4C698F", "#FF8554", "#FF3333")
+names(colors.studyGroup) <- unique(design$studyGroup)
+
+colors.donorId = myPalette[1:length(unique(design$donorId))]
+names(colors.donorId) = unique(design$donorId)
+
+```
+
 # Setup file paths
 
 ```{r}
 
-flowcellDirectories = c("/mnt/bioinformatics/pipeline/...")
+flowcellDirectories = c("/mnt/bioinformatics/pipeline/Illumina/230118_VH00126_253_AAAV5VCHV/Project_P576-1Processed_bri_230122")
 
 # insert sizes is txt file for each lib that is collection of how long fragments are and freqs (input for histogram of frag size distribution in bp)
 fragmentFiles = list.files(file.path(flowcellDirectories, "insertSizes"), full.names = T)
@@ -175,16 +224,10 @@ fragmentDistributionsFile <- "P576-1_fragmentsize_distributions.Rdata"
 
 pathToDataFile = dataDir(fragmentDistributionsFile)
 
-# If the data file exists, load it
-if (file.exists(pathToDataFile)) {
-  load(pathToDataFile)
-  
-} else {
   # Function to read and process files, 
   unpackFragData <- function(fragmentFile, species, includeShortFrags = F){
     libid <- str_extract(fragmentFile, "lib[0-9]+")
     cat(sprintf("Counting fragments of %s... \n", libid))
-    
     fragmentDistribution <- read.table(fragmentFile)
     colnames(fragmentDistribution) <- c("nReads", "fragLen")
     
@@ -195,7 +238,7 @@ if (file.exists(pathToDataFile)) {
     }
     
     fragmentDistribution$fragmentLengths <- abs(fragmentDistribution$fragLen)
-    fragmentDistribution$normReads <- fragmentDistribution$nReads/sum(fragmentDistribution$nReads) *10^3
+    fragmentDistribution$normReads <- fragmentDistribution$nReads/sum(fragmentDistribution$nReads) * 10^3
     
     fragmentDistribution$nFragments = sum(fragmentDistribution$nReads)
     
@@ -204,7 +247,7 @@ if (file.exists(pathToDataFile)) {
     
   }
   
-  fragmentList <- lapply(design$fragmentFile, function(x) unpackFragData(x, species))
+  fragmentList <- lapply(design$fragmentFile[!is.na(design$fragmentFile)], function(x) unpackFragData(x, species))
   
   cat(sprintf("Combining fragment distributions into one dataframe...\n"))
   fragmentDistributions <- bind_rows(fragmentList)
@@ -212,7 +255,6 @@ if (file.exists(pathToDataFile)) {
   cat(sprintf("Saving datafile...\n"))
   save(fragmentDistributions,
      file = pathToDataFile)
-}
 
 fragmentDistributions <- merge(fragmentDistributions, dplyr::select(design, libid, sample_name, studyGroup, cellType, donorId), by="libid", all = T)
 
@@ -229,7 +271,7 @@ xrange = c(0,750)
 fragmentDistributionPlot  <- fragmentDistributions %>%
   dplyr::filter(fragmentLengths > xrange[1] & fragmentLengths < xrange[2]) %>%
   ggplot(aes(x = fragmentLengths, y = normReads, color = donorId, group = libid)) +
-  scale_color_manual(values = colors.donorId) +
+  #scale_color_manual(values = colors.donorId) +
   geom_line() +
   xlim(c(xrange[1],xrange[2])) +
   labs(x = "Fragment length, bp", y = expression(paste("Normalized read density (a.u.)")), color = "") + 
@@ -251,7 +293,7 @@ ggsave(plotDir("P576-1_fragmentSizeDistributions.pdf"), plot = fragmentDistribut
  - plots for this were generate using deeptools and are currently located in the flow cell directory. They are included here for completeness
  - ENCODE: Transcription start site (TSS) enrichment values are dependent on the reference files used; cutoff values for high quality data are listed in the table below, for `GRCh38 Refseq TSS annotation` we are looking for > 7, while 5-7 is still acceptable.
 
-# run this with deeptools installed in the current python environment
+# run this with deeptools installed in the current python environment, skip for now?
 cores=48
 
 computeMatrix scale-regions -S pathToBigWigs/HC1_H3K27Ac.bigWig pathToBigWigs/MS1_H3K27Ac.bigWig \
@@ -302,14 +344,16 @@ if (file.exists(pathToDataFile)) {
   load(pathToDataFile)
   
 } else {
-  TSScoverage = c()
-  for (i in 1:nrow(design)) {
-    TSScoverage_ = calculateCoverage(design$bamFile[i], TSSs)
-    TSScoverage_$libid = design$libid[i]
-    
-    TSScoverage = rbind(TSScoverage, TSScoverage_)
+    TSScoverage = c()
+  for (i in 1:1:nrow(design)) {
+    if (!is.na(design$bamFile[i])) {
+      TSScoverage_ = calculateCoverage(design$bamFile[i], TSSs)
+      TSScoverage_$libid = design$libid[i]
+      
+      TSScoverage = rbind(TSScoverage, TSScoverage_)
+    }
   }
-
+  
   cat(sprintf("Saving datafile...\n"))
   save(TSScoverage,
        file = pathToDataFile)
@@ -319,7 +363,7 @@ if (file.exists(pathToDataFile)) {
 
 # Plot TSS coverage
 
-```{r, fig.width= 8, fig.height=5, fig.align = 'center'}
+```{r}
 
 TSScoverage = merge(TSScoverage, 
                     dplyr::select(design, libid, cellType, donorId, studyGroup),
@@ -437,12 +481,12 @@ ggsave(plotDir("P576-1_totalReads_vs_alignment.pdf"), gPctAligned, height = 7, w
 
  - may want to make UCSC genome browser session with bigwig files for each library that was run, tracks representing "coverage", can be helpful to identify samples that might have seemed suspicious in any of the above metrics. Look out for samples that do not show well defined features, or that are spotty or of low intensity (in case of low reads). Later, peak calls and differential peaks will be added as bed files.
 
-
 # QC: peak calling
  - peaks were called using macs2 with the following parameters:`macs2 callpeak -t {input} -g hs -f BAMPE -n {output}`
  - peak calling: count peaks for each file (bed files, count rows), recommended 10k peaks (less means too few reads or bad data/sample prep)
 
 ```{r}
+
 peaksDataFile <- "P576-1_peaks.Rdata"
 
 pathToDataFile = dataDir(peaksDataFile)
@@ -782,6 +826,36 @@ ggsave(filename = plotDir("frips.pdf"),
 ```
 
 # QC: mitochondrial percentages
+
+```{r}
+
+all_mapped_reads <- data.frame()
+
+for (bam_file in alignmentFiles) {
+  # some reads mapped to alternative chr, but less commonly
+  mapped_reads <- idxstatsBam(bam_file) %>% dplyr::filter(seqnames %in% c(1:23, "X", "Y", "MT"))
+  mapped_reads$file <- basename(bam_file)
+  mapped_reads$libid <- sub("lib([0-9]+)_.*", "\\1", mapped_reads$file)
+  all_mapped_reads <- rbind(all_mapped_reads, mapped_reads)
+}
+
+perc_mt <- all_mapped_reads %>%
+  group_by(libid) %>%
+  summarize(mt_perc = 100*mapped[seqnames == "MT"] / sum(mapped))
+
+perc_mt
+
+p <- ggplot(perc_mt, aes(libid, mt_perc, fill = libid)) +
+  geom_bar(stat = "identity") +
+  theme(legend.position = "none",
+        axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
+  labs(x = "Lib ID", y = "Mapped counts to MT (%)")
+
+p
+
+ggsave("../figures/mt_map_perc.svg", p)
+
+```
 
 # Exclude samples with failed QC
  - here's a good stopping point to show Basilin/Stephan QC plots before moving on to try merging bam files
