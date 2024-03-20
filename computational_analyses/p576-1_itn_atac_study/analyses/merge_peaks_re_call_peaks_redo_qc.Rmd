@@ -46,14 +46,19 @@ theme_set(
 
 conda init
 conda activate samtools_env
-samtools merge ./merged.bam then just list files to merge after
+samtools merge ./output_file.bam /path/to/input_file_1.bam /path/to/input_file_2.bam etc.
 
 # Re-do peak calling on those merged bam files) to get new peaks (WAY better peaks, more representative of what we're looking for)
 # in conda base environment
 conda init
-macs2 callpeak -t test_merged.bam -g hs -f BAMPE -n test_merged
+macs2 callpeak -t input.bam -g hs -f BAMPE -n name_of_output
+# no need for .ending for output name
 
-# THEN merge these peak files together into 1 big merged peaks file (per study group I assume)
-same as for above merging
+# THEN merge these (narrow) peak files together into 1 big merged peaks file for visualization on genome browser (will just use narrow peaks/study group for Diffbind so no merging needed for that I don't think)
+
+# merging the narrow peak files across study groups: example code
+cat CD4_flaring_peaks.narrowPeak CD4_healthy_peaks.narrowPeak CD4_non-flaring_peaks.narrowPeak > CD4.narrowPeak
+sort -k1,1 -k2,2n CD4.narrowPeak > CD4_sorted.bed
+bedtools merge -i CD4_sorted.bed > CD4_merged.bed
 
 # Re-run QC script with new input, not expecting to throw anything out (because that'd be throwing out a study group at this point) but I guess it's a good sanity check?
