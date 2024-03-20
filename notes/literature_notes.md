@@ -1598,6 +1598,10 @@
  - blocking CTLA-4/PD-1 may lead to expansion and activation of pre-existing tissue-resident memory T cells
  - irAE biomarkers in gastric cancer: HLA-DR15 (higher with irAEs, perhaps via IL-17), neutrophil/platelet to lymphocyte ratios (NLR, PLR, inflammatory markers of poor prognosis and irAE development)
  - managing irAEs: corticosteroids/immunosuppression
+# Mechanisms of immune checkpoint inhibitor-mediated colitis
+ - autoimmunity from CTLA-4 deficiency likely attributable to CTLA-4 expression normally on Tregs
+ - **doesn't seem like CTLA-4 blockade depletes Tregs but rather decreases their effectiveness (unable to antagonize CD80, unable to inhibit CD4 T proliferation)**
+ - **CTLA-4 blockade leads to more naive T cell priming, consistent with more irAEs**
 # Mechanisms of immune-related adverse events during the treatment of cancer with immune checkpoint inhibitors
 ## Abstract
  - mechanisms leading to irAEs are likely similar to those promoting anti-tumor responses (expansion of T cell repertoire)
@@ -1778,6 +1782,14 @@
  - CD4<sup>+</sup> T cells that recognize neoantigens express *CXCL13* and are subdivided into clusters expressing memory and T follicular helper markers, cytolytic markers, inhibitory receptors, and IFN-γ
 # Network-based machine learning approach to predict immunotherapy response in cancer patients
  - tumor mutation burden improves model
+# Networks of CD8<sup>+</sup> T cell response activation in melanoma and vitiligo
+ - vitiligo caused by destruction of melanocytes (by CD8 T cells)
+ - melanocyte/melanoma shared antigens (MSAs) like Melan-A, tyrosinase, premalanosome (PMEL) are targets of vitiligo/anti-melanoma immune responses
+ - ICIs more effective in "hot" tumors (with better immune infiltration)
+ - **T cell infiltration into tumors can be driven by DCs recognizing tumor-derived DNA (cGAS-STING pathway), leading to IFN production, migration to tumor-draining LN , where DCs prime T cells and promote their migration to tumor via CXCL10, DCs also recruited to tumor by NKs (produce FLT3L, CCL5, XCL1)**
+ - **melanoma most likely to respond to PD-1 blockade is one expressing PD-L1 and with TILs**
+ - relapse after response to PD-1 blockade can result from LoF mutations of IFN-γ and antigen presentation pathway genes
+ - **vitiligo typically recurs (in relapse) at same location, so memory T cells persist in skin and can be reactivated**
 # Neurologic autoimmunity and immune checkpoint inhibitors
  - mostly pre-ICI predictors studied here
 # New biomarkers exploration and nomogram construction of prognostic and immune-related adverse events of advanced non-small cell lung cancer patients receiving immune checkpoint inhibitors
@@ -2151,6 +2163,9 @@
  - chronic irAEs: persist > 3 months after ICI discontinuation (active if requiring immunosuppression due to ongoing inflammation, inactive if not)
  - multisystem irAEs: irAEs in different organ systems (or different tissues within same system if in 1 system)
  - steroid-resistant irAEs: some benefit but dont resolve with steroids (vs. steroid unresponsive or dependent)
+# Soluble and cell-based markers of immune checkpoint inhibitor-associated nephritis
+ - sIL-2R (circulating form of IL-2Rα i.e. CD25) higher in blood of nephritis patients
+ - lower CD8 T, CD45RA CD8 T, memory CD27 B features of nephritis patients as well, also plasmablast expansion
 # Specificity of T cell alloreactivity
  - many alloreactive T cells are much more peptide specific than previously thought, few if any recognize only the MHC molecule
  - alloreactive T cells are polyspecific, able to recognize multiple distinct peptide-MHC complexes (perhaps why there's a high frequency of allorecognition)
