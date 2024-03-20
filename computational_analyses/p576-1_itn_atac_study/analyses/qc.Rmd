@@ -109,6 +109,7 @@ if (file.exists(pathToDataFile)) {
     metrics = dplyr::bind_rows(metrics, getMetrics(libids))
   }
   
+  # remove rows with missing values from metrics data
   metrics = metrics[complete.cases(metrics), ]
   
   # Save for offline analysis
@@ -191,6 +192,7 @@ peakFiles = list.files(file.path(flowcellDirectories, "peaks"), full.names = T, 
 names(peakFiles) = str_extract(peakFiles, "lib[0-9]+")
 
 for (i in 1:nrow(design)){
+  # assign files to each row in design df based on libid
   design$bamFile[i] = alignmentFiles[design$libid[i]]
   design$fragmentFile[i] = fragmentFiles[design$libid[i]]
   design$peakFiles[i] = peakFiles[design$libid[i]]
@@ -322,7 +324,9 @@ calculateCoverage = function(bamfile, ref) {
                           maxFragmentLength = 500, 
                           normalize = "RPM")
   
+  # sum coverage across all regions
   coverage = as.vector(colSums(coverage_@assays@data@listData[[1]]))
+  # normalize coverage
   coverage = coverage/min(coverage)
   
   coverage = data.frame(distanceToTSS, coverage)
@@ -332,6 +336,7 @@ calculateCoverage = function(bamfile, ref) {
   return(coverage)
 }
 
+# retrieve TSSs
 TSSs <- resize(genes(TxDb.Hsapiens.UCSC.hg38.knownGene), fix = "start", 1)
 seqlevelsStyle(TSSs) <- "NCBI"
 
@@ -407,6 +412,7 @@ table_data = dplyr::select(design,
                            `cell type` = cellType, 
                            `TSSe score` = TSSe_score)
 
+# round TSSe scores to one decimal place
 table_data$`TSSe score` = round(table_data$`TSSe score`, 1)
 
 table_data %>%
@@ -427,7 +433,7 @@ table_data %>%
 alignCut = 80
 readCut = 50000000
 
-# This makes a total read plots
+# This makes a total read plot
 totalReadsPlot = ggplot(design, aes(fill = donorId, y = tophatstats_total_reads/1e6, x = donorId)) + 
     geom_bar(position="stack", stat="identity") +
     labs(x = "", y = "total reads / 1e6", fill = "") + 
@@ -479,7 +485,7 @@ ggsave(plotDir("P576-1_totalReads_vs_alignment.pdf"), gPctAligned, height = 7, w
 
 ```
 
- - may want to make UCSC genome browser session with bigwig files for each library that was run, tracks representing "coverage", can be helpful to identify samples that might have seemed suspicious in any of the above metrics. Look out for samples that do not show well defined features, or that are spotty or of low intensity (in case of low reads). Later, peak calls and differential peaks will be added as bed files.
+ - may want to make UCSC genome browser session with bigwig files for each library that was run, tracks representing "coverage", can be helpful to identify samples that might have seemed suspicious in any of the above metrics. Look out for samples that do not show well defined features, or that are spotty or of low intensity (in case of low reads). Later, peak calls and differential peaks will be added as bed files
 
 # QC: peak calling
  - peaks were called using macs2 with the following parameters:`macs2 callpeak -t {input} -g hs -f BAMPE -n {output}`
@@ -561,12 +567,17 @@ if (file.exists(pathToDataFile)) {
 } else {
   
   inPeakData = c()
-  ## overlap with bam file to get count
+  # overlap with bam file to get count
   for(i in 1:nrow(design)){
+      # filter MACS2 peaks data for the current libid
       peaks_ = dplyr::filter(macs2Peaks, libid == design$libid[i])
+      # create GRanges object for peaks
       peaks_gr = GRanges(seqnames = peaks_$chr, IRanges(start = peaks_$start, end = peaks_$end), strand = "*")
+      # get fragment counts within peaks
       fragment_counts <- chromVAR::getCounts(design$bamFile[i], peaks_gr, paired = TRUE, by_rg = FALSE, format = "bam")
+      # sum fragment counts within peaks
       inPeakN = counts(fragment_counts)[,1] %>% sum
+      # append in-peak count to inPeakData
       inPeakData = rbind(inPeakData, data.frame(inPeakN = inPeakN, libid = design$libid[i]))
   }
   
@@ -845,17 +856,16 @@ perc_mt <- all_mapped_reads %>%
 
 perc_mt
 
-p <- ggplot(perc_mt, aes(libid, mt_perc, fill = libid)) +
+mito_perc_plot <- ggplot(perc_mt, aes(libid, mt_perc, fill = libid)) +
   geom_bar(stat = "identity") +
   theme(legend.position = "none",
         axis.text.x = element_text(size = 8, angle = 45, hjust = 1)) +
   labs(x = "Lib ID", y = "Mapped counts to MT (%)")
 
-p
+mito_perc_plot
 
-ggsave("../figures/mt_map_perc.svg", p)
+ggsave(plotDir("P576-1_mt_perc.pdf"), plot = mito_perc_plot, height = 8,  width = 12)
 
 ```
 
 # Exclude samples with failed QC
- - here's a good stopping point to show Basilin/Stephan QC plots before moving on to try merging bam files
