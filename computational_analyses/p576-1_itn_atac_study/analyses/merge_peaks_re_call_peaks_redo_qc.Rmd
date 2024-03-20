@@ -41,8 +41,19 @@ theme_set(
 ```
 
 # Excluding failed QC samples, merge bam files by study group. difficult to deal with different peak widths across samples, Erin did consensus peaks (which IS WRONG, this means fixed list of peaks that are all 400 bp wide doesn't take into account longer ones, looks for peak overlaps b/w samples, kind of works but is dangerous because it washes out signal). INSTEAD combine data and instead of consensus peaks MERGE data manually into one big bam file per study group (pile up reads)
-merging (bed/sam tools) goes well COMMAND LINE, but keep code here for completeness
+# in conda samtools_env environment
+# merging (bed/sam tools) goes well COMMAND LINE, but keep code here for completeness
 
-# Re-do peak calling on those merged bam files) to get new peaks (WAY better peaks, more representative of what we're looking for). THEN merge these peak files together into 1 big merged peaks file
+conda init
+conda activate samtools_env
+samtools merge ./merged.bam then just list files to merge after
 
-# Re-run QC
+# Re-do peak calling on those merged bam files) to get new peaks (WAY better peaks, more representative of what we're looking for)
+# in conda base environment
+conda init
+macs2 callpeak -t test_merged.bam -g hs -f BAMPE -n test_merged
+
+# THEN merge these peak files together into 1 big merged peaks file (per study group I assume)
+same as for above merging
+
+# Re-run QC script with new input, not expecting to throw anything out (because that'd be throwing out a study group at this point) but I guess it's a good sanity check?
