@@ -114,6 +114,10 @@
  - here, they describe a subset of human memory T<sub>H2</sub> cells confined to atopic (hypersensitivity reaction occurs in part of body not in contact with allergen) individuals that includes all allergen-specific T<sub>H2</sub> cells, denoted as T<sub>H2A</sub> cells, characterized by co-expression of CRTH2, CD49d, and CD161 and exhibit numerous functional attributes distinct from conventional T<sub>H2</sub> cells
  - transcriptome analysis reveals distinct pathway in initiation of pathogenic responses to allergen
  - elimination of these cells is indicative of clinical responses induced by immunotherapy
+# A potential mechanism of anticancer immune response coincident with immune-related adverse events in patients with renal cell carcinoma
+ - **n = 5, renal cell carcinoma patients, PBMCs before combination ICI and at onset of severe irAEs, potential dataset although not sure what to use as control (no non-irAE group) and can't find data to access**
+ - **CD8:FOXP3, GZMB:CD3, perforin 1:CD3, and PD-1:CD8 expression ratios higher at irAE onset**
+ - **find expansion of some clones in metastases after irAEs (and see these clones increased in PBMCs at irAE onset)**
 # Application of ATAC-seq in tumor-specific T cell exhaustion
  - ICB limitations: short-term nature of therapeutic effects, high individual heterogeneity
  - ICB can only temporarily restore function of some exhausted T cells because of irreversible change in epigenetics of some terminally exhausted T cells
