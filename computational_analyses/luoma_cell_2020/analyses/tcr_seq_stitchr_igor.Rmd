@@ -145,12 +145,12 @@ write.csv(full_metadata, "../saved_data/rna_tcr.csv")
 ```{r}
 
 bad_alpha <- full_metadata %>%
-  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  dplyr::rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
   select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
   filter((is.na(TRAV)) | (is.na(TRAJ)) | (is.na(TRAC)) | (is.na(TRA_CDR3)))
 
 stitchr_alpha_data <- full_metadata %>%
-  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  dplyr::rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
   select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
   filter(!(TCR_name %in% bad_alpha$TCR_name)) %>%
   mutate(TRA_leader	= NA,
@@ -169,12 +169,12 @@ stitchr_alpha_data
 write.table(stitchr_alpha_data, file = "../saved_data/tcrseq_tra_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
 
 bad_beta <- full_metadata %>%
-    rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  dplyr::rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
   select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
   filter((is.na(TRBV)) | (is.na(TRBJ)) | (is.na(TRBC)) | (is.na(TRB_CDR3)))
 
 stitchr_beta_data <- full_metadata %>%
-  rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
+  dplyr::rename(TRAV = v_gene_TRA, TRAJ = j_gene_TRA, TRBV = v_gene_TRB, TRBJ = j_gene_TRB, TRAC = c_gene_TRA, TRBC = c_gene_TRB, TRA_CDR3 = cdr3_TRA, TRB_CDR3 = cdr3_TRB) %>%
   select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC) %>%
   filter(!(TCR_name %in% bad_beta$TCR_name)) %>%
   mutate(TRA_leader	= NA,
@@ -237,41 +237,33 @@ write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", ro
 
 ```
 
-# Read in IGoR output
+# Read in IGoR output to use for TCR graph
 
 ```{r}
 
 igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
-  rename(barcode = TCR_name) %>%
-  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
-  mutate(patient_group = case_when(
-    startsWith(Patient_ID, "A") ~ "ici_no_irae",
-    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
-    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
-  mutate(irAE = case_when(
-    startsWith(Patient_ID, "A") ~ "No",
-    startsWith(Patient_ID, "B") ~ "Yes",
-    startsWith(Patient_ID, "M") ~ "Yes")) %>%
-  select(patient_group, irAE, chain, pgen, barcode, cdr3) %>%
-  filter(chain == "TRA",
-         pgen != "NaN")
+  dplyr::rename(barcode = TCR_name) %>%
+  left_join(tcrs, by = "barcode") %>%
+  select(barcode, patient, Chain, v_gene, j_gene, TRA_nt, TRA_CDR3) %>%
+  dplyr::rename(nt = TRA_nt,
+                CDR3 = TRA_CDR3) %>%
+  filter(Chain == "TRA")
 
 igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
-  rename(barcode = TCR_name) %>%
-  left_join(dehashed_combined_tcr_seq, by = "barcode") %>%
-  mutate(patient_group = case_when(
-    startsWith(Patient_ID, "A") ~ "ici_no_irae",
-    startsWith(Patient_ID, "B") ~ "ici_non_myocarditis_irae",
-    startsWith(Patient_ID, "M") ~ "ici_myocarditis_irae")) %>%
-  mutate(irAE = case_when(
-    startsWith(Patient_ID, "A") ~ "No",
-    startsWith(Patient_ID, "B") ~ "Yes",
-    startsWith(Patient_ID, "M") ~ "Yes")) %>%
-  select(Patient_ID, patient_group, irAE, chain, pgen, barcode, cdr3) %>%
-  filter(chain == "TRB",
-         pgen != "NaN") %>%
-  full_join(igor_alpha, by = c("barcode", "chain", "patient_group", "pgen", "cdr3", "irAE"))
+  dplyr::rename(barcode = TCR_name) %>%
+  left_join(tcrs, by = "barcode") %>%
+  select(barcode, patient, Chain, v_gene, j_gene, TRB_nt, TRB_CDR3) %>%
+  dplyr::rename(nt = TRB_nt,
+                CDR3 = TRB_CDR3) %>%
+  filter(Chain == "TRB") %>%
+  full_join(igor_alpha, by = c("barcode", "Chain", "patient", "v_gene", "j_gene", "nt",)) %>%
+  mutate(group = case_when(
+    startsWith(patient, "CT") ~ "no ICI",
+    startsWith(patient, "C") ~ "ICI colitis",
+    startsWith(patient, "NC") ~ "ICI no colitis"))
 
 igor_combined
+
+write.csv(igor_combined, "../saved_data/tcr_graph_input.csv")
 
 ```

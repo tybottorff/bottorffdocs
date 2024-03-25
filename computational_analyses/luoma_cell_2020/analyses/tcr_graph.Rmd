@@ -1,0 +1,92 @@
+---
+title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(tcrGraph)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Make highly expanded TCR df
+
+```{r}
+
+tcrs <- read.csv("../saved_data/tcr_graph_input.csv") %>%
+  select(-X) %>%
+  mutate(clonotype = paste(v_gene, j_gene, CDR3, sep = "_")) %>%
+  group_by(patient, clonotype, Chain) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(patient, Chain) %>%
+  arrange(-count) %>%
+  slice_head(n = 50) %>%
+  ungroup()
+
+tcrs
+
+no_irae_tcrs <- tcrs %>%
+  filter(group == "ICI no colitis") %>%
+  dplyr::select(barcode, v_gene, j_gene, nt) %>%
+  dplyr::rename(libid = barcode)
+
+irae_tcrs <- tcrs %>%
+  filter(group == "ICI colitis") %>%
+  dplyr::select(barcode, v_gene, j_gene, nt) %>%
+  dplyr::rename(libid = barcode)
+
+```
+
+# Make TCR graph
+
+```{r}
+
+no_irae_tcr_graph <- makeTcrGraph(no_irae_tcrs, link = "nt")
+
+plot(
+  no_irae_tcr_graph, 
+  #nodeScalingFactor = 30,
+  chainPalette = c("orange", "cyan", "purple", "magenta"),
+  main = "No irAE TCR graph plot"
+)
+
+irae_tcr_graph <- makeTcrGraph(irae_tcrs, link = "nt")
+
+plot(
+  irae_tcr_graph, 
+  #nodeScalingFactor = 30,
+  chainPalette = c("orange", "cyan", "purple", "magenta"),
+  main = "No irAE TCR graph plot"
+)
+
+```
