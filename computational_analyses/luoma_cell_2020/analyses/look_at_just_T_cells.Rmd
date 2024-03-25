@@ -846,3 +846,22 @@ VlnPlot(cd4s, features = c("MCM2", "MCM4", "MCM5"), group.by = "predicted.cellty
 VlnPlot(cd4s, features = c("HDAC9", "CCNG2"), group.by = "dice_singler_label", pt.size = 0)
 
 ```
+
+# Look at proliferation vs. activation
+
+```{r}
+
+#prolifs <- subset(just_T_cells, subset = predicted.celltype.l2 %in% c("CD4 Proliferating", "CD8 Proliferating"))
+
+VlnPlot(just_T_cells, features = c("CD40LG", "CD38"), group.by = "predicted.celltype.l2", pt.size = 0)
+
+VlnPlot(just_T_cells, features = c("HLA-DRB1", "HLA-DRA"), group.by = "predicted.celltype.l2", pt.size = 0)
+
+# CD69, not really higher in proliferating cells, also a marker for Trm though? so...
+# CD154/CD40LG: kinda high in CD4 prolif but moreso in CD4 CTL/TCM?TEM and MAITs
+# EGR1, low in everything except MAITs
+# CD44: lowest in proliferating cells
+# CD38: yes higher in proliferating cells but really highest in CD4 CTLs, also high in dnTs
+# HLA-DR...: B1 yes higher in proliferating cells (also CD8 naive/TEM), A (yes higher in proliferating cells also in CD8 naive), B5 kinda higher in proliferating cells
+
+```
