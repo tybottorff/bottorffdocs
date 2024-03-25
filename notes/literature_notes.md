@@ -1,6 +1,9 @@
 # Accumulation of identical T cells in melanoma and vitiligo-like leukoderma
  - numbers of T cells in small skin samples often insufficient for clonality analysis
  - **perhaps only well-expressed self proteins are efficient in inducing tolerance, so rare self proteins can induce autoreactivity?**
+# A comparison of clustering models for inference of T cell receptor antigen specificity
+ - assumption: similar sequence receptors bind similar epitopes
+ - some differences in predictive performance of models, more differences in scalability
 # Activation of CD8 T cells accelerates anti-PD-1 antibody-induced psoriasis-like dermatitis through IL-6
  - human samples: infiltration of CD8 T cells into epidermis, IL-6-dependent pathogenesis
 # Activation of human T cells by major histocompatability complex class II expressing neutrophils: proliferation in the presence of superantigen, but not tetanus toxoid
@@ -426,6 +429,8 @@
 # Clinical characteristics and treatment of immune-related adverse events of immune checkpoint inhibitors
 ## Mechanisms of irAEs
  - hypotheses: ICI usage breaks up homeostasis and reduces T cell tolerance, cross-reactivity of T cells between tumor cells and normal tissue, ICI usage can increase pre-existing autoantibody levels as well as inflammatory cytokine levels, ICI can disturb CTLA-4/PD-L1 blocks in tissue expressing those inhibitory receptors to protect normal tissue
+# Clinical drug screening reveals clofazimime potentiates the efficacy while reducing the toxicity of anti-PD-1 and CTLA-4 immunotherapy
+ - clofazimine promotes E2F1-TCF1 activation in CD8s to overcome ICB resistance and promote anti-tumor effect, counteracts pathogenic Th17s to reduce irAEs
 # Clinical outcome following checkpoint therapy in renal cell carcinoma is associated with a burst of activated CD8 T cells in blood
 ## Abstract
  - small proportion of CD4 and CD8 T cells in blood activate following ICB (express Ki67 and cell cycle genes, activation markers HLA-DR, CD38, also effector molecules like granzymes, CXCR3)
@@ -542,7 +547,7 @@
  - T cell responses were polyfunctional (IFN-γ, MIP-1β, TNF-α)
  - all 8 patients with clinical benefit had at least 1 irAE, but 87% of all patients had at least one irAE, so it doesn't seem like there was a huge difference in irAE incidence between those with clinical benefit and those without
 # CTLA-4 blockade increases Th17 cells in patients with metastatic melanoma
- - Th17 CD4<sup>+</sup> T cells produce IL-17, potent inducers of tissue inflammation and autoimmunity
+ - **Th17 CD4<sup>+</sup> T cells produce IL-17, potent inducers of tissue inflammation and autoimmunity, connection to irAEs likely?**
  - activated PBMCs (*in vitro*) show higher IL-17 production post CTLA-4 blockade
 # Cutaneous manifestations associated with immune checkpoint inhibitors
  - proposed mechanisms: activation of T cells against common antigens in normal tissues and tumor cells (evidenced by association between vitiligo and melanoma for example), increased release of proinflammatory cytokines (ICB enhances Th1/17), association with specific HLA variants (mechanism unclear, seems irAE organ specific)
@@ -1346,6 +1351,8 @@
  - case report
 # Immunosensitivity mediated by downregulated AKT1-SKP2 induces anti-PD-1-associated thyroid immune injury
  - although female hormones suspected to cause susceptibility to immune injury, dividing female patients by age (to look at pre/post menopausal females) didn't yield any differences
+# Immunotherapy goes local: the central role of lymph nodes in driving tumor infiltration and efficacy
+ - previous literature: ICB resistance related to lack of TILs, tumor-draining LN important for CTLA-4 blockade (perceived mechanism involving T cell priming here) but there's also evidence for tumor-draining LN being important for PD-1 blockade
 # Immunotherapy in oncology and the kidneys: a clinical review of the evaluation and management of kidney immune-related adverse events
  - acute tubulo-interstitial nephritis is most common kidney irAE, glomerular lesions and electrolyte disturbances also seen
  - recommend early use of carticosteroids when appropriate
@@ -1405,6 +1412,10 @@
 # Induction of T cell exhaustion by JAK1/3 inhibition in the treatment of alopecia areata
  - alopecia areata is an autoimmune disease caused by T cell-mediated destruction of the hair follicle
  - JAK1/3 inhibitors disrupt γc cytokine signaling (important for T cell development, activation, homeostasis), selectively induces T cell exhaustion to help treat this autoimmune disease
+# Inhibition of IL-25/IL-17RA improves immune-related adverse events of checkpoint inhibitors and reveals antitumor activity
+ - mouse model
+ - prednisolone, anti IL-6, anti-TNFalpha, anti-IL-25 (IL-17E), and anti-IL-17RA all reduce irAEs in mice but only anti-IL25/17-RA also exert antitumor activity (and others actually add to tumor burden)
+ - **mechanism: IL-25/IL-17RA blockade reduces organ-infiltrating lymphocyte numbers to reduce irAEs**
 # Innate lymphoid cells (ILCs): cytokine hubs regulating immunity and tissue homeostasis
  - ILCs enriched at mucosal barriers, activated by stress signals and epithelial/myeloid-derived cytokines, respond by secreting effector cytokines to maintain survival and mucosal integrity
  - ILCs do not possess rearranged antigen-specific cell receptors (TCR/BCR) but they mirror T helper cell diversity regarding cytokine secretion and transcription factors regulating differentiation
@@ -1499,6 +1510,9 @@
  - *PD-L2* expression levels also correlate with response to nivolumab
  - Th1 response dominance in responders (higher *TBX21/GATA3* ratio)
  - see oligoclonal T cell expansion in responders' TILs
+# Intratumoral T cell receptor repertoire composition predicts overall survival in patients with pancreatic ductal adenocarcinoma
+ - high intratumoral TCR diversity associated with survival, as was high T cell abundance in PBMCs
+ - subset of TCRs predicts survival, more likely to be in CD8 TEM and CD4 Treg subsets perhaps recognizing beta islet-derived autoantigens...
 # Intratumoral Tcf1<sup>+</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells with stem-like properties promote tumor control in response to vaccination and checkpoint blockade immunotherapy
  - mostly mouse
  - human (and mouse) tumors house ~undifferentiated Tcf1<sup>+</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells that have stem-like properties (expansion, regeneration, differentiation), differentiate into Tcf1<sup>-</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells upon ICB
@@ -1673,6 +1687,8 @@
 #### CD4<sup>+</sup> T cells
  - CD4 coreceptors bind class II MHC molecules
  - class II MHC molecules expressed by APCs like DCs, macrophages
+# Microbial metabolite enhances immunotherapy efficacy by modulating T cell stemness in pan-cancer
+ - *L. johnsonii* enhances ICB via CD8s, cooperates with *C. sporogenes* to produce IPA (indole-3-propionic acid) which activates progenitor exhausted CD8s (H3K27 acetlyation increase at superenhancer of *Tcf7*)
 # Mismatch repair deficiency is not sufficient to elicit tumor immunogenicity
 ## Abstract
  - DNA mismatch repair deficiency is associated with high tumor mutational burden and ICB sensitivity, but most mismatch repair deficient tumors are not responsive to ICB
@@ -1751,6 +1767,9 @@
  - TCR diversity, CD8<sup>+</sup> T cell clonal expansion, tumor mutational burden predict irAEs
 ## Discussion
  - *LCP1* and *ADPGK* are genes related to T cell activation that predict irAEs
+# Multiple environmental antigens may trigger autoimmunity in psoriasis through T cell receptor polyspecificity
+ - psoriasis: T cell mediated autoimmune disease, *HLA-C06:02* is main risk gene (mediates autoimmune response against ADAMTSL5 autoepitope in melanocytes)
+ - identify peptides from wheat, yeast, microbes, tobacco, pathogens that activate psoriasis-associated TCRs
 # Multiple instance learning to predict immune checkpoint blockade efficacy using neoantigen candidates
  - predict ICB efficacy using neoantigen features (machine learning) to improve general imperfect prediction of ICB response from neoantigen load
  - SNV-derived neoantigens better predictor perhaps, not those from fusion genes, also those from indels seems to predict ICB response perhaps
@@ -1810,6 +1829,12 @@
 # Nivolumab in resected and unresectable metastatic melanoma: characteristics of immune-related adverse events and association with outcomes
  - irAEs in 68% of patients (mostly not severe)
  - **difference in overall survival between those with and without irAEs, irAEs incidence correlate with increase overall survival**
+# Nivolumab receptor occupancy on effector regulatory T cells predicts clinical benefit
+ - previous literature: high PD-1 expression on Teffs and low PD-1 expression on Tregs associated with clinical benefit from PD-1 blockade, **PD-1 blockade can suppress antitumor activity if Tregs activated, more likely with higher PD-1 expression on Tregs**
+ - PD-1 receptor occupancy lower on eTregs in patients with clinical benefit, negative association between PD-1 occupancy on eTregs and mortality
+ - baseline CD4 TCMs higher in those who go on to develop irAEs
+ - PD-1 positivity in T cell subsets not associated with irAE development
+ - slightly lower PD-1 occupancy on eTregs in irAE patients (not significant)
 # NK-cell exhaustion, B-cell exhaustion, and T cell exhaustion - the differences and similarities
  - exhaustion is not the same as anergy (senescence and suppression)
  - exhaustion: impaired state, progressive loss of functionalities, reduced proliferative capacity, triggered by chronic antigen stimulation (chronic infection, cancer)
@@ -1981,6 +2006,8 @@
 ### TiRP explains T<sub>reg</sub> plasticity in the tumor microenvironment
  - previous literature: naive T thymic emigrants can be peripherally induced to adopt regulatory phenotype, and T<sub>regs</sub> can lose *FOXP3* expression and adopt pro-inflammatory phenotype (exT<sub>regs</sub>), expanded clones observed as both T<sub>regs</sub> and conventional T cells may represent such lineages (mixed clones)
  - hypothesis: TCR features of these mixed clones may be intermediate, increasing conversion susceptibility
+# Restriction of PD-1 function by *cis*-PD-L1/CD80 interactions is required for optimal T cell responses
+ - CD80 binds PD-L1 in *cis* on primary activated DCs, interferes with PD-L1 accessing PD-1 on T cells (which would have otherwise inhibited T cell activation)
 # Reversal of immune-checkpoint inhibitor fulminant myocarditis using personalized-dose-adjusted abatacept and ruxolitinib: proof of concept
  - Abatacept: CTLA-4 fusion protein targeting CD86 on APCs, leads to global T cell anergy
 # Reversing T cell exhaustion in cancer: lessons learned from PD-1/PD-L1 immune checkpoint blockade
@@ -2589,6 +2616,8 @@
  - ST2 implicated in inflammatory conditions
 # The JAK-STAT pathway as a therapeutic strategy in cancer patients with immune checkpoint inhibitor-induced colitis: a narrative review
  - JAK-STAT inhibition helps ICI colitis, perhaps through modulation of CD8 Trms
+# The landscape of immune checkpoint-related long non-coding RNAs in core regulatory circuitry reveals implications for immunoregulation and immunotherapy responses
+ - lncRNAs such as MIR155HG and ADAMTS9-AS2 play central roles in immune regulation
 # The loss of CTLA-4 leads to massive lymphoproliferation and fatal multiorgan tissue destruction, revealing a critical negative regulatory role of CTLA-4
  - previous studies had suggested both positive and negative roles for CTLA-4 in T cell activation, **not sure if any activation roles are still thought to be true**
  - CTLA-4 mouse KO leads to lymphoproliferative disease, lymphocyte infiltration into tissue, tissue destruction, severe myocarditis and pancreatitis, death by 3-4 weeks of age
