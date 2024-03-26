@@ -49,7 +49,7 @@ for (i in seq(nrow(metadata))) {
   bam_paths <- metadata$bam_paths[i]
   
   # Define the output filename based on Condition and Tissue
-  output_file <- paste0("../saved_data/merged_", condition, "_", tissue, ".bam")
+  output_file <- paste0("/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/merged_alignments/merged_", condition, "_", tissue, ".bam")
   
   # Create the samtools merge command
   merge_command <- paste("samtools merge", output_file, bam_paths)
