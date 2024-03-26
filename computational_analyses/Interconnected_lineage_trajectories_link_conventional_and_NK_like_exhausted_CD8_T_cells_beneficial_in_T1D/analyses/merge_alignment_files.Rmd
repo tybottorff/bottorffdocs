@@ -1,0 +1,64 @@
+---
+title: "Interconnected lineage trajectories link conventional and NK-like exhausted CD8+ T cells beneficial in T1D"
+output: pdf_document
+---
+
+ - data reproduction of Erin Witkop's ATAC-seq
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(dplyr)
+library(tidyr)
+
+```
+
+# Read in metadata
+
+```{r}
+
+metadata <- read.csv("../saved_data/samplesheet.csv") %>%
+  select(-X) %>%
+  group_by(Condition, Tissue) %>%
+  summarize(bam_paths = paste(bamReads, collapse = " ")) %>%
+  ungroup()
+
+metadata
+
+```
+
+# Write script to merge alignment files per group
+
+```{r}
+
+# Open the file in append mode
+file_conn <- file("merge_batches.sh", open = "a")
+
+# Loop through each group in the metadata
+for (i in seq(nrow(metadata))) {
+  # Extract Condition and Tissue for the current group
+  condition <- metadata$Condition[i]
+  tissue <- metadata$Tissue[i]
+  
+  # Extract the space-separated BAM file paths for the current group
+  bam_paths <- metadata$bam_paths[i]
+  
+  # Define the output filename based on Condition and Tissue
+  output_file <- paste0("../saved_data/merged_", condition, "_", tissue, ".bam")
+  
+  # Create the samtools merge command
+  merge_command <- paste("samtools merge", output_file, bam_paths)
+  
+  # Write the merge command to the shell script file
+  cat(merge_command, file = file_conn, "\n")
+}
+
+# Close the file connection
+close(file_conn)
+
+```
