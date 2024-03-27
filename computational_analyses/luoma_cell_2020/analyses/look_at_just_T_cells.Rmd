@@ -379,16 +379,16 @@ t_cell_metadata
 
 patient_barcode_connect <- t_cell_metadata %>%
   group_by(orig.ident) %>%
-  slice(1) %>%
+  dplyr::slice(1) %>%
   ungroup() %>%
   mutate(patient = sub("-.*", "", orig.ident),
          barcode_num = sub(".*_", "", barcode)) %>%
-  select(patient, barcode_num)
+  dplyr::select(patient, barcode_num)
 
 patient_barcode_connect
 
 tcr <- read.csv("../raw_data/tcr/GSE144469_TCR_filtered_contig_annotations_all.csv") %>%
-  select(-X) %>%
+  dplyr::select(-X) %>%
   filter(high_confidence == "True",
          productive == "True",
          cdr3 != "None",
@@ -399,13 +399,13 @@ tcr <- read.csv("../raw_data/tcr/GSE144469_TCR_filtered_contig_annotations_all.c
          full_length == "True",
          is_cell == "True",
          chain != "Multi") %>%
-  select(-is_cell, -high_confidence, -length, -full_length, -productive, -raw_clonotype_id, -raw_consensus_id, -contig_id) %>%
+  dplyr::select(-is_cell, -high_confidence, -length, -full_length, -productive, -raw_clonotype_id, -raw_consensus_id, -contig_id) %>%
   # if a cell had two or more qualified chains of the same type, keep only that chain with the highest UMI count
   group_by(barcode, chain) %>%
   arrange(-umis) %>%
-  slice(1) %>%
+  dplyr::slice(1) %>%
   ungroup() %>%
-  select(-reads, -umis) %>%
+  dplyr::select(-reads, -umis) %>%
   pivot_wider(names_from = "chain", values_from = c("v_gene", "d_gene", "j_gene", "c_gene", "cdr3", "cdr3_nt")) %>%
   mutate(patient = sub(".*-", "", barcode)) %>%
   left_join(patient_barcode_connect, by = "patient") %>%
@@ -455,7 +455,7 @@ tcr <- tcr %>%
 rownames(tcr) <- tcr$barcode
 
 tcr <- tcr %>%
-  select(-barcode)
+  dplyr::select(-barcode)
 
 ```
 
@@ -863,5 +863,35 @@ VlnPlot(just_T_cells, features = c("HLA-DRB1", "HLA-DRA"), group.by = "predicted
 # CD44: lowest in proliferating cells
 # CD38: yes higher in proliferating cells but really highest in CD4 CTLs, also high in dnTs
 # HLA-DR...: B1 yes higher in proliferating cells (also CD8 naive/TEM), A (yes higher in proliferating cells also in CD8 naive), B5 kinda higher in proliferating cells
+
+```
+
+# Check overall levels of proliferation/activation markers in irAE groups
+
+```{r}
+
+VlnPlot(tcr_and_rna, features = c("MKI67", "CD40LG", "CD38", "HLA-DRB1", "HLA-DRA"), group.by = "group", pt.size = 0)
+
+```
+
+# DEGs for irAE groups vs. each other (no vs. yes irAE)
+
+```{r}
+
+tcr_and_rna_ici <- subset(tcr_and_rna, subset = group != "no ICI")
+
+tcr_and_rna_ici_pseudobulk <- AggregateExpression(tcr_and_rna_ici, assays = "SCT", return.seurat = T, group.by = c("orig.ident", "group"))
+
+tcr_and_rna_ici_pseudobulk$group <- factor(tcr_and_rna_ici_pseudobulk$group, levels = c("ICI colitis", "ICI no colitis"))
+
+Idents(tcr_and_rna_ici_pseudobulk) <- "group"
+
+#Idents(cd4_prolif_ici_pseudobulk)
+
+tcr_and_rna_ici_pseudobulk_degs <- FindMarkers(object = tcr_and_rna_ici_pseudobulk, 
+                         ident.1 = "ICI colitis", 
+                         ident.2 = "ICI no colitis")
+
+tcr_and_rna_ici_pseudobulk_degs
 
 ```
