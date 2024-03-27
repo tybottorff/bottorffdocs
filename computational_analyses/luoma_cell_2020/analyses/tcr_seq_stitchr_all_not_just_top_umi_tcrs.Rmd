@@ -1,0 +1,223 @@
+---
+title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
+output: pdf_document
+---
+
+ - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(circlize)
+library(Biostrings)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Read in RNA RDS
+
+```{r}
+
+rna <- readRDS("../saved_data/T_cells.rds")
+
+```
+
+# Work with RNA metadata
+
+```{r}
+
+rna_metadata <- as_tibble(rna@meta.data)
+
+rna_metadata$barcode <- colnames(rna)
+
+rna_metadata
+
+patient_barcode_connect <- rna_metadata %>%
+  group_by(orig.ident) %>%
+  dplyr::slice(1) %>%
+  ungroup() %>%
+  mutate(patient = sub("-.*", "", orig.ident),
+         barcode_num = sub(".*_", "", barcode)) %>%
+  dplyr::select(patient, barcode_num)
+
+patient_barcode_connect
+
+```
+
+# Read in TCR-seq data
+
+```{r}
+
+tcr <- read.csv("../raw_data/tcr/GSE144469_TCR_filtered_contig_annotations_all.csv") %>%
+  dplyr::select(-X) %>%
+  dplyr::filter(high_confidence == "True",
+         productive == "True",
+         cdr3 != "None",
+         !(is.na(cdr3)),
+         !(is.na(v_gene)),
+         !(is.na(j_gene)),
+         !(is.na(c_gene)),
+         full_length == "True",
+         is_cell == "True",
+         chain != "Multi") %>%
+  dplyr::select(-is_cell, -high_confidence, -length, -full_length, -productive, -raw_clonotype_id, -raw_consensus_id, -contig_id) %>%
+  mutate(patient = sub(".*-", "", barcode)) %>%
+  left_join(patient_barcode_connect, by = "patient") %>%
+  mutate(barcode = sub("-.*", "-1_", barcode)) %>%
+  mutate(barcode = paste(barcode, barcode_num, sep = "")) %>%
+  arrange(barcode, chain, v_gene, j_gene)
+
+tcr
+
+```
+
+# Prep TRA stitchr df
+
+```{r}
+
+stitchr_alpha_data <- tcr %>%
+  filter(chain == "TRA") %>%
+  dplyr::rename(TRAV = v_gene, TRAJ = j_gene, TRAC = c_gene, TRA_CDR3 = cdr3, TCR_name = barcode) %>%
+  filter(!(is.na(TRAV)),
+         !(is.na(TRAJ)),
+         !(is.na(TRA_CDR3))) %>%
+  mutate(TRBV = NA,
+         TRBJ = NA,
+         TRBC = NA,
+         TRB_CDR3 = NA,
+         TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC, TRA_leader, TRB_leader, Linker, Link_order, TRA_5_prime_seq, TRA_3_prime_seq, TRB_5_prime_seq, TRB_3_prime_seq)
+
+stitchr_alpha_data
+
+# 75,164 rows
+
+write.table(stitchr_alpha_data, file = "../saved_data/tcrseq_tra_for_stitchr_all_tcrs.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+stitchr_beta_data <- tcr %>%
+  filter(chain == "TRB") %>%
+  dplyr::rename(TRBV = v_gene, TRBJ = j_gene, TRBC = c_gene, TRB_CDR3 = cdr3, TCR_name = barcode) %>%
+  filter(!(is.na(TRBV)),
+         !(is.na(TRBJ)),
+         !(is.na(TRB_CDR3))) %>%
+  mutate(TRAV = NA,
+         TRAJ = NA,
+         TRAC = NA,
+         TRA_CDR3 = NA,
+         TRA_leader	= NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC, TRA_leader, TRB_leader, Linker, Link_order, TRA_5_prime_seq, TRA_3_prime_seq, TRB_5_prime_seq, TRB_3_prime_seq)
+
+stitchr_beta_data
+
+# 71,936 rows
+
+write.table(stitchr_beta_data, file = "../saved_data/tcrseq_trb_for_stitchr_all_tcrs.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+```
+
+# Read in stitchr output, fix NA nts
+
+```{r}
+
+stitchr_alpha_output <- read.delim("../saved_data/stitchr_tra_all_tcrs_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_beta_output <- read.delim("../saved_data/stitchr_trb_all_tcrs_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_output <- stitchr_alpha_output %>%
+  full_join(stitchr_beta_output, by = colnames(stitchr_alpha_output)) %>%
+  mutate(Chain = if_else(is.na(TRBV), "TRA", "TRB")) %>%
+  arrange(TCR_name, Chain, TRAV, TRBV, TRAJ, TRBJ)
+
+# Columns that need further separation by space
+columns_to_split_by_space <- c("TRA_nt", "TRB_nt")
+
+# Split the specified columns by space
+for (col_name in columns_to_split_by_space) {
+  stitchr_output[[col_name]] <- sapply(stitchr_output[[col_name]], function(x) unlist(strsplit(x, " ")))
+}
+
+# Define a function to replace with NA if length is 0
+replace_empty_with_na <- function(x) {
+  if (length(x) == 0) {
+    return(NA)
+  } else {
+    return(x)
+  }
+}
+
+# Replace values in the specified columns with real NA
+cols_to_update <- c("TRA_nt", "TRB_nt")
+
+for (col_name in cols_to_update) {
+  stitchr_output[[col_name]] <- lapply(stitchr_output[[col_name]], replace_empty_with_na)
+}
+
+stitchr_output$TRA_nt <- sapply(stitchr_output$TRA_nt, as.character)
+stitchr_output$TRA_aa <- sapply(stitchr_output$TRA_aa, as.character)
+stitchr_output$TRB_nt <- sapply(stitchr_output$TRB_nt, as.character)
+stitchr_output$TRB_aa <- sapply(stitchr_output$TRB_aa, as.character)
+stitchr_output$Linked_nt <- sapply(stitchr_output$Linked_nt, as.character)
+
+stitchr_output
+
+```
+
+# Modify stitchr output for TCR graph
+
+```{r}
+
+tcr$nt = if_else(is.na(stitchr_output$TRA_nt), stitchr_output$TRB_nt, stitchr_output$TRA_nt)
+
+tcr_graph_input <- tcr %>%
+  mutate(group = case_when(
+    startsWith(patient, "CT") ~ "no ICI",
+    startsWith(patient, "C") ~ "ICI colitis",
+    startsWith(patient, "NC") ~ "ICI no colitis")) %>%
+  filter(!(is.na(nt)))
+
+tcr_graph_input
+
+write.csv(tcr_graph_input, "../saved_data/tcr_graph_input.csv")
+
+```

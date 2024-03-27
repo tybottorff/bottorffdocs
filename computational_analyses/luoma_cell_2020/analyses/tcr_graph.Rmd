@@ -18,6 +18,12 @@ library(dplyr)
 library(stringr)
 library(tidyr)
 library(tcrGraph)
+library(tidyverse)
+library(igraph)
+library(graphlayouts)
+library(ggraph)
+library(viridis)
+library(gridExtra)
 
 ```
 
@@ -43,50 +49,122 @@ theme_set(
 ```{r}
 
 tcrs <- read.csv("../saved_data/tcr_graph_input.csv") %>%
-  select(-X) %>%
-  mutate(clonotype = paste(v_gene, j_gene, CDR3, sep = "_")) %>%
-  group_by(patient, clonotype, Chain) %>%
+  dplyr::select(-X) %>%
+  mutate(clonotype = paste(v_gene, j_gene, cdr3, sep = "_")) %>%
+  group_by(patient, clonotype, chain) %>%
   mutate(count = n()) %>%
   ungroup() %>%
-  group_by(patient, Chain) %>%
+  # look at highly expanded per patient
+  group_by(patient, chain) %>%
   arrange(-count) %>%
-  slice_head(n = 50) %>%
-  ungroup()
+  dplyr::slice_head(n = 350) %>%
+  ungroup() %>%
+  dplyr::rename(libid = barcode)
 
 tcrs
 
-no_irae_tcrs <- tcrs %>%
-  filter(group == "ICI no colitis") %>%
-  dplyr::select(barcode, v_gene, j_gene, nt) %>%
-  dplyr::rename(libid = barcode)
-
-irae_tcrs <- tcrs %>%
-  filter(group == "ICI colitis") %>%
-  dplyr::select(barcode, v_gene, j_gene, nt) %>%
-  dplyr::rename(libid = barcode)
-
 ```
 
-# Make TCR graph
+# Make TCR graph with Igraph: no irAE
 
 ```{r}
 
+no_irae_tcrs <- tcrs %>%
+  filter(group == "ICI no colitis")
+
 no_irae_tcr_graph <- makeTcrGraph(no_irae_tcrs, link = "nt")
 
-plot(
-  no_irae_tcr_graph, 
-  #nodeScalingFactor = 30,
-  chainPalette = c("orange", "cyan", "purple", "magenta"),
-  main = "No irAE TCR graph plot"
-)
+no_irae_tcr_igraph <- tcrGraphToIgraph(no_irae_tcr_graph)
+
+V(no_irae_tcr_igraph)$`Number of Cells` <- V(no_irae_tcr_igraph)$value
+V(no_irae_tcr_igraph)$Chain <- V(no_irae_tcr_igraph)$group
+
+dev.new(width = 9.5, length = 8)
+theme_set(theme_bw(20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.key = element_blank()))
+ggraph(no_irae_tcr_igraph, "fr") +
+    geom_edge_link(
+        edge_width = 1,
+        #edge_color = edgeColor
+    ) +
+    geom_node_point(
+        aes(fill = Chain, size = `Number of Cells`),
+        shape = 21,
+        color = "black"
+    ) +
+    #scale_fill_manual(values = nodePalette) +
+    guides(fill = guide_legend(override.aes = list(size = 5))) +
+    ggtitle("no irAE TCRs")
+
+# Compute the average connectivity
+num_edges <- ecount(no_irae_tcr_igraph)
+num_vertices <- vcount(no_irae_tcr_igraph)
+average_connectivity <- 2 * num_edges / num_vertices
+
+# Print the results
+cat("Average Connectivity (no irAE):", average_connectivity, "\n")
+cat("Number of Edges (no irAE):", num_edges, "\n")
+cat("Number of Vertices (no irAE):", num_vertices, "\n")
+
+```
+
+# # Make TCR graph with Igraph: yes irAE
+
+```{r}
+
+irae_tcrs <- tcrs %>%
+  filter(group == "ICI colitis")
 
 irae_tcr_graph <- makeTcrGraph(irae_tcrs, link = "nt")
 
-plot(
-  irae_tcr_graph, 
-  #nodeScalingFactor = 30,
-  chainPalette = c("orange", "cyan", "purple", "magenta"),
-  main = "No irAE TCR graph plot"
-)
+irae_tcr_igraph <- tcrGraphToIgraph(irae_tcr_graph)
+
+V(irae_tcr_igraph)$`Number of Cells` <- V(irae_tcr_igraph)$value
+V(irae_tcr_igraph)$Chain <- V(irae_tcr_igraph)$group
+
+dev.new(width = 9.5, length = 8)
+theme_set(theme_bw(20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.key = element_blank()))
+ggraph(irae_tcr_igraph, "fr") +
+    geom_edge_link(
+        edge_width = 1,
+        #edge_color = edgeColor
+    ) +
+    geom_node_point(
+        aes(fill = Chain, size = `Number of Cells`),
+        shape = 21,
+        color = "black"
+    ) +
+    #scale_fill_manual(values = nodePalette) +
+    guides(fill = guide_legend(override.aes = list(size = 5))) +
+    ggtitle("irAE TCRs")
+
+# Compute the average connectivity
+num_edges <- ecount(irae_tcr_igraph)
+num_vertices <- vcount(irae_tcr_igraph)
+average_connectivity <- 2 * num_edges / num_vertices
+
+# Print the results
+cat("Average Connectivity (irAE):", average_connectivity, "\n")
+cat("Number of Edges (irAE):", num_edges, "\n")
+cat("Number of Vertices (irAE):", num_vertices, "\n")
+
+```
+
+# Compute stats for irAE TCRs
+
+```{r}
+
+# Compute the average connectivity
+num_edges <- ecount(irae_tcr_graph)
+num_vertices <- vcount(irae_tcr_graph)
+average_connectivity <- 2 * num_edges / num_vertices
+
+# Other statistics
+num_edges
+num_vertices
+
+# Print the results
+cat("Average Connectivity:", average_connectivity, "\n")
+cat("Number of Edges:", num_edges, "\n")
+cat("Number of Vertices:", num_vertices, "\n")
 
 ```
