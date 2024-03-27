@@ -1,0 +1,380 @@
+---
+title: "Interconnected lineage trajectories link conventional and NK-like exhausted CD8+ T cells beneficial in T1D"
+output: pdf_document
+---
+
+ - data reproduction of Erin Witkop's ATAC-seq
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(Rsamtools)
+library(ggplot2)
+library(dplyr)
+library(GenomicAlignments)
+library(Rsubread)
+library(ATACseqQC)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(soGGi)
+library(BiocParallel)
+register(SerialParam())
+library(DiffBind)
+#library(ChIPseeker)
+#library(org.Hs.eg.db)
+library(tidyr)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Prep metadata
+
+```{r}
+
+time <- rep(c("baseline", "week 104"), each = 3)
+
+cells <- rep(c("CD57pos_DP_NN_CD8", "CD57neg_DP_NN_CD8", "DN_NN_CD8"), times = 1)
+
+metadata <- data.frame(Time = time, Cells = cells)
+
+# CD57 neg ~= PD-1 pos (see figure 1A)
+
+bam_dir <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/merged_alignments"
+
+bam_files <- list.files(bam_dir, pattern = ".bam$", full.names = TRUE)
+
+metadata$bamReads <- bam_files
+
+peaks_dir <- "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/merged_peaks"
+
+peak_files <- list.files(peaks_dir, pattern = "*narrowPeak$", full.names = TRUE)
+
+metadata$Peaks <- peak_files
+
+# metadata df with cols SampleID, Tissue, Factor, Condition, Treatment, Replicate, bamReads (path), ControlID, bamControl, Peaks (bed path), PeakCaller (bed for all?)
+# might need few more cols...
+
+metadata <- metadata %>%
+  mutate(Replicate = 1) %>%
+  dplyr::rename(Condition = Time,
+         Tissue = Cells) %>%
+  mutate(Factor = NA,
+         ControlID = NA,
+         bamControl = NA,
+         PeakCaller = "narrow")
+
+metadata
+
+write.csv(metadata, "../saved_data/merged_samplesheet.csv")
+
+```
+
+# Diffbind: create object, apply blacklist, get counts (consensus peaks)
+
+```{r}
+
+# summary of DiffBind protocol here (and previous assumed steps)
+# constructs a consensus read count matrix from replicate peak sets of m query regions by n samples
+# ATAC fragment pileup from aligned paired-end data, then builds a local bias track through a series of parameters to estimate background noise, and finally compares ATAC signal to the local background at each genomic bp using a Poisson test
+# Significant nearby regions are then merged into a peak
+# DiffBind then calculates linear scaling factors from either the total number of reads in each library, which assumes that true global differences may be expected and technical bias is small, or the total number of reads in queried peak regions, which should eliminate global differences in favor of reducing any technical biases
+# The count matrix with normalization factors is then subject to the DESeq2 framework of dispersion estimation and nega- tive binomial generalized linear model (GLM) fitting for hypothesis testing, according to the design matrix.
+# full library size normalization
+
+# create a DiffBind object
+peaks  <- dba(sampleSheet=metadata)
+# apply blacklist
+peaks  <- dba.blacklist(peaks)
+
+counts <- dba.count(peaks, bRemoveDuplicates = TRUE, bParallel = FALSE, summit = 1000)
+
+```
+
+# Look for batch effects
+
+```{r}
+
+plot(counts)
+
+p <- dba.plotPCA(counts, attributes = c(DBA_TISSUE, DBA_CONDITION))
+
+pdf("../figures/merged_pca_cells_time.pdf")
+print(p)
+dev.off()
+
+p
+
+```
+
+# MA plots (pre-normalization)
+
+```{r}
+
+# MA plots are a type of Bland–Altman plot applied to genomic data; MA plots depict global pat- terns of measurements compared between two samples, where each tested genomic feature is quantified by the difference between the two groups as the y-axis (M) and signal intensity as the x-axis
+
+# MA plots show how the fold changes between conditions are distributed as the mean concentration of reads counts increases
+
+# each of the consensus site is a point (smoothed), while the the X-axis orders them according to the mean number of overlapping read counts for the consensus site
+# the Y-axis shows the log2 fold change
+# points above the 0-fold line (blue) demonstrate greater enrichment of reads in the 1st title condition, while point below the 0-fold line are more enriched in the 2nd title condition
+# the red curve is a loess fit showing the overall trend in the data
+
+dba.plotMA(counts, bNormalized=FALSE, sub="Non-Normalized", contrast=list(CD57_pos=counts$masks$CD57pos_DP_NN_CD8, CD57_neg=counts$masks$CD57neg_DP_NN_CD8))
+
+dba.plotMA(counts, bNormalized=FALSE, sub="Non-Normalized", contrast=list(CD57_pos=counts$masks$CD57pos_DP_NN_CD8, DN=counts$masks$DN_NN_CD8))
+
+dba.plotMA(counts, bNormalized=FALSE, sub="Non-Normalized", contrast=list(CD57_neg=counts$masks$CD57neg_DP_NN_CD8, DN=counts$masks$DN_NN_CD8))
+
+# compare plots when bNormalized=TRUE?
+
+```
+
+# Look at the raw and normalized read counts in the dba.report() by setting bCounts=TRUE and comparing bNormalized=TRUE and bNormalized=FALSE
+
+# Model
+
+```{r}
+
+model <- dba.contrast(counts, categories = c(DBA_TISSUE))
+
+model <- dba.analyze(model)
+
+dba.show(model,bContrasts=TRUE)
+
+db <- dba.report(model)
+# obtain differential sites
+db
+# conc = mean concentration of reads across samples (log2)
+# fold: log2 fold change (DESeq2)
+# FDR: multiple-testing corrected significance value
+
+```
+
+# Re-show MA plots with differential sites superimposed
+
+```{r}
+
+dba.plotMA(model, contrast = 1)
+
+dba.plotMA(model, contrast = 2)
+
+dba.plotMA(model, contrast = 3)
+
+```
+
+# Volcano plots
+
+```{r}
+
+dba.plotVolcano(model, contrast = 1)
+
+dba.plotVolcano(model, contrast = 2)
+
+dba.plotVolcano(model, contrast = 3)
+
+```
+
+# Normalize data, re-analyze norm data
+
+```{r}
+
+# didn't have spike-ins, safest normalization is background=TRUE , normalize=DBA_NORM_NATIVE, using background reads and native normalization method
+
+model_norm <- dba.normalize(model, method=DBA_ALL_METHODS, library=DBA_LIBSIZE_FULL, normalize=DBA_NORM_LIB, background=FALSE)
+
+model_norm  <- dba.analyze(model_norm, method = DBA_ALL_METHODS)
+
+```
+
+# Save RDS to continue work locally
+
+```{r}
+
+saveRDS(model_norm, "../saved_data/normalized_data.rds")
+
+```
+
+# Read in RDS to continue locally
+
+```{r}
+
+model_norm <- readRDS("../saved_data/normalized_data.rds")
+
+```
+
+# Make heatmap
+
+```{r}
+
+p <- dba.plotHeatmap(model_norm,  correlations=FALSE, scale="row",
+                colSideCols = list(DBA_CONDITION = c("black","grey"),
+                                   DBA_FACTOR = c("#93a24eff","#ba4d4cc7","#7497d9ff"),
+                                   DBA_REPLICATE = c("grey20","grey40","grey60","grey80")), 
+                margin = 2)
+
+pdf("../figures/merged_heatmap_clustering.pdf")
+print(p)
+dev.off()
+
+p
+
+```
+
+# Annotate peaks
+
+```{r}
+
+# get peaks out of dba object
+peaks <- dba.peakset(model_norm, bRetrieve = TRUE)
+# could use dba.report() for just differentially bound peaks
+
+# add chr to seqnames to get annotatePeak function working
+new_seqnames <- paste0("chr", seqlevels(peaks))
+new_names_vector <- setNames(new_seqnames, seqlevels(peaks))
+peaks_with_new_seq_level <- renameSeqlevels(peaks, new_names_vector)
+
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+
+bed.annot = annotatePeak(peaks_with_new_seq_level, tssRegion=c(-3000, 3000),TxDb=txdb, annoDb="org.Hs.eg.db")
+
+annot_peaks=as.data.frame(bed.annot)
+
+annot_peaks
+
+```
+
+# Pie graph of peak annotations
+
+ - most (~60% of) peaks are close to (<= 1 kb from) promoters
+
+```{r}
+
+p <- plotAnnoPie(bed.annot)
+
+pdf("../figures/merged_gene_anno_pie.pdf")
+print(p)
+dev.off()
+
+p
+
+```
+
+# Combine gene annotations with diffbind results to make new volcano plots
+
+```{r}
+
+anno_data <- annot_peaks %>%
+  dplyr::select(seqnames, start, end, strand, width, geneChr, geneStart, geneEnd, geneLength, geneStrand, geneId, transcriptId, distanceToTSS, ENSEMBL, SYMBOL, GENENAME) %>%
+  mutate(seqnames = gsub("chr", "", seqnames))
+
+contrast_1_report <- dba.report(model_norm, method=DBA_EDGER,
+                                              contrast = 1,  
+                                              bUsePval = FALSE,
+                                              th=1) %>%
+                     as_tibble() %>%
+                     left_join(anno_data, by = c("seqnames", "start", "end", "width", "strand"))
+
+contrast_2_report <- dba.report(model_norm, method=DBA_EDGER,
+                                              contrast = 2,  
+                                              bUsePval = FALSE,
+                                              th=1) %>%
+                     as_tibble() %>%
+                     left_join(anno_data, by = c("seqnames", "start", "end", "width", "strand"))
+
+contrast_3_report <- dba.report(model_norm, method=DBA_EDGER,
+                                              contrast = 3,  
+                                              bUsePval = FALSE,
+                                              th=1) %>%
+                     as_tibble() %>%
+                     left_join(anno_data, by = c("seqnames", "start", "end", "width", "strand"))
+
+```
+
+# Make new volcano plots (compare to Erin's figure 1C and 2A)
+
+```{r}
+
+contrast_2_report <- contrast_2_report %>%
+  mutate(group = case_when(
+           p.value < 0.05 & Fold < 0 ~ "DN",
+           p.value < 0.05 & Fold > 0 ~ "CD57+",
+           p.value > 0.05 ~ "NS"
+         ))
+
+p <- ggplot(contrast_2_report, aes(x = Fold, y = -log10(p.value), color = group)) +
+  geom_point(alpha = 0.25, size = 0.1) +
+  labs(x = "Log2 Fold Change",
+       y = "-log10(p value)") +
+  geom_text_repel(data = contrast_2_report %>% filter(SYMBOL %in% c("GZMB", "NCR1", "GZMH", "KLRF1", "CD244", "TOX", "CTLA4", "SLAMF6", "NKG7", "TBX21", "PDCD1", "HAVCR2", "KLRG1", "LAG3")), aes(label = SYMBOL)) +
+  scale_color_manual(values = c("NS" = "grey", "CD57+" = "darkgreen", "DN" = "lightblue"))
+
+# contrast 2 is pos vs. DN
+
+p
+
+ggsave("../figures/merged_CD57_pos_vs_DN_volcano.svg", p)
+
+contrast_3_report <- contrast_3_report %>%
+  mutate(group = case_when(
+    # backwards > and < because of -Fold below
+           p.value < 0.05 & Fold > 0 ~ "DN",
+           p.value < 0.05 & Fold < 0 ~ "PD-1+",
+           p.value > 0.05 ~ "NS"
+         ))
+
+# contrast 3 is neg vs. DN
+
+p <- ggplot(contrast_3_report, aes(x = -Fold, y = -log10(p.value), color = group)) +
+  # negative fold because contrast order was backwards (i.e. DN vs. negative not negative vs. DN)
+  geom_point(alpha = 0.25, size = 0.1) +
+  labs(x = "Log2 Fold Change",
+       y = "-log10(p value)") +
+  geom_text_repel(data = contrast_3_report %>% filter(SYMBOL %in% c("GZMB", "NCR1", "GZMH", "KLRF1", "CD244", "TOX", "CTLA4", "SLAMF6", "NKG7", "TBX21", "PDCD1", "HAVCR2", "KLRG1", "LAG3")), aes(label = SYMBOL)) +
+  scale_color_manual(values = c("NS" = "grey", "PD-1+" = "red", "DN" = "lightblue"))
+
+p
+
+ggsave("../figures/merged_CD57_neg_vs_DN_volcano.svg", p)
+
+contrast_1_report <- contrast_1_report %>%
+  mutate(group = case_when(
+           p.value < 0.05 & Fold < 0 ~ "PD-1+",
+           p.value < 0.05 & Fold > 0 ~ "CD57+",
+           p.value > 0.05 ~ "NS"
+         ))
+
+# contrast 1 is CD57+ vs. CD57-
+
+p <- ggplot(contrast_1_report, aes(x = Fold, y = -log10(p.value), color = group)) +
+  # negative fold because contrast order was backwards (i.e. DN vs. negative not negative vs. DN)
+  geom_point(alpha = 0.25, size = 0.1) +
+  labs(x = "Log2 Fold Change",
+       y = "-log10(p value)") +
+  geom_text_repel(data = contrast_1_report %>% filter(SYMBOL %in% c("B3GAT1", "NCR1", "KIR2DL3", "KIR3DL2", "KLRF1", "NCAM1")), aes(label = SYMBOL)) +
+  scale_color_manual(values = c("NS" = "grey", "PD-1+" = "red", "CD57+" = "darkgreen"))
+
+p
+
+ggsave("../figures/merged_CD57_pos_vs_CD57_neg_volcano.svg", p)
+
+```
