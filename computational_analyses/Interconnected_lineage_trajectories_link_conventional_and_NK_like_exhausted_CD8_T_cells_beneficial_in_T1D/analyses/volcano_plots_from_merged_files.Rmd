@@ -210,7 +210,7 @@ model_norm  <- dba.analyze(model_norm, method = DBA_ALL_METHODS)
 
 ```{r}
 
-saveRDS(model_norm, "../saved_data/normalized_data.rds")
+saveRDS(model_norm, "../saved_data/merged_normalized_data.rds")
 
 ```
 
@@ -218,7 +218,7 @@ saveRDS(model_norm, "../saved_data/normalized_data.rds")
 
 ```{r}
 
-model_norm <- readRDS("../saved_data/normalized_data.rds")
+#model_norm <- readRDS("../saved_data/merged_normalized_data.rds")
 
 ```
 
