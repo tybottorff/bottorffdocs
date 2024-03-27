@@ -1917,6 +1917,8 @@
 # Polyamine metabolism is a central determinant of helper T cell lineage fidelity
  - polyamine synthesis undergoes profound changes during T cell activation, along with other metabolic changes
  - polyamine metabolism governs CD4 lineage commitment
+# Polygenic risk score for ulcerative colitis predicts immune checkpoint inhibitor-mediated colitis
+ - genetic susceptibility to UC (not Crohn's) seems to predispose to irAE-colitis
 # Positive correlation of peripheral CD8<sup>+</sup> T lymphocytes with immune-related adverse events and combinatorial prognostic value in advanced non-small cell lung cancer patients receiving immune checkpoint inhibitors
  - baseline level of peripheral CD8 Ts risk factor for irAE onset, also associated with longer survival
 # Potentiating local and abscopal antitumor efficacy through radiation with FAP-CD40 DARPin and anti-PD1 therapy
@@ -2046,6 +2048,10 @@
  - B2s: conventional B cells
  - Bregs: suppress inflammation, < 1% of peripheral blood mononuclear cells
  - activation of B cells as APCs occurs via BCR (T-cell dependent) or via germline encoded PAMP receptors (T cell independent)
+# Role of CD38 in anti-tumor immunity of small cell lung cancer
+ - ICB (+/- chemotherapy) has modest benefits in patients with SCLC (high TMB, low PD-L1 expression, aren't biomarkers of ICB response)
+ - CD38 levels correlate with levels of immunosuppressive markers *FOXP3*, *PD-1*, and *CTLA-4*
+ - CD38 levels increase after chemotherapy and ICB
 # Role of recombination activating genes in the generation of antigen receptor diversity and beyond
 ## Abstract
  - V(D)J recombination: antigen receptor gene segments cleaved, rejoined by NHEJ
@@ -2747,6 +2753,13 @@
 # TIGIT<sup>+</sup> NK cells in combination with specific gut microbiota features predict response to checkpoint inhibitor therapy in melanoma patients
  - TIGIT upregulated in T cells and CD56<sup>high</sup> NK cells of ICB responders
  - bacterial taxa associated with response (like *Ruminococcus torques*) or failure (like *Barnesiella intestinihominis*) to ICB
+# TIGIT acts as an immune checkpoint upon inhibition of PD1 signaling in autoimmune diabetes
+ - chronic activation of self-reactive T cells with beta cell antigens results in upregulation of immune checkpoint molecules that keep self-reactive T cells under control to delay beta cell destruction in autoimmune diabetes
+ - inhibiting PD-(L)1 results in autoimmune diabetes in those with pre-existing autoimmunity against beta cells
+ - TIGIT highly expressed on activated islet infiltrating T cells in NOD (non-obese diabetic) mice
+ - they find subset of stem-like memory CD8s expressing TIGIT, PD1, and TF EOMES (linked to dysfunctional CD8s)
+ - CD155 (TIGIT ligand) expressed on beta cells and islet infiltrating DCs, but islet infiltrating PD-1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells were still functional
+ - inhibiting TIGIT in NOD mice didn't result in exacerbated autoimmune diabetes but inhibiting PD-(L)1 did
 # Tissue-resident memory and circulating T cells are early responders to pre-surgical cancer immunotherapy
 ## Abstract
  - **treatment-responsive T cell clones recognize self-antigens including tumor antigens**
