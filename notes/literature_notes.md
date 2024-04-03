@@ -1852,6 +1852,8 @@
  - **trying to find evidence for relation between hydrophobicity and cross-reactivity: bring up idea of transcriptional (co)activators being non-specific due to hydrophobicity, and negative charge (perhaps unhelpful with negatively charged DNA)**
 # Outcome and treatment-related adverse events of combined immune checkpoint inhibition with flipped dosing in a real-world cohort of 79 patients with metastasized melanoma
  - changing dosages to minimize irAEs while keeping anti-tumor response
+# Overcoming cold tumors: a combination strategy of immune checkpoint inhibitors
+ - cold tumors escape immune response via lacking tumor antigens, presenting antigens poorly, preventing T cell infiltration
 # Overcoming immune checkpoint blockade resistance in solid tumors with intermittent ITK inhibition
  - dampening TCR signaling with ITK inhibitor can confer ICB sensitivity to ICB resistant solid tumors
 # Pan-cancer analysis reveals alternative splicing characteristics associated with immune-related adverse events elicited by checkpoint immunotherapy
@@ -1881,6 +1883,11 @@
 # PD-1 blockade in tumors with mismatch-repair deficiency
  - mismatch repair deficiency status predicts clinical benefit of ICI (ICI works better with tumors with mismatch repair deficiency)
  - **immune infiltrate associated with mismatch repair-deficient carcinomas directed at neoantigens**
+# PD-1 limits IL-2 production and thymic regulatory T cell development
+ - previously unknown how PD-1 limits Treg development
+ - mice
+ - PD-1 deficient Tregs have reduced TCR signaling
+ - PD-1 deficient T cells produce more IL-2 (Treg limiting cytokine)
 # PD-1 maintains CD8 T cell tolerance towards cutaneous neoantigens
  - mouse model, skin-specific expression of T cell antigens in epidermis
  - PD-1 maintains skin tolerance by preventing tissue-infiltrating antigen-specific CD8 T cells from becoming fully functional and gaining acess to epidermal APCs
@@ -2694,6 +2701,8 @@
  - review
  - bulk RNAseq study: upregulation of proinflammatory genes in myocarditis group, also downregulation of homeostasis genes
  - scRNAseq in mice: macrophages 60% of cardiac immune cell population, type 17 helper T cells with upregulated Hif1a main T cell population in acute myocarditis phase
+# The role of tissue-resident memory T cells as mediators for response and toxicity in immunotherapy-treated melanoma - two sides of the same coin?
+ - 
 # The role of type I conventional dendritic cells in cancer immunity
  - cDC1 = conventional type 1 DC, express BDCA3, CLEC9A/DNGR-1, XCR1
 # The role of type-2 conventional dendritic cells in the regulation of tumor immunity
@@ -2770,6 +2779,11 @@
  - they find subset of stem-like memory CD8s expressing TIGIT, PD1, and TF EOMES (linked to dysfunctional CD8s)
  - CD155 (TIGIT ligand) expressed on beta cells and islet infiltrating DCs, but islet infiltrating PD-1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells were still functional
  - inhibiting TIGIT in NOD mice didn't result in exacerbated autoimmune diabetes but inhibiting PD-(L)1 did
+# TIGIT blockade reshapes the tumor microenvironment based on the single-cell RNA-sequencing analysis
+ - mice
+ - *TIGIT* mostly expressed on T, NK cells
+ - TIGIT blockade inhibits Tregs by downregulating Foxp3, reducing secretion of immunosuppressive cytokines, **could be similar mechanism for Tregs being up/relating to irAEs**
+ - TIGIT blockade facilitates NK activation, stimulating CD8s
 # Tissue-resident memory and circulating T cells are early responders to pre-surgical cancer immunotherapy
 ## Abstract
  - **treatment-responsive T cell clones recognize self-antigens including tumor antigens**
