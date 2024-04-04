@@ -2702,7 +2702,7 @@
  - bulk RNAseq study: upregulation of proinflammatory genes in myocarditis group, also downregulation of homeostasis genes
  - scRNAseq in mice: macrophages 60% of cardiac immune cell population, type 17 helper T cells with upregulated Hif1a main T cell population in acute myocarditis phase
 # The role of tissue-resident memory T cells as mediators for response and toxicity in immunotherapy-treated melanoma - two sides of the same coin?
- - 
+ - Trms express high levels of inhibitory checkpoint molecules, so ICB induces reactivation/expansion of Trms in tumor microenvironment
 # The role of type I conventional dendritic cells in cancer immunity
  - cDC1 = conventional type 1 DC, express BDCA3, CLEC9A/DNGR-1, XCR1
 # The role of type-2 conventional dendritic cells in the regulation of tumor immunity
