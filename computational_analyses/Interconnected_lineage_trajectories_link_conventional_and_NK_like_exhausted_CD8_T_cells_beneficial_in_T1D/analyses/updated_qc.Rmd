@@ -1,0 +1,847 @@
+---
+title: "Interconnected lineage trajectories link conventional and NK-like exhausted CD8+ T cells beneficial in T1D"
+output: pdf_document
+---
+
+ - data reproduction of Erin Witkop's ATAC-seq
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(knitr)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(ggbeeswarm)
+library(viridis)
+library(stringr)
+library(readxl)
+library(kableExtra)
+library(RColorBrewer)
+library(plotly)
+library(tidyr)
+library(gtools)
+library(corrplot)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(stringr) # string processing
+library(dplyr) # dataframe handling
+library(readxl) # load excel files
+library(ggplot2); # plotting
+library(circlize) # get the color gradient function (color ramp) for heatmaps
+library(apird)
+library(ATACseqQC)
+library(GenomicAlignments)
+library(chromVAR)
+library(soGGi)
+library(DiffBind)
+library(EnsDb.Hsapiens.v86) # this is used for annotation data
+library(readr)
+library(edgeR)
+library(ComplexHeatmap)
+library(ChIPpeakAnno)
+library(ggrepel)
+library(ggpubr)
+library(ggvenn)
+library(msigdbr)
+library(fgsea)
+library(ShortRead)
+
+```
+
+# Set theme
+
+```{r}
+
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
+
+```
+
+# Setup dir functions and project name, set seed
+
+```{r}
+
+# set base directory to folder above current analyses folder
+baseDir <- gsub("/analyses$", "", getwd())
+
+# saved data directory
+dataDir <- function(fname) {
+  return (file.path(baseDir,'saved_data', fname))
+}
+
+# figures directory
+plotDir <- function(fname) {
+  return (file.path(baseDir,'figures', fname))
+}
+
+projects = c("P452-3")
+
+set.seed(123)
+
+```
+
+# Use apird to access data (metrics and annotations from database)
+
+```{r}
+
+dataFileName = "P452-3_data.Rdata"
+
+pathToDataFile = dataDir(dataFileName)
+
+# If the data file exists, load it
+if (file.exists(pathToDataFile)) {
+  load(pathToDataFile)
+  
+# if not, pull data from research database
+} else {
+  IDs = projects
+
+  annotations = c()
+  metrics = c()
+
+  for (ID in IDs) {
+    getGcqProjectInfo(ID)
+    libids = getProjectLibs(ID)
+    annotations = dplyr::bind_rows(annotations, getAnno(libids))
+    metrics = dplyr::bind_rows(metrics, getMetrics(libids))
+  }
+  
+  # remove rows with missing values from metrics data
+  metrics = metrics[complete.cases(metrics), ]
+  
+  # Save for offline analysis
+  save(annotations,
+     metrics,
+     file = pathToDataFile)
+}
+
+```
+
+# Combine and cleanup metrics and annotations
+
+```{r}
+
+annotations$sampleName = paste(annotations$sort, annotations$donorId, sep = "_")
+
+design <- full_join(annotations, metrics, by = c("libid"))
+
+design
+
+table(design$donorId, design$sort)
+
+table(design$donorId, design$timePoint)
+
+```
+
+# Setup colors using viridis
+
+```{r}
+
+num_sort <- length(unique(design$sort))
+num_donorId <- length(unique(design$donorId))
+num_timePoint <- length(unique(design$timePoint))
+
+palette_sort <- viridis(num_sort)
+palette_donorId <- viridis(num_donorId)
+palette_timePoint <- viridis(num_timePoint)
+
+colors.sort <- palette_sort[as.numeric(factor(unique(design$sort)))]
+colors.donorId <- palette_donorId[as.numeric(factor(unique(design$donorId)))]
+colors.timePoint <- palette_timePoint[as.numeric(factor(unique(design$timePoint)))]
+
+names(colors.sort) <- unique(design$sort)
+names(colors.donorId) <- unique(design$donorId)
+names(colors.timePoint) <- unique(design$timePoint)
+
+```
+
+# Setup file paths
+
+```{r}
+
+flowcellDirectories = "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807"
+
+# insert sizes is txt file for each lib that is collection of how long fragments are and freqs (input for histogram of frag size distribution in bp)
+fragmentFiles = list.files(file.path(flowcellDirectories, "insertSizes"), full.names = T)
+names(fragmentFiles) = str_extract(fragmentFiles, "lib[0-9]+")
+
+# alignments are bam files, everything else derived from alignments
+alignmentFiles = list.files(file.path(flowcellDirectories, "alignments"), full.names = T, pattern = ".bam$")
+names(alignmentFiles) = str_extract(alignmentFiles, "lib[0-9]+")
+
+# peak files: get files for all libs (summits, peaks, narrow peak), bed file is genomics format that has genomic interval and chr and score (in this case, summits bed is highest point of all peaks found, score is how high)
+# narrow peak file: broader range than summit, it's entire peak range not just summit/peak, score is integral of scores over range
+# bigwigs: similar to bam, contain fragments, use to generate coverage plots/trace plots, shows sum of counts b/w positions/genomic ranges
+peakFiles = list.files(file.path(flowcellDirectories, "peaks"), full.names = T, pattern = "peaks-narrow.bed")
+names(peakFiles) = str_extract(peakFiles, "lib[0-9]+")
+
+# fastq files (for library complexity analyses)
+fastqFiles = list.files(file.path(flowcellDirectories, "inputFastqs"), full.names = T, pattern = "fastq.gz$")
+names(fastqFiles) = paste(str_extract(fastqFiles, "lib[0-9]+"), str_extract(fastqFiles, "R[0-9]+"), sep = "_")
+
+for (i in 1:nrow(design)){
+  # assign files to each row in design df based on libid
+  design$bamFile[i] = alignmentFiles[design$libid[i]]
+  design$fragmentFile[i] = fragmentFiles[design$libid[i]]
+  design$peakFiles[i] = peakFiles[design$libid[i]]
+}
+
+```
+
+# Summarize sample overview
+
+```{r}
+
+table(design$donorId, design$sort) %>%
+  kable() %>%
+  kable_minimal(full_width = F)
+
+```
+
+# QC: fragment size distributions
+ - 1 peak ideally, also with oscillations
+ - expect a peak around 100 bp (nuclesome free region) and then oscillations with maxima 200 bp mono-nucleosome, 400 bp di-nucleosome and so on
+ - ENCODE: A nucleosome free region (NFR) must be present. A mononucleosome peak must be present in the fragment length distribution. These are reads that span a single nucleosome, so they are longer than 147 bp but shorter than 147*2 bp. Good ATAC-seq datasets have reads that span nucleosomes (which allows for calling nucleosome positions in addition to open regions of chromatin).
+
+```{r}
+
+species = "human"
+fragmentDistributionsFile <- "P452-3_fragmentsize_distributions.Rdata"
+
+pathToDataFile = dataDir(fragmentDistributionsFile)
+
+# If the data file exists, load it
+if (file.exists(pathToDataFile)) {
+  load(pathToDataFile)
+  
+} else {
+  # Function to read and process files, 
+  unpackFragData <- function(fragmentFile, species, includeShortFrags = F){
+    libid <- str_extract(fragmentFile, "lib[0-9]+")
+    cat(sprintf("Counting fragments of %s... \n", libid))
+    
+    
+    fragmentDistribution <- read.table(fragmentFile)
+    colnames(fragmentDistribution) <- c("nReads", "fragLen")
+    
+    # fragmentDistribution$shortReads = fragmentDistribution$nReads[fragmentDistribution$fragLen == 0]
+    
+    if (!includeShortFrags) {
+      fragmentDistribution = dplyr::filter(fragmentDistribution, fragLen > 15)
+    }
+    
+    fragmentDistribution$fragmentLengths <- abs(fragmentDistribution$fragLen)
+    fragmentDistribution$normReads <- fragmentDistribution$nReads/sum(fragmentDistribution$nReads) *10^3
+    
+    fragmentDistribution$nFragments = sum(fragmentDistribution$nReads)
+    
+    fragmentDistribution$libid <- libid
+    return(fragmentDistribution)
+    
+  }
+  
+  fragmentList <- lapply(design$fragmentFile, function(x) unpackFragData(x, species))
+  
+  cat(sprintf("Combining fragment distributions into one dataframe...\n"))
+  fragmentDistributions <- bind_rows(fragmentList)
+  
+  cat(sprintf("Saving datafile...\n"))
+  save(fragmentDistributions,
+     file = pathToDataFile)
+}
+
+fragmentDistributions <- merge(fragmentDistributions, dplyr::select(design, libid, sample_name, timePoint, sort, donorId), by="libid", all = T)
+
+```
+
+# Plot fragment size distributions
+
+ - wiggles in the below plot are a biological feature and come from 10 bp per helical turn of the DNA
+
+```{r}
+
+xrange = c(0,750)
+
+fragmentDistributionPlot  <- fragmentDistributions %>%
+  dplyr::filter(fragmentLengths > xrange[1] & fragmentLengths < xrange[2]) %>%
+  ggplot(aes(x = fragmentLengths, y = normReads, color = donorId, group = libid)) +
+  scale_color_manual(values = colors.donorId) +
+  geom_line() +
+  xlim(c(xrange[1],xrange[2])) +
+  labs(x = "Fragment length, bp", y = expression(paste("Normalized read density (a.u.)")), color = "Donor ID") + 
+  theme(text = element_text(size = 14)) +
+  theme(legend.position="right") + 
+  theme(legend.direction='vertical') +
+  theme_bw() +
+  theme(strip.text = element_text(size = 7)) +
+  facet_wrap(~ sort + timePoint, labeller = labeller(timePoint = function(variable) paste("timePoint: ", variable)), ncol = 5, scales = "free")
+
+print(fragmentDistributionPlot)
+
+ggsave(plotDir("P452-3_fragmentSizeDistributions.pdf"), plot = fragmentDistributionPlot, height = 8,  width = 12)
+
+```
+
+# QC: TSSe
+ - in ATAC we expect an enhancement at the TSSe
+ - enrichment over TSS, signal:noise > 5 at peak (exclude libs that don't meet this requirement)
+ - plots for this were generate using deeptools and are currently located in the flow cell directory
+ - ENCODE: Transcription start site (TSS) enrichment values are dependent on the reference files used; cutoff values for high quality data are listed in the table below, for `GRCh38 Refseq TSS annotation` we are looking for > 7, while 5-7 is still acceptable.
+
+```{r}
+
+calculateCoverage = function(bamfile, ref) {
+  distanceToTSS = -1500:1500
+  coverage_ <- regionPlot(bamFile = bamfile, 
+                          testRanges = ref, style = "point", 
+                          format = "bam", paired = TRUE,
+                          minFragmentLength = 0, 
+                          maxFragmentLength = 500, 
+                          normalize = "RPM")
+  
+  # sum coverage across all regions
+  coverage = as.vector(colSums(coverage_@assays@data@listData[[1]]))
+  # normalize coverage
+  coverage = coverage/min(coverage)
+  
+  coverage = data.frame(distanceToTSS, coverage)
+  
+  colnames(coverage) <- c("distanceToTSS", "aggregateTSSscore")
+  
+  return(coverage)
+}
+
+# retrieve TSSs
+TSSs <- resize(genes(TxDb.Hsapiens.UCSC.hg38.knownGene), fix = "start", 1)
+seqlevelsStyle(TSSs) <- "NCBI"
+
+fragmentDistributionsFile <- "P452-3_TSS_coverage.Rdata"
+
+pathToDataFile = dataDir(fragmentDistributionsFile)
+
+# If the data file exists, load it
+if (file.exists(pathToDataFile)) {
+  load(pathToDataFile)
+  
+} else {
+    TSScoverage = c()
+  for (i in 1:1:nrow(design)) {
+    if (!is.na(design$bamFile[i])) {
+      TSScoverage_ = calculateCoverage(design$bamFile[i], TSSs)
+      TSScoverage_$libid = design$libid[i]
+      
+      TSScoverage = rbind(TSScoverage, TSScoverage_)
+    }
+  }
+  
+  cat(sprintf("Saving datafile...\n"))
+  save(TSScoverage,
+       file = pathToDataFile)
+}
+
+```
+
+# Plot TSS coverage
+
+```{r}
+
+TSScoverage = merge(TSScoverage, 
+                    dplyr::select(design, libid, sort, donorId, timePoint),
+                    by = c("libid"))
+
+TSSePlot  <- TSScoverage %>%
+  ggplot(aes(x = distanceToTSS,
+             y = aggregateTSSscore,
+             group = libid,
+             color = donorId))+
+  geom_line() +
+  scale_color_manual(values = colors.donorId) +
+  labs(x = "distance to TSS (bp)",
+       y = "aggregate, normalized TSS score", color = "Donor ID") + 
+  theme_bw() +
+  theme(legend.position="right") + 
+  theme(legend.direction='vertical') + 
+  facet_wrap(~ sort + timePoint, labeller = labeller(timePoint = function(variable) paste("timePoint: ", variable)), ncol = 5, scales="fixed") +
+  geom_hline(yintercept = 5, linetype = 2) + 
+  geom_hline(yintercept = 7, linetype = 3, color = "grey")
+
+plot(TSSePlot)
+
+ggsave(plotDir("P452-3_TSSePlot.pdf"), plot = TSSePlot, height = 8,  width = 12)
+
+```
+
+# Display TSSe scores
+
+```{r}
+
+TSSe_scores = TSScoverage %>%
+  group_by(libid) %>%
+  summarise(TSSe_score = max(aggregateTSSscore))
+
+design = merge(design, TSSe_scores, by = "libid")
+
+table_data = dplyr::select(design, 
+                           libid, sort, donorId, timePoint,
+                           `TSSe score` = TSSe_score)
+
+# round TSSe scores to one decimal place
+table_data$`TSSe score` = round(table_data$`TSSe score`, 1)
+
+table_data %>%
+  kbl() %>%
+  kable_minimal(full_width = F)
+
+```
+
+# QC: read counts and alignment
+ - ENCODE recommends 50 mio (aligned) reads for paired-end, 25 mio for single read
+ - ENCODE: Each replicate should have 25 million non-duplicate, non-mitochondrial aligned reads for single-end sequencing and 50 million for paired-ended sequencing (i.e. 25 million fragments, regardless of sequencing run type). The alignment rate, or percentage of mapped reads, should be greater than 95%, though values > 80% may be acceptable
+ - want 10-50 mil reads depending on if TF analysis required (ENCODE suggestions)
+
+```{r}
+
+# cutoffs from encode
+alignCut = 80
+readCut = 50000000
+
+# This makes a total read plot
+totalReadsPlot = ggplot(design, aes(fill = donorId, y = tophatstats_total_reads/1e6, x = donorId)) + 
+    # this y val comes from metrics so I do need that...
+    geom_bar(position="stack", stat="identity") +
+    labs(x = "", y = "total reads / 1e6", fill = "Donor ID") + 
+    scale_fill_manual(values = colors.donorId) +
+    theme(legend.position="bottom") + 
+    geom_hline(yintercept = readCut/1e6, linetype = 2) +
+    theme(legend.direction='horizontal') +
+    facet_wrap(~ sort + timePoint, labeller = labeller(timePoint = function(variable) paste("timePoint: ", variable)), ncol = 5, scales="free") +
+    theme_bw() +
+    theme(axis.text.x = element_blank(), axis.ticks = element_blank(), strip.text = element_text(size = 7))
+
+print(totalReadsPlot)
+
+ggsave(plotDir("P452-3_totalReads.pdf"), totalReadsPlot, height = 6, width = 8)
+
+```
+
+# Plot alignment vs. read count (~alignment vs median CV)
+ - ENCODE recommends an alignment of at least `r alignCut`% and `r (readCut/1e6)` mio reads. In contrast to the RNAseq plot where we are good samples are in the top left, we now want our samples to fall into the top right corner
+
+```{r}
+
+gPctAligned <- ggplot(data = design) +
+  geom_point(aes(x = tophatstats_total_reads/1e6, 
+                 y = pct_aligned,
+                 color = donorId, 
+                 shape = sort),
+                 size = 1.5) + 
+  scale_color_manual(values = colors.donorId) +
+  labs(x = "total reads / mio", 
+       y = "percent alignment", 
+       color = "donor",
+       shape = "sort")+
+  geom_hline(yintercept = alignCut, linetype = 2)+
+  geom_vline(xintercept = readCut/1e6, linetype = 2)+
+  ylim(c(0,100))+
+  xlim(c(0,70))+
+  theme_bw() +
+  theme(legend.position = "right") + 
+  theme(legend.direction=  'vertical')
+
+print(gPctAligned)
+
+ggsave(plotDir("P452-3_totalReads_vs_alignment.pdf"), gPctAligned, height = 7, width = 8)
+
+```
+
+# QC: peak calling
+ - peaks were called using macs2 with the following parameters:`macs2 callpeak -t {input} -g hs -f BAMPE -n {output}`
+ - peak calling: count peaks for each file (bed files, count rows), recommended 10k peaks (less means too few reads or bad data/sample prep)
+
+```{r}
+
+peaksDataFile <- "P452-3_peaks.Rdata"
+
+pathToDataFile = dataDir(peaksDataFile)
+
+readPeaks = function(peakFile, libid, peakCaller) {
+    peaks_ = read.table(peakFile, header = FALSE, fill = TRUE)  %>% mutate(width = abs(V3-V2))
+    
+    if (peakCaller == "seacr") {
+       colnames(peaks_)[1:6] = c("chr", "start", "end", "total sign", "max signal", "max signal region")
+    } else if (peakCaller == "macs2") {
+       colnames(peaks_)[1:10] = c("chr", "start", "end", "name", "score", "strand", "total sign", "pValue", "qValue", "peak")
+    }
+    
+    peaks_$libid = libid
+    
+    return (peaks_)
+    }
+
+# If the data file exists, load it
+if (file.exists(pathToDataFile)) {
+  
+  load(pathToDataFile)
+} else {
+  macs2Peaks = c()
+  
+  for (i in 1:nrow(design)) {
+    
+    # step through library
+    print(paste0("Reading peaks from ", design$libid[i]))
+
+    # MACS2 full data set
+    # get macs2 peaks
+    peaks_ = readPeaks(design$peakFiles[i], libid = design$libid[i], peakCaller = "macs2")
+    
+    macs2Peaks = rbind(macs2Peaks, peaks_)
+    
+  }
+
+  save(macs2Peaks, file = pathToDataFile)
+}
+
+macs2Peaks = dplyr::filter(macs2Peaks, chr %in% c(1:23,"X","Y"))
+
+macs2Peaks = merge(macs2Peaks, dplyr::select(design, c("libid", "donorId", "sort", "timePoint")), by = "libid")
+
+```
+
+# Summarize peaks
+
+```{r}
+
+peakSummary = macs2Peaks %>% 
+  dplyr::group_by(libid) %>%
+  dplyr::summarise(nPeaks = n(), minPeak = min(width), meanPeaks = mean(width), medianPeaks = median(width), maxPeak = max(width))
+
+design = merge(design, peakSummary, by = "libid")
+
+```
+
+# Calculate FRiP
+
+```{r}
+
+fripsDataFile <- "P452-3_frips.Rdata"
+
+pathToDataFile = dataDir(fripsDataFile)
+
+# If the data file exists, load it
+if (file.exists(pathToDataFile)) {
+  load(pathToDataFile)
+  
+} else {
+  
+  inPeakData = c()
+  # overlap with bam file to get count
+  for(i in 1:nrow(design)){
+      # filter MACS2 peaks data for the current libid
+      peaks_ = dplyr::filter(macs2Peaks, libid == design$libid[i])
+      # create GRanges object for peaks
+      peaks_gr = GRanges(seqnames = peaks_$chr, IRanges(start = peaks_$start, end = peaks_$end), strand = "*")
+      # get fragment counts within peaks
+      fragment_counts <- chromVAR::getCounts(design$bamFile[i], peaks_gr, paired = TRUE, by_rg = FALSE, format = "bam")
+      # sum fragment counts within peaks
+      inPeakN = counts(fragment_counts)[,1] %>% sum
+      # append in-peak count to inPeakData
+      inPeakData = rbind(inPeakData, data.frame(inPeakN = inPeakN, libid = design$libid[i]))
+  }
+  
+  save(inPeakData, file = pathToDataFile)
+  
+}
+
+design = merge(design, inPeakData, by = "libid")
+                 
+design = design %>% dplyr::mutate(frip = round(inPeakN/as.numeric(mapped_paired_reads) * 100,2))
+
+```
+
+# Summarize peak calling
+
+```{r}
+
+table_data = dplyr::select(design, libid, donorId, `totalReads (Mio)` = tophatstats_total_reads, `align %` = pct_aligned, `aligned reads` = mapped_paired_reads, `peak calls` = nPeaks, `median peak width` = medianPeaks, FRiP = frip)
+table_data$`totalReads (Mio)` = round(table_data$`totalReads (Mio)`/1e6,1)
+table_data$`align %` = round(table_data$`align %`,1)
+
+table_data %>%
+  kbl() %>%
+  kable_minimal(full_width = F)
+
+```
+
+# QC: peak counts
+ - first plot below summarizes the number of peaks that were discovered for cell type and study group
+
+```{r}
+
+ggpeakN = design %>% ggplot(aes(x = timePoint, y = nPeaks, fill = timePoint)) +
+    geom_boxplot(outlier.shape = NA) +
+    geom_jitter(aes(color = donorId), position = position_jitter(0.15)) +
+    scale_fill_manual(values = colors.timePoint) +
+    scale_color_manual(values = colors.donorId) +
+    theme_bw() +
+    ylab("Number of peaks") +
+    facet_grid(~ sort, scales = "fixed") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8), strip.text = element_text(size = 8))
+
+plot(ggpeakN)
+
+ggsave(filename = plotDir("peak_counts.pdf"),
+         plot = ggpeakN,
+         width = 9,
+         height = 5)
+
+```
+
+# Plot peaks vs reads
+ - ENCODE:The number of peaks within a replicated peak file should be >150,000, though values >100,000 may be acceptable. 
+ - ENCODE recommends > 150,000 peaks, although > 100,000 is still acceptable
+
+```{r}
+
+ggPeakNvsReads = ggplot(data = design) +
+  geom_point(aes(x = tophatstats_total_reads/1e6, 
+                 y = nPeaks,
+                 color = donorId, 
+                 shape = sort),
+                 size = 1.5) + 
+  scale_color_manual(values = colors.donorId) +
+  labs(x = "total reads / mio", 
+       y = "number of peaks", 
+       color = "donor",
+       shape = "cell type")+
+  xlim(c(0,70)) +
+  theme_bw() +
+  theme(legend.position = "right") + 
+  theme(legend.direction=  'vertical')
+
+plot(ggPeakNvsReads)
+
+ggsave(filename = plotDir("peakCalling_peakN_vs_reads.pdf"),
+         plot = ggPeakNvsReads,
+         width = 8,
+         height = 6)
+
+```
+
+# QC: peak widths
+ - first, the median peak width by study group
+ - want them to not be too narrow or too broad, want ~400-1000 bp peak widths as medians, cut and run wider than ATACseq
+
+```{r}
+
+ggPeakWidthSummarized = design  %>% ggplot(aes(x = timePoint, y = medianPeaks, fill = timePoint)) +
+    geom_boxplot(outlier.shape = NA) +
+    geom_jitter(aes(color = donorId), position = position_jitter(0.15)) +
+    scale_fill_manual(values = colors.sort) +
+    scale_color_manual(values = colors.donorId) +
+    facet_grid(~ sort, scales = "fixed") +
+    ylab("Median peak width") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8), strip.text = element_text(size = 7)) +
+    coord_cartesian(ylim = c(500, 1500))
+
+plot(ggPeakWidthSummarized)
+
+ggsave(filename = plotDir("peak_median_widths.pdf"),
+         plot = ggPeakWidthSummarized,
+         width = 8,
+         height = 6)
+
+```
+
+# Investigate peak width distribution by libid
+
+```{r}
+
+ggPeakWidth = macs2Peaks %>% ggplot(aes(x = libid, y = width, fill = donorId)) +
+    geom_violin() +
+    facet_wrap(~ sort, scales = "free") +
+    scale_fill_manual(values = colors.donorId) +
+    scale_y_continuous(limits = c(100, 2000)) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    ylab("Width of Peaks")
+
+plot(ggPeakWidth)
+
+ggsave(filename = plotDir("peakwidths_by_sample.pdf"),
+         plot = ggPeakWidth,
+         width = 8,
+         height = 6)
+
+```
+
+# QC: FRiP
+ - ENCODE: The fraction of reads in called peak regions (FRiP score) should be > 0.3, though values greater than 0.2 are acceptable. For EN-TEx tissues, FRiP scores will not be enforced as QC metric. TSS enrichment remains in place as a key signal to noise measure
+ - FRiP is calculated by going through the bam files and counting the reads that fall within a called peak
+
+```{r}
+
+ggFRiPs = design %>% ggplot(aes(x = timePoint, y = frip, fill = timePoint)) +
+    geom_boxplot(outlier.shape = NA) +
+    geom_jitter(aes(color = donorId), position = position_jitter(0.15)) +
+    scale_fill_manual(values = colors.timePoint) +
+    scale_color_manual(values = colors.donorId) +
+    theme_bw() +
+    facet_grid(~ sort, scales = "free") +
+    ylab("% of Fragments in Peaks") +
+    xlab("")
+
+plot(ggFRiPs)
+
+ggsave(filename = plotDir("frips.pdf"),
+         plot = ggFRiPs,
+         width = 8,
+         height = 6)
+
+```
+
+# QC: mitochondrial percentages
+
+```{r}
+
+all_mapped_reads <- data.frame()
+
+for (bam_file in alignmentFiles) {
+  # some reads mapped to alternative chr, but less commonly
+  mapped_reads <- idxstatsBam(bam_file) %>% dplyr::filter(seqnames %in% c(1:23, "X", "Y", "MT"))
+  mapped_reads$file <- basename(bam_file)
+  mapped_reads$libid <- sub("lib([0-9]+)_.*", "\\1", mapped_reads$file)
+  all_mapped_reads <- rbind(all_mapped_reads, mapped_reads)
+}
+
+perc_mt <- all_mapped_reads %>%
+  group_by(libid) %>%
+  summarize(mt_perc = 100*mapped[seqnames == "MT"] / sum(mapped)) %>%
+  ungroup() %>%
+  mutate(libid = paste("lib", libid, sep = ""))
+
+design <- design %>% full_join(perc_mt, by = "libid")
+
+```
+
+# Plot MT %s
+
+```{r}
+
+mito_perc_plot <- ggplot(design, aes(x = timePoint, y = mt_perc, fill = timePoint)) +
+    geom_boxplot(outlier.shape = NA) +
+    geom_jitter(aes(color = donorId), position = position_jitter(0.15)) +
+    scale_fill_manual(values = colors.timePoint) +
+    scale_color_manual(values = colors.donorId) +
+    theme_bw() +
+    facet_grid(~ sort, scales = "free") +
+    ylab("% of reads in MT") +
+    xlab("") +
+    theme(strip.text = element_text(size = 9))
+
+mito_perc_plot
+
+ggsave(plotDir("P452-3_mt_perc.pdf"), plot = mito_perc_plot, height = 8,  width = 12)
+
+```
+
+# QC: library complexity (diversity of unique seqs)
+ - read in fastq files
+
+```{r}
+
+fastq_list <- list()
+
+# Read each FASTQ file and append to the list, tracking libid/R1 vs. R2 names
+for (fastQ in fastqFiles) {
+  # just doing first three files for now as this reading and subsequent unique seq counting is slow
+    fastq_file <- readFastq(fastQ)
+    fastq_list[[basename(fastQ)]] <- fastq_file
+}
+
+```
+
+# Prepare dfs of downsampled (to various degrees) fastq files from various libraries and R1/R2
+
+```{r}
+
+downsample_reads <- function(fastq_data, sample_size) {
+  if (sample_size >= length(fastq_data)) {
+    return(fastq_data)
+  } else {
+    sampled_indices <- sample(length(fastq_data), size = sample_size, replace = FALSE)
+    return(fastq_data[sampled_indices])
+  }
+}
+
+# Define list of downsampling sizes
+downsampling_lengths <- c(10^5, 10^6, 10^7, 2*10^7)
+
+# Initialize empty results df
+results_df <- data.frame(
+  Library_ID = character(),
+  Read_Type = character(),
+  Total_Sequences = numeric(),
+  Total_Unique_Sequences = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# use var i here to track where I'm at in fastq_list for names
+i = 1
+
+# Loop through each FASTQ file in fastq_list
+for (fastq_file in fastq_list) {
+  library_id <- str_extract(names(fastq_list)[i], "lib[0-9]+")
+  read_type <- str_extract(names(fastq_list)[i], "R[0-9]+")
+  # increment i for next fastq_file name/read type extraction
+  i = i + 1
+
+  # Loop through each downsampling size
+  for (length in downsampling_lengths) {
+    downsampled_fastq <- downsample_reads(fastq_file, length)
+    total_seqs <- length(downsampled_fastq)
+    total_unique_seqs <- length(table(sread(downsampled_fastq)))
+    
+    results_df <- rbind(results_df, 
+                        data.frame(Library_ID = library_id,
+                                   Read_Type = read_type,
+                                   Total_Sequences = total_seqs,
+                                   Total_Unique_Sequences = total_unique_seqs))
+  }
+}
+
+results_df
+
+```
+
+# Plot rarefaction curve (unique seqs (y) as function of seq depth (x))
+
+```{r}
+
+rarefaction_plot <- ggplot(results_df, aes(x = Total_Sequences, y = Total_Unique_Sequences)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ Library_ID + Read_Type) +
+  labs(x = "Total seqs", y = "Unique seqs") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+rarefaction_plot
+
+ggsave(plotDir("P452-3_rarefaction.pdf"), plot = rarefaction_plot, height = 8,  width = 12)
+
+```
+
+# Exclude samples with failed QC
+ - none
