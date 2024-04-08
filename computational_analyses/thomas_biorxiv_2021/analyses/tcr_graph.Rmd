@@ -1,9 +1,7 @@
 ---
-title: "Molecular Pathways of Colon Inflammation Induced by Cancer Immunotherapy"
+title: "Thomas bioRxiv"
 output: pdf_document
 ---
-
- - data mining of https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7415717/
  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -48,18 +46,34 @@ theme_set(
 
 ```{r}
 
+metadata <- data.frame(
+  patient_id = c("MC_2", "SIC_13", "SIC_19", "SIC_31", "SIC_32", "SIC_36", "SIC_40", "SIC_43", "SIC_53", "MC_1", "MC_9", "SIC_71", "SIC_89", "SIC_76", "SIC_94", "SIC_97", "SIC_100", "SIC_100", "SIC_109", "SIC_121", "SIC_126", "SIC_134", "SIC_140", "SIC_141", "SIC_172", "SIC_186", "SIC_187", "SIC_188", "SIC_196"),
+  simplified_patient_id = c("HC7", "HC1", "IHC3", "IHC4", "C7", "C8", "C9", "C10", "IHC5", "HC6", "HC8", "C11", "C12", "C14", "IHC6", "C13", "C1", "C1", "IHC1", "C2", "C3", "C4", "C5", "C6", "IHC2", "HC2", "HC3", "HC4", "HC5")) %>%
+  mutate(group = case_when(
+    startsWith(simplified_patient_id, "H") ~ "No ICI",
+    startsWith(simplified_patient_id, "I") ~ "ICI no colitis",
+    startsWith(simplified_patient_id, "C") ~ "ICI colitis"))
+
 tcrs <- read.csv("../saved_data/tcr_graph_input.csv") %>%
   dplyr::select(-X) %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$") %>%
+  filter(!(is.na(v_gene)),
+         !(is.na(j_gene)),
+         !(is.na(cdr3))) %>%
   mutate(clonotype = paste(v_gene, j_gene, cdr3, sep = "_")) %>%
-  group_by(patient, clonotype, chain) %>%
+  group_by(orig.ident, clonotype, chain) %>%
   mutate(count = n()) %>%
   ungroup() %>%
   # look at highly expanded per patient
-  group_by(patient, chain) %>%
+  group_by(orig.ident, chain) %>%
   arrange(-count) %>%
   dplyr::slice_head(n = 350) %>%
   ungroup() %>%
-  dplyr::rename(libid = barcode)
+  dplyr::rename(libid = TCR_name) %>%
+  mutate(patient_id = str_extract(orig.ident, "SIC_[0-9]+")) %>%
+  left_join(metadata, by = "patient_id")
 
 tcrs
 
