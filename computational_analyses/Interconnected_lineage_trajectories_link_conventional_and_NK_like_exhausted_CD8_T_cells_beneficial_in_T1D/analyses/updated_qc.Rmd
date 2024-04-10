@@ -286,8 +286,8 @@ fragmentDistributionPlot  <- fragmentDistributions %>%
   theme(legend.position="right") + 
   theme(legend.direction='vertical') +
   theme_bw() +
-  theme(strip.text = element_text(size = 7)) +
-  facet_wrap(~ sort + timePoint, labeller = labeller(timePoint = function(variable) paste("timePoint: ", variable)), ncol = 5, scales = "free")
+  theme(strip.text = element_text(size = 5)) +
+  facet_wrap(~ sort + timePoint, labeller = labeller(timePoint = function(variable) paste("timePoint: ", variable)), ncol = 3, scales = "free")
 
 print(fragmentDistributionPlot)
 
@@ -374,7 +374,7 @@ TSSePlot  <- TSScoverage %>%
   theme_bw() +
   theme(legend.position="right") + 
   theme(legend.direction='vertical') + 
-  facet_wrap(~ sort + timePoint, labeller = labeller(timePoint = function(variable) paste("timePoint: ", variable)), ncol = 5, scales="fixed") +
+  facet_wrap(~ sort + timePoint, labeller = labeller(timePoint = function(variable) paste("timePoint: ", variable)), ncol = 3, scales="fixed") +
   geom_hline(yintercept = 5, linetype = 2) + 
   geom_hline(yintercept = 7, linetype = 3, color = "grey")
 
@@ -427,7 +427,7 @@ totalReadsPlot = ggplot(design, aes(fill = donorId, y = tophatstats_total_reads/
     theme(legend.position="bottom") + 
     geom_hline(yintercept = readCut/1e6, linetype = 2) +
     theme(legend.direction='horizontal') +
-    facet_wrap(~ sort + timePoint, labeller = labeller(timePoint = function(variable) paste("timePoint: ", variable)), ncol = 5, scales="free") +
+    facet_wrap(~ sort + timePoint, labeller = labeller(timePoint = function(variable) paste("timePoint: ", variable)), ncol = 3, scales="free") +
     theme_bw() +
     theme(axis.text.x = element_blank(), axis.ticks = element_blank(), strip.text = element_text(size = 7))
 
@@ -757,91 +757,4 @@ ggsave(plotDir("P452-3_mt_perc.pdf"), plot = mito_perc_plot, height = 8,  width 
 
 ```
 
-# QC: library complexity (diversity of unique seqs)
- - read in fastq files
-
-```{r}
-
-fastq_list <- list()
-
-# Read each FASTQ file and append to the list, tracking libid/R1 vs. R2 names
-for (fastQ in fastqFiles) {
-  # just doing first three files for now as this reading and subsequent unique seq counting is slow
-    fastq_file <- readFastq(fastQ)
-    fastq_list[[basename(fastQ)]] <- fastq_file
-}
-
-```
-
-# Prepare dfs of downsampled (to various degrees) fastq files from various libraries and R1/R2
-
-```{r}
-
-downsample_reads <- function(fastq_data, sample_size) {
-  if (sample_size >= length(fastq_data)) {
-    return(fastq_data)
-  } else {
-    sampled_indices <- sample(length(fastq_data), size = sample_size, replace = FALSE)
-    return(fastq_data[sampled_indices])
-  }
-}
-
-# Define list of downsampling sizes
-downsampling_lengths <- c(10^5, 10^6, 10^7, 2*10^7)
-
-# Initialize empty results df
-results_df <- data.frame(
-  Library_ID = character(),
-  Read_Type = character(),
-  Total_Sequences = numeric(),
-  Total_Unique_Sequences = numeric(),
-  stringsAsFactors = FALSE
-)
-
-# use var i here to track where I'm at in fastq_list for names
-i = 1
-
-# Loop through each FASTQ file in fastq_list
-for (fastq_file in fastq_list) {
-  library_id <- str_extract(names(fastq_list)[i], "lib[0-9]+")
-  read_type <- str_extract(names(fastq_list)[i], "R[0-9]+")
-  # increment i for next fastq_file name/read type extraction
-  i = i + 1
-
-  # Loop through each downsampling size
-  for (length in downsampling_lengths) {
-    downsampled_fastq <- downsample_reads(fastq_file, length)
-    total_seqs <- length(downsampled_fastq)
-    total_unique_seqs <- length(table(sread(downsampled_fastq)))
-    
-    results_df <- rbind(results_df, 
-                        data.frame(Library_ID = library_id,
-                                   Read_Type = read_type,
-                                   Total_Sequences = total_seqs,
-                                   Total_Unique_Sequences = total_unique_seqs))
-  }
-}
-
-results_df
-
-```
-
-# Plot rarefaction curve (unique seqs (y) as function of seq depth (x))
-
-```{r}
-
-rarefaction_plot <- ggplot(results_df, aes(x = Total_Sequences, y = Total_Unique_Sequences)) +
-  geom_line() +
-  geom_point() +
-  facet_wrap(~ Library_ID + Read_Type) +
-  labs(x = "Total seqs", y = "Unique seqs") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
-
-rarefaction_plot
-
-ggsave(plotDir("P452-3_rarefaction.pdf"), plot = rarefaction_plot, height = 8,  width = 12)
-
-```
-
 # Exclude samples with failed QC
- - none
