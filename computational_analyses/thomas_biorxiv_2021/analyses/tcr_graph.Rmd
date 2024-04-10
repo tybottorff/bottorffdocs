@@ -62,18 +62,19 @@ tcrs <- read.csv("../saved_data/tcr_graph_input.csv") %>%
   filter(!(is.na(v_gene)),
          !(is.na(j_gene)),
          !(is.na(cdr3))) %>%
-  mutate(clonotype = paste(v_gene, j_gene, cdr3, sep = "_")) %>%
-  group_by(orig.ident, clonotype, chain) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
+  #mutate(clonotype = paste(v_gene, j_gene, cdr3, sep = "_")) %>%
+  #group_by(orig.ident, clonotype, chain) %>%
+  #mutate(count = n()) %>%
+  #ungroup() %>%
   # look at highly expanded per patient
-  group_by(orig.ident, chain) %>%
-  arrange(-count) %>%
-  dplyr::slice_head(n = 350) %>%
-  ungroup() %>%
+  #group_by(orig.ident, chain) %>%
+  #arrange(-count) %>%
+  #dplyr::slice_head(n = 350) %>%
+  #ungroup() %>%
   dplyr::rename(libid = TCR_name) %>%
   mutate(patient_id = str_extract(orig.ident, "SIC_[0-9]+")) %>%
-  left_join(metadata, by = "patient_id")
+  left_join(metadata, by = "patient_id") %>%
+  head(34)
 
 tcrs
 
@@ -100,10 +101,10 @@ V(no_irae_tcr_igraph)$Chain <- V(no_irae_tcr_igraph)$group
 dev.new(width = 9.5, length = 8)
 theme_set(theme_bw(20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.key = element_blank()))
 ggraph(no_irae_tcr_igraph, "fr") +
-    geom_edge_link(
-        edge_width = 1,
-        #edge_color = edgeColor
-    ) +
+    #geom_edge_link(
+    #    edge_width = 1,
+    #    #edge_color = edgeColor
+    #) +
     geom_node_point(
         aes(fill = Chain, size = `Number of Cells`),
         shape = 21,

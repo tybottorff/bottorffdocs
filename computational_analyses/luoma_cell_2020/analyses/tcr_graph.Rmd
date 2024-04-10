@@ -111,7 +111,7 @@ cat("Number of Vertices (no irAE):", num_vertices, "\n")
 
 ```
 
-# # Make TCR graph with Igraph: yes irAE
+# Make TCR graph with Igraph: yes irAE
 
 ```{r}
 
@@ -154,5 +154,79 @@ average_connectivity <- 2 * num_edges / num_vertices
 cat("Average Connectivity (irAE):", average_connectivity, "\n")
 cat("Number of Edges (irAE):", num_edges, "\n")
 cat("Number of Vertices (irAE):", num_vertices, "\n")
+
+```
+
+# Read in convergence df
+
+```{r}
+
+convergence <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
+  select(-X) %>%
+  select(barcode, group, Chain, v_gene, d_gene, j_gene, c_gene, convergence) %>%
+  dplyr::rename(chain = Chain)
+
+convergence
+
+```
+
+# Test convergence vs. connectivity
+
+ - take random subsets and get connectivity and convergence fraction metrics, see if they correlate over many random subsets (irAE vs. no irAE as well)
+
+```{r}
+
+sample_and_analyze <- function(df, n) {
+  results <- vector("list", n)
+  
+  for (i in 1:n) {
+    # Sample the dataframe
+    sampled_df <- df %>%
+      sample_n(500, replace = FALSE)
+    
+    # Create the TCR graph
+    tcr_graph <- makeTcrGraph(sampled_df, link = "nt")
+    tcr_igraph <- tcrGraphToIgraph(tcr_graph)
+    
+    # Compute average connectivity
+    num_edges <- ecount(tcr_igraph)
+    num_vertices <- vcount(tcr_igraph)
+    average_connectivity <- 2 * num_edges / num_vertices
+    
+    # Compute fraction of 'Yes' values in the convergence column
+    convergence_fraction <- mean(sampled_df$convergence == 'Yes', na.rm = TRUE)
+    
+    # Store the results
+    results[[i]] <- list(average_connectivity = average_connectivity,
+                         convergence_fraction = convergence_fraction)
+  }
+  
+  return(results)
+}
+
+# Load data and preprocess
+random_irae_tcrs <- read.csv("../saved_data/tcr_graph_input.csv") %>%
+  dplyr::select(-X) %>%
+  left_join(convergence, by = c("barcode", "group", "chain", "v_gene", "d_gene", "j_gene", "c_gene")) %>%
+  filter(group == "ICI colitis") %>%
+  dplyr::rename(libid = barcode)
+
+# Call the function to sample and analyze
+n_times <- 100
+results <- sample_and_analyze(random_irae_tcrs, n_times)
+
+# Extract average connectivity and convergence fraction from results
+average_connectivity <- unlist(lapply(results, function(x) x$average_connectivity))
+convergence_fraction <- unlist(lapply(results, function(x) x$convergence_fraction))
+
+# Create a dataframe for plotting
+plot_data <- data.frame(
+  Average_Connectivity = average_connectivity,
+  Convergence_Fraction = convergence_fraction
+)
+
+ggplot(plot_data, aes(x = Average_Connectivity, y = Convergence_Fraction)) +
+  geom_point() +
+  labs(x = "Average Connectivity", y = "Convergence Fraction")
 
 ```
