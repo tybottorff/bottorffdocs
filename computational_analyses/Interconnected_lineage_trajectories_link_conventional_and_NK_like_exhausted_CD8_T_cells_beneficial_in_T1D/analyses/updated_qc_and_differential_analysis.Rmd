@@ -758,3 +758,432 @@ ggsave(plotDir("P452-3_mt_perc.pdf"), plot = mito_perc_plot, height = 8,  width 
 ```
 
 # Exclude samples with failed QC
+
+# Differential analysis
+
+ - perform separately (comparing sorts) for each of the time points
+
+# Set paramaters for differential analysis
+
+```{r}
+
+pcutoff = 0.1
+logPcutoff = -log10(pcutoff)
+logFCcutoff = 0
+
+```
+
+# Setup plot functions for differential analysis
+
+```{r}
+
+volcanoplot = function(data, logfc_cutoff, p_cutoff, regulationColors, topN = NULL, colorString = "") {
+  if ("padj" %in% names(data)) {
+     theplot = ggplot(data, aes(x = log2FoldChange, y = -log10(padj), color = regulation, text = labelText))
+  } else if ("Fold" %in% names(data)) {
+     theplot = ggplot(data, aes(x = Fold, y = -log10(FDR), color = regulation, text = labelText))
+  } else {
+     theplot = ggplot(data, aes(x = logFC, y = -log10(FDR), color = regulation, text = labelText))
+  }
+  theplot = theplot + 
+              geom_point(alpha=0.7, size=2.5, shape = 19) +
+              scale_color_manual(values = regulationColors) + 
+              geom_hline(yintercept =  -log10(p_cutoff), color="black", linetype="dotted",size=0.3) +
+              geom_vline(xintercept = -logfc_cutoff, color="black", linetype="dotted",size=0.3) + 
+              geom_vline(xintercept = +logfc_cutoff, color="black", linetype="dotted",size=0.3) + 
+              theme(text = element_text(size=12), strip.text.x = element_text(size = 12), plot.title = element_text(size=12)) + 
+              labs(color = colorString,  y = "log10 FDR", x = "log2 FC")
+  
+  if (!is.null(topN) && topN != 0) {
+    if (is.numeric(topN)) {
+      sig = dplyr::filter(data, regulation != "unaffected")
+      sig = sig[1:topN, ]
+    } else {
+      sig = dplyr::filter(data, gene %in% topN)
+    }
+    if ("padj" %in% names(data)) {
+     theplot = theplot + geom_text_repel(data = siga, aes(x = log2FoldChange, y = -log10(padj), label = nearestGene), 
+             size=4, 
+             #vjust=1,
+             #hjust=0.5,
+             max.overlaps = Inf,
+             color = "black")
+    } else if ("Fold" %in% names(data)) {
+     theplot = theplot + geom_text_repel(data = sig, aes(x = Fold, y = -log10(FDR), label = nearestGene), 
+             size=4, 
+             #vjust=1,
+             #hjust=0.5,
+             max.overlaps = Inf,
+             color = "black")
+    } else {
+     theplot = theplot + geom_text_repel(data = sig, aes(x = logFC, y = -log10(FDR), label = nearestGene), 
+             size=4, 
+             #vjust=1,
+             #hjust=0.5,
+             max.overlaps = Inf,
+             color = "black")
+    }
+  }
+
+  return(theplot)
+}
+
+enrichmentCategories = c("up", "down", "unaffected")
+enrichmentColors = c("#FE5000",  "#0033a0", "#E6E6E6")
+names(enrichmentColors) <- enrichmentCategories
+
+categorize = function(object, regulationCategories, logFC_cutoff = 1, p_cutoff = 0.05) {
+  
+  if ("padj" %in% names(object)) {
+      object$regulation = regulationCategories[3]
+      object$regulation[object$log2FoldChange > +logFC_cutoff & object$padj <= p_cutoff] = regulationCategories[1]
+      object$regulation[object$log2FoldChange < -logFC_cutoff & object$padj <= p_cutoff] = regulationCategories[2]
+      object$regulation = factor(object$regulation, levels = regulationCategories)
+  } else if ("Fold" %in% names(object)) {
+      object$regulation = regulationCategories[3]
+      object$regulation[object$Fold > +logFC_cutoff & object$FDR <= p_cutoff] = regulationCategories[1]
+      object$regulation[object$Fold < -logFC_cutoff & object$FDR <= p_cutoff] = regulationCategories[2]
+      object$regulation = factor(object$regulation, levels = regulationCategories)
+  } else {
+    object$regulation = regulationCategories[3]
+    object$regulation[object$logFC > +logFC_cutoff & object$FDR <= p_cutoff] = regulationCategories[1]
+    object$regulation[object$logFC < -logFC_cutoff & object$FDR <= p_cutoff] = regulationCategories[2]
+    object$regulation = factor(object$regulation, levels = regulationCategories)
+  }
+  return(object)
+}
+
+```
+
+## Baseline
+
+## Setup DBA object, find contrast between responders and non-responders
+
+```{r}
+
+peakFileName = "P452-1_baseline_diffbind_object.rds"
+pathToDataFile = dataDir(peakFileName)
+
+design_baseline = dplyr::filter(design, 
+                      timePoint == "Baseline") %>%
+    mutate(sort = if_else(startsWith(sort, "C"), substr(sort, 1, 5), substr(sort, 1, 2)),
+         sort = gsub("\\+", "pos", sort),
+         sort = gsub("\\-", "neg", sort),
+         sample_id = paste(sort, donorId, sep = "_"))
+
+# add a replicate index column (required by diffBind and has to be 1 ... N)
+for (iGroup in unique(design_baseline$sort)) {
+  idx = design_baseline$sort == iGroup
+  design_baseline$replicate[design_baseline$sort == iGroup] = 1:sum(idx)
+}
+
+table(design_baseline$sort)
+
+if (file.exists(pathToDataFile)) {
+
+  consensusPeaks_baseline = readRDS(pathToDataFile)
+
+} else {
+
+  samples = data.frame(SampleID = design_baseline$sample_name, 
+                       Tissue = design_baseline$sort,
+                       Condition = design_baseline$timePoint, 
+                       Treatment = design_baseline$timePoint, 
+                       Replicate = design_baseline$replicate, 
+                       bamReads = design_baseline$bamFile, 
+                       Peaks = design_baseline$peakFiles, 
+                       PeakCaller = "narrow")
+  
+  consensusPeaks_baseline = dba(sampleSheet=samples)
+  
+  summary(consensusPeaks_baseline$binding[,3]-consensusPeaks_baseline$binding[,2])
+  
+  consensusPeaks_baseline = dba.count(consensusPeaks_baseline, peaks = "/mnt/bioinformatics/pipeline/Illumina/220802_VH00126_203_AAAMVKNHV/Project_P452-3Processed_globus_220807/merged_peaks/all_merged_peaks.bed", summits = T)
+  
+  consensusPeaks_baseline = dba.contrast(consensusPeaks_baseline, design = c("~ 0 + Tissue"), reorderMeta=list(Tissue = "CD57pos"))
+  
+  consensusPeaks_baseline = dba.analyze(consensusPeaks_baseline, method = DBA_ALL_METHODS)
+  
+  dba.show(consensusPeaks_baseline, bContrast=T)
+  
+  dba.plotVolcano(consensusPeaks_baseline, contrast=1)
+  dba.plotVolcano(consensusPeaks_baseline, contrast=2)
+  dba.plotVolcano(consensusPeaks_baseline, contrast=3)
+
+  saveRDS(consensusPeaks_baseline, file = pathToDataFile)
+}
+
+```
+
+# Get and format annotations
+
+```{r}
+annoData <- ChIPpeakAnno::toGRanges(EnsDb.Hsapiens.v86, feature="gene")
+
+annoData = annoData[seqnames(annoData) %in% paste0("chr",c(1:23,"X","Y"))]
+
+# seqlevelsStyle(annoData) <- "UCSC" # change seqnames from "2" to "chr2"
+ucsc.levels <- paste0("chr",c(1:23,"X","Y"))
+seqlevels(annoData) <- ucsc.levels
+seqlevelsStyle(annoData) <- "NCBI" # change seqnames from "chr2" to "chr2"
+
+```
+
+# Grab "consensus" peak list and annotate peaks to promoters and gene bodies
+
+```{r}
+
+consensusPeaklist_baseline = dba.peakset(consensusPeaks_baseline, bRetrieve=T, DataType = DBA_DATA_FRAME)
+
+filterChr = c(1:23, "X", "Y") # filter out peaks that are not on the UCSC genome browser
+
+bed = consensusPeaklist_baseline %>% dplyr::filter(START >= 0, CHR %in% filterChr) %>% dplyr::select(CHR, START, END)
+    
+write.table(bed, file = dataDir("_baseline_consensusPeaks.bed"), sep="\t", quote=F, row.names=F, col.names=F)
+
+consensusPeaklist_baseline$peakID = 1:nrow(consensusPeaklist_baseline)
+
+consensusPeaklist_baseline.g = GRanges(seqnames = consensusPeaklist_baseline$CHR, 
+                                 IRanges(start = consensusPeaklist_baseline$START, 
+                                         end = consensusPeaklist_baseline$END), 
+                                 strand = "*", 
+                                 peakID = consensusPeaklist_baseline$peakID)
+
+seqlevelsStyle(consensusPeaklist_baseline.g) = "UCSC"
+seqlevels(consensusPeaklist_baseline.g)
+
+consensusPeaklist_baseline.g = consensusPeaklist_baseline.g[seqnames(consensusPeaklist_baseline.g) %in% paste0("chr",c(1:23,"X","Y"))]
+seqlevels(consensusPeaklist_baseline.g) <- ucsc.levels
+seqlevelsStyle(consensusPeaklist_baseline.g) <- "NCBI" # change seqnames from "chr2" to "chr2"
+seqlevels(consensusPeaklist_baseline.g)
+
+# First, we annotate the closest gene bodies (one to one)
+geneBodies.g <- ChIPpeakAnno::annotatePeakInBatch(consensusPeaklist_baseline.g, 
+                                                  AnnotationData = annoData, 
+                                                  output = "nearestLocation",
+                                                  select = "first")
+
+geneBodies.g = ChIPpeakAnno::addGeneIDs(geneBodies.g, orgAnn="org.Hs.eg.db", IDs2Add=c("symbol"))
+
+nearestGeneBodies = data.frame(peakID = geneBodies.g$peakID, 
+                               closestGene = geneBodies.g$symbol, 
+                               distanceToGene = geneBodies.g$distancetoFeature, 
+                               closestGeneENS = geneBodies.g$feature)
+
+# Now, all promoters within +/- 10 000 bp (one to many)
+nearPromoters.g = ChIPpeakAnno::annotatePeakInBatch(consensusPeaklist_baseline.g, 
+                                                    AnnotationData = annoData, 
+                                                    output = "nearestBiDirectionalPromoters",
+                                                    bindingRegion = c(-10000, 10000),
+                                                    select = "all")
+
+nearPromoters.g = ChIPpeakAnno::addGeneIDs(nearPromoters.g, orgAnn="org.Hs.eg.db", IDs2Add=c("symbol"))
+
+nearPromoters = data.frame(peakID = nearPromoters.g$peakID, 
+                           distanceToPromoter = nearPromoters.g$distanceToSite,
+                           promoterSymbol = nearPromoters.g$gene_name,
+                           promoterENS = nearPromoters.g$feature)
+
+# All peaks that weren't annotated, we are now going to find, and then look for the one closest promoter within 100 000 bp (one to one)
+missingPeakIDs = setdiff(consensusPeaklist_baseline.g$peakID, nearPromoters.g$peakID)
+missingPeaks.g = consensusPeaklist_baseline.g[consensusPeaklist_baseline.g$peakID %in% missingPeakIDs]
+
+farPromoters.g = ChIPpeakAnno::annotatePeakInBatch(missingPeaks.g, 
+                                                   AnnotationData = annoData, 
+                                                   output = "nearestBiDirectionalPromoters",
+                                                   bindingRegion = c(-100000, 100000),
+                                                   select = "all")
+
+farPromoters = data.frame(peakID = farPromoters.g$peakID,
+                          distanceToPromoter = farPromoters.g$distanceToSite,
+                          promoterSymbol = farPromoters.g$gene_name, 
+                          promoterENS = farPromoters.g$feature)
+
+promoters = rbind(nearPromoters, farPromoters)
+
+promoters = dplyr::distinct(promoters) # remove duplicates
+
+```
+
+# Process contrasts
+
+```{r}
+
+contrasts = dba.show(consensusPeaks_baseline, bContrast=T)
+contrasts = dplyr::mutate(contrasts, name = paste0(Group, "_vs_", Group2))
+dge_baseline = c()
+
+for (iContrast in 1:nrow(contrasts)) {
+  dge_ = dba.report(consensusPeaks_baseline, method=DBA_DESEQ2, contrast = iContrast, th = 1, DataType = DBA_DATA_FRAME)
+  
+  dge_$peakID = as.numeric(rownames(dge_))
+  
+  dge_ = merge(dge_, nearestGeneBodies, by = "peakID", all.x = TRUE, no.dups = FALSE)
+  
+  dge_ = left_join(dge_, promoters, by = "peakID", keep = FALSE) 
+
+  dge_$peakPosition = paste0(dge_$Chr, ":", dge_$Start, "-", dge_$End)
+  
+  dge_ = dplyr::arrange(dge_, FDR)
+  
+  dge_baseline[[iContrast]] = dge_
+}
+
+names(dge_baseline) = contrasts$name
+
+```
+
+# Export differential peaks
+
+```{r}
+for (contrast in names(dge_baseline)) {
+  dge_ = dge_baseline[[contrast]]
+  
+  out = dge_ %>%
+        dplyr::filter(FDR < 0.1) %>%
+        dplyr::select(peakPosition, Fold, FDR, 
+                      promoterSymbol, promoterENS, distanceToPromoter,
+                      closestGene, closestGeneENS, distanceToGene
+                      ) %>%
+        dplyr::rename(logFC = Fold)
+                      
+    
+  write.table(out, file =  dataDir(paste0("_baseline_", contrast, "_differential_peaks_annotated.csv")), sep=",", quote=F, row.names=F)
+    
+  bed = dge_ %>% dplyr::filter(FDR < pcutoff) %>% dplyr::select(Chr, Start, End)
+      
+  bed = distinct(bed)
+      
+  write.table(bed, file = dataDir(paste0("_baseline_", contrast, "_differential_peaks.bed")), sep="\t", quote=F, row.names=F, col.names=F)
+  
+  # bed = dge_ %>% dplyr::filter(FDR < pcutoff) %>% dplyr::select(Chr, Start, End)
+  # bed = dplyr::arrange(bed, Chr, Start)
+  # bed$Chr = paste0("chr",bed$Chr)
+  # bed = distinct(bed)
+  # bed$peakID = 1:nrow(bed)
+  #     
+  # bed$blank = "1"
+  # bed$strand = "+"
+  #     
+  # write.table(dplyr::select(bed, peakID, Chr, Start, End, strand), file = dataDir("H3K27Ac_differential_peaks_homer_format.txt"), sep="\t", quote=F, row.names=F, col.names=F)
+}
+
+```
+
+# Volcano plots
+
+```{r}
+for (contrast in names(dge_baseline)) {
+  dge_ = dge_baseline[[contrast]]
+  #dge_$labelText = if_else(dge_$regulation != "unaffected", paste0("peakPosition: ", dge_$peakPosition, "\n", 
+  #                                      "nearestGene: ", dge_$closestGene, " (", dge_$distanceToGene, " bp)", "\n",
+  #                                      "nearbyPromoter: ", dge_$promoterSymbol, " (", dge_$distanceToPromoter, " bp)", "\n", 
+  #                              sep = ""), NA)
+  dge_$labelText = paste0("nearestGene: ", dge_$closestGene, "\nnearbyPromoter: ", dge_$promoterSymbol,
+                                sep = "")
+  
+  dge_ = categorize(dge_, enrichmentCategories, logFC_cutoff = logFCcutoff, p_cutoff = pcutoff)
+  
+  dge_baseline[[contrast]] = dge_
+  
+  vp_peaks = volcanoplot(dge_, logFCcutoff, pcutoff, enrichmentColors, colorString = paste0("_baseline - ", contrast)) +
+    geom_text_repel(aes(label = labelText), 
+                  size = 1.5, 
+                  color = "black",
+                  box.padding = 0.2,
+                  point.padding = 0.5)
+  print(vp_peaks)
+    
+  ggsave(filename = plotDir(paste0("vp__baseline_", contrast, ".png")),
+         plot = vp_peaks,
+         width = 7,
+         height = 5)
+  
+  ggplotly(vp_peaks)
+  htmlwidgets::saveWidget(as_widget(ggplotly(vp_peaks)), plotDir(paste0("interactive/vp__baseline_", contrast, ".html")))
+}
+
+```
+
+# Setup for heatmaps
+
+```{r}
+
+col_fun = colorRamp2(c(-4, 0, 4), c("#0033a0", "white", "#FE5000"))
+
+reorder = order(design_baseline$responder, design_baseline$libid)
+design_baseline_ <- design_baseline[reorder, ]
+
+countsConsensusPeaks = as.matrix(consensusPeaklist_baseline[ , 4:(ncol(consensusPeaklist_baseline)-1)])
+countsConsensusPeaks_ = countsConsensusPeaks[ , reorder]
+
+```
+
+# Heatmaps for top n peaks
+
+```{r}
+
+nPeaks = 200
+
+for (contrast in names(dge_baseline)) {
+  dge_ = dge_baseline[[contrast]]
+  
+  sigPeaks = dge_[1:nPeaks,]
+  
+  sigPeaksNames = unique(sigPeaks$peakPosition)
+  sigPeaksIDs = unique(sigPeaks$peakID)
+  
+  counts_ = countsConsensusPeaks_[rownames(countsConsensusPeaks_) %in% sigPeaksIDs, ]
+  rownames(counts_) = sigPeaksNames
+  
+  tp = t(scale(t(log2(1+counts_))))
+
+  ha <- HeatmapAnnotation(df = list(group = design_baseline_$responder), 
+                          col = list(group = colors.responder)
+                          )
+  
+  hm = (Heatmap(tp, show_column_names = FALSE, show_row_names = F, cluster_columns = FALSE, name = "scaled\nlog2\npeak score", top_annotation = ha, col = col_fun, cluster_rows = TRUE, column_title = paste0("_baseline - ", contrast), show_row_dend = FALSE))
+  
+  plot(hm)
+  
+  
+  pdf(plotDir(paste0("hm__baseline_", contrast, "_top_peaks.pdf")), height= 8, width = 5)
+  print(hm)
+  invisible(dev.off())
+}
+```
+
+# Heatmaps for n promoter peaks
+
+```{r}
+
+nPeaks = 50
+
+for (contrast in names(dge_baseline)) {
+  dge_ = dge_baseline[[contrast]]
+  
+  sigPeaks = dplyr::filter(dge_, !is.na(promoterSymbol))[1:nPeaks,]
+  sigPeaksNames = paste0(sigPeaks$promoterSymbol, " (", sigPeaks$distancetoPromoter, " bp)")
+  sigPeaksIDs = sigPeaks$peakID
+    
+  counts_ = countsConsensusPeaks_[match(sigPeaksIDs, rownames(countsConsensusPeaks_)), ]
+    
+  rownames(counts_) = sigPeaksNames
+    
+  tp = t(scale(t(log2(1+counts_))))
+    
+  ha <- HeatmapAnnotation(df = list(group = design_baseline_$responder), 
+                            col = list(group = colors.responder)
+                            )
+    
+  hm = (Heatmap(tp, show_column_names = FALSE, show_row_names = TRUE, cluster_columns = FALSE, name = "scaled\nlog2\npeak score", top_annotation = ha, col = col_fun, cluster_rows = TRUE, column_title = paste0("_baseline - ", contrast, "- top promoters"), show_row_dend = FALSE))
+  
+  plot(hm)
+    
+  pdf(plotDir(paste0("hm__baseline_", contrast, "_top_promoters.pdf")), height= 8, width = 7)
+  print(hm)
+  
+  invisible(dev.off())
+}
+
+```
