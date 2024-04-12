@@ -59,9 +59,18 @@ tcrs <- read.csv("../saved_data/tcr_graph_input.csv") %>%
   arrange(-count) %>%
   dplyr::slice_head(n = 350) %>%
   ungroup() %>%
-  dplyr::rename(libid = barcode)
+  dplyr::rename(libid = barcode) %>%
+  mutate(id = paste(libid, chain, cdr3, sep = "_"))
 
 tcrs
+
+converged_tcrs <- tcrs %>%
+  group_by(cdr3) %>%
+  mutate(distinct_cdr3_nt_count = n_distinct(cdr3_nt)) %>%
+  filter(distinct_cdr3_nt_count > 1) %>%
+  mutate(id = paste(libid, chain, cdr3, sep = "_"))
+
+converged_tcrs
 
 ```
 
@@ -157,76 +166,145 @@ cat("Number of Vertices (irAE):", num_vertices, "\n")
 
 ```
 
-# Read in convergence df
+# Find nodes in connected structures (irAE)
 
 ```{r}
 
-convergence <- read.csv("../saved_data/converged_public_private_tcrs.csv") %>%
-  select(-X) %>%
-  select(barcode, group, Chain, v_gene, d_gene, j_gene, c_gene, convergence) %>%
-  dplyr::rename(chain = Chain)
+irae_connected_nodes <- irae_tcr_graph$edges %>%
+  group_by(from) %>%
+  filter(n() > 1) %>%
+  slice(1) %>%
+  select(from)
 
-convergence
+irae_connected_nodes
+
+irae_connected_node_info <- irae_tcr_graph$nodes %>%
+  filter(id %in% irae_connected_nodes$from)
+
+irae_connected_node_info
 
 ```
 
-# Test convergence vs. connectivity
-
- - take random subsets and get connectivity and convergence fraction metrics, see if they correlate over many random subsets (irAE vs. no irAE as well)
+# Remake graph with just connected structures (irAE) to test filtering
 
 ```{r}
 
-sample_and_analyze <- function(df, n) {
-  results <- vector("list", n)
-  
-  for (i in 1:n) {
-    # Sample the dataframe
-    sampled_df <- df %>%
-      sample_n(500, replace = FALSE)
-    
-    # Create the TCR graph
-    tcr_graph <- makeTcrGraph(sampled_df, link = "nt")
-    tcr_igraph <- tcrGraphToIgraph(tcr_graph)
-    
-    # Compute average connectivity
-    num_edges <- ecount(tcr_igraph)
-    num_vertices <- vcount(tcr_igraph)
-    average_connectivity <- 2 * num_edges / num_vertices
-    
-    # Compute fraction of 'Yes' values in the convergence column
-    convergence_fraction <- mean(sampled_df$convergence == 'Yes', na.rm = TRUE)
-    
-    # Store the results
-    results[[i]] <- list(average_connectivity = average_connectivity,
-                         convergence_fraction = convergence_fraction)
-  }
-  
-  return(results)
-}
+connected_irae_tcrs <- tcrs %>%
+  filter(nt %in% irae_connected_node_info$nt)
 
-# Load data and preprocess
-random_irae_tcrs <- read.csv("../saved_data/tcr_graph_input.csv") %>%
-  dplyr::select(-X) %>%
-  left_join(convergence, by = c("barcode", "group", "chain", "v_gene", "d_gene", "j_gene", "c_gene")) %>%
-  filter(group == "ICI colitis") %>%
-  dplyr::rename(libid = barcode)
+connected_irae_tcr_graph <- makeTcrGraph(connected_irae_tcrs, link = "nt")
 
-# Call the function to sample and analyze
-n_times <- 100
-results <- sample_and_analyze(random_irae_tcrs, n_times)
+connected_irae_tcr_igraph <- tcrGraphToIgraph(connected_irae_tcr_graph)
 
-# Extract average connectivity and convergence fraction from results
-average_connectivity <- unlist(lapply(results, function(x) x$average_connectivity))
-convergence_fraction <- unlist(lapply(results, function(x) x$convergence_fraction))
+V(connected_irae_tcr_igraph)$`Number of Cells` <- V(connected_irae_tcr_igraph)$value
+V(connected_irae_tcr_igraph)$Chain <- V(connected_irae_tcr_igraph)$group
 
-# Create a dataframe for plotting
-plot_data <- data.frame(
-  Average_Connectivity = average_connectivity,
-  Convergence_Fraction = convergence_fraction
-)
+dev.new(width = 9.5, length = 8)
+theme_set(theme_bw(20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.key = element_blank()))
+ggraph(connected_irae_tcr_igraph, "fr") +
+    geom_edge_link(
+        edge_width = 1,
+        #edge_color = edgeColor
+    ) +
+    geom_node_point(
+        aes(fill = Chain, size = `Number of Cells`),
+        shape = 21,
+        color = "black"
+    ) +
+    #scale_fill_manual(values = nodePalette) +
+    guides(fill = guide_legend(override.aes = list(size = 5))) +
+    ggtitle("Connected irAE TCRs")
 
-ggplot(plot_data, aes(x = Average_Connectivity, y = Convergence_Fraction)) +
-  geom_point() +
-  labs(x = "Average Connectivity", y = "Convergence Fraction")
+# Compute the average connectivity
+num_edges <- ecount(connected_irae_tcr_igraph)
+num_vertices <- vcount(connected_irae_tcr_igraph)
+average_connectivity <- 2 * num_edges / num_vertices
+
+# Print the results
+cat("Average Connectivity (irAE):", average_connectivity, "\n")
+cat("Number of Edges (irAE):", num_edges, "\n")
+cat("Number of Vertices (irAE):", num_vertices, "\n")
+
+```
+
+# Find nodes in connected structures (no irAE)
+
+```{r}
+
+no_irae_connected_nodes <- no_irae_tcr_graph$edges %>%
+  group_by(from) %>%
+  filter(n() > 1) %>%
+  slice(1) %>%
+  select(from)
+
+no_irae_connected_nodes
+
+no_irae_connected_node_info <- no_irae_tcr_graph$nodes %>%
+  filter(id %in% no_irae_connected_nodes$from)
+
+no_irae_connected_node_info
+
+```
+
+# Remake graph with just connected structures (no irAE) to test filtering
+
+```{r}
+
+connected_no_irae_tcrs <- tcrs %>%
+  filter(nt %in% no_irae_connected_node_info$nt)
+
+connected_no_irae_tcr_graph <- makeTcrGraph(connected_no_irae_tcrs, link = "nt")
+
+connected_no_irae_tcr_igraph <- tcrGraphToIgraph(connected_no_irae_tcr_graph)
+
+V(connected_no_irae_tcr_igraph)$`Number of Cells` <- V(connected_no_irae_tcr_igraph)$value
+V(connected_no_irae_tcr_igraph)$Chain <- V(connected_no_irae_tcr_igraph)$group
+
+dev.new(width = 9.5, length = 8)
+theme_set(theme_bw(20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.key = element_blank()))
+ggraph(connected_no_irae_tcr_igraph, "fr") +
+    geom_edge_link(
+        edge_width = 1,
+        #edge_color = edgeColor
+    ) +
+    geom_node_point(
+        aes(fill = Chain, size = `Number of Cells`),
+        shape = 21,
+        color = "black"
+    ) +
+    #scale_fill_manual(values = nodePalette) +
+    guides(fill = guide_legend(override.aes = list(size = 5))) +
+    ggtitle("Connected no irAE TCRs")
+
+# Compute the average connectivity
+num_edges <- ecount(connected_no_irae_tcr_igraph)
+num_vertices <- vcount(connected_no_irae_tcr_igraph)
+average_connectivity <- 2 * num_edges / num_vertices
+
+# Print the results
+cat("Average Connectivity (no irAE):", average_connectivity, "\n")
+cat("Number of Edges (no irAE):", num_edges, "\n")
+cat("Number of Vertices (no irAE):", num_vertices, "\n")
+
+```
+
+# Compare convergence frequencies in connected vs. all TCRs
+
+```{r}
+
+connected_irae_tcrs %>%
+  mutate(id = paste(libid, chain, cdr3, sep = "_"),
+         converged = if_else(id %in% converged_tcrs$id, "Converged", "Not converged")) %>%
+  summarize(convergence_freq = sum(converged == "Converged") / n())
+
+connected_no_irae_tcrs %>%
+  mutate(id = paste(libid, chain, cdr3, sep = "_"),
+         converged = if_else(id %in% converged_tcrs$id, "Converged", "Not converged")) %>%
+  summarize(convergence_freq = sum(converged == "Converged") / n())
+
+tcrs %>%
+  mutate(id = paste(libid, chain, cdr3, sep = "_"),
+         converged = if_else(id %in% converged_tcrs$id, "Converged", "Not converged")) %>%
+  summarize(convergence_freq = sum(converged == "Converged") / n())
 
 ```
