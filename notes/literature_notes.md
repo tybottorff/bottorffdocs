@@ -862,6 +862,7 @@
  - key effector genes (like *Prf1*, *Gzmb*) demethylated and gain chromatin accessibility upon antigen recognition
  - after pathogen clearance, memory precursor cells can differentiate into long-lived memory cells by demethylating naive-associated genes (*Bcl2*, *Il7r*), demethylated and open chromatin at both effector and naive genes allowing rapid effector responses upon reencountering pathogens
  - CD8<sup>+</sup> T cells can become exhausted due to persistent antigen exposure, proliferating less, expressing inhibitory cell receptors (PD-1, CTLA-4, TIM3, LAG3), losing effector function
+ - Tex cells lack open chromatin sites in *Ifng* locus in Teff/TEM cells, Tex cells have open chromatin sites in *Pdcd1* locus (PD1)
 # Epitope spreading toward wild type melanocyte-lineage antigens rescues suboptimal immune checkpoint blockade responses
 ## Abstract
  - prior literature: ICI efficacy correlates with load of tumor-specific neoantigens and vitiligo development in patients with melanoma
