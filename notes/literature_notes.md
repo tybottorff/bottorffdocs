@@ -25,6 +25,10 @@
  - mice
  - ectopic accumulation of T and B cells in damaged organs only in aged mice
  - CD4 T cell-derived IL-21 upregulated CXCL13 (B cell homing chemokine) in irAE organs in aged mice with ICB
+# A human mutation in STAT3 promotes type 1 diabetes through a defect in CD8<sup>+</sup> T cell tolerance
+ - human STAT3 GOF mutations linked to T1D
+ - mouse model
+ - STAT3-GOFs drive cytotoxic CD8s resistant to terminal exhaustion, epigenetically distinct, accelerate T1D
 # Allopeptides and the alloimmune response
  - allorecognition is recognition of non-self
  - main targets of recipient immune response against allograft are donor MHC antigens on allogenic tissue
@@ -201,6 +205,9 @@
 # Autoimmunity affecting the biliary tract fuels the immunosurveillance of cholangiocarcinoma
  - TCR clonotypes shared between liver and cholangiocarcinoma tumor of primary sclerosing cholangitis host
  - mechanistic overlap between autoimmunity and cancer immunosurveillance (autoimmunity fuels immunosurveillance)
+# Autoreactive CD8<sup>+</sup> T cell exhaustion distinguishes subjects with slow type 1 diabetes progression
+ - motivation: study variation in kinetics of beta cell loss across T1D individuals
+ - activated islet-specific CD8 memory T cells prevalent in subjects with faster T1D progression, **slow disease progression associated with exhaustion-like profile (multiple inhibitory receptor expression, limited cytokine production, reduced proliferation)**
 # Autoreactive napsin A-specific T cells are enriched in lung tumors and inflammatory lung lesions during immune checkpoint blockade
 ## Summary
  - DITAS: discovery of tumor-associated self-antigens to find peptides that induce both antitumor and irAE responses, analyze shared antigens between NSCLC and lung tissue, determine which HLA peptides bind to, predicting CD8<sup>+</sup> T cell epitopes of peptides
@@ -829,7 +836,7 @@
 # Elucidating the heterogeneity of immunotherapy response and immune-related toxicities by longitudinal ctDNA and immune cell compartemtn tracking in lung cancer
  - TCR beta seq
  - data from 79 patients in 2 cohorts
- - paired analyses of peripheral TCRseq at baseline and on-treatment time points showed no significant changes in TCR clonotype abundances by clinical benefit **but did see on-treatment changes (more expanding and regressing clones) in circulating TCR clonotypes in patients with irAEs, perhaps surprising given correlation between irAE development and clinical benefit**
+ - paired analyses of peripheral TCRseq at baseline and on-treatment time points showed no significant changes in TCR clonotype abundances by clinical benefit **but did see on-treatment changes (more expanding and regressing clones) in circulating TCR clonotypes in patients with irAEs (~5 months before diagnosis), perhaps surprising given correlation between irAE development and clinical benefit**
 # Emerging concepts in T cell receptor specificity: rationalizing and (maybe) predicting outcomes
 ## Rules are made to be broken and roles are not easily defined
  - example: A6 TCR recognizes HTLV-1 Tax<sub>11-19</sub> peptide presented by MHCI HLA-A*0201, surprisingly strongest interaction in interface is between CDR3α and HLA-A2 (so peptide not involved surprisingly yet TCR is specific not degenerate)
@@ -837,6 +844,10 @@
  - a single TCR has been shown to recognize > 1 million peptides
  - crossreactivity is needed as there are many more potential antigens than TCRs
  - hotspots/anchors can be important parts of peptides that must remain more constant for TCR binding, other parts of peptide can vary and allow crossreactivity, hotspots/anchors need not only bind CDRs
+# Enforing the checkpoints: harnessing T cell exhaustion for therapy of T1D
+ - 3 signal model for exhaustion: persistent antigen exposure, negative costimulatory signals, chronic inflammation
+ - transcriptional signatures of CD8 exhaustion associated with better prognosis across several autoimmune diseases (most profoundly in systemic diseases)
+ - teplizumab (anti-CD3) promotes exhaustion, slows T1D progression
 # Enhancer RNA-based modeling of adverse events and objective responses of cancer immunotherapy reveals associated key enhancers and target genes
  - predicting irAE risk from enhancer RNA expression
  - target genes of irAE-related enhancers (including upstream regulators of MYC) were involved in metabolism, inflammation, immune activation
@@ -888,6 +899,12 @@
 ## Discussion
  - tissue-resident memory T cells may underlie irAEs (common in barrier tissue)
  - **duodenitis blocked by antibody to integrin α 4 β 7 (LPAM-1) which blocks T cell infiltraton into GI tract, suggesting that GI toxicity resulted from circulating T cells trafficked to GI tract following expansion elsewhere i.e. in the tumor perhaps**
+# Exhausted-like CD8<sup>+</sup> T cell phenotypes linked to C-peptide preservation in alefacept-treated T1D subjects
+ - T1DAL trial of alefacept (LFA3-Ig fusion, binds CD2, disrupts CD58-mediated costimulation of T cells, selectively depletes memory/effector T cells) in recent-onset T1D patients
+ - RNAseq: greater insulin C-peptide (measurement proxy for insulin, stays in blood longer) preservation associated with activation/exhaustion module genes
+ - TIGIT<sup>+</sup>KLRG1<sup>+</sup> is partially exhausted
+ - alefacept resulted in preservation of endogenous insulin in 30% of subjects after 2 years, also depletes TEMs/TCMs and preserves Tregs
+ - CD8<sup>+</sup>CD57<sup>+</sup> frequency maintained (more cytotoxic than canonically exhausted cells), CD8<sup>+</sup>PD-1<sup>+</sup> frequency recovered after therapy in responders, both of these populations have high inhibitory recepto rexpression, hypoproliferation following anti-CD3/anti-CD28
 # Exhaust the exhausters: targeting regulatory T cells in the tumor microenvironment
  - Tregs can suppress anti-tumor immunity
 # Expansion of pathogenic cardiac macrophages in immune checkpoint inhibitor myocarditis
@@ -1000,6 +1017,9 @@
  - factors associated with irAEs: pre-existing autoimmune disease, sex, BMI, response to ICI, circulating cytokines and immune cells, genetic variants, microbiome
 # FDA approves anti-CD3 antibody to delay type 1 diabetes onset
  - T1D: autoreactive T cells destroy insulin secreting β cells
+# Fluctuations in plasma adrenocorticotropic hormone concentration may predict the onset of immune checkpoint inhibitor-related hypophysitis
+ - hypophysitis: adrenal insufficiency
+ - similar story to TSH/TH levels fluctuating in thyroid irAEs
 # From reads to insight: a hitchhiker's guide to ATAC-seq data analysis
  - ATAC-seq: genetically engineered hyperactive Tn5 transposase cuts open chromatin and leaves behind 9 bp staggered nick, ligates high-throughput sequencing adapters to regions, so nick is repaired leaving behind 9 bp duplication
  - pre-analysis: QC (FastQC base quality scores, GC content, sequence length distribution, sequence duplication levels, primer contamination, etc.) and alignment to reference genome (> 80% unique mapping rate is successful)
@@ -1027,12 +1047,30 @@
 ## Factors impacting response and resistance to ICB
 ### Host-intrinsic factors
  - tumor mutational burden (total number of distinct mutations per coding area of tumor genome) helps explain ICB response (higher burden for example in environmental DNA damage associated melanoma, lung/bladder cancer better response with more neoantigens)
+# Harnessing CD8<sup>+</sup> T cell exhaustion to treat type 1 diabetes
+ - T1D: insulin deficiency due to destruction of insulin-producing beta cells in the pancreatic islet of Langerhans by autoreactive T cells specific for islet autoantigens, leading to hyperglycemia
+ - exhausted T cells associated with improved outcomes in T1D
+ - loss of self-tolerance occurs in two phases: escape from thymic deletion in central tolerance and aberrant activation in peripheral tolerance
+ - central tolerance does not completely eliminate (via clonal deletion) or render anergic all autoreactive T cells (**autoreactive cells can be detected in peripheral circulation of both T1D and healthy individuals but are preferentially activated in T1D state**), likely due to low avidity (~affinity but across multiple interaction sites) between autoreactive TCR and self-peptide:MHC complexes presented by DCs, some of these autoreactive and not deleted/anergic T cells become Tregs
+ - impaired central tolerance may result from defects in antigen presentation, due to reduced thymic expression (of islet-specific autoantigens), alternative splicing, etc.
+ - CD4 or CD8 deficiencies both protect NOD (non-obese diabetic) T1D model mice from diabetes, CD4s license DCs and prevent CD8 deletion
+ - naive (autoreactive) T cell activation occurs in pancreatic lymph node following encounter with islet-derived autoantigens, then activated T cells migrate to pancreatic islets via circulation
+ - CD8s most abundant leukocyte in islets of T1D patients, followed by macrophages, CD4s
+ - islet autoantigens: preoproinsulin, insulin, IGRP, GAD65...
+ - increased levels of islet MHC I expression is a hallmark of T1D, mice without MHC I on beta cells are protected from T1D
+ - exhaustion sets in with the inability to fully clear an antigen, so T cells adjust proliferation and effector function to lower level (to minimize tissue damage while still mediating antigen control), with continued antigen presence T cells become more exhausted and eventually deleted following terminal exhaustion
+ - antigen amount matters more than antigen strength in driving exhaustion, other driving factors of exhaustion include limited CD4 help, minimal costimulation during T cell priming, tissue microenvironment...
+ - exhausted cells are epigenetically distinct, making reinvigoration ineffective (i.e. by ICB)
+ - it takes years (in humans) after autoimmunity onset for T1D to develop, faster with ICB as expected
+ - CD2 costimulation can prevent exhaustion, **alefacept (anti-CD2) can help treat T1D i.e. by allowing exhaustion presumably**
 # Hierarchical transcriptional network governing heterogeneous T cell exhaustion and its implications for immune checkpoint blockade
  - PD-1 stabilizes TCF-1<sup>+</sup> Tex precursor pool (that maintains a chronically stimulated Tex pool)
 # High-affinity oligoclonal TCRs define effective adoptive T cell therapy targeting mutant KRAS-G12D
  - only mutant G12D but not WT peptides stabilized HLA-C*08:02 (critical anchor salt bridge to HLA-C), so instance of no/less crossreactivity between TCR and WT/mutant peptide
 # High IGKC-expressing intratumoral plasma cells predict response to immune checkpoint blockade
  - potential new dataset
+# High proinsulin:C-peptide ratio identifies individuals with stage 2 type 1 diabetes at high risk for progression to clinical diagnosis and responses to teplizumab treatment
+ - elevated baseline proinsulin:C-peptide ratio associated with more rapid progression to T1D in both placebo and teplizumab-treated individuals, but teplizumab abrogates this association
 # High-throughput and single cell T cell receptor sequencing technologies
 ## Introduction
  - diversity (D) gene segment only contributes to TCRβ
@@ -1126,6 +1164,10 @@
 # ICBcomb: a comprehensive expression database for immune checkpoint blockade combination therapy
  - human and mouse expression data from combination ICB
  - 1399 samples across 29 cancer types, 52 drugs
+# Id2 epigenetically controls CD8<sup>+</sup> T cell exhaustion by disrupting the assembly of the Tcf3-LSD1 complex
+ - progenitor Tex marked by Slamf6<sup>+</sup>, terminally Tex marked by Tim-3<sup>+</sup>
+ - Id2: inhibitor of DNA binding protein 2, regulates generation of progenitor Tex and conversion to terminal Tex
+ - Id2 KO dampens CD8 response and maintenance of stem-like CD8s, suppresses PD-1 blockade, increases tumor susceptibility
 # Identification of antigen-specific TCR sequences based on biological and statistical enrichment in unselected individuals
  - biological (FACS, TCR beta seq) and statistical methods
  - most antigen-specific TCRs in VDJdb come from pMHC-multimer (tetramer) binding FACS experiments, which has the drawbacks of limited throughput and can only be used with T cell donors with genetically matched HLA alleles
@@ -1534,6 +1576,8 @@
  - HLA-DR4 associated with increased T1D irAE risk
 # Is autoimmunity the Achilles' heel of cancer immunotherapy
  - hypophysitis most common endocrine irAE after CTLA-4 blockade, rarely observed with PD-1 blockade
+# Islet-autoreactive CD4<sup>+</sup> T cells are linked with response to alefacept in type 1 diabetes
+ - frequency of IAR (islet antigen-reactive) CD4 memory cells (with proinflammatory phenotype) inversely correlated with C-peptide preservation in alefacept-treated individuals
 # Lactate modulates RNA splicing to promote CTLA-4 expression in tumor-infiltrating regulatory T cells
  - lactate uptake by Tregs contributes to efficacy of CTLA-4 blockade
  - RNA splicing machinery correlated with tumor-infiltrating Treg cell signatures
@@ -1566,6 +1610,7 @@
  - enriched naive, Treg, and follicular helper CD4<sup>+</sup> T cells in lymph nodes, effector CD4 T cells enriched in adjacent normal regions, CD4 Tregs and follicular helper T cells enriched in tumor
 # Lipidomics reveals immune-related adverse events in NSCLC patients receiving immune checkpoint inhibitor
  - not sure of significance of some lipid metabolites predicting irAE..., **perhaps relation is via signal transduction/membrane remodeling**
+ - lipid metabolism has been shown to be dysregulated in immune cells, tumor cells, and some lipids can activate immune cells, so **perhaps NKT cells more likely abnormally activated in ICI patients with high levels of certain lipids**
 # Liver mediated adaptive immune tolerance
  - liver is immunologically tolerant, equipped to limit hypersensitivity to food-derived antigens, bacterial products, can easily accept allografts
  - persistent infection of liver with pathogen usually results in tolerance
@@ -1672,6 +1717,8 @@
  - Tscm/Tcm show superior persistance and antitumor immunity compared to Tem and Teff cells
  - naive T cells in hyporesponsive state (small size, low proliferation, low metabolism)
  - TCMs in lymphoid organs and do not have immediate lytic function, TEMs in nonlymphoid tissues and have lytic activity and higher levels of receptors for migration to inflamed tissues
+# Metabolic plasticity of T cell fate decision
+ - metabolic stress can lead to exhaustion
 # MHC-II alleles shape the CDR3 repertoires of conventional and regulatory naive CD4<sup>+</sup> T cells
  - **H2-A<sup>j</sup> favors selection of narrower and more hydrophobic CDR3 repertoire compared to H2-A<sup>b</sub> in mice**
 # MHC class II (DRB) promoter polymorphism and its role in parasite control among malaria patients
@@ -1862,6 +1909,9 @@
  - **doesn't seem to be the case here that alternative splicing (as a source of neoantigens) is increased in irAE patients and irAEs were caused by increased neoantigen load, so their model instead is that splicing's effects on irAE risk instead perhaps due to altered protein function i.e. alternative splice variant has different function that leads to irAEs**
 # Pan-MHC and cross-species prediction of T cell receptor-antigen binding
  - new AI assisted method
+# Partial exhaustion of CD8 T cells and clinical response to teplizumab in new-onset type 1 diabetes
+ - **population of partially (not terminally) exhausted CD8s accumulated in responders and expand after treatment, high levels of EOMES TF, effector molecules, inhibitory receptors like TIGIT and KLRG1**
+ - not terminally exhausted because TIGIT ligand addition further downregulates their activation
 # Patient HLA class I genotype influences cancer response to checkpoint blockade immunotherapy
 ## Abstract
  - HLA-I loci heterozygosity associated with better survival (3 major HLA-I genes: A-C)
@@ -1972,13 +2022,15 @@
 # Prior viral infection primes cross-reactive CD8<sup>+</sup> T cells that respond to mouse heart allografts
  - rejection after transplant due to viral-specific T cells that crossreact to alloantigen
 # Protective effect of low-intensity pulsed ultrasound on immune checkpoint inhibitor-related myocarditis via fune-tuning of CD4<sup>+</sup> T cell differentiation
- - 
 # Quantifiable predictive features define epitope-specific T cell receptor repertoires
 ## Abstract
  - TCR is heterodimer, mediates pathogen-associated epitope recognition through interactions between peptide and MHC, generated by genomic rearrangement of germline TCR locus (VDJ recombination) to allow potentially 10^15 to 10^61 unique receptors
  - TCRs from T cells that recognize the same pMHC epitope often share conserved sequence features, perhaps able to predict model epitope specificity
  - here, they study CD8<sup>+</sup> TCRs in mice and humans to study these conserved features as well as features differentiating them
  - **takehome: each epitope-specific repertoire studied had a clustered group of receptors with core sequence similarities plus a dispersed set of diverse "outlier" sequences, so some similar but some different sort of unhelpful**
+# Reassessing human MHC-I genetic diversity in T cell studies
+ - underrepresentation of MHCI alleles associated with Asian, Australian, African descent
+ - A*02 is most studied allele
 # Rechallenge of immune checkpoint inhibitors in a case with adverse events inducing myasthenia gravis
  - ICI-induced myasthenia gravis (MG) irAE associated with germline variant in *SLC22A5* in thymoma case
 # Regulatory  T cell-specific epigenomic region variants are a key determinant of susceptibility to common autoimmune diseases
@@ -2003,6 +2055,8 @@
 ## Discussion
  - inflammatory transcriptional reprogramming of Tregs, enrichment of transcripts like *IFNG*, *STAT1*, *RORC* and *STAT3*
  - previous literature: irAEs are similar to autoimmune conditions since TNF blockade (autoimmune therapy) helps with irAE symptoms in mice
+# Remodeling T cell compartments during anti-CD3 immunotherapy of type 1 diabetes
+ - transient rises in PD-1<sup>+</sup>Foxp3<sup>+</sup> Tregs and potentially anergic (CD57<sup>-</sup>KLRG1<sup>-</sup>PD-1<sup>+</sup>) cells in CD4 compartment paralleled by increases in circulating CD8s with exhaustion traits (CD57<sup>-</sup>KLRG1<sup>+</sup>PD-1<sup>+</sup> or TIGIT<sup>+</sup>KLRG1<sup>+</sup>)
 # Repertoire analyses reveal T cell receptor sequence features that influence T cell fate
 ## Abstract
  - **TRB CDR3 hydrophobicity promotes reactivity to self-peptides**
@@ -2113,6 +2167,9 @@
 # Sharing of T cell receptors in antigen-specific responses is driven by convergent recombination
  - convergent recombination, rather than recombination bias or selection, drives publicity
  - potential causes of publicity: self tolerance restricts capacity of TCRs to recognize some epitopes, different conformations of peptides in MHC groove (flat or prominent), degenerate binders
+# Shifts in isoform usage underlie transcriptional differences in regulatory T cells in type 1 diabetes
+ - most GWAS hits for T1D are in regulatory sequences active in lymphoid cell types
+ - observe many genes (especially RNA recognition and splicing genes, many regulated by variable exon inclusion triggering NMD) with differences in isoform usage between T1D/control in Tregs
 # Significance of the autoantibody assay in predicting the development of immune-related adverse events in patients receiving atezolizumab plus bevacizumab combination therapy for unresectable hepatocellular carcinoma
  - irAE patients more likely to have autoantibody and to have complete ICB-response
 # Simultaneous epitope and transcriptome measurement in single cells
@@ -2215,6 +2272,8 @@
 # Soluble and cell-based markers of immune checkpoint inhibitor-associated nephritis
  - sIL-2R (circulating form of IL-2Rα i.e. CD25) higher in blood of nephritis patients
  - lower CD8 T, CD45RA CD8 T, memory CD27 B features of nephritis patients as well, also plasmablast expansion
+# Soluble PD-L1 predicts tumor response and immune-related adverse events in patients with advanced melanoma treated with anti-PD-1 antibodies
+ - circulating soluble PD-L1 levels higher at baseline in patients with better prognosis (only in patients with low tumor burden), levels higher and vary more after treatment in irAE patients
 # Specificity of T cell alloreactivity
  - many alloreactive T cells are much more peptide specific than previously thought, few if any recognize only the MHC molecule
  - alloreactive T cells are polyspecific, able to recognize multiple distinct peptide-MHC complexes (perhaps why there's a high frequency of allorecognition)
@@ -2570,6 +2629,9 @@
  - Tex importance depends on pre-treatment terminal Tex infiltration: low terminal Tex baseline infiltration responsive tumors had PD-1 blockade increasing these cells (increased infiltration or expansion of these cells, consistent with increased exhausted-like T cells with ICB), but high terminal Tex baseline infiltration responsive tumors had opposite pattern (decreased frequency with ICB)
 ### Local expansion of pre-existing Texp cells
  - local expansion of pre-existing Texp cells drives Texp accumulation, as does clonal revival (from periphery)
+# Th2 cell clonal expansion at diagnosis in human type 1 diabetes
+ - frequency of CD127<sup>high</sup> Th2 cells positively correlates with length of partial remission of T1D (common after diagnosis, a period of partial remission, longer partial remission associated with better response to treatment)
+ - identify clonally expanded Th2 clusters in CD127<sup>high</sup> cells from T1D but not from healthy donors
 # The altertions in peripheral lymphocyte subsets predict the efficacy and prognosis of immune checkpoint inhibitors in hepatocellular carcinoma
  - CD3<sup>+</sup>CD8<sup>+</sup> T cell percentage increases after ICI, B cell percentage decreases
 # The cancer-immunity cycle: indication, genotype, and immunotype
