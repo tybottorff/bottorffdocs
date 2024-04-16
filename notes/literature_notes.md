@@ -63,6 +63,11 @@
 # An anti-CD3 antibody, teplizumab, in relatives at risk for type 1 diabetes
  - teplizumab delays progression of type 1 diabetes in high risk participants
  - KLRG1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells more common in teplizumab group than placebo
+# An autoimmune stem-like CD8 T cell population drives type I diabetes
+ - mice
+ - stem-like autoimmune progenitor population in pancreatic draining LN self-renews and gives rise to pancreatic LN autoimmune mediators
+ - transplanting as few as 20 autoimmune progenitors induced T1D (implanting as many as 100k pancreatic autoimmune mediators did not induce T1D, they're short-lived)
+ - T1D becomes clinically evident when > 80% of beta cells have been destroyed (requiring months to years of latent beta cell killing in humans)
 # ANGPTL2 promotes immune checkpoint inhibitor-related murine autoimmune myocarditis
  - ANGPTL2 is a potential inflammatory mediator
 # An increased population of regulatory T cells improves the pathophysiology of placental ischemia in a rat model of preeclampsia
@@ -208,6 +213,13 @@
 # Autoreactive CD8<sup>+</sup> T cell exhaustion distinguishes subjects with slow type 1 diabetes progression
  - motivation: study variation in kinetics of beta cell loss across T1D individuals
  - activated islet-specific CD8 memory T cells prevalent in subjects with faster T1D progression, **slow disease progression associated with exhaustion-like profile (multiple inhibitory receptor expression, limited cytokine production, reduced proliferation)**
+# Autoreactive CD8<sup>+</sup> T cells are restrained by an exhaustion-like program that is maintained by LAG3
+ - **intra-islet CD8s phenotypically, transcriptionally, epigenetically, metabolically possess features of canonically exhausted cells, important differences though**
+ - mice
+ - LAG3 (IR) KO accelerates disease, enhanced T cell effector functions, enhanced islet trafficking, diminished exhaustion phenotype
+ - TFs TCF1 and TOX are critical modulators of exhaustion program
+ - in mouse model of systemic lupus erythematosus, kidney infiltrating T cells have been shown to be functionally, metabolically, transcriptionally exhausted but this doesn't prevent autoimmunity, likely not all cells are exhausted and/or it's partial exhaustion
+ - effector CD4s considered drivers of T1D, growing appreciation for CD8s and for stem-like population in pancreatic LN that renews effector pool
 # Autoreactive napsin A-specific T cells are enriched in lung tumors and inflammatory lung lesions during immune checkpoint blockade
 ## Summary
  - DITAS: discovery of tumor-associated self-antigens to find peptides that induce both antitumor and irAE responses, analyze shared antigens between NSCLC and lung tissue, determine which HLA peptides bind to, predicting CD8<sup>+</sup> T cell epitopes of peptides
@@ -275,6 +287,10 @@
 # Beneficial autoimmunity improves cancer prognosis
  - beneficial autoimmunity referring to irAEs being associated with improved survival on ICIs **as well as spontaneous autoimmunity without ICIs in patients with tumors**
  - importance of non-mutated tumor antigens that are autoantigens, for example from reactivated embryonic/gonadal transcriptional programs, epigenetic changes, aberrant RNA splicing, translation of noncoding RNAs (cryptic peptides), unique PTMs, not unique to tumor cells but enriched on them
+# Beta cell-specific CD8<sup>+</sup> T cells maintain stem-cell memory-associated epigenetic programs during type 1 diabetes
+ - **motivation: beta cell-specific CD8s don't all become fully exhausted despite chronic antigen exposure (evidenced by pancreatic islet transplant recipients being predisposed to undergo rapid antigen-specific effector CD8 responses)... why?**
+ - DNA methylation-based "multipotency index", beta cell-specific CD8s stem-like epigenetic multipotency score
+ - scATACseq: co-existence of naive and effector-associated epigenetic programs in individual beta cell-specific CD8s
 # Biomarkers of checkpoint inhibitor induced immune-related adverse events - a comprehensive review
  - blood-based, immunogenetic and microbial biomarkers predicting irAEs prior to and during ICI therapy
  - no single biomarker has proven to be sufficiently predictive for irAE development
