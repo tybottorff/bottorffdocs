@@ -1458,6 +1458,11 @@
  - severe irAEs associated with improved overall survival
 # Increased circulating levels of CRP and IL-6 and decreased frequencies of T and B lymphocyte subsets are associated with immune-related adverse events during combination therapy with PD-1 inhibitors for liver cancer
  - irAE patients (especially those with severe irAEs) had higher levels of CRP and IL-6, lower levels of non-NK lymphocytes
+# Increased coexpression of PD-1, TIGIT, and KLRG1 on tumor-reactive CD8<sup>+</sup> T cells during relapse after allogenic stem cell transplantation
+ - minor histocompatability antigens (MiHA)
+ - MiHA-specific CD8s from relapsed patients have coinhibitory expression signature vs. remission patients
+# Increased expression of TIGIT and KLRG1 correlates with impaired CD56<sup>bright</sup> NK cell immunity in HPV16-related cervical intraepithelial neoplasia
+ - TIGIT and KLRG1 also expressed on NKs
 # Induction of neoantigen-specific cytotoxic T cells and construction of T cell receptor co-engineered T cells for ovarian cancer
 ## Abstract
  - neoantigens implicated as major target of anticancer cytotoxic T cells
@@ -1937,6 +1942,8 @@
 # Patterns of neurological adverse events among a retrospective cohort of patients receiving immune checkpoint inhibitors
  - 1.72% incidence of neurological irAEs, mostly peripheral (vs. central)
  - melanoma and renal cell carcinoma associated with neurological irAEs, perhaps related to frequency of brain metastases in these tumor types
+# PD1<sup>+</sup>TIGIT<sup>+</sup>2B4<sup>+</sup>KLRG1<sup>+</sup> cells might underlie T cell dysfunction in patients treated with BCMA-directed chimeric antigen receptor T cell therapy
+ - majority of T cells in relapsed/refractory multiple myeloma and T cell subsets in post-CAR-T relapsed patients express multiple coinhibitory markers (PD1, TIGIT, 2B4 i.e. CD244, KLRG1)
 # PD-1 and ICOS coexpression identifies tumor-reactive CD4<sup>+</sup> T cells in human solid tumors
  - identify subset of CD4<sup>+</sup> Th cells distinct from FOXP3<sup>+</sup> Tregs that coexpress PD-1 and ICOS, Trm phenotype, expansion in tumor but rare in periphery, recognize both neoantigens and tumor-associated antigens
 # PD-1 blockade augments Th1 and Th17 and suppresses Th2 responses in peripheral blood from patients with prostate and advanced melanoma cancer
