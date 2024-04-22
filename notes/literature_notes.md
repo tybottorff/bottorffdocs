@@ -594,6 +594,12 @@
  - high mitochondrial count fraction could also just mean that the cell is very active in cellular respiration though
  - low counts/genes could also just mean quiescent cells
  - high counts/genes could also just mean large cells
+# CXCL12-CXCR4 mediates CD57<sup>+</sup> CD8<sup>+</sup> T cell responses in the progression of type 1 diabetes
+ - **CD57 marks TEM, marked by cytotoxicity, pro-inflammatory cytokine production, intracellular glucose uptake, involved in T1D pathophysiology**
+ - increase in peripheral CD57<sup>+</sup> CD8s in 1 T1D patient with STAT3 (TF) mutation
+ - CXCL12-CXCR4 axis promotes expansion/function of CD57<sup>+</sup> CD8s via Erk1/2
+ - changes in serum CXCL12 concentrations during peri-remission phase of T1D
+ - treatment with CXCR4 agonist reduces infiltration of CD57<sup>+</sup> CD8s and mitigates hyperglycemia in T1D mouse model
 # CXCR5<sup>+</sup> CD8 T cells: potential immunotherapy targets or drivers of immune-mediated adverse events?
  - CXCR5<sup>+</sup> CD8 T cells are cytotoxic but also associate with B cells to effect their function (so these CD8s are similar to CD4 Tfhs)
  - tumors express CXCR5 and produce its ligand CXCL13 to recruit B/T cells into TME (**not sure of advantage of tumor doing this**)
@@ -620,6 +626,9 @@
  - identify MHC-presented peptide ligands by combining TCR selection of highly diverse yeast-displayed peptide-MHC libraries with deep sequencing
  - structural conservation of the TCR interaction surface, not surprising
  - alloreactivity: ability of TCR to bind multiple MHCs
+# Decreased expression of programmed death-1 on CD8<sup>+</sup> effector memory T lymphocytes correlates with the pathogenesis of type 1 diabetes
+ - chronic inflammation in autoimmune diseases mainly mediated by memory T cells (TEMs mostly)
+ - PD-1<sup>+</sup> CD8 TEMs/TCMs less frequent in periphery of T1D patients (more dramatic with more autoantibodies)
 # Defining CD8<sup>+</sup> T cells that provide the proliferative burst after PD-1 therapy
  - virus-specific CD8s (ICOS<sup>+</sup> CD28<sup>+</sup>) proliferate after PD-1 blockade in mice chronically infected with LCMV
 # Defining the memory CD8 T cell
@@ -2227,6 +2236,11 @@
  - CD8<sup>+</sup> T cell activation via ICB successful in microsatellite instable (MSI, high TMB, more TILs) colorectal cancer, limited success against microsatellite stable (MSS, lower TMB, fewer TILs) colorectal cancer
  - MSI CD8<sup>+</sup> T cells show tumor-specific activation, MSS CD8<sup>+</sup> T cells show tumor unspecific or bystander features
  - **prior literature: T cells that crossreact have higher *EOMES* and *KLRG1* expression**
+# Single cell profiling reveals unique features of diabetogenic T cells in anti-PD-1-induced type 1 diabetes mice
+ - PD-1 blockade-induced T1D vs. spontaneous T1D in NOD mice
+ - PD-1 blockade induces expansion of terminally exhausted/effector-like CD8s in pancreas, increase in T-bet<sup>high</sup> CD4s (FoxP3<sup>-</sup>), decrease in memory CD4s (also FoxP3<sup>-</sup>) in contrast to spontaneous T1D
+ - PD-1 blockade caused increased TCR sharing between pancreas and periphery
+ - T cells in blood of PD-1 blocked mice show different markers than spontanteous T1D blood T cells
 # Single cell RNA-seq reveals expanded clones of islet antigen-reactive CD4<sup>+</sup> T cells in peripheral blood of subjects with type 1 diabetes
  - unclear significance of islet antigen reactive T cells in peripheral blood of T1D patients (similar cells in healthy control subjects)
  - hypothesis: key disease associated cells show evidence of prior antigen exposure, inferred from expanded TCR clonotypes and essential phenotypic properties in their transcriptomes
@@ -2652,6 +2666,9 @@
  - Tex importance depends on pre-treatment terminal Tex infiltration: low terminal Tex baseline infiltration responsive tumors had PD-1 blockade increasing these cells (increased infiltration or expansion of these cells, consistent with increased exhausted-like T cells with ICB), but high terminal Tex baseline infiltration responsive tumors had opposite pattern (decreased frequency with ICB)
 ### Local expansion of pre-existing Texp cells
  - local expansion of pre-existing Texp cells drives Texp accumulation, as does clonal revival (from periphery)
+# Teplizumab improves and stabilizes beta cell function in antibody positive high-risk individuals
+ - 1 14 day course of teplizumab in non-diabetics at high risk for T1D, helps people remain T1D-free
+ - changes in C-peptide with teplizumab treatment associated with increases in partially exhausted memory KLRG1<sup>+</sup>TIGIT<sup>+</sup> CD8s that showed reduced secretion of IFNgamma and TNFalpha
 # Th2 cell clonal expansion at diagnosis in human type 1 diabetes
  - frequency of CD127<sup>high</sup> Th2 cells positively correlates with length of partial remission of T1D (common after diagnosis, a period of partial remission, longer partial remission associated with better response to treatment)
  - identify clonally expanded Th2 clusters in CD127<sup>high</sup> cells from T1D but not from healthy donors
@@ -2697,6 +2714,11 @@
  - PD1 can increase expression of transcription factors like BATF to counteract T cell activation transcriptional program
  - PDL1 can also bind CD80
  - after T cell activation, if antigen is cleared, memory T cells form and PD1 expression levels decrease (PD1 expression remains high if antigen persists and T cell exhaustion can develop)
+# The frequency of CD4<sup>+</sup> and CD8<sup>+</sup> circulating T stem cell memory in type 1 diabetes
+ - CD4 TSCMs more frequent in new case T1D patients (vs. long-term ones and controls)
+ - more frequent CD8 naive T cells in new case patients (vs. long-term and healthy controls)
+ - increased PD-1 expression on CD4 TCM cells in long-term patients vs. healthy controls
+ - higher PD-1 expression on CD8 TCMs in T1D patients vs. controls
 # The good and the bad of T cell crossreactivity: challenges and opportunities for novel therapeutics in autoimmunity and cancer
  - each T cell expresses ~10,000 copies of TCR on cell surface
  - **peptide binding to MHC allelic products subject to specific rules, i.e. anchor/preferred residues in peptide for specific MHC alleles just like anchor/prefered peptide residues for specific TCRs**
@@ -2885,6 +2907,9 @@
  - T<sub>RM</sub> cells particularly abundant in barrier organs (skin, GI tract), perhaps due to abundant microbial antigens in barriers
  - perhaps ICB reinvigorates T<sub>RM</sub> cells
  - **systemic corticosteroids used to treat irAEs, or systemic JAKi (both suppress T cell function globally), but homing integrins like ITGA4 are upregulated in irAEs and has been targeted to treat irAEs**
+# Tolerogenic dendritic cells pulsed with islet antigen induce long-term reduction in T-cell autoreactivity in type 1 diabetes patients
+ - tolerogenic DCs inhibit antigen-specific proinflammatory T cells, generate antigen-specific Tregs, promote IL-10 production, possible intervention for autoimmunity
+ - phase 1 trial for vaccinations with tolerogenic DCs pulsed with proinsulin peptide, see decline in autoimmune responses to vaccine peptide over years and temporary decline in T cell responses to other islet autoantigens, increase in ICOS<sup>+</sup>CCR4<sup>+</sup>TIGIT<sup>+</sup> Tregs and CD103<sup>+</sup> tissue-resident and CCR6<sup>+</sup> CD4 TEMs
 # Toxicity-specific peripheral blood T and B cell dynamics in anti-PD-1 and combined immune checkpoint inhibition
 ## Abstract
  - flow cytometry
