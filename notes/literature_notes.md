@@ -833,6 +833,10 @@
  - ankylosing spondylitis: autoimmune condition
  - see that good responders to biologics have increased TCR repertoire diversity
  - positive correlation between TCR repertoire diversity and IL-23 levels
+# Dysregulation of CD4<sup>+</sup> and CD8<sup>+</sup> T resident memory T, myeloid, and stromal cells in steroid-experienced, checkpoint inhibitor colitis
+ - CD4 and CD8 resident memory T cells are progenitors for cytotoxic effectors (TCR clonotype analyses)
+ - **activated (CD38<sup>+</sup> HLA-DR<sup>+</sup>) CD4 resident memory T cells and cytotoxic CD8s up in colitis tissue**
+ - distinct from UC, ICI colitis tissue showed perturbed stromal metabolism (NAD<sup>+</sup> and Trp), impacting epithelial cell survival and inflammation
 # Early changes in the circulating T cells are associated with clinical outcomes after PD-L1 blockade by durvalumab in advanced NSCLC patients
  - previous literature: increases in T cells after PD-L1 blockade
  - patients with higher TCR diversity on day 15 had better responses
