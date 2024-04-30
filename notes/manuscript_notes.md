@@ -1,3 +1,8 @@
+# Interconnected lineage trajectories link conventional and NK-like exhausted CD8<sup>+</sup> T cells beneficial in T1D
+ - previous literature: NK-like CD57<sup>+</sup> and PD-1<sup>+</sup> exhausted CD8s linked to beneficial immunotherapy response in T1D patients
+ - here, they show that these cell populations are epigenetically similar although CD57<sup>+</sup> Tex cells show increased accessibility of iKIR (inhibitory killer cell immunoglobulin-like receptor) and other NK cell genes
+ - PD-1<sup>+</sup> and CD57<sup>+</sup> Tex cells show reciprocal expression of IRs and iKIRs accompanied by chromatin accessibility of Tcf1 and Tbet TF target sites, respectively
+ - clonal relationships between PD-1<sup>+</sup> and CD57<sup>+</sup> Tex cells
 # Self-reactive germline-like TCR alpha chains shared between blood and pancreas
 ## Abstract
  - IAR T cells: human islet antigen reactive CD4<sup>+</sup> memory T cells
