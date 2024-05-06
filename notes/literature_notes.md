@@ -933,7 +933,7 @@
  - RNAseq: greater insulin C-peptide (measurement proxy for insulin, stays in blood longer) preservation associated with activation/exhaustion module genes
  - TIGIT<sup>+</sup>KLRG1<sup>+</sup> is partially exhausted
  - alefacept resulted in preservation of endogenous insulin in 30% of subjects after 2 years, also depletes TEMs/TCMs and preserves Tregs
- - CD8<sup>+</sup>CD57<sup>+</sup> frequency maintained (more cytotoxic than canonically exhausted cells), CD8<sup>+</sup>PD-1<sup>+</sup> frequency recovered after therapy in responders, both of these populations have high inhibitory recepto rexpression, hypoproliferation following anti-CD3/anti-CD28
+ - CD8<sup>+</sup>CD57<sup>+</sup> frequency maintained (more cytotoxic than canonically exhausted cells), CD8<sup>+</sup>PD-1<sup>+</sup> frequency recovered after therapy in responders, both of these populations have high inhibitory receptor expression, hypoproliferation following anti-CD3/anti-CD28
 # Exhaust the exhausters: targeting regulatory T cells in the tumor microenvironment
  - Tregs can suppress anti-tumor immunity
 # Expansion of pathogenic cardiac macrophages in immune checkpoint inhibitor myocarditis
