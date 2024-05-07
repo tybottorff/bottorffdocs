@@ -933,7 +933,7 @@
  - RNAseq: greater insulin C-peptide (measurement proxy for insulin, stays in blood longer) preservation associated with activation/exhaustion module genes
  - TIGIT<sup>+</sup>KLRG1<sup>+</sup> is partially exhausted
  - alefacept resulted in preservation of endogenous insulin in 30% of subjects after 2 years, also depletes TEMs/TCMs and preserves Tregs
- - CD8<sup>+</sup>CD57<sup>+</sup> frequency maintained (more cytotoxic than canonically exhausted cells), CD8<sup>+</sup>PD-1<sup>+</sup> frequency recovered after therapy in responders, both of these populations have high inhibitory receptor expression, hypoproliferation following anti-CD3/anti-CD28
+ - CD8<sup>+</sup>CD57<sup>+</sup> frequency maintained (more cytotoxic than canonically exhausted cells), CD8<sup>+</sup>PD-1<sup>+</sup> frequency recovered after therapy in responders, both of these populations have high inhibitory recepto rexpression, hypoproliferation following anti-CD3/anti-CD28
 # Exhaust the exhausters: targeting regulatory T cells in the tumor microenvironment
  - Tregs can suppress anti-tumor immunity
 # Expansion of pathogenic cardiac macrophages in immune checkpoint inhibitor myocarditis
@@ -1666,6 +1666,8 @@
  - severe irAE patients had higher frequencies of CD4 naive T cells, lower frequencies of CD16<sup>+</sup> NK cells at all time points, lower frequencies of TIGIT<sup>+</sup> Tregs at baseline, higher frequencies of CD38<sup>+</sup> CD4 TCMs and CD39<sup>+</sup> HLA-DR<sup>+</sup> CD8 TCMs at peak irAE time
 # Low TCR binding strength results in increased progenitor-like CD8<sup>+</sup> tumor-infiltrating lymphocytes
  - TILs with low TCR affinity to tumor-associated antigen had progenitor-like phenotypes and increased quiescence, higher affinity TCR TILs had more cell division and faster progression to T-cell exhaustion programs
+# LRT: integrative analysis of scRNA-seq and scTCR-seq data to investigate clonal differentiation heterogeneity
+ - LRT uses transcriptomics info from RNAseq to construct cell trajectories, uses TCRseq to identify clonotype clusters with differentiation biases, aims to correct the error that you get only using RNAseq for trajectory analysis of T cells (cells with same differentiation state may come from different founder cells, instead use TCRseq info as same clonotype assumed to mean same progenitor)
 # m<sup>6</sup>A mRNA methylation controls T cell homeostatis by targeting IL-7/STAT5/SOCS pathway
  - m<sup>6</sup>A is the most common and abundant mRNA modification
  - KO of m<sup>6</sup>A writer protein METTL3 in mouse T cells disrupts T cell homeostasis and differentiation
