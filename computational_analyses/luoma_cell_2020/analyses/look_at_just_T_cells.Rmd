@@ -895,3 +895,13 @@ tcr_and_rna_ici_pseudobulk_degs <- FindMarkers(object = tcr_and_rna_ici_pseudobu
 tcr_and_rna_ici_pseudobulk_degs
 
 ```
+
+# Look for EOMES, TIGIT+KLRG1+ signatures by irAE group within CD8s
+
+```{r}
+
+cd8s <- subset(tcr_and_rna, subset = predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 %in% c("CD8 TEM", "CD8 TCM", "CD8 Proliferating", "CD8 Naive"))
+
+VlnPlot(cd8s, features = c("TIGIT", "KLRG1"), group.by = "group", pt.size = 0)
+
+```

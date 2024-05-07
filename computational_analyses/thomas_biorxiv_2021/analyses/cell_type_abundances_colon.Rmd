@@ -102,6 +102,8 @@ metadata$barcode <- rownames(metadata)
 
 metadata
 
+T_cells <- AddMetaData(T_cells, metadata = metadata)
+
 ```
 
 # Analyze cell type abundances by group
