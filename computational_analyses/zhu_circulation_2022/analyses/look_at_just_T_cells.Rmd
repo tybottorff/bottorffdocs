@@ -421,3 +421,33 @@ ggplot(cell_type_score_histograms %>% filter(predicted.celltype.l1 == "CD8 T"), 
   scale_y_continuous(breaks = pretty_breaks(n = 2))
 
 ```
+
+# Look for EOMES, TIGIT+KLRG1+ signatures by irAE group within CD8s
+
+```{r}
+
+non_naive_cd8s <- subset(just_T_cells, subset = predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 %in% c("CD8 TEM", "CD8 TCM", "CD8 Proliferating"))
+
+VlnPlot(non_naive_cd8s, features = c("TIGIT", "KLRG1", "EOMES"), group.by = "irAE", pt.size = 0)
+
+```
+
+# Stats analysis for CD8 non-naive T cells between irAE groups, pseudobulk, specifically looking at TIGIT, KLRG1, EOMES
+
+```{r}
+
+non_naive_cd8s_pseudobulk <- AggregateExpression(non_naive_cd8s, assays = "integrated", return.seurat = T, group.by = c("orig.ident", "irAE"))
+
+non_naive_cd8s_pseudobulk$irAE <- factor(non_naive_cd8s_pseudobulk$irAE, levels = c("Yes", "No"))
+
+Idents(non_naive_cd8s_pseudobulk) <- "irAE"
+
+Idents(non_naive_cd8s_pseudobulk)
+
+#cd4_prolif_ici_pseudobulk_degs <- FindMarkers(object = cd4_prolif_ici_pseudobulk, 
+#                         ident.1 = "ICI colitis", 
+#                         ident.2 = "ICI no colitis")
+
+#cd4_prolif_ici_pseudobulk_degs
+
+```

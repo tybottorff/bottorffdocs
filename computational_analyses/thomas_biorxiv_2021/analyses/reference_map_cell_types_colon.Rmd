@@ -214,3 +214,21 @@ plot <- DimPlot(just_T_cells, reduction = "umap", group.by = "orig.ident", shuff
 plot
 
 ```
+
+# Bring in irAE group into metadata for Seurat object
+
+```{r}
+
+just_T_cells <- readRDS("../saved_data/T_cells_with_irae_groups.rds")
+
+```
+
+# Look for EOMES, TIGIT+KLRG1+ signatures by irAE group within CD8s
+
+```{r}
+
+non_naive_cd8s <- subset(just_T_cells, subset = predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 %in% c("CD8 TEM", "CD8 TCM", "CD8 Proliferating"))
+
+VlnPlot(non_naive_cd8s, features = c("TIGIT", "KLRG1", "EOMES"), group.by = "group", pt.size = 0)
+
+```

@@ -104,6 +104,8 @@ metadata
 
 T_cells <- AddMetaData(T_cells, metadata = metadata)
 
+saveRDS(T_cells, "../saved_data/T_cells_with_irae_groups.rds")
+
 ```
 
 # Analyze cell type abundances by group
