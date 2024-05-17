@@ -16,3 +16,17 @@
  - find that their TAA reactive CD8<sup>+</sup> expanded antigen specific T cells are oliog/monoclonal (not diverse in terms of their TCR sequences)
  - big question: do we see expanded cells regardless of antigen specificity? what happens to expanded cells after treatment? do they persist? keep expanding? move to a specific tissue? are these expanded cells related to irAEs?
  - hypothesis: we will find polyclonal expansion in databases we are mining of ICI treated patients
+# 5/16/24 Wilske seminar (Andrea Schietinger)
+ - CD8 dysfunction happens surprisingly early in tumors, plastic (reprogrammable) at first but fixed later
+ - loss of Tcf1 during exhaustion development
+ - ICB effect from peripheral T cells not intratumoral exhausted T cells reinvigorating (fixed)
+ - Tox upregulates IRs (PD1, CTLA4, LAG3) and CD39, inhibits Tcf1
+ - Tox-induced exhaustion required for T cell persistence (upregulating IRs important to prevent overstimulation and subsequent apoptosis)
+ - CD8s primed against pancreatic antigens in pancreatic LN (NOD mice T1D model)
+ - autoreactive CD8s somehow functional and persist despite IR expression in NOD mice, due to Tcf1<sup>high</sup> CD8s in pancreatic LN replenishing Tcf1<sup>intermediate</sup> progenitors and Tcf1<sup>low</sup> effectors while also renewing themselves (required for T1D)
+ - Wnt/beta-catenin high in Tcf1<sup>high</sup> CD8s, stem program
+ - spatial organization of LN allows stemness (separation by Tcf1 expression)
+ - differentiation down Tcf1 gradient associated with migration
+ - somehow Tcf1<sup>high</sup> CD8s lost in cancer draining LN
+ - CD4s key in T1D, help prime naive CD8s, recruit CD8s to periphery, but also (novel here) help increase CD8 effector function via CD4-CD8-APC triads
+ - example of APC presenting CD4 insulin antigen that also contains CD8 ligand, allows triad and promotes T1D?
