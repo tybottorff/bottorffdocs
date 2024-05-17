@@ -1,0 +1,43 @@
+---
+title: "scX code review"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load necessary libraries
+
+```{r}
+
+library(scX)
+library(Seurat)
+
+```
+
+# Shiny from integrated, transformed, reduced, clustered, cell typed data
+
+```{r}
+
+#my_example <- readRDS("../../computational_analyses/luoma_cell_2020/saved_data/cell_type_ref_mapped_integrated_transformed_reduced_clustered.rds")
+class(my_example)
+#my_example_rna_counts <- CreateSeuratObject(my_example@assays$RNA$counts)
+class(my_example_rna_counts)
+#my_example_rna_counts@meta.data <- my_example@meta.data
+#my_example_rna_counts <- as.SingleCellExperiment(my_example_rna_counts)
+class(my_example_rna_counts)
+
+#saveRDS(cseo, "../code_reviews/cseo.rds")
+#cseo <- readRDS("../code_reviews/cseo.rds")
+
+#cseo <- createSCEobject(xx = my_example_rna_counts_sce, 
+#                        partitionVars = "predicted.celltype.l1", 
+#                        metadataVars = c("orig.ident", "ident", "cd_type", "percent_hb", "percent_mito", "percent_ribo", "seurat_clusters", #"predicted.celltype.l1.score", "predicted.celltype.l2.score", "predicted.celltype.l2", "integrated_snn_res.3"),
+#                        descriptionText = "")
+
+#class(cseo)
+
+#launch_scX(cseo)
+  
+```
