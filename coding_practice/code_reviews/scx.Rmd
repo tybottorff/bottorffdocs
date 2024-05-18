@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(scX)
 library(Seurat)
+library(dplyr)
 
 ```
 
@@ -21,23 +22,24 @@ library(Seurat)
 ```{r}
 
 #my_example <- readRDS("../../computational_analyses/luoma_cell_2020/saved_data/cell_type_ref_mapped_integrated_transformed_reduced_clustered.rds")
-class(my_example)
-#my_example_rna_counts <- CreateSeuratObject(my_example@assays$RNA$counts)
-class(my_example_rna_counts)
-#my_example_rna_counts@meta.data <- my_example@meta.data
-#my_example_rna_counts <- as.SingleCellExperiment(my_example_rna_counts)
-class(my_example_rna_counts)
+#class(my_example)
+#my_example_sct_counts <- CreateSeuratObject(my_example@assays$SCT$counts)
+#class(my_example_sct_counts)
+
+#my_example_sct_counts@meta.data <- my_example@meta.data %>% select(orig.ident, nCount_RNA, nFeature_RNA, nCount_SCT, percent_mito, percent_ribo, percent_hb, seurat_clusters, integrated_snn_res.3, predicted.celltype.l1, predicted.celltype.l2)
+#my_example_sct_counts_sce <- as.SingleCellExperiment(my_example_sct_counts)
+#class(my_example_sct_counts_sce)
+
+cseo <- createSCEobject(xx = my_example_sct_counts_sce, 
+                        partitionVars = c("predicted.celltype.l1", "predicted.celltype.l2"), 
+                        metadataVars = c("orig.ident", "nCount_RNA", "nFeature_RNA", "nCount_SCT", "percent_mito", "percent_ribo", "percent_hb", "seurat_clusters", "integrated_snn_res.3"),
+                        descriptionText = "")
 
 #saveRDS(cseo, "../code_reviews/cseo.rds")
 #cseo <- readRDS("../code_reviews/cseo.rds")
 
-#cseo <- createSCEobject(xx = my_example_rna_counts_sce, 
-#                        partitionVars = "predicted.celltype.l1", 
-#                        metadataVars = c("orig.ident", "ident", "cd_type", "percent_hb", "percent_mito", "percent_ribo", "seurat_clusters", #"predicted.celltype.l1.score", "predicted.celltype.l2.score", "predicted.celltype.l2", "integrated_snn_res.3"),
-#                        descriptionText = "")
+class(cseo)
 
-#class(cseo)
-
-#launch_scX(cseo)
+launch_scX(cseo)
   
 ```
