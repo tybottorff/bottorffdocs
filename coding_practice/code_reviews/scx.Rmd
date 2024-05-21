@@ -21,24 +21,21 @@ library(dplyr)
 
 ```{r}
 
-#my_example <- readRDS("../../computational_analyses/luoma_cell_2020/saved_data/cell_type_ref_mapped_integrated_transformed_reduced_clustered.rds")
-#class(my_example)
-#my_example_sct_counts <- CreateSeuratObject(my_example@assays$SCT$counts)
-#class(my_example_sct_counts)
+my_example <- readRDS("../../computational_analyses/luoma_cell_2020/saved_data/cell_type_ref_mapped_integrated_transformed_reduced_clustered.rds")
 
-#my_example_sct_counts@meta.data <- my_example@meta.data %>% select(orig.ident, nCount_RNA, nFeature_RNA, nCount_SCT, percent_mito, percent_ribo, percent_hb, seurat_clusters, integrated_snn_res.3, predicted.celltype.l1, predicted.celltype.l2)
-#my_example_sct_counts_sce <- as.SingleCellExperiment(my_example_sct_counts)
-#class(my_example_sct_counts_sce)
+my_example_sct_counts <- CreateSeuratObject(my_example@assays$SCT$counts)
 
-cseo <- createSCEobject(xx = my_example_sct_counts_sce, 
-                        partitionVars = c("predicted.celltype.l1", "predicted.celltype.l2"), 
-                        metadataVars = c("orig.ident", "nCount_RNA", "nFeature_RNA", "nCount_SCT", "percent_mito", "percent_ribo", "percent_hb", "seurat_clusters", "integrated_snn_res.3"),
-                        descriptionText = "")
+my_example_sct_counts@meta.data <- my_example@meta.data %>% select(orig.ident, nCount_RNA, nFeature_RNA, nCount_SCT, percent_mito, percent_ribo, percent_hb, seurat_clusters, integrated_snn_res.3, predicted.celltype.l1, predicted.celltype.l2)
+
+my_example_sct_counts_sce <- as.SingleCellExperiment(my_example_sct_counts)
+
+#cseo <- createSCEobject(xx = my_example_sct_counts_sce, 
+#                        partitionVars = c("predicted.celltype.l1", "predicted.celltype.l2"), 
+#                        metadataVars = c("orig.ident", "nCount_RNA", "nFeature_RNA", "nCount_SCT", "percent_mito", "percent_ribo", "percent_hb", #"seurat_clusters", "integrated_snn_res.3"),
+#                        descriptionText = "")
 
 #saveRDS(cseo, "../code_reviews/cseo.rds")
-#cseo <- readRDS("../code_reviews/cseo.rds")
-
-class(cseo)
+cseo <- readRDS("../code_reviews/cseo.rds")
 
 launch_scX(cseo)
   
