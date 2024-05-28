@@ -30,3 +30,7 @@
  - somehow Tcf1<sup>high</sup> CD8s lost in cancer draining LN
  - CD4s key in T1D, help prime naive CD8s, recruit CD8s to periphery, but also (novel here) help increase CD8 effector function via CD4-CD8-APC triads
  - example of APC presenting CD4 insulin antigen that also contains CD8 ligand, allows triad and promotes T1D?
+# 5/22/24 BRI symposium
+ - Caroline Stefani: cells shed pores damaging their membranes, granzymes enter through such pores (from perforins), LITAF is a membrane resilience factor, maybe beta cells (T1D) have low LITAF
+ - Jane Buckner: often see anti-citrullinated protein antibodies in RA, HLA DR 4 (class II) key hit in RA (GWAS), so CD4s involved
+ - Aaron Ring: autoantibodies serve as an independent axis of phenotypic variation, can help (i.e. some autoantibodies improve ICB outcome) or hurt (i.e. some autoantibodies worsen ICB outcome, among other examples), one's autoantibody profile can be used to predict disease state and response to therapy
