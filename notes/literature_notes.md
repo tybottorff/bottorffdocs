@@ -1692,6 +1692,8 @@
  - MHC binding platform composed of 2 domains from single heavy α-chain (HC) for MHCI and from two chains for MHCII (α-chain and β-chain), 2 domains form β-sheet as base and 2 α-helices on top that have space between them to accommodate a peptide chain
  - 2 membrane-proximal immunoglobulin domains support peptide-binding unit
  - MHCI binding groove can accomodate ~8-10 residue peptide, ~13-25 residue peptide for MHCII
+# Massively parallel single-cell mitochondrial DNA genotyping and chromatin profiling
+ - mtDNA mutation rate ~2-10x that of nuclear DNA
 # Measuring CDR3 length variability in individuals during ontogeny
  - *Xenopus laevis* analysis of Ig CDR3s
  - adult CDR3s longer
