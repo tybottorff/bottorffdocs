@@ -11,6 +11,8 @@
  - superantigen refers to antigen binding to MHC class II with high affinity outside antigen binding groove in absence of antigen processing, trigger proliferation of T cells expressing TcR-VB gene products (stimulate T cells in TCR Vβ-specific manner)
 # Adoptive T cell therapy targeting Epstein-Barr virus as a treatment for multiple sclerosis
  - there's a causative link between EBV and MS, want to target EBV-infected B cells (EBV transforms B cells for life upon infection)
+# Adoptive T cell therapy with IL-12 pre-conditioned low avidity T cells prevents exhaustion and results in enhanced T cell activation, tumor clearance, and decreased risk for autoimmunity
+ - another paper discussing how low avidity T cells are safer than high avidity ones (less autoimmune reactions)
 # Advances in immune checkpoint inhibitor combination strategies for microsatellite stable colorectal cancer
  - microsatellite stable (MSS) colorectal tumors are immune-cold
 # Advances in immune checkpoint inhibitors induced-cardiotoxicity
@@ -21,6 +23,13 @@
  - CTLA-4 expressed on tumor infiltrating Tregs, binds to B7 on surface of APCs
  - myocardium infiltrating lymphocytes mostly CD8 T cells in ICI-myocarditis patients
  - irAE hypotheses: ICIs bind to cell surface proteins (like CTLA-4) in normal tissue leading to T cell infiltration (**this is an obvious one I don't think about much**), crossreactive T cells (T cells recognizing tumor antigens enter circulation and identify similar antigens in healthy tissue), via cytokines (promote infiltration of inflammatory molecules into nontarget tissue, ICIs increase circulating cytokine levels, **this is a good one I don't think about much**), autoantibodies
+# A genetic bottleneck of mitochondrial DNA during human lymphocyte development
+## Introduction
+ - mtDNA mutates 5-10x rate of nuclear DNA (lack of DNA repair, ROS)
+ - only a small subset of mtDNA is transmitted to next generation, avoiding issue of continual accumulation of deleterious mutations
+## Results
+ - overrepresentation of homoplasmic mtDNA mutations in B, T, and NK cells, lower mutational murden than in progenitors/myeloid cells
+ - genetic bottleneck during lymphoid development resulting from replicative dilution during lymphocyte development (strengthens drift towards lower mtDNA mutational burden and lower genetic diversity within cells)
 # Aging-associated and CD4 T cell-dependent ectopic CXCL13 activation predisposes to anti-PD-1 therapy-induced adverse events
  - mice
  - ectopic accumulation of T and B cells in damaged organs only in aged mice
@@ -525,7 +534,7 @@
 # Comparative immunologic characterization of autoimmune giant cell myocarditis with ipilimumab
  - see more sharing between myocarditis tissue TCRs and lung tumor TCRs (~10%) vs. hepatitis tissue TCRs and myocarditis tissue TCRs (~1%)
  - see more T cells in myocarditis tissue (mostly CD4<sup>+</sup>) than hepatitis tissue
- - perhaps related to hepatiits being steroid responsive, myocarditis being steroid refractory
+ - perhaps related to hepatitis being steroid responsive, myocarditis being steroid refractory
 # Comparing anti-tumor and anti-self immunity in a patient with melanoma receiving immune checkpoint blockade
  - irAE tissues overexpressed immunosuppression genes (*CSF1R*, *IL10RA*, *IL27/EBI3*, *FOXP3*, *KLRG1*, *SOCS1*, *TGFB1*, *IL1B*, *PTGER1/EP1*, *PTGER4/EP4*), **not sure of mechanism here besides potentially more Tregs as I've seen elsewhere higher Tregs in irAE (which I don't have a good hypothesis for really)**, may have implications for ICB resistance
  - **TCRseq didn't find common TCR repertoires between tumor and irAE sites, arguing against shared antigen recognition between tumor and self, although they may have just not detected rare/small subset of overlapping TCRs; their figure on this was a little confusing to me as they did clustering of TCR repertoires across sites vs. just counting % shared TCRs between sites or something more intuitive**
@@ -542,6 +551,8 @@
  - CNS (meningitis, encephalitis, demyelinating syndrome, vasculitis) and PNS (neuropathy, NMJ disorders, myopathy)
 # Contribution of the skin-gut axis to immune-related adverse events with multi-system involvement
  - skin irAEs may predict other irAEs
+# Co-occuring infections in cancer patients treated with checkpoint inhibitors significantly increase the risk of immune related adverse events
+ - **perhaps related to connection between infections and autoimmunity**
 # Co-regulation of CD8<sup>+</sup> T cell exhaustion by multiple inhibitory receptors during chronic viral infection
  - co-expression of multiple distinct inhibitory receptors associated with greater T cell exhaustion and more severe infection (in context of chronic infection causing T cell exhaustion)
  - blockade of T cell inhibitory receptors PD-1, LAG-3 reinvigorate T cells
@@ -600,6 +611,10 @@
  - CXCL12-CXCR4 axis promotes expansion/function of CD57<sup>+</sup> CD8s via Erk1/2
  - changes in serum CXCL12 concentrations during peri-remission phase of T1D
  - treatment with CXCR4 agonist reduces infiltration of CD57<sup>+</sup> CD8s and mitigates hyperglycemia in T1D mouse model
+# CXCL16-dependent scavenging of oxidized lipids by islet macrophages promotes differentiation of pathogenic CD8<sup>+</sup> T cells in diabetic autoimmunity
+ - *Cxcl16* KO in NOD mice suppresses T1D via islet-specific mechanism (impaired clearance of oxidized LDLs by islet macrophages leads to reduced islet transitory Tex CD8s)
+ - pancreatic islet microenvironment is highly oxidative (beta cells vulnerable to autoinflammatory insults)
+ - islet macrophages highly express CXCL16 (chemokine, scavenger receptor for oxidized LDLs)
 # CXCR5<sup>+</sup> CD8 T cells: potential immunotherapy targets or drivers of immune-mediated adverse events?
  - CXCR5<sup>+</sup> CD8 T cells are cytotoxic but also associate with B cells to effect their function (so these CD8s are similar to CD4 Tfhs)
  - tumors express CXCR5 and produce its ligand CXCL13 to recruit B/T cells into TME (**not sure of advantage of tumor doing this**)
@@ -1190,6 +1205,9 @@
  - clonal expansion (activated pathogen-specific T cells expand and differentiate into effector T cells), contraction (majority of effector T cells die by apoptosis following clearance of pathogen), and memory (some primed T cells persist as long term memory T cells to protect against subsequent infections even decades later)
 # Hydrophobic CDR3 residues promote the development of self-reactive T cells
  - **hydrophobicity at positions 6 and 7 of CDR3 β promote development of self-reactive T cells**
+# Hypervariable sites in the mtDNA control region are mutational hotspots
+ - evidence supports mutational hotspots, not ancient mutations "shuffled" among different lineages via recombination
+ - germline and somatic mtDNA mutations preferentially occur at hypervariable sites
 # ICBcomb: a comprehensive expression database for immune checkpoint blockade combination therapy
  - human and mouse expression data from combination ICB
  - 1399 samples across 29 cancer types, 52 drugs
@@ -1595,6 +1613,9 @@
 # Intratumoral Tcf1<sup>+</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells with stem-like properties promote tumor control in response to vaccination and checkpoint blockade immunotherapy
  - mostly mouse
  - human (and mouse) tumors house ~undifferentiated Tcf1<sup>+</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells that have stem-like properties (expansion, regeneration, differentiation), differentiate into Tcf1<sup>-</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells upon ICB
+# Inverse correlation between IL-7 receptor expression and CD8 T cell exhaustion during persistent antigen stimulation
+ - persistent antigen exposure suppresses IL-7R alpha expression, correlates with T cell exhaustion
+ - exposure to short-lived antigen only temporarily suppresses IL-7R alpha expression, fails to induce T cell exhaustion
 # Inverse vaccination, the opposite of Jenner's concept, for therapy of autoimmunity
  - Jenner invented vaccination in 1796
  - autoimmunity treatment includes immunosuppression via anti-CD20 monoclonal antibody (B cells marked by CD20), anti-CD52 mAb (WBCs marked by CD52), similarly reduce transplant rejection with mAbs against CD3 (T cells marked by CD3), can also disrupt lymphocyte ingress into tissue via integrin blockade or impeded egress of lymphocytes out of lymph nodes via spingosine phosphate receptor modulation
@@ -1622,6 +1643,8 @@
 # Learning predictive signatures of HLA type from T-cell repertoires
  - trained model to predict HLA type based on TCR repertoire
  - different HLA types have different TCR repertoire features (CDR3 length, V gene usage...)
+# Leveraging TCR affinity in adoptive immunotherapy against shared tumor/self antigens
+ - low affinity perhaps better (still get tumor cell killing but less likely to get autoimmine response), i.e. high affinity attacked both tumor and self but low affinity was able to somehow just attack tumor (pehraps more antigen produced in tumor or other microenvironmental differences)
 # Lineage tracing reveals clonal progenitors and long-term persistence of tumor-specific T cells during immune checkpoint blockade
 ## Abstract
  - scRNAseq + TCR-seq of tumor, normal, and lymph tissue in patients with lung cancer after ICI
@@ -2150,6 +2173,11 @@
 # Risk of colitis in immune checkpoint inhibitors and in chemotherapy/placebo for solid tumors: a systematic review and meta-analysis
  - CTLA-4 blockade more likely to induce colitis than PD-1 blockade
  - NSCLC patients with ICB less likely to develop colitis than melanoma patients
+# Role, function, and regulation of the thymocyte selection-associated high mobility group box protein in CD8<sup>+</sup> T cell exhaustion
+ - TOX fosters T cell exhaustion by inducing transcriptional and epigenetic alterations
+ - TOX maintains antigen specific T cells during persistent antigen exposure (via exhaution?)
+ - TOX mitigates tissue damage elicited by immunopathology during continuous antigen encounter (via exhaustion)
+ - TOX participates in endocytic recycling of PD-1 to contribute to high levels of PD-1 on cell surface
 # Role of B cells as antigen presenting cells
  - B2s: conventional B cells
  - Bregs: suppress inflammation, < 1% of peripheral blood mononuclear cells
@@ -2288,6 +2316,9 @@
  - PD-1 PD-L1 interaction promotes TE cell exhaustion, supports conversion of TE cells into suppressive T<sub>reg</sub> cells
  - irAEs are frequent in patients treated with ICIs (~90% of patients treated with PD-1 blockade and/or CTLA-4 blockade), severe/life threatening (grades 3/4, respectively) irAEs in fewer but still many patients
  - at baseline, patients with arthritis had less cells with features of CD8 T<sub>CM</sub> cells, patients with pneumonitis had more CD4 T<sub>H2</sub> cells, patients with thyroiditis had more CD4 T<sub>H17</sub> cells, so **different populations of T cells are associated with different irAEs, and quantification/characterization of T cell populations before ICI treatment can serve as predictive biomarkers**
+# Single cell RNA sequencing reveals the altered innate immunity in immune checkpoint inhibitor-related myocarditis
+ - monocytes, NKs, B cells contribute to regulating innate immunity and inflammation in ICI-myocarditis
+ - S100A protein family possibly biomarks ICI-myocarditis
 # Single cell sequencing links multiregional immune landscapes and tissue-resident T cells in ccRCC to tumor topology and therapy efficacy
  - clear cell renal cell carcinoma (ccRCC) highly immune infiltrated
  - only n = 2 per group (untreat, resistant, responsive)
@@ -2420,6 +2451,12 @@
  - previous studies had linked activated T cells and clonally expanded TCRs to severe irAEs but this study was uniquely looking at pre-treatment T cell characteristics
  - unanswered question: do circulating activated CD4 TM cells (their abundance here found to correlate with irAE development) exhibit a higher propensity to recognize self-antigens in patients at risk for severe ICI induced irAEs?
  - limitations: retrospective, different ICIs studied at same time here (each with different irAE risks), most irAEs occur within first 3 months but some can occur later (which would have been missed here, median time to severe irAE here was ~6 weeks with no irAEs after 3 months)
+# T cell exhaustion, costimulation and clinical outcome in autoimmunity and infection
+ - CD8 exhaustion during chronic infection driven by both persistent antigen and lack of accessory help signals (with more pronounced CD4 costimulation, CD8 exhaustion reduced)
+# T cell exhaustion dynamics in systemic autoimmune disease
+ - exhaustion phenotype progresses with increasing lupus severity
+ - CD8s expand with rate of lupus disease
+ - lupus mouse model
 # T cell immune awakening in response to immunotherapy is age-dependent
  - patients > 70 have more clonal TCRs after ICB, younger show more diverse TCRs with ICB
 # T cell invigoration to tumour burden ratio associated with anti-PD-1 response
