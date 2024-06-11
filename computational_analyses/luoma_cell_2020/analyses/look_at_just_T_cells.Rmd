@@ -244,6 +244,7 @@ DimPlot(just_T_cells, reduction = "umap", group.by = "orig.ident", shuffle = TRU
 ```{r}
 
 saveRDS(just_T_cells, "../saved_data/T_cells.rds")
+#just_T_cells <- readRDS("../saved_data/T_cells.rds")
 
 ```
 
@@ -903,5 +904,41 @@ tcr_and_rna_ici_pseudobulk_degs
 non_naive_cd8s <- subset(tcr_and_rna, subset = predicted.celltype.l1 == "CD8 T" & predicted.celltype.l2 %in% c("CD8 TEM", "CD8 TCM", "CD8 Proliferating"))
 
 VlnPlot(non_naive_cd8s, features = c("TIGIT", "KLRG1", "EOMES"), group.by = "group", pt.size = 0)
+
+```
+
+# Look for TIGIT+KLRG1+ counts
+
+```{r}
+
+group_data <- non_naive_cd8s@meta.data %>% dplyr::select(group, orig.ident)
+
+group_data$barcode <- rownames(group_data)
+
+rownames(group_data) <- NULL
+
+tigit_klrg1_counts <- FetchData(non_naive_cd8s, vars = c("TIGIT", "KLRG1"))
+
+tigit_klrg1_counts$barcode <- rownames(tigit_klrg1_counts)
+
+rownames(tigit_klrg1_counts) <- NULL
+
+tigit_klrg1_counts_and_group_data <- group_data %>%
+  left_join(tigit_klrg1_counts, by = "barcode") %>%
+  mutate(TIGIT_status = if_else(TIGIT > 0, "pos", "neg"),
+         KLRG1_status = if_else(KLRG1 > 0, "pos", "neg")) %>%
+  group_by(group, orig.ident, TIGIT_status, KLRG1_status) %>%
+  summarize(count = n()) %>%
+  filter(group != "no ICI",
+         TIGIT_status == "pos",
+         KLRG1_status == "pos")
+
+tigit_klrg1_counts_and_group_data
+
+wilcox.test(tigit_klrg1_counts_and_group_data$count ~ tigit_klrg1_counts_and_group_data$group)
+
+ggplot(tigit_klrg1_counts_and_group_data, aes(x = group, y = count, color = group)) +
+  geom_boxplot() + 
+  labs(x = "irAE status", y = "TIGIT+ KLRG1+\nnon-naive CD8 count", color = "irAE status")
 
 ```
