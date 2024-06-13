@@ -390,7 +390,7 @@ patient_barcode_connect
 
 tcr <- read.csv("../raw_data/tcr/GSE144469_TCR_filtered_contig_annotations_all.csv") %>%
   dplyr::select(-X) %>%
-  filter(high_confidence == "True",
+  dplyr::filter(high_confidence == "True",
          productive == "True",
          cdr3 != "None",
          !(is.na(cdr3)),
@@ -428,8 +428,8 @@ pgen <- read.csv("../saved_data/rna_tcr_no_na_good_cell_typing.csv") %>%
 
 test <- tcr %>%
   left_join(pgen, by = c("barcode", "v_gene_TRA", "v_gene_TRB", "d_gene_TRA", "d_gene_TRB", "j_gene_TRA", "j_gene_TRB", "c_gene_TRA", "c_gene_TRB", "cdr3_TRA", "cdr3_TRB", "cdr3_nt_TRA", "cdr3_nt_TRB")) %>%
-  filter(predicted.celltype.l2 == "CD8 Trm") %>%
-  filter(!(is.na(pgen_TRA)))
+  dplyr::filter(predicted.celltype.l2 == "CD8 Trm") %>%
+  dplyr::filter(!(is.na(pgen_TRA)))
 
 # Find the quantiles for the top and bottom 10%
 top_10_percentile <- quantile(test$pgen_TRA, 0.9)
@@ -925,20 +925,21 @@ rownames(tigit_klrg1_counts) <- NULL
 
 tigit_klrg1_counts_and_group_data <- group_data %>%
   left_join(tigit_klrg1_counts, by = "barcode") %>%
+  dplyr::filter(group != "no ICI") %>%
   mutate(TIGIT_status = if_else(TIGIT > 0, "pos", "neg"),
          KLRG1_status = if_else(KLRG1 > 0, "pos", "neg")) %>%
-  group_by(group, orig.ident, TIGIT_status, KLRG1_status) %>%
-  summarize(count = n()) %>%
-  filter(group != "no ICI",
-         TIGIT_status == "pos",
-         KLRG1_status == "pos")
+  group_by(group, orig.ident) %>%
+  summarize(total_count = n(),
+            double_pos_count = sum(TIGIT_status == "pos" & KLRG1_status == "pos")) %>%
+  mutate(freq = double_pos_count / total_count) %>%
+  dplyr::select(group, orig.ident, freq)
 
 tigit_klrg1_counts_and_group_data
 
-wilcox.test(tigit_klrg1_counts_and_group_data$count ~ tigit_klrg1_counts_and_group_data$group)
+wilcox.test(tigit_klrg1_counts_and_group_data$freq ~ tigit_klrg1_counts_and_group_data$group)
 
-ggplot(tigit_klrg1_counts_and_group_data, aes(x = group, y = count, color = group)) +
+ggplot(tigit_klrg1_counts_and_group_data, aes(x = group, y = freq, color = group)) +
   geom_boxplot() + 
-  labs(x = "irAE status", y = "TIGIT+ KLRG1+\nnon-naive CD8 count", color = "irAE status")
+  labs(x = "irAE status", y = "TIGIT+ KLRG1+\nnon-naive CD8 frequency", color = "irAE status")
 
 ```
