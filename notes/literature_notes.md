@@ -1,3 +1,7 @@
+# Abatacept increases T cell exhaustion in early RA individuals who carry HLA risk alleles
+ - TIGIT KLRG1 coexpression may define peripheral exhausted cells
+ - lower levels of EOMES transcription modules and TIGIT<sup>+</sup> KLRG1<sup>+</sup> frequency associated wiht RA HLA risk alleles
+ - TIGIT<sup>+</sup> KLRG1<sup>+</sup> frequency increased in RA HLA risk but not non-risk subjects treated with CTLA4 Ig
 # Accumulation of identical T cells in melanoma and vitiligo-like leukoderma
  - numbers of T cells in small skin samples often insufficient for clonality analysis
  - **perhaps only well-expressed self proteins are efficient in inducing tolerance, so rare self proteins can induce autoreactivity?**
@@ -47,6 +51,8 @@
  - paired colon mucosal biopsy and blood from 13 patients with ICB colitis, 8 healthy controls, 8 with ICB no colitis
  - RNA, TCR, among other data!
  - TCR sharing between periphery and colon
+# Altering beta cell antigen exposure to exhausted CD8 T cells prevents autoimmune diabetes in mice
+ - intermediate antigen exposure in mice islets allows T cells to enter exhaution program without becoming functionally exhausted
 # Amino acid similarity accounts for T cell crossreactivity and for "holes" in the T cell repertoire
  - analyze HIV epitope SLFNTVATL (SFL9)
  - biochemically similar amino acid substitutions in peptide don't drastically alter TCR-pMHC recognition
@@ -174,6 +180,8 @@
 # Association between rheumatic autoantibodies and immune-related adverse events
  - irAEs associated with better anti-tumor response
  - rheumatic-irAEs associated with pre-ICI baseline rhematoid factor (pre-existing perhaps subclinical autoimmunity)
+# Association between specific human leukocyte antigen alleles and development of thyroid immune-related adverse events
+ - A*26:01, DPA1*01:03 and DPB1*02:01 were significantly more frequent in patients with thyroid irAE than in patients without any irAEs
 # Association between T cell repertoire diversificaton and both clinical response as well as toxicity following immune checkpoint blockade in metastatic cancer patients
  - increase repertoire diversity after ICB correlates with ICB response and irAE development in prostate cancer patients
 # Association of antithyroglobulin antibodies with the development of thyroid dysfunction induced by nivolumab
@@ -208,6 +216,9 @@
 # Autoantibody profiles in patients with immune checkpoint inhibitor-induced neurological immune related adverse events
  - higher prevalence of neuromuscular autoantibodies in irAE patients (63% had autoantibodies vs. 7% in no irAE group)
  - brain-reactive autoantibodies in 45% of irAE patients (20% of controls at baseline, but 7 controls developed *de novo* brain-reactive autoantibodies after ICI so no difference between irAE groups)
+# Autoimmune CD8<sup>+</sup> T cells in type 1 diabetes: from single cell RNA sequencing to T cell receptor redirection
+ - prior literature: only a small number of stem cell-like beta cell-specific CD8 T cells needed to induce T1D in mice
+ - review
 # Autoimmune dilated cardiomyopathy in PD-1 receptor-deficient mice
  - PD-1 prevents autoimmunity, here PD-1 KO leads to cardiomyocyte death
  - PD-L1 constitutively expressed in heart and kidney, as well as on APCs, likely that heart cells downregulate proliferation of autoreactive lymphocytes
@@ -300,6 +311,8 @@
  - **motivation: beta cell-specific CD8s don't all become fully exhausted despite chronic antigen exposure (evidenced by pancreatic islet transplant recipients being predisposed to undergo rapid antigen-specific effector CD8 responses)... why?**
  - DNA methylation-based "multipotency index", beta cell-specific CD8s stem-like epigenetic multipotency score
  - scATACseq: co-existence of naive and effector-associated epigenetic programs in individual beta cell-specific CD8s
+# Beyond T cell toxicity - intrathecal chemokine CXCL13 indicating B cell involvement in immune-related adverse events following checkpoint inhibition: a two-case series and literature review
+ - intrathecal CXCL13 (potential biomarker of B cell involvement) elevation in two patients with neurological irAEs, also had altered CD4:CD8 ratios in blood
 # Biomarkers of checkpoint inhibitor induced immune-related adverse events - a comprehensive review
  - blood-based, immunogenetic and microbial biomarkers predicting irAEs prior to and during ICI therapy
  - no single biomarker has proven to be sufficiently predictive for irAE development
@@ -959,6 +972,10 @@
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
 # External validation of biomarkers for immune-related adverse events after immune checkpoint inhibition
  - **unable to reliably predict risk of irAEs in most cases from pre-therapy flow cytometry and clinical data**
+# Extraislet expression of islet antigen boosts T cell exhaustion to partially prevent autoimmune diabetes
+ - NOD mice
+ - some CD8s specific for islet antigen (IGRP) show Tex characteristics within islet but maintain precursor Tex state in peripheral lymphoid organs (more IGRP-specific T cells in peripheral lymphoid organs than islets)
+ - extraislet antigen exposure induces exhaustion
 # Genetic imprinting: recognition and marking of imprinted loci
  - genetic imprinting: epigenetic process resulting in monoallelic parent-of-origin-specific expression of subset of genes (parental alleles differentially marked by DNA methylation during gametogenesis)
 # Genetic variation associated with thyroid autoimmunity shapes the systemic immune response to PD-1 checkpoint blockade
@@ -2137,6 +2154,12 @@
 ### TiRP explains T<sub>reg</sub> plasticity in the tumor microenvironment
  - previous literature: naive T thymic emigrants can be peripherally induced to adopt regulatory phenotype, and T<sub>regs</sub> can lose *FOXP3* expression and adopt pro-inflammatory phenotype (exT<sub>regs</sub>), expanded clones observed as both T<sub>regs</sub> and conventional T cells may represent such lineages (mixed clones)
  - hypothesis: TCR features of these mixed clones may be intermediate, increasing conversion susceptibility
+# Responders to low-dose ATG induce CD4<sup>+</sup> T cell exhaustion in type 1 diabetes
+ - ATG = anti-thymocyte globulin
+ - low-dose ATG transiently preserves C-peptide and lowers HbA1c in recent-onset T1D individuals (unclear mechanism)
+ - low-dose ATG treatment preserves Tregs (stable methylation of *FOXP3* Treg-specific demethylation region) and increased proportions of CD4<sup>+</sup> FOXP3<sup>+</sup> Tregs (flow cytometry)
+ - responders show transient rise in IL-6, IP-10, TNF-alpha and durable CD4<sup>+</sup> exhaustion phenotype
+ - non-responders to ATG show higher proportions of senescent T cells at baseline and after treatment and increased methylation of *EOMES* (less expression of *EOMES* exhaustion marker)
 # Restriction of PD-1 function by *cis*-PD-L1/CD80 interactions is required for optimal T cell responses
  - CD80 binds PD-L1 in *cis* on primary activated DCs, interferes with PD-L1 accessing PD-1 on T cells (which would have otherwise inhibited T cell activation)
 # Reversal of immune-checkpoint inhibitor fulminant myocarditis using personalized-dose-adjusted abatacept and ruxolitinib: proof of concept
