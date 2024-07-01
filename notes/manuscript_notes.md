@@ -94,3 +94,9 @@
  - here, they show that these cell populations are epigenetically similar although CD57<sup>+</sup> Tex cells show increased accessibility of iKIR (inhibitory killer cell immunoglobulin-like receptor) and other NK cell genes
  - PD-1<sup>+</sup> and CD57<sup>+</sup> Tex cells show reciprocal expression of IRs and iKIRs accompanied by chromatin accessibility of Tcf1 and Tbet TF target sites, respectively
  - clonal relationships between PD-1<sup>+</sup> and CD57<sup>+</sup> Tex cells
+# Teplizumab induces persistent changes in the antigen-specific repertoire in individuals at-risk for type 1 diabetes
+ - teplizumab: FcR non-binding anti-CD3 mAb, approved to delay progression of T1D in at-risk individuals
+ - increased expression of exhaustion and regulation genes with teplizumab in CD8s
+ - differentiation of CD8 exhausted and memory cells with teplizumab
+ - ***IL7R* expression (needed for expansion/maintenance of memory CD8s, also supports antigen specific expansion and effector function) reduced with teplizumab, patients with lowered CD127 expression had longer diabetes free intervals**
+ - autoantigen reactive CD8 T cell frequency didn't increase in teplizumab group (did increase in placebo group)
