@@ -2,6 +2,11 @@
  - TIGIT KLRG1 coexpression may define peripheral exhausted cells
  - lower levels of EOMES transcription modules and TIGIT<sup>+</sup> KLRG1<sup>+</sup> frequency associated wiht RA HLA risk alleles
  - TIGIT<sup>+</sup> KLRG1<sup>+</sup> frequency increased in RA HLA risk but not non-risk subjects treated with CTLA4 Ig
+# Abnormal T cell frequencies, including cytomegalovirus-associated expansions, distinguish seroconverted subjects at risk for type 1 diabetes
+ - reduced frequency of MAIT cells in seroconverted (for T1D autoantibodies?) subjects
+ - seroconverted subjects also had decreased frequencies of CCR4-expressing CD4s
+ - elevated levels of CD57<sup>+</sup>, CD28<sup>-</sup>, CD127<sup>-</sup>, CD27<sup>-</sup> CD8s (SLEC) in seroconverted subjects, most pronounced in those progressing to T1D
+ - **CMV major capsid protein shares 64% identity and 73% similarity with dominant epitope peptide of IA-2 (T1D autoimmune peptide), so molecular mimicry could be a mechanism for CMV-induced T1D**
 # Accumulation of identical T cells in melanoma and vitiligo-like leukoderma
  - numbers of T cells in small skin samples often insufficient for clonality analysis
  - **perhaps only well-expressed self proteins are efficient in inducing tolerance, so rare self proteins can induce autoreactivity?**
@@ -51,7 +56,7 @@
  - paired colon mucosal biopsy and blood from 13 patients with ICB colitis, 8 healthy controls, 8 with ICB no colitis
  - RNA, TCR, among other data!
  - TCR sharing between periphery and colon
-# Altering beta cell antigen exposure to exhausted CD8 T cells prevents autoimmune diabetes in mice
+# Altering β cell antigen exposure to exhausted CD8 T cells prevents autoimmune diabetes in mice
  - intermediate antigen exposure in mice islets allows T cells to enter exhaution program without becoming functionally exhausted
 # Amino acid similarity accounts for T cell crossreactivity and for "holes" in the T cell repertoire
  - analyze HIV epitope SLFNTVATL (SFL9)
@@ -82,7 +87,7 @@
  - mice
  - stem-like autoimmune progenitor population in pancreatic draining LN self-renews and gives rise to pancreatic LN autoimmune mediators
  - transplanting as few as 20 autoimmune progenitors induced T1D (implanting as many as 100k pancreatic autoimmune mediators did not induce T1D, they're short-lived)
- - T1D becomes clinically evident when > 80% of beta cells have been destroyed (requiring months to years of latent beta cell killing in humans)
+ - T1D becomes clinically evident when > 80% of β cells have been destroyed (requiring months to years of latent β cell killing in humans)
 # ANGPTL2 promotes immune checkpoint inhibitor-related murine autoimmune myocarditis
  - ANGPTL2 is a potential inflammatory mediator
 # An increased population of regulatory T cells improves the pathophysiology of placental ischemia in a rat model of preeclampsia
@@ -103,6 +108,13 @@
  - cathepsins (lysosomal proteases) and thymus-specific serine protease alter MHC ligand repertoire presented to T cells during development, helps positive selection
 ### Antigen presentation in the medulla
  - transcriptional noise (low level transcription of any gene) may expose developing thymocytes to antigenic diversity of peripheral tissue (tissue-restricted antigens) without those peripheral antigens needing to be transited to thymus, not just inherent leaky gene expression but rather promiscuous gene expression and a distinct property of medullary thymic epithelial cells (1-3% of these cells express a particular tissue-restricted antigen but the cells get replace weekly changing topology of antigen expression in medulla)
+# Anti-IL-7 receptor-α reverses established type 1 diabetes in nonobese diabetic mice by modulating effector T cell function
+ - previous literature: genetic variation in IL7 receptor α gene (*IL-7R*) associated with susceptibility to T1D, Il-7 essential for proliferation of naive T cells and contributes to CD8 memory T cells in mice, supplying exogenous IL-7 can promote expansion of self-reactive T cells, IL-7 receptor composed of common γ chain and IL-7Rα chain
+ - IL-7Rα antibody induces durable, complete remission in newly onset diabetic mice
+ - IL-7 increases, and IL-7Rα antibody decreases, IFN-γ producing CD4s (Th1) and CD8s
+ - IL-7 decreases, and IL-7Rα enhances, PD-1 expression in effector T cells
+ - PD-1 blockade reversed immune tolerance mediated by IL-7Rα antibody
+ - IL-7Rα antibody increases frequency of Tregs without affecting suppressor activity
 # Anti-integrin αvβ6 autoantibodies are a potential biomarker for ulcerative colitis-like immune checkpoint inhibitor-induced colitis
  - αvβ6 autoantibodies in > 90% of patients with UC, and a subset of ICI-colitis is similar to UC
  - see αvβ6 autoantibodies in ~30% of ICI-colitis patients and they have UC-like colitis (~2% of controls have these autoantibodies)
@@ -217,7 +229,7 @@
  - higher prevalence of neuromuscular autoantibodies in irAE patients (63% had autoantibodies vs. 7% in no irAE group)
  - brain-reactive autoantibodies in 45% of irAE patients (20% of controls at baseline, but 7 controls developed *de novo* brain-reactive autoantibodies after ICI so no difference between irAE groups)
 # Autoimmune CD8<sup>+</sup> T cells in type 1 diabetes: from single cell RNA sequencing to T cell receptor redirection
- - prior literature: only a small number of stem cell-like beta cell-specific CD8 T cells needed to induce T1D in mice
+ - prior literature: only a small number of stem cell-like β cell-specific CD8 T cells needed to induce T1D in mice
  - review
 # Autoimmune dilated cardiomyopathy in PD-1 receptor-deficient mice
  - PD-1 prevents autoimmunity, here PD-1 KO leads to cardiomyocyte death
@@ -231,7 +243,7 @@
  - TCR clonotypes shared between liver and cholangiocarcinoma tumor of primary sclerosing cholangitis host
  - mechanistic overlap between autoimmunity and cancer immunosurveillance (autoimmunity fuels immunosurveillance)
 # Autoreactive CD8<sup>+</sup> T cell exhaustion distinguishes subjects with slow type 1 diabetes progression
- - motivation: study variation in kinetics of beta cell loss across T1D individuals
+ - motivation: study variation in kinetics of β cell loss across T1D individuals
  - activated islet-specific CD8 memory T cells prevalent in subjects with faster T1D progression, **slow disease progression associated with exhaustion-like profile (multiple inhibitory receptor expression, limited cytokine production, reduced proliferation)**
 # Autoreactive CD8<sup>+</sup> T cells are restrained by an exhaustion-like program that is maintained by LAG3
  - **intra-islet CD8s phenotypically, transcriptionally, epigenetically, metabolically possess features of canonically exhausted cells, important differences though**
@@ -307,10 +319,10 @@
 # Beneficial autoimmunity improves cancer prognosis
  - beneficial autoimmunity referring to irAEs being associated with improved survival on ICIs **as well as spontaneous autoimmunity without ICIs in patients with tumors**
  - importance of non-mutated tumor antigens that are autoantigens, for example from reactivated embryonic/gonadal transcriptional programs, epigenetic changes, aberrant RNA splicing, translation of noncoding RNAs (cryptic peptides), unique PTMs, not unique to tumor cells but enriched on them
-# Beta cell-specific CD8<sup>+</sup> T cells maintain stem-cell memory-associated epigenetic programs during type 1 diabetes
- - **motivation: beta cell-specific CD8s don't all become fully exhausted despite chronic antigen exposure (evidenced by pancreatic islet transplant recipients being predisposed to undergo rapid antigen-specific effector CD8 responses)... why?**
- - DNA methylation-based "multipotency index", beta cell-specific CD8s stem-like epigenetic multipotency score
- - scATACseq: co-existence of naive and effector-associated epigenetic programs in individual beta cell-specific CD8s
+# β cell-specific CD8<sup>+</sup> T cells maintain stem-cell memory-associated epigenetic programs during type 1 diabetes
+ - **motivation: β cell-specific CD8s don't all become fully exhausted despite chronic antigen exposure (evidenced by pancreatic islet transplant recipients being predisposed to undergo rapid antigen-specific effector CD8 responses)... why?**
+ - DNA methylation-based "multipotency index", β cell-specific CD8s stem-like epigenetic multipotency score
+ - scATACseq: co-existence of naive and effector-associated epigenetic programs in individual β cell-specific CD8s
 # Beyond T cell toxicity - intrathecal chemokine CXCL13 indicating B cell involvement in immune-related adverse events following checkpoint inhibition: a two-case series and literature review
  - intrathecal CXCL13 (potential biomarker of B cell involvement) elevation in two patients with neurological irAEs, also had altered CD4:CD8 ratios in blood
 # Biomarkers of checkpoint inhibitor induced immune-related adverse events - a comprehensive review
@@ -538,7 +550,7 @@
  - no differences in mucosal Tregs between ICB drugs and IBD
  - higher numbers of activated ICOS<sup>+</sup> CD4 Ts in CTLA-4 blockade colitis vs. IBD
 # Comparative analyses of CDR3 regions in paired human αβ CD8 T cells
- - CDR3 length among paired αβ TCRs had a fairly narrow distribution due to random assortment of CDR3 length in alpha and beta chains
+ - CDR3 length among paired αβ TCRs had a fairly narrow distribution due to random assortment of CDR3 length in α and β chains
  - nucleotide deletions among CDR3 regions were positively correlated with insertions in both α and β TCRs
  - CDR3 loops of both α and β chains contained an abundance of charged/polar residues and the CDR3 base regions contained a conserved motif
  - the occurrence of Gly was CDR3 length‐ and position‐dependent in both chains, whereas the frequency of Ser at positions 106 and 107 was positively correlated with CDR3 length in TCR β
@@ -626,7 +638,7 @@
  - treatment with CXCR4 agonist reduces infiltration of CD57<sup>+</sup> CD8s and mitigates hyperglycemia in T1D mouse model
 # CXCL16-dependent scavenging of oxidized lipids by islet macrophages promotes differentiation of pathogenic CD8<sup>+</sup> T cells in diabetic autoimmunity
  - *Cxcl16* KO in NOD mice suppresses T1D via islet-specific mechanism (impaired clearance of oxidized LDLs by islet macrophages leads to reduced islet transitory Tex CD8s)
- - pancreatic islet microenvironment is highly oxidative (beta cells vulnerable to autoinflammatory insults)
+ - pancreatic islet microenvironment is highly oxidative (β cells vulnerable to autoinflammatory insults)
  - islet macrophages highly express CXCL16 (chemokine, scavenger receptor for oxidized LDLs)
 # CXCR5<sup>+</sup> CD8 T cells: potential immunotherapy targets or drivers of immune-mediated adverse events?
  - CXCR5<sup>+</sup> CD8 T cells are cytotoxic but also associate with B cells to effect their function (so these CD8s are similar to CD4 Tfhs)
@@ -672,7 +684,7 @@
  - find that CD8<sup>+</sup> T cell exhaustion in bone marrow was primarily alloantigen-driven
 # Detection of identical T cell clones in peritumoral pleural effusion and pneumonitis lesions in a cancer patient during immune-checkpoint blockade
  - bronchoalveolar lavage fluid from patient with ICB-pneumonitis
- - TCR beta sequencing
+ - TCRβ sequencing
  - **see identical clones between peritumoral pleural effusion and bronchoalveolar lavage fluid, don't see in peripheral blood**
 # Determinants of anti-PD-1 response and resistance in clear cell renal cell carcinoma
 ## Abstract
@@ -685,6 +697,10 @@
 # Different associations between organ-specific immune-related adverse event and survival in non-small cell lung cancer patients treated with programmed death-1 inhibitors-based combination therapy
  - NSCLC PD-1 blockade plus chemotherapy patients have longer progression free survival (but not necessarily overall survival) with irAEs
  - skin irAE associated with better prognosis, pneumonitis severe irAE and high steroid compromise survival
+# Differential impact of genetic deletion of TIGIT or PD-1 on melanoma-specific T-lymphocytes
+ - perhaps KO of these IRs could help prevent irAEs in case of adoptive transfer of tumor-specific T cells? **this seems backwards to me...**
+ - cell cycle genes downregulated in PD-1 KO, these genes' expression preserved in TIGIT KO
+ - PD-1 KO and TIGIT KO T cells show higher anti-tumor reactivity than WT (**I believe this makes sense with these IRs inhibiting overactivation**)
 # Differential requirements for CD4<sup>+</sup> T cells in the efficacy of the anti-PD-1<sup>+</sup> LAG-3 and anti-PD-1<sup>+</sup> CTLA-4 combinations in melanoma flank and brain metastases models
  - mouse melanoma models
  - anti-PD-1<sup>+</sup> CTLA-4 associated with FOXP3<sup>+</sup> CD4<sup>+</sup> T cells (Tregs) infiltrating, fewer activated CD4<sup>+</sup> T cells, accumulation of CD8<sup>+</sup> T cells secreting IFNγ
@@ -891,7 +907,7 @@
 # Elevated circulating memory T cells precede immunotherapy toxicities in melanoma
  - summary of a paper I've already read (*T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma*)
 # Elucidating the heterogeneity of immunotherapy response and immune-related toxicities by longitudinal ctDNA and immune cell compartemtn tracking in lung cancer
- - TCR beta seq
+ - TCRβ seq
  - data from 79 patients in 2 cohorts
  - paired analyses of peripheral TCRseq at baseline and on-treatment time points showed no significant changes in TCR clonotype abundances by clinical benefit **but did see on-treatment changes (more expanding and regressing clones) in circulating TCR clonotypes in patients with irAEs (~5 months before diagnosis), perhaps surprising given correlation between irAE development and clinical benefit**
 # Emerging concepts in T cell receptor specificity: rationalizing and (maybe) predicting outcomes
@@ -1109,7 +1125,7 @@
 ### Host-intrinsic factors
  - tumor mutational burden (total number of distinct mutations per coding area of tumor genome) helps explain ICB response (higher burden for example in environmental DNA damage associated melanoma, lung/bladder cancer better response with more neoantigens)
 # Harnessing CD8<sup>+</sup> T cell exhaustion to treat type 1 diabetes
- - T1D: insulin deficiency due to destruction of insulin-producing beta cells in the pancreatic islet of Langerhans by autoreactive T cells specific for islet autoantigens, leading to hyperglycemia
+ - T1D: insulin deficiency due to destruction of insulin-producing β cells in the pancreatic islet of Langerhans by autoreactive T cells specific for islet autoantigens, leading to hyperglycemia
  - exhausted T cells associated with improved outcomes in T1D
  - loss of self-tolerance occurs in two phases: escape from thymic deletion in central tolerance and aberrant activation in peripheral tolerance
  - central tolerance does not completely eliminate (via clonal deletion) or render anergic all autoreactive T cells (**autoreactive cells can be detected in peripheral circulation of both T1D and healthy individuals but are preferentially activated in T1D state**), likely due to low avidity (~affinity but across multiple interaction sites) between autoreactive TCR and self-peptide:MHC complexes presented by DCs, some of these autoreactive and not deleted/anergic T cells become Tregs
@@ -1118,7 +1134,7 @@
  - naive (autoreactive) T cell activation occurs in pancreatic lymph node following encounter with islet-derived autoantigens, then activated T cells migrate to pancreatic islets via circulation
  - CD8s most abundant leukocyte in islets of T1D patients, followed by macrophages, CD4s
  - islet autoantigens: preoproinsulin, insulin, IGRP, GAD65...
- - increased levels of islet MHC I expression is a hallmark of T1D, mice without MHC I on beta cells are protected from T1D
+ - increased levels of islet MHC I expression is a hallmark of T1D, mice without MHC I on β cells are protected from T1D
  - exhaustion sets in with the inability to fully clear an antigen, so T cells adjust proliferation and effector function to lower level (to minimize tissue damage while still mediating antigen control), with continued antigen presence T cells become more exhausted and eventually deleted following terminal exhaustion
  - antigen amount matters more than antigen strength in driving exhaustion, other driving factors of exhaustion include limited CD4 help, minimal costimulation during T cell priming, tissue microenvironment...
  - exhausted cells are epigenetically distinct, making reinvigoration ineffective (i.e. by ICB)
@@ -1233,7 +1249,7 @@
  - Id2: inhibitor of DNA binding protein 2, regulates generation of progenitor Tex and conversion to terminal Tex
  - Id2 KO dampens CD8 response and maintenance of stem-like CD8s, suppresses PD-1 blockade, increases tumor susceptibility
 # Identification of antigen-specific TCR sequences based on biological and statistical enrichment in unselected individuals
- - biological (FACS, TCR beta seq) and statistical methods
+ - biological (FACS, TCRβ seq) and statistical methods
  - most antigen-specific TCRs in VDJdb come from pMHC-multimer (tetramer) binding FACS experiments, which has the drawbacks of limited throughput and can only be used with T cell donors with genetically matched HLA alleles
  - **I think all they do is compare TCR repertoires between antigen-activated and resting pools to find enriched TCRs in antigen-activated pools to call antigen-specific, not *de novo* identifying antigen-specific TCRs as would be nice**
  - **public peanut antigen-specific CDR3s are more germline-like (fewer N-nucleotide insertions than private ones) and show evidence of convergent recombination**
@@ -1288,7 +1304,9 @@
  - insufficient IL-2 limits CD8 TIL expansion as tumors progress
  - expanded TILs also exit through draining LN to control distal tumor(s)
 # IL7 genetic variation and toxicity to immune checkpoint blockade in patients with melanoma
- - minor allele carries of *Il7* intron have increased severe irAE risk
+ - minor allele carries of *IL7* intron have increased severe irAE risk
+# IL-7 receptor blockade reverses autoimmune diabetes by promoting inhibition of effector/memory T cells
+ - 
 # Immune checkpoint inhibitor-induced myocarditis with myositis/myasthenia gravis overlap syndrome: a systematic review of cases
  - IM3OS: myocarditis with myositis/myasthenia gravis overlap syndrome
 # Immune checkpoint inhibitor-induced thyroid disorders: a single center experience
@@ -1528,7 +1546,7 @@
  - JAK1/3 inhibitors disrupt γc cytokine signaling (important for T cell development, activation, homeostasis), selectively induces T cell exhaustion to help treat this autoimmune disease
 # Inhibition of IL-25/IL-17RA improves immune-related adverse events of checkpoint inhibitors and reveals antitumor activity
  - mouse model
- - prednisolone, anti IL-6, anti-TNFalpha, anti-IL-25 (IL-17E), and anti-IL-17RA all reduce irAEs in mice but only anti-IL25/17-RA also exert antitumor activity (and others actually add to tumor burden)
+ - prednisolone, anti IL-6, anti-TNFα, anti-IL-25 (IL-17E), and anti-IL-17RA all reduce irAEs in mice but only anti-IL25/17-RA also exert antitumor activity (and others actually add to tumor burden)
  - **mechanism: IL-25/IL-17RA blockade reduces organ-infiltrating lymphocyte numbers to reduce irAEs**
 # Innate lymphoid cells (ILCs): cytokine hubs regulating immunity and tissue homeostasis
  - ILCs enriched at mucosal barriers, activated by stress signals and epithelial/myeloid-derived cytokines, respond by secreting effector cytokines to maintain survival and mucosal integrity
@@ -1571,9 +1589,9 @@
  - ICB response and GI irAE associated with *Enterobacteriaceae taxa*, tRNA metabolism, RNP complex biogenesis pathways in colon
 # Integrative analysis of risk factors for immune-related adverse events of checkpoint blockade therapy in cancer
  - allelic variation of *HLA-B* correlated with irAE risk
-# Interferon-gamma-producing CD8<sup>+</sup> tissue resident memory T cells are a targetable hallmark of immune checkpoint inhibitor-colitis
+# Interferon-γ-producing CD8<sup>+</sup> tissue resident memory T cells are a targetable hallmark of immune checkpoint inhibitor-colitis
  - **CD8 Trms (*IFNG* and inhibitor checkpoint-expressing) dominant activated T cell subset in ICI colitis, activation correlates with ICI colitis severity**
- - **activated CD8 Trms express high levels of checkpoint inhibitor, interferon-gamma transcripts**
+ - **activated CD8 Trms express high levels of checkpoint inhibitor, interferon-γ transcripts**
  - similar between combination ICB and PD-1 blockade
 # Interleukin-2 signaling in the regulation of T cell biology in autoimmunity and cancer
  - CD25 (IL-2Rα) heightens receptor affinity for IL-2
@@ -1626,13 +1644,13 @@
  - see oligoclonal T cell expansion in responders' TILs
 # Intratumoral T cell receptor repertoire composition predicts overall survival in patients with pancreatic ductal adenocarcinoma
  - high intratumoral TCR diversity associated with survival, as was high T cell abundance in PBMCs
- - subset of TCRs predicts survival, more likely to be in CD8 TEM and CD4 Treg subsets perhaps recognizing beta islet-derived autoantigens...
+ - subset of TCRs predicts survival, more likely to be in CD8 TEM and CD4 Treg subsets perhaps recognizing β islet-derived autoantigens...
 # Intratumoral Tcf1<sup>+</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells with stem-like properties promote tumor control in response to vaccination and checkpoint blockade immunotherapy
  - mostly mouse
  - human (and mouse) tumors house ~undifferentiated Tcf1<sup>+</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells that have stem-like properties (expansion, regeneration, differentiation), differentiate into Tcf1<sup>-</sup> PD-1<sup>+</sup> CD8<sup>+</sup> T cells upon ICB
 # Inverse correlation between IL-7 receptor expression and CD8 T cell exhaustion during persistent antigen stimulation
- - persistent antigen exposure suppresses IL-7R alpha expression, correlates with T cell exhaustion
- - exposure to short-lived antigen only temporarily suppresses IL-7R alpha expression, fails to induce T cell exhaustion
+ - persistent antigen exposure suppresses IL-7Rα expression, correlates with T cell exhaustion
+ - exposure to short-lived antigen only temporarily suppresses IL-7Rα expression, fails to induce T cell exhaustion
 # Inverse vaccination, the opposite of Jenner's concept, for therapy of autoimmunity
  - Jenner invented vaccination in 1796
  - autoimmunity treatment includes immunosuppression via anti-CD20 monoclonal antibody (B cells marked by CD20), anti-CD52 mAb (WBCs marked by CD52), similarly reduce transplant rejection with mAbs against CD3 (T cells marked by CD3), can also disrupt lymphocyte ingress into tissue via integrin blockade or impeded egress of lymphocytes out of lymph nodes via spingosine phosphate receptor modulation
@@ -1880,7 +1898,7 @@
  - neoantigen-specific TILs exhibited tumor-specific expansion with dysfunctional phenotypes, distinct from blood-emigrant bystanders and regulatory TILs
  - neoantigen-specific TILs largely exhibited tumor-specific clonal expansion, with only limited overlap with dually expanded TILs found in the peripheral blood, possible caveat to any PBMC-based TCR feature analysis is that we don't know if they are tumor-specific or not, although here this is just neoantigen, so perhaps there is more sharing betweeen PBMC and TILs targeting tumor-associated antigens
 # Moving towards personalized treatments of immune-related adverse events
- - corticosteroids are the cornerstone of irAE treatment, potent suppressors of T cell function/activity, followed by mycophenolate for patients for whom corticosteroids fail (this drug depletes guanosine nucleotides preferentially in T/B cells to inhibit their proliferation to suppress cell-mediated immune responses and antibody production), calcineurin inhibitors and methotrexate can also inhibit T cell function to treat irAEs, as can blocking of integrins T cells use to extravasate from circulation into peripheral tissue where they cause inflammation (like antibodies targeting alpha 4 beta 7 and alpha 4 integrins to treat colitis and encephalitis as these integrins are expressed on gut epithelium and blood-brain barrier, respectively)
+ - corticosteroids are the cornerstone of irAE treatment, potent suppressors of T cell function/activity, followed by mycophenolate for patients for whom corticosteroids fail (this drug depletes guanosine nucleotides preferentially in T/B cells to inhibit their proliferation to suppress cell-mediated immune responses and antibody production), calcineurin inhibitors and methotrexate can also inhibit T cell function to treat irAEs, as can blocking of integrins T cells use to extravasate from circulation into peripheral tissue where they cause inflammation (like antibodies targeting α4 β7 and α4 integrins to treat colitis and encephalitis as these integrins are expressed on gut epithelium and blood-brain barrier, respectively)
  - histopathological findings of different organ irAEs: generally infiltrates into irAE tissue are lymphocyte rich, sometimes myeloid too (pulmonary)
 # mTOR regulates T cell exhaustion and PD-1-targeted immunotherapy response during chronic viral infection
  - background: PD-1-blockade enhances T cell response by promoting differentiation of stem-like T cells towards TIM3<sup>+</sup> cells
@@ -2158,7 +2176,7 @@
  - ATG = anti-thymocyte globulin
  - low-dose ATG transiently preserves C-peptide and lowers HbA1c in recent-onset T1D individuals (unclear mechanism)
  - low-dose ATG treatment preserves Tregs (stable methylation of *FOXP3* Treg-specific demethylation region) and increased proportions of CD4<sup>+</sup> FOXP3<sup>+</sup> Tregs (flow cytometry)
- - responders show transient rise in IL-6, IP-10, TNF-alpha and durable CD4<sup>+</sup> exhaustion phenotype
+ - responders show transient rise in IL-6, IP-10, TNF-α and durable CD4<sup>+</sup> exhaustion phenotype
  - non-responders to ATG show higher proportions of senescent T cells at baseline and after treatment and increased methylation of *EOMES* (less expression of *EOMES* exhaustion marker)
 # Restriction of PD-1 function by *cis*-PD-L1/CD80 interactions is required for optimal T cell responses
  - CD80 binds PD-L1 in *cis* on primary activated DCs, interferes with PD-L1 accessing PD-1 on T cells (which would have otherwise inhibited T cell activation)
@@ -2172,11 +2190,11 @@
  - benchmarking ability of RNAseq methods (vs. gold standard of targeted TCRseq) to profile TCR repertoires, examine 19 bulk RNAseq samples across 4 cancer cohorts, T cell rich/poor tissue
  - RNAseq works ok in T cell rich tissue with low diversity repertoires, don't work as well in T cell poor tissues especially those with highly diverse repertoires
 ## Introduction
- - MiXCR (RNAseq method) has been shown to be able to detect TCR beta sequences with relative frequencies > 0.15% in T cell rich tissue
+ - MiXCR (RNAseq method) has been shown to be able to detect TCRβ sequences with relative frequencies > 0.15% in T cell rich tissue
 ## Results
  - multi-cohort dataset
-### RNA-seq based TCR profiling methods were able to successfully capture TCR beta low SDI repertoires across various T cell rich tissues
- - capturing ability based on sum of TCRseq confirmed TCR beta clonotypes captured in RNAseq methods
+### RNA-seq based TCR profiling methods were able to successfully capture TCRβ low SDI repertoires across various T cell rich tissues
+ - capturing ability based on sum of TCRseq confirmed TCRβ clonotypes captured in RNAseq methods
  - RNAseq methods capture ~93% of clonotypes in T cell rich low SDI samples, ~76% in T cell poor low SDI samples (averages)
  - capture fewer clonotypes in high SDI samples
  - CATT and TRUST4 did better than MiXCR in T cell poor high SDI samples
@@ -2383,6 +2401,8 @@
  - case report of patient with metastatic HER2 NSCLC with high PD-L1 level
  - started on pembrolizumab
  - ICI-induced myocarditis before third ICI cycle
+# Start codon variant in *LAG3* is associated with decreased LAG-3 expression and increased risk of autoimmune thyroid disease
+ - GWAS hit shows rare 5' UTR variant in *LAG3* showing large effect, variant generates a novel start codon for an ORF upstream of the canonical start codon, leading to reduced mRNA and surface protein expression of LAG-3 coreceptor on activated lymphocytes
 # Statistical analysis of CDR3 length distributions for the assessment of T and B cell repertoire biases
  - Gaussian-like distribution in length pattern, given large number of small effects (random mechanism of junction diversity) acting additively and independently on CDR3 length
 # Stitchr: stitching coding TCR nucleotide sequences from V/J/CDR3 information
@@ -2602,11 +2622,11 @@
 # T cell repertoire in peripheral blood as a potential biomarker for predicting response to concurrent cetuximab and nivolumab in head and neck squamous cell carcinoma
  - TCRB chain profiling
  - increased baseline TCR sequence diversity associated with ICB response
-# T cells specific for alpha-myosin drive immunotherapy related myocarditis
+# T cells specific for α-myosin drive immunotherapy related myocarditis
  - mice (*Pdcd1-/-Ctla4+/-*, recapitulates features of ICB myocarditis in humans)
  - CD8<sup>+</sup> dominant cell population in immune infiltrate in heart and drive myocarditis (anti-CD8 antibody rescues mice)
- - alpha-myosin antigen target of three MHCI restricted TCRs from mice with myocarditis
- - **peripheral blood from three humans with ICI-myocarditis were expanded by alpha-myosin peptides, these alpha-myosin expanded T cells shared TCR clonotypes with diseased heart and skeletal muscle infiltrates**
+ - α-myosin antigen target of three MHCI restricted TCRs from mice with myocarditis
+ - **peripheral blood from three humans with ICI-myocarditis were expanded by α-myosin peptides, these α-myosin expanded T cells shared TCR clonotypes with diseased heart and skeletal muscle infiltrates**
 # T cell tolerance: central and peripheral
 ## Summary
  - central tolerance: clonal deletion and diversion (Treg differentiation) control self-reactive T cells in the thymus
@@ -2637,9 +2657,9 @@
 ## Results
  - elevated TCR convergence in baseline peripheral blood of those who respond to CTLA-4 blockade for cancer
 ## Discussion
- - **TCRs can have alpha or beta chain dominance, or codominance, in terms of contribution to antigen specificity**, one not contributing as much to specificity would mean it just plays an accessory/stabilizing role
+ - **TCRs can have α or β chain dominance, or codominance, in terms of contribution to antigen specificity**, one not contributing as much to specificity would mean it just plays an accessory/stabilizing role
 # TCR-ESM: employing protein language embeddings to predict TCR-peptice-MHC binding
- - trained on paired alpha beta TCR data
+ - trained on paired α β TCR data
 # TCR sequencing and cloning methods for repertoire analysis and isolation of tumor-reactive TCRs
 ## Abstract
  - SEQTR (SEQuencing T cell Receptor): combines *in vitro* transcription and single primer pair TCR amplification, combine with PCR to amplify TCR from bulk population, tumor-specific TCR identification and cloning
@@ -2734,9 +2754,9 @@
  - Tex importance depends on pre-treatment terminal Tex infiltration: low terminal Tex baseline infiltration responsive tumors had PD-1 blockade increasing these cells (increased infiltration or expansion of these cells, consistent with increased exhausted-like T cells with ICB), but high terminal Tex baseline infiltration responsive tumors had opposite pattern (decreased frequency with ICB)
 ### Local expansion of pre-existing Texp cells
  - local expansion of pre-existing Texp cells drives Texp accumulation, as does clonal revival (from periphery)
-# Teplizumab improves and stabilizes beta cell function in antibody positive high-risk individuals
+# Teplizumab improves and stabilizes β cell function in antibody positive high-risk individuals
  - 1 14 day course of teplizumab in non-diabetics at high risk for T1D, helps people remain T1D-free
- - changes in C-peptide with teplizumab treatment associated with increases in partially exhausted memory KLRG1<sup>+</sup>TIGIT<sup>+</sup> CD8s that showed reduced secretion of IFNgamma and TNFalpha
+ - changes in C-peptide with teplizumab treatment associated with increases in partially exhausted memory KLRG1<sup>+</sup>TIGIT<sup>+</sup> CD8s that showed reduced secretion of IFNγ and TNFα
 # Th2 cell clonal expansion at diagnosis in human type 1 diabetes
  - frequency of CD127<sup>high</sup> Th2 cells positively correlates with length of partial remission of T1D (common after diagnosis, a period of partial remission, longer partial remission associated with better response to treatment)
  - identify clonally expanded Th2 clusters in CD127<sup>high</sup> cells from T1D but not from healthy donors
@@ -2949,11 +2969,11 @@
  - TIGIT upregulated in T cells and CD56<sup>high</sup> NK cells of ICB responders
  - bacterial taxa associated with response (like *Ruminococcus torques*) or failure (like *Barnesiella intestinihominis*) to ICB
 # TIGIT acts as an immune checkpoint upon inhibition of PD1 signaling in autoimmune diabetes
- - chronic activation of self-reactive T cells with beta cell antigens results in upregulation of immune checkpoint molecules that keep self-reactive T cells under control to delay beta cell destruction in autoimmune diabetes
- - inhibiting PD-(L)1 results in autoimmune diabetes in those with pre-existing autoimmunity against beta cells
+ - chronic activation of self-reactive T cells with β cell antigens results in upregulation of immune checkpoint molecules that keep self-reactive T cells under control to delay β cell destruction in autoimmune diabetes
+ - inhibiting PD-(L)1 results in autoimmune diabetes in those with pre-existing autoimmunity against β cells
  - TIGIT highly expressed on activated islet infiltrating T cells in NOD (non-obese diabetic) mice
  - they find subset of stem-like memory CD8s expressing TIGIT, PD1, and TF EOMES (linked to dysfunctional CD8s)
- - CD155 (TIGIT ligand) expressed on beta cells and islet infiltrating DCs, but islet infiltrating PD-1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells were still functional
+ - CD155 (TIGIT ligand) expressed on β cells and islet infiltrating DCs, but islet infiltrating PD-1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells were still functional
  - inhibiting TIGIT in NOD mice didn't result in exacerbated autoimmune diabetes but inhibiting PD-(L)1 did
 # TIGIT blockade reshapes the tumor microenvironment based on the single-cell RNA-sequencing analysis
  - mice
@@ -2969,6 +2989,10 @@
  - expanded T cells in ICB recognized self-antigens like cancer-speciifc MAGEA1
 ## Discussion
  - previous literature: inhibitory receptors constitutively expressed by tissue-resident T cells
+# Tissue-resident memory T cells break tolerance to renal autoantigens and orchestrate immune-mediated nephritis
+ - recently activated splenic CD8s develop hybrid phenotype in context of renal autoantigen cross-presentation
+ - circulating memory T cells rapidly disappear; tissue-resident memory T cells emerge and persist within kidney, leading to immune-mediated nephritis
+ - T cells infiltrating kidneys of patients with interstitial nephritis express markers of tissue residency
 # Tissue-resident memory T cells in immune-related adverse events: friend or foe?
  - **previous literature: T<sub>RM</sub> cells locally expanded in irAE-dermatitis and -colitis**
  - T<sub>RM</sub> cells remain in tissue through expression of retention molecules (CD103, CD69 or CD49a), express PD-1 and other inhibitory receptors that control reactivation
