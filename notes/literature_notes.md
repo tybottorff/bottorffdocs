@@ -2781,6 +2781,10 @@
  - exhausted T cells accumulate when amount of antigen exceeds ability for clearance by antigen-specific T cells
  - characterized by increased expression of coinhibitory receptors (PD-1, LAG-3, TIM-3, TIGIT), these receptors also mark T cell activation
  - blocking coinhibitory receptors (i.e. ICB) can reinvigorate exhausted T cells but exhaustion is a difficult to reverse, altered epigenetic state
+# The CD318/CD6 axis limits type 1 diabetes islet autoantigen-specific human T cell activation
+ - CD318 expressed on some human DCs, activated monocytes
+ - CD318<sup>+</sup> DCs suppress autoreactive T cells specific for GAD65 (self-antigen in T1D)
+ - previous literature: CD318 is CD6 ligand (CD6 on T cells)
 # The changing landscape of naive T cell receptor repertoire with human aging
  - aging associated with loss of thymus productivity, yet naive T cells still maintain abundance by division in periphery for many years
  - **shorter CDR3 β, less added N nucleotides within CDR3 β with aging**
