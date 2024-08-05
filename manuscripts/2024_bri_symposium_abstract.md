@@ -1,5 +1,7 @@
 Title (character limit 137/150): Better defining exhausted TIGIT<sup>+</sup>KLRG1<sup>+</sup> subsets in teplizumab treated T1D subjects using ATAC-seq: epigenetics and mitochondrial variants.
- 
+
+Authors: Ty A. Bottorff, Joshua Centore, Alice E. Wiedeman, Vivian H. Gersuk, Michael Konieczny, Lauren E. Higdon, S. Alice Long, Peter S. Linsley
+
 Abstract (character limit 1484/1500):
  
 T cell exhaustion, a state of reduced effector function, results from chronic stimulation from antigens that cannot be fully cleared.
@@ -9,4 +11,4 @@ To investigate this heterogeneity in association with response to therapy amongs
 We found that the epigenetic states of DP CD127<sup>+</sup> CD8s were intermediate to that of other DP CD8s (PD-1<sup>+</sup> and CD57<sup>+</sup>) and TIGIT<sup>-</sup>KLRG1<sup>-</sup> CD8s.
 We also analyzed mitochondrial-mapping ATAC-seq reads and found that the DP CD57<sup>+</sup> CD8s had the most mitochondrial single nucleotide variants.
 We hypothesize that a bifurcation occurs in non-naive CD8 differentiation where one branch leads to the DP CD127<sup>+</sup> CD8s and the other branch leads to the DP PD-1<sup>+</sup> CD8s and the more terminal, downstream DP CD57<sup>+</sup> CD8s.
-This separation of the DP CD127<sup>+</sup> lineage from other DPs lineage is consistent with the observed heterogeneity in association with response to therapy and bodes well for new trials combining teplizumab and anti-IL7R.
+This separation of the DP CD127<sup>+</sup> lineage from other DPs lineage is consistent with the observed heterogeneity in association with response to therapy and the favorable outcomes with IL7R blockade in T1D patients.
