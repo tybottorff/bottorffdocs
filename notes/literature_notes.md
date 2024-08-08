@@ -343,6 +343,11 @@
  - *PD-L1* mRNA levels associated with CD8 T cell infiltration and better prognosis
 # BMI, irAE, and gene expression signatures associate with resistance to immune-checkpoint inhibition and outcomes in renal cell carcinoma
  - irAEs associated with clinical benefit
+# Broad induction of immunoregulatory mechanisms after a short course of anti-IL-7Rα antibodies in NOD mice
+ - LAG-3, Tim-3, PD-1 increased on peripheral blood CD4s and CD8s from anti-IL-7Rα treated NOD mice, accordingly these cells had reduced cytokine production
+ - also see more Tregs in circulating CD4 compartment with anti-IL-7Rα treatment
+ - delayed T1D disease kinetics with anti-IL-7Rα treatment
+ - IL-7 may provide early activating signals for T cells, so reduced IL-7 signaling promotes IR expression
 # Broad TCR repertoire and diverse structural solutions for recognition of an immunodominant CD8<sup>+</sup> T cell epitope
  - many distinct TCRs recognizing HLA-A2-M1 (pMHC) here, solution to specifically recognizing a relatively featureless peptide antigen
 # Cancer immunotherapy based on mutation-speciifc CD4<sup>+</sup> T cells in a patient with epithelial cancer
@@ -365,6 +370,9 @@
  - **main finding: signatures of heterogeneous tumor infiltrating TRM and “pre-exhausted” long-lived effector-memory CD8<sup>+</sup> T cells were associated with better ICB response only in the presence of CD28**
 # CD103<sup>+</sup> tumor-resident CD8<sup>+</sup> T cells are associated with improved survival in immunotherapy-naive melanoma patients and expand significantly during anti-PD-1 treatment
  - supporting evidence for strong literature conclusion of ICB inducing expansion of (CD8) T cells
+# CD4<sup>+</sup>CD25<sup>+</sup>CD127<sup>high</sup> cell frequency predicts disease progression in type 1 diabetes
+ - patients with highest frequency of CD4<sup>+</sup>CD25<sup>+</sup>CD127<sup>high</sup> cells at diagnosis had longest partial remissions (common after diagnosis), **not sure how this connects to CD127 associating with worse outcome in non-naive CD8s...**
+ - **also see higher probability of response to antiinflammatory drug alefacept in T1DAL with more CD127<sup>high</sup> cells... I think CD4s still here though**
 # CD4<sup>+</sup> T cell activation distinguishes response to anti-PD-L1<sup>+</sup> anti-CTLA-4 therapy from anti-PD-L1 monotherapy
 ## Highlights and summary
  - adding CTLA-4 blockade to PD-L1 blockade promotes CD4 T expansion
@@ -427,6 +435,10 @@
  - CDR3 length distributions do not correlate with genetic variability of the CDR3 region; the most constrained CDR3 length distributions are those of the α and β chains, yet they are highly variable genetically
 # CDR3 sequences in IgA nephropathy are shorter and exhibit reduced diversity
  - B cells
+# Cells with Treg-specific *FOXP3* demethylation but low CD25 are prevalent in autoimmunity
+ - recent literature: subset of FOXP3<sup>+</sup> CD25<sup>low</sup> Tregs increased in peripheral blood of SLE patients, unknown significance
+ - here, these cells seem to be up in various autoimmune diseases vs. healthy controls
+ - compared to conventional Tregs (CD25<sup>high</sup>), these CD25<sup>low</sup> Tregs are more often in the cell cycle, express PD-1 (late stage IR) more often, and express CTLA-4 less (early stage IR)
 # Cellular alterations in immune checkpoint inhibitor therapy-related cardiac dysfunction
  - perhaps underlying conditions aggrevated from ICB to induce cardiac irAE
 # Changes of peripheral T cell subsets in melanoma patients with immune-related adverse events
@@ -1220,6 +1232,8 @@
 # Human leukocyte antigen genotype association with the development of immune-related adverse events in patients with non-small cell lung cancer treated with single agent immunotherapy
  - **homozygosity at >= 1 HLA-I locus associated with reduced irAE risk, perhaps due to less diverse peptide presentation i.e. less self-peptides presented**
  - HLA-A3 supertype (incuding various similar HLA-A alleles) associated with increased irAE risk
+# Human regulatory T cells from umbilical cord blood display increased repertoire diversity and lineage stability relative to adult peripheral blood
+ - umbilical cord Tregs more diverse in TCR repertoire and ore hmogenous in phenotype, fewer effector-like cells vs. adult peripheral blood Tregs
 # Human T cell development, localization, and function throughout life
 ## Changes in T cells throughout life
  - early life (infancy and early childhood): most T cells are naive, also Tregs, greatest number of new antigens are encountered, naïve T cells play key protective roles in fending off pathogens, Treg cells are critical for developing tolerance to innocuous and ubiquitous antigens, and long-term reserves of memory T cells are established
@@ -1306,12 +1320,14 @@
 # IL7 genetic variation and toxicity to immune checkpoint blockade in patients with melanoma
  - minor allele carries of *IL7* intron have increased severe irAE risk
 # IL-7 receptor blockade reverses autoimmune diabetes by promoting inhibition of effector/memory T cells
- - 
+ - NOD mice
+ - IL-7 suppressed PD-1 expression on activated T cells *in vitro*, **perhaps supporting bifurcation (DP CD127 and DP PD-1 split)**
+ - other literature cited for low IL7R levels in Tex
 # Immune checkpoint inhibitor-induced myocarditis with myositis/myasthenia gravis overlap syndrome: a systematic review of cases
  - IM3OS: myocarditis with myositis/myasthenia gravis overlap syndrome
 # Immune checkpoint inhibitor-induced thyroid disorders: a single center experience
  - thyroid irAEs emerge after median time of 9 weeks, mainly in females
- - regardless of initial presentation, all irAE thyroidits patients later developed persistent hypothyroidism requiring hormone replacement (levothyroxine), increased TSH (thyroid-stimulating hormone) after ICI in these atients
+ - regardless of initial presentation, all irAE thyroiditis patients later developed persistent hypothyroidism requiring hormone replacement (levothyroxine), increased TSH (thyroid-stimulating hormone) after ICI in these atients
 # Immune checkpoint inhibitor rechallenge after immune-related adverse events in patients with cancer
  - ~29% recurrence rate of same irAE that prompted discontinuation of ICI therapy after rechallenge with same ICI
  - colitis, hepatitis, pneumonitis more common than other irAEs among patients who had recurrence
@@ -2131,7 +2147,7 @@
  - A*02 is most studied allele
 # Rechallenge of immune checkpoint inhibitors in a case with adverse events inducing myasthenia gravis
  - ICI-induced myasthenia gravis (MG) irAE associated with germline variant in *SLC22A5* in thymoma case
-# Regulatory  T cell-specific epigenomic region variants are a key determinant of susceptibility to common autoimmune diseases
+# Regulatory T cell-specific epigenomic region variants are a key determinant of susceptibility to common autoimmune diseases
  - SNPs associated with autoimmunity enriched in CpG demethylated regions in naive Tregs, less enriched in activation-induced demethylated regions in Tconv/Tregs
 # Regulatory T cells suppress CD4<sup>+</sup> effector T cell activation by controlling protein synthesis
 ## Abstract
@@ -2145,6 +2161,8 @@
  - Tregs can suppress CD4 effector T cells directly or through modulation of APCs (mostly DCs)
  - proposed suppression mechanisms: suppressive cytokine release (TGFβ, IL-10, IL-35), inhibitory receptor expression (CTLA-4, PD-1, TIGIT)
  - upon activation, resting T cells undergo rapid reprogramming in preparation of cell division, includes increased translation
+# Regulatory T cells suppress the formation of potent KLRK1 and IL-7R expressing effector CD8 T cells by limiting IL-2
+ - major suppressive mechanism of Tregs of CD8s in mice is IL-2, Tregs inhibit formation of KLRK1<sup>+</sup>IL-7R<sup>+</sup> CD8 Teffs (highly Teff)
 # Regulatory T cell transcriptomic reprogramming characterizes adverse events by checkpoint inhibitors in solid tumors
 ## Abstract
  - focus on Tregs as they help maintain peripheral tolerance, appear expanded in peripheral blood of cancer patients, and abundantly express checkpoint molecules
@@ -2391,6 +2409,10 @@
  - lower CD8 T, CD45RA CD8 T, memory CD27 B features of nephritis patients as well, also plasmablast expansion
 # Soluble PD-L1 predicts tumor response and immune-related adverse events in patients with advanced melanoma treated with anti-PD-1 antibodies
  - circulating soluble PD-L1 levels higher at baseline in patients with better prognosis (only in patients with low tumor burden), levels higher and vary more after treatment in irAE patients
+# Soluble RAGE prevents type 1 diabetes expanding functional regulatory T cells
+ - antagonist to RAGE protects against murine diabetes (increases Tregs within islets, pancreatic LNs, spleen, increases islet insulin expression and function)
+ - diabetes protection dependent on Tregs and RAGE antagonization
+ - human Tregs treated with RAGE ligand downregulated genes for suppression, migration, Treg homeostasis
 # Specificity of T cell alloreactivity
  - many alloreactive T cells are much more peptide specific than previously thought, few if any recognize only the MHC molecule
  - alloreactive T cells are polyspecific, able to recognize multiple distinct peptide-MHC complexes (perhaps why there's a high frequency of allorecognition)
