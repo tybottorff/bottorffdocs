@@ -11,4 +11,4 @@ To investigate this heterogeneity in association with response to therapy amongs
 We found that the epigenetic states of DP CD127<sup>+</sup> CD8s were intermediate to that of other DP CD8s (PD-1<sup>+</sup> and CD57<sup>+</sup>) and TIGIT<sup>-</sup>KLRG1<sup>-</sup> CD8s.
 We also analyzed mitochondrial-mapping ATAC-seq reads and found that the DP CD57<sup>+</sup> CD8s had the most mitochondrial single nucleotide variants.
 We hypothesize that a bifurcation occurs in non-naive CD8 differentiation where one branch leads to the DP CD127<sup>+</sup> CD8s and the other branch leads to the DP PD-1<sup>+</sup> CD8s and the more terminal, downstream DP CD57<sup>+</sup> CD8s.
-This separation of the DP CD127<sup>+</sup> lineage from other DPs lineage is consistent with the observed heterogeneity in association with response to therapy and the reversal of autoimmune diabetes with IL7R blockade in NOD mice.
+This separation of the DP CD127<sup>+</sup> lineage from other DPs lineage is consistent with the observed heterogeneity in association with response to therapy and the possible protective effect of IL7R blockade against autoimmune diabetes.
