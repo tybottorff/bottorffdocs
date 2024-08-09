@@ -1910,6 +1910,14 @@
 # Molecular pathways of colon inflammation induced by cancer immunotherapy
  - CD8 T cells underlie colitis irAEs, substantial fraction of colitis-associated CD8 T cels originate from Trm populations explaining the frequent early onset of colitis symptoms following ICB
  - **n = 8 (melanoma ICB colitis), n = 8 (HC), n = 6 (melanoma ICB no irAE), looks like a good dataset! TCR and RNA!**
+# Molecular signature of CD8<sup>+</sup> T cell exhaustion during chronic viral infection
+## Abstract
+ - compared gene expression profiles of dysfunctional LCMV-specific CD8s from chronic infection to functional LCMV-specific effector and memory CD8s generated from acute infection
+ - exhausted CD8s: OE IRs (PD-1), had major changes in TCR and cytokine signaling pathways, display altered expression of genes involved in chemotaxis, adhesion, migration, expression distinct set of TFs, had metabolic/bioenergetic deficiencies
+ - T cell exhaustion progressive, distinct from anergy
+ - functional exhaustion probably due to both active suppression and passive defects in signaling/metabolism
+## Introduction
+ - most effector CD8s apoptose, but ~5-10% survive and differentiate into long-surviving/persisting (**homeostatically proliferate in response to IL-7** and IL-15) memory CD8s that downregulate some effector properties but retain capacity to rapidly reactivate effector functions and proliferate upon antigen re-encounter
 # Molecular signatures of antitumor neoantigen-reactive T cells from metastatic human cancers
  - neoantigen-specific TILs exhibited tumor-specific expansion with dysfunctional phenotypes, distinct from blood-emigrant bystanders and regulatory TILs
  - neoantigen-specific TILs largely exhibited tumor-specific clonal expansion, with only limited overlap with dually expanded TILs found in the peripheral blood, possible caveat to any PBMC-based TCR feature analysis is that we don't know if they are tumor-specific or not, although here this is just neoantigen, so perhaps there is more sharing betweeen PBMC and TILs targeting tumor-associated antigens
@@ -2782,6 +2790,7 @@
 # Th2 cell clonal expansion at diagnosis in human type 1 diabetes
  - frequency of CD127<sup>high</sup> Th2 cells positively correlates with length of partial remission of T1D (common after diagnosis, a period of partial remission, longer partial remission associated with better response to treatment)
  - identify clonally expanded Th2 clusters in CD127<sup>high</sup> cells from T1D but not from healthy donors
+ - **not sure how this connects to CD127s being bad in T1D, that's CD8s vs. CD4s here though...**
 # The altertions in peripheral lymphocyte subsets predict the efficacy and prognosis of immune checkpoint inhibitors in hepatocellular carcinoma
  - CD3<sup>+</sup>CD8<sup>+</sup> T cell percentage increases after ICI, B cell percentage decreases
 # The cancer-immunity cycle: indication, genotype, and immunotype
@@ -3088,6 +3097,10 @@
  - Th1 (T helper type 1) cells secrete IL-2, interferon-γ, lymphotoxin-α and stimulate type 1 immunity (intense phagocytic activity), more or less synonymous with cell-mediated immunity but some antibodies are still produced, protective for most infections
  - Th2 cells secrete IL-4/5/9/10/13 and stimulate type 2 immunity (high antibody titers), more or less synonymous with humoral immunity (Th2 cells suppress phagocytosis), resolves cell-mediated inflammation
  - systemic stress, immunosuppression cause type 2 response to infection normally controlled by type 1 response
+# Tyrosine-protein kinase SYK-related gene signature in baseline immune cells with adjuvant immunotherapy-induced immune-related adverse events in melanoma
+ - ICI as (neo)adjuvant in melanoma treatments
+ - peripheral CD4s and CD8s at baseline, RNAseq
+ - tyrosine kinase SYK pathway associated with severe irAEs
 # Uncoupling therapeutic efficacy from immune-related adverse events in immune checkpoint blockade
 ## Improving immunotherapeutic strategies to reduce irAEs
 ### Broadening checkpoint blockade antibody strategies
