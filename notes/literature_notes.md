@@ -147,6 +147,8 @@
  - platelet-derived PD-L1 reported to promote immune evasion and contribute to tumor growth by inhibiting CD4<sup>+</sup> and CD8<sup>+</sup> lymphocytes
 # A single-cell map of intratumoral changes during anti-PD1 treatment of patients with breast cancer
  - 1/3 of tumors had PD-1 expressing T cells, clonally expand with PD-1 blockade, mostly CD8<sup>+</sup> T cells with cytotoxic activity, immune-cell homing (*CXCL13*), and exhaustion markers (*LAG3*, *HAVCR2*) and CD4<sup>+</sup> T cells with Th1 (*IFNG*) and follicular helper (*BCL6*, *CXCR5*) signatures
+# A phase 2 randomized trial with autologous polyclonal expanded regulatory T cells in children with new-onset type 1 diabetes
+ - single dose of expTregs showed no efficacy in preserving C-peptide (suppressive capacity *in vitro*)
 # A phenotypically and functionally distinct human T<sub>H2</sub> cell subpopulation is associated with allergic disorders
  - allergen-specific type 2 helper T (T<sub>H2</sub>) cells critical in initiating/orchestrating allergic/asthmatic inflammatory response pathways
  - currently lack methodology to identify and differentiate these cells from nonpathogenic T<sub>H2</sub> cell types (otherwise would be able to use them as therapeutic targets and biomarkers)
@@ -441,6 +443,9 @@
  - compared to conventional Tregs (CD25<sup>high</sup>), these CD25<sup>low</sup> Tregs are more often in the cell cycle, express PD-1 (late stage IR) more often, and express CTLA-4 less (early stage IR)
 # Cellular alterations in immune checkpoint inhibitor therapy-related cardiac dysfunction
  - perhaps underlying conditions aggrevated from ICB to induce cardiac irAE
+# Cellular proliferation biases clonal lineage tracing and trajectory inference
+ - sampling bias can skew single cell datasets away from cellular composition they aim to represent
+ - here, they describe a form of sampling bias from repeated sampling from a growing, heterogeneous population
 # Changes of peripheral T cell subsets in melanoma patients with immune-related adverse events
 ## T cell changes in patients with severe irAEs receiving anti-PD-1 monotherapy
  - no clear differences
@@ -1492,6 +1497,8 @@
  - *ARAD1* and *IL6* variants likely predict severe irAEs
 # Immunomediated colitis induced by nivolumab that mimics endoscopically and histologically an ulcerative colitis
  - case report
+# Immunoregulatory biomarkers of the remission phase in type 1 diabetes: miR-30d-5p modulates PD-1 expression and regulatory T cell expansion
+ - data from pediatric patients and NOD mice
 # Immunosensitivity mediated by downregulated AKT1-SKP2 induces anti-PD-1-associated thyroid immune injury
  - although female hormones suspected to cause susceptibility to immune injury, dividing female patients by age (to look at pre/post menopausal females) didn't yield any differences
 # Immunotherapy goes local: the central role of lymph nodes in driving tumor infiltration and efficacy
@@ -1918,6 +1925,7 @@
  - functional exhaustion probably due to both active suppression and passive defects in signaling/metabolism
 ## Introduction
  - most effector CD8s apoptose, but ~5-10% survive and differentiate into long-surviving/persisting (**homeostatically proliferate in response to IL-7** and IL-15) memory CD8s that downregulate some effector properties but retain capacity to rapidly reactivate effector functions and proliferate upon antigen re-encounter
+ - **specific functions are lost hierarchically as exhaustion progresses, like IL-2, cytotoxicity, proliferation lost early while IFN-γ persisting longer**
 # Molecular signatures of antitumor neoantigen-reactive T cells from metastatic human cancers
  - neoantigen-specific TILs exhibited tumor-specific expansion with dysfunctional phenotypes, distinct from blood-emigrant bystanders and regulatory TILs
  - neoantigen-specific TILs largely exhibited tumor-specific clonal expansion, with only limited overlap with dually expanded TILs found in the peripheral blood, possible caveat to any PBMC-based TCR feature analysis is that we don't know if they are tumor-specific or not, although here this is just neoantigen, so perhaps there is more sharing betweeen PBMC and TILs targeting tumor-associated antigens
@@ -1931,6 +1939,8 @@
  - irAE colitis: see activated CD8<sup>+</sup> T cells and (granzyme B<sup>+</sup>) MAITs, not seen in ulcerative colitis
  - ICB induces increase in peripheral activated memory CD4<sup>+</sup> and CD8<sup>+</sup> T cells regardless of colitis irAE
  - low baseline circulating MAITs associated with irAE colitis
+# Multi-modal generative modeling for joint analysis of single-cell T cell receptor and gene expression data
+ - motivation: interplay between T cell function through TCR and RNA phenotype, recent studies have shown that clonotypes express similar RNA phenotypes (non-random distribution across RNA-based clusters), even see differences between clonotypes recognizing same epitope
 # Multi-omics prediction of immune-related adverse events during checkpoint immunotherapy
 ## Introduction
  - pneumonitis is the most common fatal irAE (10% death rate), myocarditis is the most lethal irAE (~50% mortality)
@@ -2458,6 +2468,10 @@
  - here, they try instead to use the anti IL6 receptor antibody (FDA approved to treat RA) for ICI-induced arthritis
 # Systematically administered low-affinity HER2 CAR T cells mediate antitumor efficacy without toxicity
  - disadvantage of high-affinity CARs for targets like HER2 expressed on normal tissues, low-affinity HER2 CARs can safely regress tumors
+# Systematic analyses on the horse-shoe-like effect in PCA plots of scRNA-seq data
+ - horse-shoe shape: U-shaped curve with 2nd axis curved/twisted relative to first
+ - doesn't seem to be due to distance saturation property (from closely local points, Euclidean distance grows linearly along gradient but distance saturates after certain point)
+ - seems to be a non-random result, an interpretable feature of the data
 # Targeted reconstruction of T cell receptor sequence from single cell RNA-seq links CDR3 length to T cell differentiation status
 ## Abstract
  - TRAPeS tool to extract TCRseq from short read scRNAseq libraries (previous methods needed long sequencing reads)
@@ -3077,6 +3091,8 @@
 # tRNA-m<sup>1</sup>A modification promotes T cell expansion via efficient MYC protein synthesis
  - naive T cells undergo radical changes during transition from dormant to hyperactive state, necesitating *de novo* transcription and translation
  - here, they propose mechanism for enhanced translation efficiency to promote this transition
+# TSpred: a robust prediction framework for TCR-epitope interactions using paired chain TCR sequence data
+ - issue is that data for training is too sparse compared to huge selection space of TCRs and epitopes
 # Tumor immunotherapies by immune checkpoint inhibitors (ICIs); the pros and cons
  - CTLA-4 acts at earlier stage of T cell induction, PD-(L)1 acts at later stage to prevent T cell function in peripheral tissue
 # Tumor invasion in the central airway is a risk factor for early-onset checkpoint inhibitor pneumonitis in patients with non-small cell lung cancer
