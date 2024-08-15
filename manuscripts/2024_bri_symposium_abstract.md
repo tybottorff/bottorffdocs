@@ -1,4 +1,4 @@
-Title (character limit 137/150): Better defining exhausted TIGIT<sup>+</sup>KLRG1<sup>+</sup> subsets in teplizumab treated T1D subjects using ATAC-seq: epigenetics and mitochondrial variants.
+Title (character limit 137/150): Better defining exhausted TIGIT<sup>+</sup>KLRG1<sup>+</sup> subsets in teplizumab-treated T1D subjects using ATAC-seq: epigenetics and mitochondrial variants.
 
 Authors: Ty A. Bottorff, Joshua Centore, Alice E. Wiedeman, Vivian H. Gersuk, Michael Konieczny, Lauren E. Higdon, S. Alice Long, Peter S. Linsley
 
