@@ -13,6 +13,8 @@
 # A comparison of clustering models for inference of T cell receptor antigen specificity
  - assumption: similar sequence receptors bind similar epitopes
  - some differences in predictive performance of models, more differences in scalability
+# A comparison of scRNA-seq annotation methods based on experimentally labeled immune cell subtype dataset
+ - SVM, scBERT, and scDeepSort were the best supervised methods, Seurat was the best unsupervised clustering method (couldn't fit actual cell type distribution though)
 # Activation of CD8 T cells accelerates anti-PD-1 antibody-induced psoriasis-like dermatitis through IL-6
  - human samples: infiltration of CD8 T cells into epidermis, IL-6-dependent pathogenesis
 # Activation of human T cells by major histocompatability complex class II expressing neutrophils: proliferation in the presence of superantigen, but not tetanus toxoid
@@ -1328,6 +1330,10 @@
  - NOD mice
  - IL-7 suppressed PD-1 expression on activated T cells *in vitro*, **perhaps supporting bifurcation (DP CD127 and DP PD-1 split)**
  - other literature cited for low IL7R levels in Tex
+# IL-7 signaling must be intermittent, not continuous, during CD8 T cell homeostasis to promote cell survival instead of cell death
+ - maintenance of naive CD8s requires IL-7 and TCR signaling, and here they report that the IL-7 signaling needs to be intermittent (not continuous) as prolonged IL-7 signaling induces proliferation, IFN-γ production, and cell death triggered by IFN-γ
+ - TCR engagements interrupt IL-7 signaling, supporting survivial and quiescence
+ - CD8s with insufficient TCR affinity for ligands receive prolonged IL-7 signaling and apoptose
 # Immune checkpoint inhibitor-induced myocarditis with myositis/myasthenia gravis overlap syndrome: a systematic review of cases
  - IM3OS: myocarditis with myositis/myasthenia gravis overlap syndrome
 # Immune checkpoint inhibitor-induced thyroid disorders: a single center experience
@@ -1940,7 +1946,17 @@
  - ICB induces increase in peripheral activated memory CD4<sup>+</sup> and CD8<sup>+</sup> T cells regardless of colitis irAE
  - low baseline circulating MAITs associated with irAE colitis
 # Multi-modal generative modeling for joint analysis of single-cell T cell receptor and gene expression data
+## Introduction
  - motivation: interplay between T cell function through TCR and RNA phenotype, recent studies have shown that clonotypes express similar RNA phenotypes (non-random distribution across RNA-based clusters), even see differences between clonotypes recognizing same epitope
+## Results
+### mvTCR fuses T cell receptor and gene expression data
+ - gene expression data + CDR3s from α and β chains, both encoded individually then mixture model fuses modalities into shared representation for each cell to use in downstrem analyses
+ - various approaches to combine two modalities: concatenation, product of experts, and mixture of experts
+### mvTCR enables analysis of cell function and phenotype
+ - **rationale for seeing if joint T cell embedding can improve prediction of antigen specificity is that that cells with shared clonal heritage express similar RNA phenotype**
+## Methods
+ - both CDR3s are zero-padded to maximal sequence length
+ - only look at 5000 most highly variable genes, read counts normalized and log transformed
 # Multi-omics prediction of immune-related adverse events during checkpoint immunotherapy
 ## Introduction
  - pneumonitis is the most common fatal irAE (10% death rate), myocarditis is the most lethal irAE (~50% mortality)
@@ -2801,6 +2817,14 @@
 # Teplizumab improves and stabilizes β cell function in antibody positive high-risk individuals
  - 1 14 day course of teplizumab in non-diabetics at high risk for T1D, helps people remain T1D-free
  - changes in C-peptide with teplizumab treatment associated with increases in partially exhausted memory KLRG1<sup>+</sup>TIGIT<sup>+</sup> CD8s that showed reduced secretion of IFNγ and TNFα
+# Teplizumab induces persistent changes in the antigen-specific repertoire in individuals at-risk for type 1 diabetes
+ - teplizumab: FcR non-binding anti-CD3 mAb approved to delay T1D progresion in at-risk patients
+ - scRNAseq
+ - reduced expression of genes in TCR and activation pathways in responders
+ - increased expression of exhaustion/immune regulation genes with teplizumab treatment in CD8s
+ - differentiation of CD8 exhausted/memory cells with teplizumab treatment
+ - **IL7R* expression reduced and patients with lower CD127 expression had longer diabetes free intervals**
+ - frequency of autoantigen reactive CD8s expanded in placebo group over 18 months, didn't increase in teplizumab group
 # Th2 cell clonal expansion at diagnosis in human type 1 diabetes
  - frequency of CD127<sup>high</sup> Th2 cells positively correlates with length of partial remission of T1D (common after diagnosis, a period of partial remission, longer partial remission associated with better response to treatment)
  - identify clonally expanded Th2 clusters in CD127<sup>high</sup> cells from T1D but not from healthy donors
