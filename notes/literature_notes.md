@@ -147,8 +147,6 @@
 # Antiplatelet drugs may increase the risk for checkpoint inhibitor-related pneumonitis in advanced cancer patients
  - mechanism: changed immune landscape within tumor microenvironemnt, platelets' role in circulation and immune system being disturbed
  - platelet-derived PD-L1 reported to promote immune evasion and contribute to tumor growth by inhibiting CD4<sup>+</sup> and CD8<sup>+</sup> lymphocytes
-# A single-cell map of intratumoral changes during anti-PD1 treatment of patients with breast cancer
- - 1/3 of tumors had PD-1 expressing T cells, clonally expand with PD-1 blockade, mostly CD8<sup>+</sup> T cells with cytotoxic activity, immune-cell homing (*CXCL13*), and exhaustion markers (*LAG3*, *HAVCR2*) and CD4<sup>+</sup> T cells with Th1 (*IFNG*) and follicular helper (*BCL6*, *CXCR5*) signatures
 # A phase 2 randomized trial with autologous polyclonal expanded regulatory T cells in children with new-onset type 1 diabetes
  - single dose of expTregs showed no efficacy in preserving C-peptide (suppressive capacity *in vitro*)
 # A phenotypically and functionally distinct human T<sub>H2</sub> cell subpopulation is associated with allergic disorders
@@ -166,6 +164,8 @@
  - ICB can only temporarily restore function of some exhausted T cells because of irreversible change in epigenetics of some terminally exhausted T cells
  - exhausted T cells lose effector functions, change epigenetic/transcriptional profiles, change metabolism, slow down proliferation, and respond more slowly to stimuli due to cytokine (IL-2, TNF, IFN-γ) deficiency
  - TOX is key inducer of T cell exhaustion, NFAT (upstream target of TOX) is key regulator of T cell exhaustion
+# A single-cell map of intratumoral changes during anti-PD1 treatment of patients with breast cancer
+ - 1/3 of tumors had PD-1 expressing T cells, clonally expand with PD-1 blockade, mostly CD8<sup>+</sup> T cells with cytotoxic activity, immune-cell homing (*CXCL13*), and exhaustion markers (*LAG3*, *HAVCR2*) and CD4<sup>+</sup> T cells with Th1 (*IFNG*) and follicular helper (*BCL6*, *CXCR5*) signatures
 # Assessment of human leukocyte antigen-based neoantigen presentation to determine pan-cancer response to immunotherapy
  - integration of binding affinity of neoantigens to HLA-I and HLA-I allele divergence = HLA tumor-antigen presentation score (HAPS)
  - high HAPS associated with better response to ICB (makes sense, more neoantigens presented, more likely to be recognized by T cells)
@@ -220,6 +220,8 @@
  - A6 TCR bound to HLA-A*02:01 presenting agonist/antagonist peptides
  - TCR α and β chains move asymmetrically
  - agonist stabilizes complex, antagonist destabilizes complex
+# A systematic overview of single-cell transcriptomics databases, their use cases, and limitations
+ - GEO biggest database
 # ATAC-seq: a method for assaying chromatin accessibility genome-wide
  - probe DNA accessibility with hyperactive Tn5 transposase (inserts sequencing adapters into accessible chromatin regions, sequencing reads used to infer regions of increased accesibility, can also map transcription factor binding and nucleosome positions)
  - alternative to DNase-seq for chromatin accessibility and MNase-seq for nucleosome positioning
@@ -726,7 +728,8 @@
  - anti-PD-1<sup>+</sup> LAG-3 associated with CD4<sup>+</sup> T cells expressing CXCF4, TNFSF8, IL21R accumulating
 # Differentiation and homeostasis of effector Treg cells are regulated by inositol polyphosphates modulating Ca<sup>2+</sup> influx
  - subclass of Tregs express Foxp3, activated Foxp3<sup>+</sup> Tregs differentiate into effector Treg (eTreg) cells to maintain peripheral immune homeostasis and tolerance
-# Digital spatial profiling of melanoma shows CD95 expression in immune cells is associated with resistance to immunotherapy
+# Directional integration and pathway enrichemnt analysis for multi-omics data
+ - prioritize genes/pathways that change consistently across datasets (as expected to do, like positive correlation for central dogma and negative with DNA methylation or KO/OE experiments vs. control), penalize those with inconsistent directionality
 # Dissecting the tumor microenvironment in response to immune checkpoint inhibitors via single cell and spatial transcriptomics
  - good summary of cancer immunity cycle for me: cancer cells generate neoantigens, present on MHC, APCs sample antigens and present fragments via MHCI/II, APCs traffic to lymph nodes (due to signals from proinflammatory cytokines) and induce expansion and differentiation of naive T cells into cytotoxic effector T cells that migrate to tumor, recognize cancer cells via TCR-pMHCI docking, kill cancer cells, release more neoantigens
  - programs that promote response/resistance to immunotherapy: cell cycle genes (CDK4/6) repress resistance to ICB and sensitize tumors (in mice), TCF7 (transcription factor involved in T cell differentiation) levels higher in responders
@@ -2477,6 +2480,8 @@
  - TCRs have constant domains (anchor to cell membrane) and variable domains (interact with pMHC)
  - CDRs come from hypervariable regions of V domains
  - CDR1/2 interact mostly with MHC
+# Structure of a fully assembled γδ T cell antigen receptor
+ - γδ TCRs recognize more diverse ligands, though both γδ and αβ TCRs share CD3 (Ab targeting CD3 used to bind complex to image)
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
  - ICI-induced inflammatory arthritis has been reported
@@ -2703,6 +2708,8 @@
 # T cell tolerant fraction as a predictor of immune-related adverse events
  - tolerant fraction characterized according to productive/non-productive TCRB sequences, **not sure how this relates, I understand their hypothesis that more tolerant T cells would lead to lower irAE risk but I don't understand how tolerant fraction can be estimated from productive fraction, productive just means it can function and bind some antigen not necessarily self/foreign?**
  - **so they say "In healthy subjects, we considered TRB sequences that are expressed to be tolerant; otherwise, the subject would not be healthy" which does make sense but what about abundance? healthy people have rare self-reactive T cells that's known I think**
+# TCR clustering by contrastive learning on antigen specificity
+ - method that does well with challenge of clustering TCRs with dissimilar sequences but similar target epitopes together in the same "correct" clusters
 # TCR contact residue hydrophobicity is a hallmark of immunogenic CD8<sup>+</sup> T cell epitopes
  - relative hydrophobicity of TCR contact residues enriched in immunogenic MHC I epitopes in human and murine MHCs in both self and foreign immunogenic epitopes
  - **highly polar amino acids underrepresented in immunogenic epitopes vs. non-immunogenic epitopes, hydrophobic amino acids overrepresented**
