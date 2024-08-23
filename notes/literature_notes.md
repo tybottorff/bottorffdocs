@@ -980,6 +980,8 @@
  - **immune activity against wild type melanocyte antigens in melanoma may contribute to ICB efficacy despite low neoantigen burden (i.e. perhaps in responders with low neoantigen tumors more often will see irAEs given necessity for immune activity against tumor associated antigens shared between tumor and self)**
 ## Discussion
  - **neoantigens may contribute to breaking of self-tolerance (toward wild type melanocyte self-antigens) in ICB**
+# Essential role of the Wnt pathway effector Tcf-1 for the establishment of functional CD8 T cell memory
+ - Wnt not needed for effector responses but needed for secondary challenge responses (recurrent infections)
 # Evaluating T cell cross-reactivity between tumors and immune-related adverse events with TCR sequencing: pitfalls in interpretations of functional relevance
 ## Abstract
  - shared T cell clones between tumor and irAE evidence for crossreactivity **(or shared antigens)** underlying irAEs
@@ -1010,6 +1012,12 @@
  - MHC class II molecules undetectable on resting T cells, expressed highly on activated T cells, unclear function (vs. clear antigen presentation function on APCs to CD4<sup>+</sup> T cells), perhaps also antigen presentation
 # External validation of biomarkers for immune-related adverse events after immune checkpoint inhibition
  - **unable to reliably predict risk of irAEs in most cases from pre-therapy flow cytometry and clinical data**
+# Extracellular signal-regulated kinase (ERK) pathway control of CD8<sup>+</sup> T cell differentiation
+ - ERK activity has been used to report antigen receptor occupancy
+ - positive and negative regulatory roles for ERK in T cell activation
+ - ERK controls TFs, cytokines, cytokine receptors expressed by activated T cells
+ - large proportion of proteome restructuring driven by T cell antigen receptor triggering not dependent on ERK
+ - selective targets of ERK module include effector molecules and cytokines
 # Extraislet expression of islet antigen boosts T cell exhaustion to partially prevent autoimmune diabetes
  - NOD mice
  - some CD8s specific for islet antigen (IGRP) show Tex characteristics within islet but maintain precursor Tex state in peripheral lymphoid organs (more IGRP-specific T cells in peripheral lymphoid organs than islets)
@@ -2832,6 +2840,9 @@
  - differentiation of CD8 exhausted/memory cells with teplizumab treatment
  - **IL7R* expression reduced and patients with lower CD127 expression had longer diabetes free intervals**
  - frequency of autoantigen reactive CD8s expanded in placebo group over 18 months, didn't increase in teplizumab group
+# TGF-β cytokine signaling promotes CD8<sup>+</sup> T cell development and low-affinity CD4<sup>+</sup> T cell homeostasis by regulation of interleuokin-7 receptor-α expression
+ - IL-7Rα induced upon T cell positive selection
+ - **TGF-β signaling promotes IL-7Rα expression and CD8 differentiation**
 # Th2 cell clonal expansion at diagnosis in human type 1 diabetes
  - frequency of CD127<sup>high</sup> Th2 cells positively correlates with length of partial remission of T1D (common after diagnosis, a period of partial remission, longer partial remission associated with better response to treatment)
  - identify clonally expanded Th2 clusters in CD127<sup>high</sup> cells from T1D but not from healthy donors
@@ -2882,6 +2893,8 @@
  - PD1 can increase expression of transcription factors like BATF to counteract T cell activation transcriptional program
  - PDL1 can also bind CD80
  - after T cell activation, if antigen is cleared, memory T cells form and PD1 expression levels decrease (PD1 expression remains high if antigen persists and T cell exhaustion can develop)
+# The Erk2 MAPK regulates CD8 T cell proliferation and survival
+ - Erk1 dispensable for activation, Erk2 required for CD8 proliferation in absence of costimulation
 # The frequency of CD4<sup>+</sup> and CD8<sup>+</sup> circulating T stem cell memory in type 1 diabetes
  - CD4 TSCMs more frequent in new case T1D patients (vs. long-term ones and controls)
  - more frequent CD8 naive T cells in new case patients (vs. long-term and healthy controls)
@@ -3079,6 +3092,8 @@
  - T<sub>RM</sub> cells particularly abundant in barrier organs (skin, GI tract), perhaps due to abundant microbial antigens in barriers
  - perhaps ICB reinvigorates T<sub>RM</sub> cells
  - **systemic corticosteroids used to treat irAEs, or systemic JAKi (both suppress T cell function globally), but homing integrins like ITGA4 are upregulated in irAEs and has been targeted to treat irAEs**
+# TNIK signaling imprints CD8<sup>+</sup> T cell memory formation early after priming
+ - priming of CD8s induces Wnt activation
 # Tolerogenic dendritic cells pulsed with islet antigen induce long-term reduction in T-cell autoreactivity in type 1 diabetes patients
  - tolerogenic DCs inhibit antigen-specific proinflammatory T cells, generate antigen-specific Tregs, promote IL-10 production, possible intervention for autoimmunity
  - phase 1 trial for vaccinations with tolerogenic DCs pulsed with proinsulin peptide, see decline in autoimmune responses to vaccine peptide over years and temporary decline in T cell responses to other islet autoantigens, increase in ICOS<sup>+</sup>CCR4<sup>+</sup>TIGIT<sup>+</sup> Tregs and CD103<sup>+</sup> tissue-resident and CCR6<sup>+</sup> CD4 TEMs
