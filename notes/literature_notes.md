@@ -3273,3 +3273,5 @@
  - **any given TCR-pMHC interaction is likely not the best TCR to bind that pMHC (affinity wise), but it's good enough to stimulate a response, this also means that the affinity can be increased for therapeutics**
 # γδ T cell exhaustion: Opportunities for intervention
  - γδ T cells (TCRs with γ and δ chains instead of the usual α and β ones) can respond to varied infections/tumor challenges in a non-MHC-restricted manner, involved in immune surveillance (pleiotropic i.e. more than one effector functions)
+# ZEB1 transcription factor promotes immune escape in melanoma
+ - ZEB1 expression in melanoma cells associated with decreased CD8 T cell infiltration
