@@ -15,6 +15,8 @@
  - some differences in predictive performance of models, more differences in scalability
 # A comparison of scRNA-seq annotation methods based on experimentally labeled immune cell subtype dataset
  - SVM, scBERT, and scDeepSort were the best supervised methods, Seurat was the best unsupervised clustering method (couldn't fit actual cell type distribution though)
+# A comprehensive profile of TCF1<sup>+</sup> progenitor and TCF1<sup>-</sup> terminally exhausted PD-1<sup>+</sup> CD8<sup>+</sup> T cells in head and neck squamos cell carcinoma: implications for prognosis and immunotherapy
+ - progenitor Tex (TCF1<sup>+</sup>) produced abundant TNFα, while terminal Tex (TCF1<sup>-</sup>) expressed higher levels of CD103, TIM-3, CTLA-4, and TIGIT, terminal Tex exhibited a polyfunctional TNFα+GZMB+IFNγ+ phenotype
 # Activation of CD8 T cells accelerates anti-PD-1 antibody-induced psoriasis-like dermatitis through IL-6
  - human samples: infiltration of CD8 T cells into epidermis, IL-6-dependent pathogenesis
 # Activation of human T cells by major histocompatability complex class II expressing neutrophils: proliferation in the presence of superantigen, but not tetanus toxoid
@@ -87,7 +89,7 @@
  - KLRG1<sup>+</sup> TIGIT<sup>+</sup> CD8<sup>+</sup> T cells more common in teplizumab group than placebo
 # An autoimmune stem-like CD8 T cell population drives type I diabetes
  - mice
- - stem-like autoimmune progenitor population in pancreatic draining LN self-renews and gives rise to pancreatic LN autoimmune mediators
+ - stem-like autoimmune progenitor population (TCF1<sup>high</sup>) in pancreatic draining LN self-renews and gives rise to pancreatic LN autoimmune mediators (TCF1<sup>low</sup>)
  - transplanting as few as 20 autoimmune progenitors induced T1D (implanting as many as 100k pancreatic autoimmune mediators did not induce T1D, they're short-lived)
  - T1D becomes clinically evident when > 80% of β cells have been destroyed (requiring months to years of latent β cell killing in humans)
 # ANGPTL2 promotes immune checkpoint inhibitor-related murine autoimmune myocarditis
@@ -2326,6 +2328,12 @@
  - within V region of heavy and light chains
 # Role of the multiple T cell receptor (TCR)-ζ chain signaling motifs in selection of the T cell repertoire
  - TCR is composed of four distinct signal transducing subunits (CD3-γ, -δ, -ε, and ζ) that contain either one (CD3-γ, -δ, -ε) or three (-ζ) signaling motifs (ITAMs) within their intracytoplasmic domains
+# Runx3 and Runx1 are required for CD8 T cell development during thymopoiesis
+ - Runx1, Runx3 highly expressed in thymic medulla and cortex, respectively
+ - Runx3 KO mice display abnormalities in CD4 expression during lineage decisions and impairment of CD8 T cell maturation in thymus
+ - large proportion of Runx3 KO peripheral CD8s also express CD8 and have reduced proliferation
+# Runx3 guards cytotoxic CD8<sup>+</sup> effector T cells against deviation towards T<sub>FH</sub> cell lineage
+ - Runx3 deficiency limits clonal expansion and impairs upregulation of cytotoxic molecules in T<sub>EFF</sub> cells, these cells aberrantly upregulate genes characteristic of T<sub>FH</sub> cells (like *Bcl6*, *Tcf7*, and *CXCR5*)
 # Safety, outcomes and T cell characteristics in patients with relapsed or refractory MDS or CMML treated with atezolizumab in combination with guadecitabine
  - hypothesis: resistance to hypomethylating agents (HMAs) in patients with myelodysplastic syndrome (MDS) and chronic myelomonocytic leukemia (CMML) overcome by combining PD-L1 blockade with HMA
 # scRNAseq defines dynamic T cell subsets in longitudinal colon and peripheral blood samples in immune checkpoint inhibitor-induced colitis
@@ -2490,6 +2498,8 @@
  - CDR1/2 interact mostly with MHC
 # Structure of a fully assembled γδ T cell antigen receptor
  - γδ TCRs recognize more diverse ligands, though both γδ and αβ TCRs share CD3 (Ab targeting CD3 used to bind complex to image)
+# Subsets of exhausted CD8<sup>+</sup> T cells differentially mediate tumor control and respond to checkpoint blockade
+ - exhausted CD8 TILs include subpopulation of progenitor exhausted cells that retain polyfunctionality, persist long term, differentiate into terminally exhausted TILs
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
  - ICI-induced inflammatory arthritis has been reported
@@ -2535,6 +2545,8 @@
  - *PIK3CA* mutation results in increase PD-L1 levels, repression of CD8<sup>+</sup> T cell differentiation in cervical cancer
 # Targeting T regulatory (Treg) cells in immunotherapy-resistant cancers
  - high abundance of Tregs associated with resistance to ICB
+# T-bet controls autoaggressive CD8 lymphocyte responses in type 1 diabetes
+ - in absence of T-bet, autoaggressive CD8s reduced in number and produce less IFN-γ but increased IL-2
 # T cell characteristics associated with toxicity to immune checkpoint blockade in patients with melanoma
 ## Abstract
  - irAEs in 10-60% of patients with melanoma treated with ICI
@@ -3023,6 +3035,11 @@
  - **CDR3s more hydrophobic in KIR<sup>+</sup>*HELIOS*<sup>+</sup> CD8 T cells, has been seen before, KIR<sup>+</sup> CD8 T cells may be CD8 T<sub>regs</sub> and hydrophobic/aromatic junctional CDR3 residues may increase likelihood of self-reactivity and therefore Treg (CD4 *FOXP3* or CD8 KIR<sup>+</sup>*HELIOS*<sup>+</sup>) fate**
 # The T cell repertoire in tumors overlaps with pulmonary inflammatory lesions in patients treated with checkpoint inhibitors
  - **significant overlap between CDR3s of TRBs from tumor infiltrating T cell clones and clones infiltrating irAE lesions, most prevalent clones also expanded in peripheral blood but much less overlap**
+# The transcription factor Runx2 is required for long-term persistence of antiviral CD8<sup>+</sup> memory T cells
+ - acute viral infection in mice
+ - loss of Runx2 in T cells leads to reduction in KLRG1<sup>low</sup>CD127<sup>high</sup> memory precursor cell numbers with no effect on terminal populations (KLRG1<sup>high</sup>CD127<sup>high</sup>)
+ - Runx2 expression regulated by TCR signal strength via IRF4, TLR4/7
+ - Runx2 expression levels enhanced by weak rather than strong TCR signal (negative regulation by TF IRF4)
 # The yin and yang of co-inhibitory receptors: towards anti-tumor immunity without autoimmunity
  - co-inhibitory receptors: PD-1 (CD279), CTLA-4 (cytotoxic T lymphocyte-associated antigen-4, CD152, high sequence similarity to co-stimulatory CD28 that it outcompetes for ligands B7-1/2), TIGIT (T cell immunoglobulin and ITIM domain, in CD28 protein family), TIM-3 (T cell immunoglobulin and mucin-domain containing protein-3), LAG-3 (lymphocyte activation gene-3)
  - central tolerance in the thymus acts as the first control during T cell development to eliminate autoreactive clones
