@@ -315,6 +315,10 @@
  - ethnicity associated with rash, hepatitis, pneumonitis
 # Baseline serum autoantibody signatures predict recurrence and toxicity in melanoma patients receiving adjuvant immune checkpoint blockade
  - title summary
+# BATF regulates progenitor to cytolytic effector CD8<sup>+</sup> T cell transition during chronic viral infection
+ - TBX21 deletion diminishes formation of CX3CR1<sup>+</sup> (effector Tex?)
+ - TF BATF helps maintain permissive chromatin structure that allows transition from TCF1<sup>+</sup> progenitors to CXCR3<sup>+</sup> (Tex?) effector cells
+ - IL-21 from CD4s can help drive progenitor Tex to effector Tex, IL-21 upregulates BATF (TF) expression in CD8s
 # B cells as biomarkers: predicting immune checkpoint therapy adverse events
  - association between early therapy-induced changes in circulating B cells (decreased B cells, increased plasmablasts and CD21<sup>low</sup>PD-1<sup>+</sup> memory B cells) and an increased risk of high-grade irAEs in patients treated with ICB
 # B cell-specific MHC class II deletion reveals multiple nonredundant roles for B cell antigen presentation in murine lupus
@@ -435,6 +439,8 @@
  - following activation, T cells increase CTLA-4 expression (outcompetes CD28 for CD80/86 and regulates extent and duration of T cell activation to prevent excessive immunopathology), other negative signals include PD-1, LAG-3, 2B4, TIGIT, TIM-3
 ### Signal 3: Cytokines
  - IL-12, type I IFN, also IL-1/6/10/18/27/33 and TGFβ, among others
+# CD83 expression characterizes precursor exhausted T cell population
+ - precursor: BTLA, SLAMF6, also CCR6, CD81, CD83, CRTAM
 # CD8 T cell function and crossreactivity explored by stepwise increased peptide-HLA versus TCR affinity
  - vaccines with native tumor epitope (vs. HLA affinity-optimized epitope) generated T cells eith better functionality and enhanced crossreactivity against potential low affinity escape epitopes
  - cumulative impact of peptide:HLA and TCR-peptide:HLA affinity on T cell responses
@@ -714,6 +720,8 @@
  - higher number of expanded TCR clones in pre-treatment responders suggesting pre-existing immunity, **presumably to tumor before ICI is what this means?**, maintenance of these pre-treatment expanded clones associates with response
 ## Introduction
  - clear cell renal cell carcinoma: most common subtype of kidney cancer, immunogenic, most tumor mutational burden (comparable to "cold" tumors, 10-fold lower than melanoma, TMB doesn't associate with ICB response)
+# Developmental relationships of four exhausted CD8<sup>+</sup> T cell subsets reveals underlying transcriptional and epigenetic landscape control mechanisms
+ - TCF1 more progenitor TF, Tbet more terminal TF, TOX could be either?
 # Development of TCRB CDR3 length repertoire of human T lymphocytes
  - previous literature: CDR3s of CD4 thymocytes become shorter during thymic development, i.e. thymocytes with longer CDR3s are more likely to be deleted
  -repertoire distribution patterns depend on use of the BV gene; BV‐dependent patterns were shaped during thymic selections and maintained in the peripheral blood
@@ -998,6 +1006,17 @@
 ## Discussion
  - tissue-resident memory T cells may underlie irAEs (common in barrier tissue)
  - **duodenitis blocked by antibody to integrin α 4 β 7 (LPAM-1) which blocks T cell infiltraton into GI tract, suggesting that GI toxicity resulted from circulating T cells trafficked to GI tract following expansion elsewhere i.e. in the tumor perhaps**
+# Exhausted CD8<sup>+</sup> T cells face a developmental fork in the road
+ - progenitor, intermediate, effector, and terminal Tex subpopulations
+ - Tex<sup>eff</sup> CD8s sound like the DP CD57<sup>+</sup> I'm working with... NK-like receptors...
+ - **bifurcation model in which progenitor Tex transition through intermediate Tex to either effector Tex or terminal Tex**
+ - **they posit that driving differentiation to effector Tex could be beneficial for cancer immunotherapy, which isn't consistent with these cells being good in autoimmunity... (CD57s)**
+ - TCF-1 (TF) marks progenitor Tex, also surface expression of CXCR5 and SLAMF6
+ - **increased frequencies of progenitor Tex cells in pretreatment tumor biopsies correlating with improved clinical response is consistent with increased frequencies of DP CD127<sup>+</sup> cells (perhaps same progenitor Tex group) correlating with worse outcome in autoimmunity (T1D)**
+ - effector Tex: CX3CR1, NK-like receptors KLRE1 KLRD1 KLRG1, TFs T-bet and ZEB2, **increased frequencies of effector-like cells seem better in cancer which is inconsistent with CD57s being good for T1D, but perhaps they have different targets (i.e. maybe CD57s here targeting pathogenic CD4s?)**
+ - effector/terminal Tex have less developmental plasticity, consistent with them being more terminal than progenitor Tex (evidence from higher frequency of retaining phenotype upon recall challenge with new infection in virus model)
+ - **increased TCR avidity (strength of interaction between TCR and pMHC) correlated with exhausted fate in virus model, lower avidity T cell clones preferentially biased to effector Tex fate, this makes sense with overstimulation leading to more Tex fate**
+ - CD4 help (i.e. secreting IL-21) can help effector Tex formation, may be limited in tumors wehere C4s are less abundant, so **bifurcation model more likely perhaps with CD4 help which I'd think would be true in T1D**
 # Exhausted-like CD8<sup>+</sup> T cell phenotypes linked to C-peptide preservation in alefacept-treated T1D subjects
  - T1DAL trial of alefacept (LFA3-Ig fusion, binds CD2, disrupts CD58-mediated costimulation of T cells, selectively depletes memory/effector T cells) in recent-onset T1D patients
  - RNAseq: greater insulin C-peptide (measurement proxy for insulin, stays in blood longer) preservation associated with activation/exhaustion module genes
@@ -1172,6 +1191,7 @@
  - exhausted cells are epigenetically distinct, making reinvigoration ineffective (i.e. by ICB)
  - it takes years (in humans) after autoimmunity onset for T1D to develop, faster with ICB as expected
  - CD2 costimulation can prevent exhaustion, **alefacept (anti-CD2) can help treat T1D i.e. by allowing exhaustion presumably**
+ - terminal Tex: TCF1, Tbet, PD-1, EOMES
 # Hierarchical transcriptional network governing heterogeneous T cell exhaustion and its implications for immune checkpoint blockade
  - PD-1 stabilizes TCF-1<sup>+</sup> Tex precursor pool (that maintains a chronically stimulated Tex pool)
 # High-affinity oligoclonal TCRs define effective adoptive T cell therapy targeting mutant KRAS-G12D
@@ -2182,6 +2202,11 @@
  - COVID-19 pathology/mortality related to overactive immune response, so perhaps surprising for ICI (augmenting immune response) to help with COVID-19
 # Prior viral infection primes cross-reactive CD8<sup>+</sup> T cells that respond to mouse heart allografts
  - rejection after transplant due to viral-specific T cells that crossreact to alloantigen
+# Progenitor-like exhausted SPRY1<sup>+</sup> CD8<sup>+</sup> T cells potentiate responsiveness to neoadjuvant PD-1 blockade in esophageal squamous cell carcinoma
+ - scRNAseq
+ - SPRY1<sup>+</sup> CD8s correlate with ICB response as expected of progenitor Tex
+ - progenitor TFs: TBX21, REL, NFKB1, FOXO1
+ - terminal TFs: TOX, EOMES
 # Protective effect of low-intensity pulsed ultrasound on immune checkpoint inhibitor-related myocarditis via fune-tuning of CD4<sup>+</sup> T cell differentiation
 # Quantifiable predictive features define epitope-specific T cell receptor repertoires
 ## Abstract
@@ -2250,6 +2275,10 @@
 # Reversing T cell exhaustion in cancer: lessons learned from PD-1/PD-L1 immune checkpoint blockade
  - PD-1<sup>low</sup> T cells more responsive to PD-1 blockade than PD-1<sup>high</sup> T cells, consistent with Tpex more responsive than Tex
  - secondary lymphoid tissues (like LNs) are important for PD-1 blockade, **removing tumor-draining LN compromises efficacy of ICB**
+# Revolutionizing tumor immunotherapy: unleashing the power of progenitor exhausted T cells
+ - terminal Tex high in TOX, EOMES, IRs (PD-1, TIM-3, LAG-3), CD39, CD69, CD101
+ - progenitor Tex: TCF1
+ - TOX high in progenitor and term Tex, low in effector Tex...
 # Rigorous benchmarking of T cell receptor repertoire profiling methods for cancer RNA sequencing
 ## Abstract
  - benchmarking ability of RNAseq methods (vs. gold standard of targeted TCRseq) to profile TCR repertoires, examine 19 bulk RNAseq samples across 4 cancer cohorts, T cell rich/poor tissue
@@ -2480,6 +2509,8 @@
  - GWAS hit shows rare 5' UTR variant in *LAG3* showing large effect, variant generates a novel start codon for an ORF upstream of the canonical start codon, leading to reduced mRNA and surface protein expression of LAG-3 coreceptor on activated lymphocytes
 # Statistical analysis of CDR3 length distributions for the assessment of T and B cell repertoire biases
  - Gaussian-like distribution in length pattern, given large number of small effects (random mechanism of junction diversity) acting additively and independently on CDR3 length
+# Stem-like precursors are the fount to sustain persistent CD8<sup>+</sup> T cell responses
+ - progenitor Tex: TCF1, CXCR5, CD73, ID3
 # Stitchr: stitching coding TCR nucleotide sequences from V/J/CDR3 information
  - leader sequence/signal peptide just refers to signal for TCR to be trafficked to cell membrane
 # Strategies to reinvigorate exhausted CD8<sup>+</sup> T cells in tumor microenvironment
