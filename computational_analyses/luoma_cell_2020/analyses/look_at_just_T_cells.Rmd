@@ -943,3 +943,52 @@ ggplot(tigit_klrg1_counts_and_group_data, aes(x = group, y = freq, color = group
   labs(x = "irAE status", y = "TIGIT+ KLRG1+\nnon-naive CD8 frequency", color = "irAE status")
 
 ```
+
+# Export Anndata object for mvTCR
+
+```{r}
+
+just_T_cells <- readRDS("../saved_data/T_cells.rds")
+library(sceasy)
+
+metadata <- just_T_cells@meta.data %>%
+  mutate(group = case_when(
+    startsWith(orig.ident, "CT") ~ "no ICI",
+    startsWith(orig.ident, "C") ~ "ICI colitis",
+    startsWith(orig.ident, "NC") ~ "ICI no colitis"))
+
+metadata
+
+just_T_cells <- AddMetaData(just_T_cells, metadata = metadata)
+
+#just_T_cells_normalized <- NormalizeData(just_T_cells)
+
+just_T_cells[["RNA"]] <- as(just_T_cells[["RNA"]], "Assay")
+
+sceasy::convertFormat(just_T_cells, from="seurat", to="anndata", outFile='../saved_data/t_cells.h5ad')
+
+```
+
+# Export clean TCR csv for mvTCR
+
+```{r}
+
+tcrs <- read.csv("../saved_data/tcrs.csv") %>%
+  dplyr::rename(barcode = X) %>%
+  mutate("is_cell" = "True",
+         "high_confidence" = "True",
+         "umis" = 1,
+         "reads" = 1,
+         "productive" = "True") %>%
+  pivot_longer(cols = matches("(TRA|TRB)$"),
+               names_to = c(".value", "Chain"),
+               names_pattern = "^(.*)_(TRA|TRB)$") %>%
+  dplyr::rename(chain = Chain)
+
+tcrs
+
+tcrs_cleaned <- tcrs[-c(99571, 94594), ]
+
+write.csv(tcrs_cleaned, "../saved_data/tcrs_for_mvtcr.csv")
+
+```
