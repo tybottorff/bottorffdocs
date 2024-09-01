@@ -2881,6 +2881,10 @@
  - reduced expression of genes in TCR and activation pathways in responders
  - increased expression of exhaustion/immune regulation genes with teplizumab treatment in CD8s
  - differentiation of CD8 exhausted/memory cells with teplizumab treatment
+ - transcriptional signatures of activation in CD4/CD8 T cells at 3 month time point
+ - 3 month time point: reduced expression of TCR receptor/activation genes in responders
+ - CD8s: increased expression of exhaustion/immune regulation genes after teplizumab treatment
+ - differentiation of CD8s after teplizumab treatment (pseudotime analyses)
  - **IL7R* expression reduced and patients with lower CD127 expression had longer diabetes free intervals**
  - frequency of autoantigen reactive CD8s expanded in placebo group over 18 months, didn't increase in teplizumab group
 # TGF-β cytokine signaling promotes CD8<sup>+</sup> T cell development and low-affinity CD4<sup>+</sup> T cell homeostasis by regulation of interleuokin-7 receptor-α expression
