@@ -233,6 +233,10 @@
  - differentially accessible regions are tricky to call because of variability in transposition reaction efficiency, among other reasons
 # Attention network for predicting T cell receptor-peptide binding can associate attention with interpretable protein structural properties
  - machine learning model based on modified version of Transformer, source-target attention neural network
+# Attenuated effector T cells are linked to control of chronic HBV infection
+ - prior literature: progenitor Tex give rise to terminal Tex through antigen-driven proliferation
+ - TGF-β regulates CD8 T cell attenuation
+ - attenuation != exhaustion apparently...
 # Autoantibody profiles in patients with immune checkpoint inhibitor-induced neurological immune related adverse events
  - higher prevalence of neuromuscular autoantibodies in irAE patients (63% had autoantibodies vs. 7% in no irAE group)
  - brain-reactive autoantibodies in 45% of irAE patients (20% of controls at baseline, but 7 controls developed *de novo* brain-reactive autoantibodies after ICI so no difference between irAE groups)
@@ -578,6 +582,16 @@
  - **PD-1 blockade colitis seems more CD8 T, CTLA-4 blockade colitis seems more CD4 T (lamina propria)**
  - no differences in mucosal Tregs between ICB drugs and IBD
  - higher numbers of activated ICOS<sup>+</sup> CD4 Ts in CTLA-4 blockade colitis vs. IBD
+# Combination anti-PD-1 and anti-CTLA-4 therapy generates waves of clonal responses that include progenitor-exhausted CD8<sup>+</sup> T cells
+## Introduction
+ - CTLA4 mechanism: CTLA4 upregulated early in T cell activation, competitively inhibits costimulatory CD28 to attenuate T cell activation, CTLA4 blockade enhances priming/early activation, increases T cell infiltration into tumor and broadens TCR repertoire
+ - PD1 mechanism: PD-L1 expressed by myeloid/cancer cells induced by IFN-γ, exhausted T cells highly express PD1 and are reinvigorated by PD1 blockade
+## Results
+ - non-naive CD8s from blood paired RNA/TCR sequencing
+ - PD1 blockade induced expansion of Tex at week 3, combination ICB induced expansion of both exhausted and effector CD8s at weeks 6 and 9, respectively
+ - healthy donors show minimal variation in clonotype frequencies over time, ICB induces significant changes in frequencies of ~1% of non-naive CD8 clonotypes, waves over time
+ - distribution of Tex subsets differs based on tissue location (i.e. blood vs. tumor, blood perhaps enriched for late progenitor and NK/intermediate Tex vs. tumor enriched for terminal Tex, also just many more Tex in tumor than blood given that Tex are enriched for tumor-specific CD8s)
+ - combination ICB seems to reinvigorate both progenitor and more differentiated (intermediate/NK-like + terminal subsets of Tex
 # Comparative analyses of CDR3 regions in paired human αβ CD8 T cells
  - CDR3 length among paired αβ TCRs had a fairly narrow distribution due to random assortment of CDR3 length in α and β chains
  - nucleotide deletions among CDR3 regions were positively correlated with insertions in both α and β TCRs
@@ -672,6 +686,8 @@
 # CXCR5<sup>+</sup> CD8 T cells: potential immunotherapy targets or drivers of immune-mediated adverse events?
  - CXCR5<sup>+</sup> CD8 T cells are cytotoxic but also associate with B cells to effect their function (so these CD8s are similar to CD4 Tfhs)
  - tumors express CXCR5 and produce its ligand CXCL13 to recruit B/T cells into TME (**not sure of advantage of tumor doing this**)
+# CXCR5<sup>+</sup>TIM-3<sup>-</sup>PD-1<sup>+</sup> stem-like cytotoxic CD8<sup>+</sup> T cells: elevated in chronic rhinosinusitis and associated with disease severity
+ - chronic rhinosinusitis is an inflammatory disease with an autoimmune background
 # Cysteine and hydrophobic residues in CDR3 serve as distinct T cell self-reactivity indices
  - rare thymocytes survive strong self-antigen enagement and differentiate into type A precursors of CD8αα<sup>+</sup> intestinal interepithelial lymphocytes (IELs) or CD4<sup>+</sup> Tregs in thymic medulla
  - Tregs enriched with hydrophobic amino acids at positions 6 and 7 of CDR3 in TCRβ chain
@@ -754,6 +770,11 @@
  - **PD-1 blockade predominantly induces expansion of specific tumor infiltrating exhausted-like CD8<sup>+</sup> T cell subsets**
  - **CTLA-4 blockade induces expansion of ICOS<sup>+</sup> Th1-like CD4<sup>+</sup> effector T cells, also engages specific subsets of exhausted-like CD8<sup>+</sup> T cells**
  - **different ICI target different T cell subsets**
+# Distinct epigenetic landscapes underlie tissue-specific memory T cell differentiation
+ - scATACseq from 7 non-lymphoid organs and circulation
+ - tissue-resident memory T cells and circulating memory T cells have distinct epigenetic trajectories
+ - early epigenetic bifurcation of tissue-resident and circulating memory T precursors in liver (differential *Fcgr2b* accessibility and FcγRIIB expression)
+ - terminal Tex uniquely share accessibility in *cis*-regulatory elements contained within core resident memory T cell epigenetic signature
 # Distinct immune-effector and metabolic profile of CD8<sup>+</sup> T cells in patients with autoimmune polyarthritis induced by therapy with immune checkpoint inhibitors
  - **CD8s from irAE patients show lower activation, effector function, homing, exhaustion, apoptosis, reduced release of cytotoxic and proinflammatory immune mediators**
  - **higher glycolytic rate and ATP production from irAE CD8s**
@@ -1307,6 +1328,9 @@
  - most antigen-specific TCRs in VDJdb come from pMHC-multimer (tetramer) binding FACS experiments, which has the drawbacks of limited throughput and can only be used with T cell donors with genetically matched HLA alleles
  - **I think all they do is compare TCR repertoires between antigen-activated and resting pools to find enriched TCRs in antigen-activated pools to call antigen-specific, not *de novo* identifying antigen-specific TCRs as would be nice**
  - **public peanut antigen-specific CDR3s are more germline-like (fewer N-nucleotide insertions than private ones) and show evidence of convergent recombination**
+# Identification of human progenitors of exhausted CD8<sup>+</sup> T cells associated with elevated IFN-γ response in early phase of viral infection
+ - high magnitude of IFN-γ response associated with rapid viral immune escape, associated with early onset of exhaustion
+ - **model: early presence of antigen leads to rapid clonal expansion and high IFN-γ response and precursor cells differentiating into cytotoxic and exhausted subsets (related to low-affinity but prolonged antigens maintaining Tex) vs. reduced/delayed antigen stimulation results in less likely differentiation into exhaustion/effector subsets but rather promotes expansion of memory precursor subsets**
 # Identification of neoantigens for individualized cancer immunotherapy
  - neoepitopes are attractive targets for therapeutic cancer vaccines, **but most cancer mutations are unique for individual patients (neoantigenome), requiring individualized treatment**
  - **not all tumor mutations give rise to neoantigens, neoepitope-specific T cells reflect only 1-2% of mutations in an individual tumor, this could be due to not all tumor mutations giving rise to neoantigens and from T cell repertoire not recognizing all neoantigens perhaps as well**
@@ -1610,6 +1634,9 @@
  - mouse model
  - prednisolone, anti IL-6, anti-TNFα, anti-IL-25 (IL-17E), and anti-IL-17RA all reduce irAEs in mice but only anti-IL25/17-RA also exert antitumor activity (and others actually add to tumor burden)
  - **mechanism: IL-25/IL-17RA blockade reduces organ-infiltrating lymphocyte numbers to reduce irAEs**
+# Inhibition of JAK/STAT signaling sustains stem-like exhausted CD8<sup>+</sup> T lymphocytes with enhanced antitumor effects
+ - mouse *in vitro*
+ - inhibiting JAK-STAT reduces CD8 T cell exhaustion and increases number of stem-like progenitors
 # Innate lymphoid cells (ILCs): cytokine hubs regulating immunity and tissue homeostasis
  - ILCs enriched at mucosal barriers, activated by stress signals and epithelial/myeloid-derived cytokines, respond by secreting effector cytokines to maintain survival and mucosal integrity
  - ILCs do not possess rearranged antigen-specific cell receptors (TCR/BCR) but they mirror T helper cell diversity regarding cytokine secretion and transcription factors regulating differentiation
@@ -1730,6 +1757,10 @@
  - hypophysitis most common endocrine irAE after CTLA-4 blockade, rarely observed with PD-1 blockade
 # Islet-autoreactive CD4<sup>+</sup> T cells are linked with response to alefacept in type 1 diabetes
  - frequency of IAR (islet antigen-reactive) CD4 memory cells (with proinflammatory phenotype) inversely correlated with C-peptide preservation in alefacept-treated individuals
+# JAK-STAT signaling maintains homeostasis in T cells and macrophages
+ - JAK-STAT has roles in immune responses, also here in regulating immune cell homeostasis
+ - JAK-STAT-mediated transcription and chromatina accessibility across 12 mouse models (KO all STAT TFs, TYK2 kinase)
+ - JAK-STAT signaling contributes to poised epigenetic and transcriptional state to help prepare cells for rapid response to immune stimuli
 # Lactate modulates RNA splicing to promote CTLA-4 expression in tumor-infiltrating regulatory T cells
  - lactate uptake by Tregs contributes to efficacy of CTLA-4 blockade
  - RNA splicing machinery correlated with tumor-infiltrating Treg cell signatures
@@ -1812,6 +1843,9 @@
  - MHC binding platform composed of 2 domains from single heavy α-chain (HC) for MHCI and from two chains for MHCII (α-chain and β-chain), 2 domains form β-sheet as base and 2 α-helices on top that have space between them to accommodate a peptide chain
  - 2 membrane-proximal immunoglobulin domains support peptide-binding unit
  - MHCI binding groove can accomodate ~8-10 residue peptide, ~13-25 residue peptide for MHCII
+# Massively parallel single-cell chromatin landscapes of human immune cell development and intratumoral T cell exhaustion
+ - droplet-based scATACseq on > 200k cells from human blood and basal cell carcinoma
+ - 90% of Tex CD8s from post-therapy biopsies (Tex highly expanded after ICB)
 # Massively parallel single-cell mitochondrial DNA genotyping and chromatin profiling
  - mtDNA mutation rate ~2-10x that of nuclear DNA
 # Measuring CDR3 length variability in individuals during ontogeny
@@ -2123,6 +2157,8 @@
 # PD-1 maintains CD8 T cell tolerance towards cutaneous neoantigens
  - mouse model, skin-specific expression of T cell antigens in epidermis
  - PD-1 maintains skin tolerance by preventing tissue-infiltrating antigen-specific CD8 T cells from becoming fully functional and gaining acess to epidermal APCs
+# PD-1 signaling limits expression of phospholipid phosphatase 1 and promotes intratumoral CD8<sup>+</sup> T cell ferroptosis
+ - PD1 signaling inhibits expression of *PLPP1* (phospholipid phosphatase 1, via Akt-GATA1) which promotes CD8 ferroptosis (driven by unsaturated FAs) and impairs antitumor immunity
 # PD-L1 expression affects neoantigen presentation
  - PD-L1 expression on tumor related to ICB prognosis, but can get clinical benefit even without tumor PD-L1 expression and PD-L1 expression on tumor doesn't guarentee response
  - mice
@@ -2876,18 +2912,27 @@
  - 1 14 day course of teplizumab in non-diabetics at high risk for T1D, helps people remain T1D-free
  - changes in C-peptide with teplizumab treatment associated with increases in partially exhausted memory KLRG1<sup>+</sup>TIGIT<sup>+</sup> CD8s that showed reduced secretion of IFNγ and TNFα
 # Teplizumab induces persistent changes in the antigen-specific repertoire in individuals at-risk for type 1 diabetes
+## Abstract/introduction
+ - TN10: 14 day course of teplizumab to see if it would delay/prevent stage 3 T1D (clinical diagnosis) in those with high-risk (stage 2 T1D)
  - teplizumab: FcR non-binding anti-CD3 mAb approved to delay T1D progresion in at-risk patients
  - scRNAseq
  - reduced expression of genes in TCR and activation pathways in responders
  - increased expression of exhaustion/immune regulation genes with teplizumab treatment in CD8s
- - differentiation of CD8 exhausted/memory cells with teplizumab treatment
- - transcriptional signatures of activation in CD4/CD8 T cells at 3 month time point
+ - differentiation of CD8 exhausted/memory cells with teplizumab treatment (pseudotime analyses)
+ - transcriptional signatures of activation in CD4/CD8 T cells at 3 month time point (reversed at 18 months)
  - 3 month time point: reduced expression of TCR receptor/activation genes in responders
  - CD8s: increased expression of exhaustion/immune regulation genes after teplizumab treatment
  - differentiation of CD8s after teplizumab treatment (pseudotime analyses)
  - **IL7R* expression reduced and patients with lower CD127 expression had longer diabetes free intervals**
  - frequency of autoantigen reactive CD8s expanded in placebo group over 18 months, didn't increase in teplizumab group
-# TGF-β cytokine signaling promotes CD8<sup>+</sup> T cell development and low-affinity CD4<sup>+</sup> T cell homeostasis by regulation of interleuokin-7 receptor-α expression
+## Results
+ - higher % (of parent CD3) of CD4 (at 6 months) and CD8 (at 3 months) T cells in R
+ - IL7R downregulated in R at 3 months, also decreased at 18 months
+ - reduced expression of CD127 in TEMRA and CM CD8s at 3 months, reduced frequency of CD127<sup>+</sup> CM CD8s at 3 and 6 months
+ - patients with lower CD127 expression at 3 and 18 months had longer median time to diagnosis with stage 3 T1D
+ - lower CD127 expression associated with slower disease progression
+ - enhanced expression of exhaustion genes in effector/memory CD8s with teplizumab
+# TGF-β cytokine signaling promotes CD8<sup>+</sup> T cell development and low-affinity CD4<sup>+</sup> T cell homeostasis by regulation of interleukin-7 receptor-α expression
  - IL-7Rα induced upon T cell positive selection
  - **TGF-β signaling promotes IL-7Rα expression and CD8 differentiation**
 # Th2 cell clonal expansion at diagnosis in human type 1 diabetes
@@ -3176,6 +3221,9 @@
  - neoantigen-specific clones from non-responding tumors express TCRs with lower ligand-dependent signaling
 ## Discussion
  - one hypothesis for the lack of ICB response in some patients is that tumour-specific T cells exhibit low activity owing to poor avidity or affinity of their TCR for its cognate peptide MHC, **not sure what this means exactly**
+# Transcription factor Ikzf1 associates with Foxp3 to repress gene expression in Treg cells and limit autoimmunity and anti-tumor immunity
+ - IkE5-deficient Tregs express genes otherwise repressed by Foxp3 upon TCR stimulation (like *Ifng*), Treg-specific IkE5 deletion causes IFNγ overproduction (destabilizes Foxp3 expression and impairs Treg suppressive function leading to autoimmunity and anti-tumor immunity)
+ - mechanism: Foxp3-Ikzf1-Ikzf3 complex competes with coactivators (like p300) for binding to target gene loci via chromatin remodeling, so Ikzf1 association with Foxp3 is essential for gene repressive function of Foxp3
 # Transcriptomic profiling of human effector and regulatory T cell subsets identifies predictive population signatures
  - Tregs less transcriptionally diverse than Th cells, likely reflects dominant role of Foxp3 on Treg transcriptome
  - most Tregs develop in thymus upon encountering self-antigen, some Tregs may also develop at barrier sites upon encountering harmless environmental antigens (like skin/intestinal microbiome components)
