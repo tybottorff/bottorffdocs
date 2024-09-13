@@ -22,6 +22,9 @@ library(tidyr)
 library(ComplexHeatmap)
 library(viridis)
 library(readxl)
+library(circlize)
+library(Seurat)
+library(factoextra)
 
 ```
 
@@ -42,13 +45,58 @@ theme_set(
 
 ```
 
-# Read in data
+# Read in baseline data
 
 ```{r}
 
 flow_data <- read_excel("../raw_data/holly_flow_data.xlsx") %>%
-  select(`Subject ID`, `General irAE Classification 9-8-24`, `Cell population`, `Cell Frequency`) %>%
-  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, sort = `Cell population`, freq = `Cell Frequency`) %>%
+  select(`Subject ID`, `General irAE Classification 9-8-24`, `Patient Type`, `Cell population`, `Cell Frequency`) %>%
+  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, sort = `Cell population`, baseline_freq = `Cell Frequency`) %>%
+  mutate(group = case_when(
+    group == "Autoimmune" ~ "AID",
+    group == "Healthy" ~ "HC",
+    TRUE ~ group
+  )) %>%
+  # remove 71 NAs of patient ID (all in AID group)
+  filter(!(is.na(patient_id)),
+         baseline_freq > 0) %>%
+  mutate(parent_population = gsub(".*_of_", "", sort),
+         parent_population = gsub("_", " ", parent_population),
+         sort = gsub("pct_", "", sort),
+         sort = gsub("_", " ", sort),
+         parent_parent_population = str_extract(parent_population, "[^ ]+$")) %>%
+  arrange(parent_parent_population)
+
+flow_data
+
+```
+
+# Read in all visits data
+
+```{r}
+
+visit_1_flow_data <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") %>%
+  filter(`General Patient Type` == "Cancer_Patient",
+         !(is.na(`Subject ID`)),
+         `Cell Frequency` > 0) %>%
+  select(-c(`SAMPLE ID`, `General Patient Type`, `Visit Descriptor General no irAE visit`)) %>%
+  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, sort = `Cell population`, visit_1_freq = `Cell Frequency`) %>%
+  mutate(parent_population = gsub(".*_of_", "", sort),
+         parent_population = gsub("_", " ", parent_population),
+         sort = gsub("pct_", "", sort),
+         sort = gsub("_", " ", sort),
+         parent_parent_population = str_extract(parent_population, "[^ ]+$"))
+
+visit_1_flow_data
+
+all_flow_data <- visit_1_flow_data %>%
+  left_join(flow_data, by = c("patient_id", "group", "specific_group", "sort", "parent_population", "parent_parent_population"))
+
+all_flow_data
+  
+```
+  select(`Subject ID`, `General irAE Classification 9-8-24`, `Patient Type`, `Cell population`, `Cell Frequency`) %>%
+  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, sort = `Cell population`, freq = `Cell Frequency`) %>%
   mutate(group = case_when(
     group == "Autoimmune" ~ "AID",
     group == "Healthy" ~ "HC",
@@ -69,7 +117,7 @@ flow_data
 
 ```
 
-# Stats tests
+# Stats tests for baseline data
 
 ```{r}
 
@@ -121,7 +169,93 @@ stats_test
 
 ```
 
-# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for HC vs. cancer
+# Prepare data for PCA from baseline data
+
+```{r}
+
+wide_flow_num_data <- flow_data %>%
+  select(-c(log10_freq, parent_population, parent_parent_population)) %>%
+  pivot_wider(names_from = sort, values_from = freq) %>%
+  drop_na(-c(group, patient_id)) %>%
+  select(-c(patient_id, group, specific_group))
+
+wide_flow_num_data
+
+wide_flow_metadata <- flow_data %>%
+  select(-c(log10_freq, parent_population, parent_parent_population)) %>%
+  pivot_wider(names_from = sort, values_from = freq) %>%
+  drop_na(-c(group, patient_id)) %>%
+  select(c(patient_id, group, specific_group)) %>%
+  mutate(patient_id_simple = row_number())
+
+wide_flow_metadata
+
+```
+
+# Make PCA plots for baseline data
+
+```{r}
+
+#dim(wide_flow_num_data)
+
+pca = prcomp(as.data.frame((na.omit(wide_flow_num_data)), center=TRUE, scale=FALSE))
+
+var = get_pca_var(pca)
+
+#head(var$coord)
+
+pca_contributions = as.data.frame((var$contrib))
+
+sumPCA = summary(pca)
+
+#summary(pca)
+
+pca_variance = as.data.frame(t(sumPCA$importance))
+pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
+
+pcaScores= as.data.frame(pca$x)
+
+pcaScores
+
+pcaScores$patient_id_simple = row.names(pcaScores)
+
+pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
+
+pcaData = merge(wide_flow_metadata, pcaScores, by = "patient_id_simple")
+
+pcas = list()
+pcas[["fullData"]] = pcaData
+
+pcaLabels = list()
+pcaLabels[["fullData"]] = pcaLabels_
+
+pcaCorrelations = list()
+
+limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
+
+p <- ggplot(data = pcaData) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = specific_group), size = 2, alpha = 0.8) + 
+  xlim(-limits[1], limits[1]) +
+  ylim(-limits[2], limits[2]) +
+  labs(color = "study group") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7)  # Make legend text smaller
+  ) +
+  guides(color = guide_legend(nrow = 6)) +  # Adjust legend to 2 rows
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+ggsave("../figures/pca_specific_group.png", plot = p, width = 7, height = 8)
+
+```
+
+# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for HC vs. cancer (baseline)
 
 ```{r}
 
@@ -244,7 +378,7 @@ dev.off()  # Close the PDF device
 
 ```
 
-# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for AID vs. cancer
+# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for AID vs. cancer (baseline)
 
 ```{r}
 
@@ -368,7 +502,7 @@ dev.off()  # Close the PDF device
 
 ```
 
-# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for irAE vs. AID
+# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for irAE vs. AID (baseline)
 
 ```{r}
 
@@ -492,7 +626,7 @@ dev.off()  # Close the PDF device
 
 ```
 
-# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for non-irAE vs. AID
+# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for non-irAE vs. AID (baseline)
 
 ```{r}
 
@@ -616,7 +750,7 @@ dev.off()  # Close the PDF device
 
 ```
 
-# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for non-irAE vs. HC
+# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for non-irAE vs. HC (baseline)
 
 ```{r}
 
