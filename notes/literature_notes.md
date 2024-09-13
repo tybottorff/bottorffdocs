@@ -240,6 +240,15 @@
 # Autoantibody profiles in patients with immune checkpoint inhibitor-induced neurological immune related adverse events
  - higher prevalence of neuromuscular autoantibodies in irAE patients (63% had autoantibodies vs. 7% in no irAE group)
  - brain-reactive autoantibodies in 45% of irAE patients (20% of controls at baseline, but 7 controls developed *de novo* brain-reactive autoantibodies after ICI so no difference between irAE groups)
+# Autoantigen-specific CD4<sup>+</sup> T cells acquire an exhausted phenotype and persist in human antigen-specific autoimmune disease
+## Abstract
+ - exhausted CD4s: reduced proliferative capacity and pro-inflammatory cytokine production, express co-inhibitors receptors and FOXP3
+ - autoantigen-specific exhausted CD4 cell frequencies stable for years despite successful therapy
+ - autoantigen-specific CD4s respond to checkpoint inhibition
+ - exhausted CD4 phenotype development during chronic stimulation regulated by FOXP3 (*in vitro* evidence)
+## Introduction
+ - autoantigen-specific T cell frequency: 10<sup>-4</sup> to 10<sup>-5</sup> of total T cells
+ - autoantigen-specific T cells detected in both HCs and AID patients but display increased proliferation and pro-inflammatory cytokine production in AID patients
 # Autoimmune CD8<sup>+</sup> T cells in type 1 diabetes: from single cell RNA sequencing to T cell receptor redirection
  - prior literature: only a small number of stem cell-like β cell-specific CD8 T cells needed to induce T1D in mice
  - review
@@ -617,6 +626,10 @@
 # Consensus disease definitions for neurologic immune-related adverse events of immune checkpoint inhibitors
  - neurologic irAE indicence rate: 1-12%
  - CNS (meningitis, encephalitis, demyelinating syndrome, vasculitis) and PNS (neuropathy, NMJ disorders, myopathy)
+# Contrasting autoimmune and treatment effects reveals baseline set points of immune toxicity following checkpoint inhibitor treatment
+ - variations between patients in baseline (pre-treatment) immune statuses may explain why some develop irAEs and some don't, for example perhaps some have "hits" in certain regulatory pathways that are sufficient to cause irAEs with ICB (less buffering in self-tolerance)
+ - PBMCs from patients with thymic cancer before/after ICB (after at time of irAE or at equivalent time in those with no irAEs)
+ - **subtract treatment effects (ICI treatment effects i.e. differences in pre/post ICI across all subjects and ICI-associated iraE effects i.e. differences in pre/post ICI between irAE and non-irAE groups) from baseline differences (in cell state prior to ICI between groups) to focus on baseline states associated with impending irAE development uncoupled from ICI response effects**
 # Contribution of the skin-gut axis to immune-related adverse events with multi-system involvement
  - skin irAEs may predict other irAEs
 # Co-occuring infections in cancer patients treated with checkpoint inhibitors significantly increase the risk of immune related adverse events
@@ -688,6 +701,9 @@
  - tumors express CXCR5 and produce its ligand CXCL13 to recruit B/T cells into TME (**not sure of advantage of tumor doing this**)
 # CXCR5<sup>+</sup>TIM-3<sup>-</sup>PD-1<sup>+</sup> stem-like cytotoxic CD8<sup>+</sup> T cells: elevated in chronic rhinosinusitis and associated with disease severity
  - chronic rhinosinusitis is an inflammatory disease with an autoimmune background
+ - paranasal sinus and peripheral blood samples from patients with CRS and HCs
+ - CXCR5 and PD-1 more highly expressed in T cells in nasal tissue in those with CRS
+ - CRS patients had higher percentages/densities of CXCR5<sup>+</sup>TIM-3<sup>-</sup>PD-1<sup>+</sup> CD8s in nasal tissue (no difference in blood), and levels of these T cells negatively correlated with disease severity/duration and positively correlated with inflammatory state
 # Cysteine and hydrophobic residues in CDR3 serve as distinct T cell self-reactivity indices
  - rare thymocytes survive strong self-antigen enagement and differentiate into type A precursors of CD8αα<sup>+</sup> intestinal interepithelial lymphocytes (IELs) or CD4<sup>+</sup> Tregs in thymic medulla
  - Tregs enriched with hydrophobic amino acids at positions 6 and 7 of CDR3 in TCRβ chain
