@@ -45,75 +45,38 @@ theme_set(
 
 ```
 
-# Read in baseline data
+# Read in baseline data to look at group differences
 
 ```{r}
 
-flow_data <- read_excel("../raw_data/holly_flow_data.xlsx") %>%
-  select(`Subject ID`, `General irAE Classification 9-8-24`, `Patient Type`, `Cell population`, `Cell Frequency`) %>%
-  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, sort = `Cell population`, baseline_freq = `Cell Frequency`) %>%
-  mutate(group = case_when(
-    group == "Autoimmune" ~ "AID",
-    group == "Healthy" ~ "HC",
-    TRUE ~ group
-  )) %>%
-  # remove 71 NAs of patient ID (all in AID group)
-  filter(!(is.na(patient_id)),
-         baseline_freq > 0) %>%
+baseline_flow_data <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") %>%
+  # subset for only baseline visits
+  mutate(cleaned_visit_num = str_extract(`Visit Descriptor`, "\\d+")) %>%
+  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, irae_ex = `Documented irAE's (9/6/2024)`) %>%
+  filter(cleaned_visit_num == 1 | is.na(cleaned_visit_num) & group %in% c("AID_Patient", "Healthy_Control")) %>%
+  select(patient_id, group, specific_group, cleaned_visit_num, irae_ex, starts_with("pct_")) %>%
+  pivot_longer(
+    cols = starts_with("pct_"), 
+    names_to = "sort",
+    values_to = "freq") %>%
   mutate(parent_population = gsub(".*_of_", "", sort),
          parent_population = gsub("_", " ", parent_population),
+         parent_parent_population = str_extract(parent_population, "[^ ]+$"),
          sort = gsub("pct_", "", sort),
-         sort = gsub("_", " ", sort),
-         parent_parent_population = str_extract(parent_population, "[^ ]+$")) %>%
-  arrange(parent_parent_population)
+         sort = gsub("_", " ", sort)
+  ) %>%
+  filter(freq > 0) %>%
+  mutate(irae_severity_category = case_when(
+    group == "irAE/SAE" & str_detect(irae_ex, "Encephalitis|Pleural effusion|pneumonitis|hepatitis|esophagitis|thyroid|Thyroid") ~ "Severe",
+    group == "irAE/SAE" & !str_detect(irae_ex, "Encephalitis|Pleural effusion|pneumonitis|hepatitis|esophagitis") ~ "Not severe",
+    group == "non-irAE" ~ "Cancer group - no irAE",
+    group %in% c("AID_Patient", "Healthy_Control") ~ "HC/AID - no irAE"),
+    pneumonitis = if_else(str_detect(irae_ex, "pneumonitis"), "Pneumonitis", "No pneumonitis"),
+    thyroid_irae = if_else(str_detect(irae_ex, "thyroid|Thyroid"), "Thyroid irAE", "No thyroid irAE"),
+    skin_irae = if_else(str_detect(irae_ex, "skin|Rash|Pruritus|dermatitis"), "Skin irAE", "No skin irAE")
+  )
 
-flow_data
-
-```
-
-# Read in all visits data
-
-```{r}
-
-visit_1_flow_data <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") %>%
-  filter(`General Patient Type` == "Cancer_Patient",
-         !(is.na(`Subject ID`)),
-         `Cell Frequency` > 0) %>%
-  select(-c(`SAMPLE ID`, `General Patient Type`, `Visit Descriptor General no irAE visit`)) %>%
-  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, sort = `Cell population`, visit_1_freq = `Cell Frequency`) %>%
-  mutate(parent_population = gsub(".*_of_", "", sort),
-         parent_population = gsub("_", " ", parent_population),
-         sort = gsub("pct_", "", sort),
-         sort = gsub("_", " ", sort),
-         parent_parent_population = str_extract(parent_population, "[^ ]+$"))
-
-visit_1_flow_data
-
-all_flow_data <- visit_1_flow_data %>%
-  left_join(flow_data, by = c("patient_id", "group", "specific_group", "sort", "parent_population", "parent_parent_population"))
-
-all_flow_data
-  
-```
-  select(`Subject ID`, `General irAE Classification 9-8-24`, `Patient Type`, `Cell population`, `Cell Frequency`) %>%
-  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, sort = `Cell population`, freq = `Cell Frequency`) %>%
-  mutate(group = case_when(
-    group == "Autoimmune" ~ "AID",
-    group == "Healthy" ~ "HC",
-    TRUE ~ group
-  )) %>%
-  # remove 71 NAs of patient ID (all AID group)
-  filter(!(is.na(patient_id)),
-         freq > 0) %>%
-  mutate(parent_population = gsub(".*_of_", "", sort),
-         parent_population = gsub("_", " ", parent_population),
-         sort = gsub("pct_", "", sort),
-         sort = gsub("_", " ", sort),
-         log10_freq = log10(freq),
-         parent_parent_population = str_extract(parent_population, "[^ ]+$")) %>%
-  arrange(parent_parent_population)
-
-flow_data
+baseline_flow_data
 
 ```
 
@@ -121,49 +84,16 @@ flow_data
 
 ```{r}
 
-stats_test <- flow_data %>%
+stats_test <- baseline_flow_data %>%
   mutate(simpler_group = case_when(
     group %in% c("non-irAE", "irAE/SAE") ~ "Cancer",
-    group == "HC" ~ "HC",
-    group == "AID" ~ "AID")) %>%
-  filter(group %in% c("HC", "irAE/SAE")) %>%
+    group == "Healthy_Control" ~ "HC",
+    group == "AID_Patient" ~ "AID")) %>%
+  filter(group %in% c("non-irAE", "irAE/SAE")) %>%
   group_by(sort) %>%
-  summarize(pval = wilcox.test(freq[group == "irAE/SAE"], freq[group == "HC"], paired = FALSE, exact = FALSE)$p.value) %>%
+  summarize(pval = wilcox.test(freq[irae_severity_category == "Severe"], freq[irae_severity_category != "Severe"], paired = FALSE, exact = FALSE)$p.value) %>%
   mutate(adj_pval = p.adjust(pval, method = "BH")) %>%
   arrange(adj_pval)
-
-# there are some subsets w/ different freqs in cancer (cancer vs. HC), 0.01 < p < 0.05
-# CD38hiCD127neg of NN CD8 Tcells
-# Treg of CD4 Tcells
-# so make a heatmap with 3 groups (irae, no irae, HC) with these 2 split off?
-
-# no subsets w/ different freqs in irAE vs. no irAE
-
-# many subsets w/ different freqs in cancer vs. AID
-# p < 0.01
-# Treg of CD4 Tcells, naive of CD8 Tcells, Tcells of nonGrans, NKcells of nonGrans, Tfh of NN Tconv Tcells, CXCR3pos of NN CD8 Tcells	
-# 0.01 < p < 0.05
-# CD11cpos of Bcells, MAIT of NN CD8 Tcells, naive of Treg Tcells, CRTH2pos of NN CD8 Tcells, unswMem of Bcells, Bcells of nonGrans, CCR4pos of NN Tconv Tcells	
-# so make heatmap with 3 groups (irae, no irae, AID) with these groups split off?
-
-# HC vs. AID: no subset freq differences
-
-# irAE vs. AID 0.01 < p < 0.05
-# CD11cpos of Bcells, NKcells of nonGrans, Tcells of nonGrans, Tfh of NN Tconv Tcells, Tfh of NN Tconv Tcells, naive of CD8 Tcells, unswMem of Bcells, Bcells of nonGrans, CXCR3pos of NN CD8 Tcells, naive of Treg Tcells, DN of Bcells
-
-# non-irAE vs. AID
-# p < 0.001
-# Treg of CD4 Tcells
-# 0.001 < p < 0.01
-# naive of CD8 Tcells, CCR4pos of NN Tconv Tcells, CRTH2pos of NN CD8 Tcells	
-# 0.01 < p < 0.05
-# ICOSpos of Tfh Tconv Tcells, CRTH2pos of NN Tconv Tcells, SCM of Tconv Tcells, EMRA of CD8 Tcells, KLRG1posTIGITpos of CD8 Tcells, Tcells of nonGrans	
-
-# non-irAE vs. HC
-# 0.01 < p < 0.05
-# CRTH2pos of NN Tconv Tcells, Treg of CD4 Tcells, CD38hiCD127neg of NN CD8 Tcells, CRTH2pos of NN CD8 Tcells, SCM of Tconv Tcells
-
-# irAE vs. HC: none
 
 stats_test
 
@@ -173,22 +103,24 @@ stats_test
 
 ```{r}
 
-wide_flow_num_data <- flow_data %>%
-  select(-c(log10_freq, parent_population, parent_parent_population)) %>%
+wide_baseline_flow_num_data <- baseline_flow_data %>%
+  filter(group %in% c("non-irAE", "irAE/SAE")) %>%
+  select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
-  drop_na(-c(group, patient_id)) %>%
-  select(-c(patient_id, group, specific_group))
+  drop_na(-c(group, patient_id, irae_ex, irae_severity_category)) %>%
+  select(-c(patient_id, group, specific_group, irae_ex, irae_severity_category))
 
-wide_flow_num_data
+wide_baseline_flow_num_data
 
-wide_flow_metadata <- flow_data %>%
-  select(-c(log10_freq, parent_population, parent_parent_population)) %>%
+wide_baseline_flow_metadata <- baseline_flow_data %>%
+  filter(group %in% c("non-irAE", "irAE/SAE")) %>%
+  select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
-  drop_na(-c(group, patient_id)) %>%
-  select(c(patient_id, group, specific_group)) %>%
+  drop_na(-c(group, patient_id, irae_ex, irae_severity_category)) %>%
+  select(c(patient_id, group, specific_group, irae_ex, irae_severity_category)) %>%
   mutate(patient_id_simple = row_number())
 
-wide_flow_metadata
+wide_baseline_flow_metadata
 
 ```
 
@@ -196,9 +128,9 @@ wide_flow_metadata
 
 ```{r}
 
-#dim(wide_flow_num_data)
+#dim(wide_baseline_flow_num_data)
 
-pca = prcomp(as.data.frame((na.omit(wide_flow_num_data)), center=TRUE, scale=FALSE))
+pca = prcomp(as.data.frame((na.omit(wide_baseline_flow_num_data)), center=TRUE, scale=FALSE))
 
 var = get_pca_var(pca)
 
@@ -221,7 +153,7 @@ pcaScores$patient_id_simple = row.names(pcaScores)
 
 pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
 
-pcaData = merge(wide_flow_metadata, pcaScores, by = "patient_id_simple")
+pcaData = merge(wide_baseline_flow_metadata, pcaScores, by = "patient_id_simple")
 
 pcas = list()
 pcas[["fullData"]] = pcaData
@@ -236,10 +168,10 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = specific_group), size = 2, alpha = 0.8) + 
+  geom_point(aes(x = PC1, y = PC2, color = irae_severity_category), size = 2, alpha = 0.8) + 
   xlim(-limits[1], limits[1]) +
   ylim(-limits[2], limits[2]) +
-  labs(color = "study group") +
+  labs(color = "irAE severity") +
   theme_bw() +
   theme(legend.position = "bottom") +
   theme(
@@ -259,7 +191,7 @@ ggsave("../figures/pca_specific_group.png", plot = p, width = 7, height = 8)
 
 ```{r}
 
-flow_data_filtered <- flow_data %>%
+flow_data_filtered <- baseline_flow_data %>%
   filter(group != "AID")
 
 # Define the order of groups
@@ -382,7 +314,7 @@ dev.off()  # Close the PDF device
 
 ```{r}
 
-flow_data_filtered <- flow_data %>%
+flow_data_filtered <- baseline_flow_data %>%
   filter(group != "HC")
 
 # Define the order of groups
@@ -506,11 +438,11 @@ dev.off()  # Close the PDF device
 
 ```{r}
 
-flow_data_filtered <- flow_data %>%
-  filter(group %in% c("AID", "irAE/SAE"))
+flow_data_filtered <- baseline_flow_data %>%
+  filter(group %in% c("AID_Patient", "irAE/SAE"))
 
 # Define the order of groups
-group_order <- c("AID", "irAE/SAE")
+group_order <- c("AID_Patient", "irAE/SAE")
 
 # Reorder the patient_group factor by group
 flow_data_filtered$group <- factor(flow_data_filtered$group, levels = group_order)
@@ -553,7 +485,7 @@ col_annotations <- data.frame(Group = sorted_col_info$group)
 
 # Define colors for column annotations
 annotation_colors <- list(
-  Group = c("AID" = "blue", "irAE/SAE" = "red")
+  Group = c("AID_Patient" = "blue", "irAE/SAE" = "red")
 )
 
 # Create HeatmapAnnotation for columns
@@ -601,7 +533,7 @@ row_anno <- rowAnnotation(
   col = list(ParentPop = row_annotation_colors)
 )
 
-row.subsections <- c(60, 11)
+row.subsections <- c(69, 11)
 
 # Plot the heatmap
 heatmap_obj <- Heatmap(
@@ -620,7 +552,7 @@ heatmap_obj <- Heatmap(
 )
 
 # Save the heatmap to a PDF file
-pdf(file = "../saved_data/holly_wip_heatmap_z_scores_AID_vs_irAE.pdf", width = 10, height = 8)  # Adjust width and height as needed
+pdf(file = "../figures/holly_wip_heatmap_z_scores_AID_vs_irAE.pdf", width = 10, height = 8)  # Adjust width and height as needed
 draw(heatmap_obj)  # Render the heatmap
 dev.off()  # Close the PDF device
 
@@ -630,11 +562,11 @@ dev.off()  # Close the PDF device
 
 ```{r}
 
-flow_data_filtered <- flow_data %>%
-  filter(group %in% c("AID", "non-irAE"))
+flow_data_filtered <- baseline_flow_data %>%
+  filter(group %in% c("AID_Patient", "non-irAE"))
 
 # Define the order of groups
-group_order <- c("AID", "non-irAE")
+group_order <- c("AID_Patient", "non-irAE")
 
 # Reorder the patient_group factor by group
 flow_data_filtered$group <- factor(flow_data_filtered$group, levels = group_order)
@@ -677,7 +609,7 @@ col_annotations <- data.frame(Group = sorted_col_info$group)
 
 # Define colors for column annotations
 annotation_colors <- list(
-  Group = c("AID" = "blue", "non-irAE" = "green")
+  Group = c("AID_Patient" = "blue", "non-irAE" = "green")
 )
 
 # Create HeatmapAnnotation for columns
@@ -725,7 +657,7 @@ row_anno <- rowAnnotation(
   col = list(ParentPop = row_annotation_colors)
 )
 
-row.subsections <- c(61, 10)
+row.subsections <- c(70, 10)
 
 # Plot the heatmap
 heatmap_obj <- Heatmap(
@@ -744,7 +676,7 @@ heatmap_obj <- Heatmap(
 )
 
 # Save the heatmap to a PDF file
-pdf(file = "../saved_data/holly_wip_heatmap_z_scores_AID_vs_non_irAE.pdf", width = 10, height = 8)  # Adjust width and height as needed
+pdf(file = "../figures/holly_wip_heatmap_z_scores_AID_vs_non_irAE.pdf", width = 10, height = 8)  # Adjust width and height as needed
 draw(heatmap_obj)  # Render the heatmap
 dev.off()  # Close the PDF device
 
@@ -754,11 +686,11 @@ dev.off()  # Close the PDF device
 
 ```{r}
 
-flow_data_filtered <- flow_data %>%
-  filter(group %in% c("HC", "non-irAE"))
+flow_data_filtered <- baseline_flow_data %>%
+  filter(group %in% c("Healthy_Control", "non-irAE"))
 
 # Define the order of groups
-group_order <- c("HC", "non-irAE")
+group_order <- c("Healthy_Control", "non-irAE")
 
 # Reorder the patient_group factor by group
 flow_data_filtered$group <- factor(flow_data_filtered$group, levels = group_order)
@@ -801,7 +733,7 @@ col_annotations <- data.frame(Group = sorted_col_info$group)
 
 # Define colors for column annotations
 annotation_colors <- list(
-  Group = c("HC" = "black", "non-irAE" = "green")
+  Group = c("Healthy_Control" = "black", "non-irAE" = "green")
 )
 
 # Create HeatmapAnnotation for columns
@@ -849,7 +781,7 @@ row_anno <- rowAnnotation(
   col = list(ParentPop = row_annotation_colors)
 )
 
-row.subsections <- c(66, 5)
+row.subsections <- c(75, 5)
 
 # Plot the heatmap
 heatmap_obj <- Heatmap(
@@ -868,8 +800,205 @@ heatmap_obj <- Heatmap(
 )
 
 # Save the heatmap to a PDF file
-pdf(file = "../saved_data/holly_wip_heatmap_z_scores_HC_vs_non_irAE.pdf", width = 10, height = 8)  # Adjust width and height as needed
+pdf(file = "../figures/holly_wip_heatmap_z_scores_HC_vs_non_irAE.pdf", width = 10, height = 8)  # Adjust width and height as needed
 draw(heatmap_obj)  # Render the heatmap
 dev.off()  # Close the PDF device
+
+```
+
+# Read in all visits' cancer patient data to look at baseline vs. post-ICI and non-irAE vs. irAE in post ICI
+
+```{r}
+
+cancer_flow_data <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") %>%
+  # subset for only cancer patients
+  filter(`General Patient Type` == "Cancer_Patient",
+         `Visit Descriptor` %in% c("Visit 1", "visit 1", "Visit 2", "Visit 2, irAE", "Visit 3", "Visit 3, irAE")) %>%
+  mutate(cleaned_visit_num = str_extract(`Visit Descriptor`, "\\d+")) %>%
+  # group by patient and handle cases with 1 (exclude), 2 (keep both), or 3 (keep visits 1 and 3 only, exclude visit 2) visits
+  # rationale here is to take later post-ICI visit if possible (i.e. if we have 3), but may want to reconsider this
+  group_by(`Subject ID`) %>%
+  filter(n() >= 2, if (n() == 3) cleaned_visit_num %in% c(1, 3) else TRUE) %>%
+  ungroup() %>%
+  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, irae_ex = `Documented irAE's (9/6/2024)`) %>%
+  select(patient_id, group, specific_group, cleaned_visit_num, irae_ex, starts_with("pct_")) %>%
+  pivot_longer(
+    cols = starts_with("pct_"), 
+    names_to = "sort",
+    values_to = "freq") %>%
+  mutate(parent_population = gsub(".*_of_", "", sort),
+         parent_population = gsub("_", " ", parent_population),
+         parent_parent_population = str_extract(parent_population, "[^ ]+$"),
+         sort = gsub("pct_", "", sort),
+         sort = gsub("_", " ", sort)
+  )
+
+cancer_flow_data
+  
+```
+
+# Stats tests including post-baseline data
+
+```{r}
+
+cancer_stats_test <- cancer_flow_data %>%
+  mutate(irae_severity_category = case_when(
+    group == "irAE/SAE" & str_detect(irae_ex, "Encephalitis|Pleural effusion|pneumonitis|hepatitis|esophagitis|thyroid|Thyroid") ~ "Severe",
+    group == "irAE/SAE" & !str_detect(irae_ex, "Encephalitis|Pleural effusion|pneumonitis|hepatitis|esophagitis") ~ "Not severe",
+    group == "non-irAE" ~ "Cancer group - no irAE",
+    group %in% c("AID_Patient", "Healthy_Control") ~ "HC/AID - no irAE")) %>%
+  filter(cleaned_visit_num != 1, irae_severity_category %in% c("Severe", "Cancer group - no irAE")) %>%
+  group_by(sort) %>%
+  # paired TRUE for pre/post, FALSE for group comparisons
+  summarize(pval = wilcox.test(freq[irae_severity_category == "Severe"], freq[irae_severity_category == "Cancer group - no irAE"], paired = FALSE, exact = FALSE)$p.value) %>%
+  mutate(adj_pval = p.adjust(pval, method = "BH")) %>%
+  arrange(adj_pval) %>%
+  filter(adj_pval < 0.05)
+
+cancer_stats_test
+
+# no differences in subset freqs between irAE and no irAE groups looking only at post-ICI data, nor for severe vs. no irAE
+
+# there are a good number of pre/post ICI subset freq differneces in irAE group
+# 0.01 < padj < 0.05
+# ICOSpos of Tfh Tconv Tcells, PD1pos of CM CD8 Tcells, PD1pos of CM Treg Tcells, PD1pos of EM CD8 Tcells, PD1pos of EMRA CD8 Tcells, SCM of Tconv Tcells, PD1posCD27neg of EMRA CD8 Tcells, CXCR6posGrzmBpos of NN CD8 Tcells, CD38hiCD127neg of NN CD8 Tcells, PD1pos of CM Tconv Tcells, PDL1pos of classical monocytes, PD1pos of EM Tconv Tcells, PD1pos of EM Treg Tcells
+
+irae_ici_effects <- c("ICOSpos of Tfh Tconv Tcells", "PD1pos of CM CD8 Tcells", "PD1pos of CM Treg Tcells", "PD1pos of EM CD8 Tcells", "PD1pos of EMRA CD8 Tcells", "SCM of Tconv Tcells", "PD1posCD27neg of EMRA CD8 Tcells", "CXCR6posGrzmBpos of NN CD8 Tcells", "CD38hiCD127neg of NN CD8 Tcells", "PD1pos of CM Tconv Tcells", "PDL1pos of classical monocytes", "PD1pos of EM Tconv Tcells", "PD1pos of EM Treg Tcells")
+
+# there are a good number of pre/post ICI subset freq differneces in non-irAE group too
+# padj < 0.01
+# ICOSpos of Tfh Tconv Tcells, PD1pos of CM CD8 Tcells, PD1pos of CM Tconv Tcells, PD1pos of EM CD8 Tcells, PD1pos of EM Tconv Tcells, PD1pos of EMRA CD8 Tcells, PD1posCD27neg of EMRA CD8 Tcells, PD1pos of NKcells, Tph of NN Tconv Tcells	
+# 0.01 < padj < 0.05
+# PD1pos of EM Treg Tcells, PD1pos of CM Treg Tcells, PD1posTIGITpos of EM Tconv Tcells, basophils of nonGrans
+
+non_irae_ici_effects <- c("ICOSpos of Tfh Tconv Tcells", "PD1pos of CM CD8 Tcells", "PD1pos of CM Tconv Tcells", "PD1pos of EM CD8 Tcells", "PD1pos of EM Tconv Tcells", "PD1pos of EMRA CD8 Tcells", "PD1posCD27neg of EMRA CD8 Tcells", "PD1pos of NKcells", "Tph of NN Tconv Tcells", "PD1pos of EM Treg Tcells", "PD1pos of CM Treg Tcells", "PD1posTIGITpos of EM Tconv Tcells", "basophils of nonGrans")
+
+# many (20) subsets differnet between pre/post ICI if grouping all cancer subjects together (irAE or no irAE)
+
+```
+
+# Make boxplots for subsets different over ICI treatment in either irAE or non-irAE group
+
+```{r}
+
+ggplot_data <- cancer_flow_data %>%
+  filter(sort %in% intersect(non_irae_ici_effects, irae_ici_effects),
+         freq > 0) %>%
+  mutate(visit = case_when(
+           cleaned_visit_num == 1 ~ "Pre-ICI",
+           cleaned_visit_num %in% c(2, 3) ~ "Post-ICI"
+         ),
+         visit_group = paste(visit, group, sep = "_"))
+
+ggplot_data
+
+ggplot_data$visit <- factor(ggplot_data$visit, levels = c("Pre-ICI", "Post-ICI"))
+ggplot_data$group <- factor(ggplot_data$group, levels = c("non-irAE", "irAE/SAE"))
+ggplot_data$visit_group <- factor(ggplot_data$visit_group, levels = c("Pre-ICI_non-irAE", "Post-ICI_non-irAE", "Post-ICI_irAE/SAE", "Pre-ICI_irAE/SAE"))
+
+p <- ggplot(ggplot_data, aes(x = visit_group, y = freq, color = group, shape = visit)) +
+  geom_boxplot() +
+  geom_point() +
+  geom_line(aes(group = patient_id), color = "grey", alpha = 0.5) +
+  facet_wrap( ~sort, ncol = 3) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        strip.text = element_text(size = 6)) +
+  labs(y = "Percent of parent")
+
+p
+
+ggsave("../figures/ici_effect_on_subsets.png", plot = p, width = 7, height = 6)
+
+```
+
+# Prepare data for PCA from cancer data
+
+```{r}
+
+wide_cancer_flow_num_data <- cancer_flow_data %>%
+  select(-c(parent_population, parent_parent_population)) %>%
+  pivot_wider(names_from = sort, values_from = freq) %>%
+  drop_na(-c(group, patient_id)) %>%
+  select(-c(patient_id, group, specific_group, cleaned_visit_num))
+
+wide_cancer_flow_num_data
+
+wide_cancer_flow_metadata <- cancer_flow_data %>%
+  select(-c(parent_population, parent_parent_population)) %>%
+  pivot_wider(names_from = sort, values_from = freq) %>%
+  drop_na(-c(group, patient_id)) %>%
+  select(c(patient_id, group, specific_group, cleaned_visit_num)) %>%
+  mutate(patient_id_simple = row_number(),
+         visit = case_when(
+           cleaned_visit_num == 1 ~ "Pre-ICI",
+           cleaned_visit_num %in% c(2, 3) ~ "Post-ICI"
+         )) %>%
+  mutate(patient_id = gsub("LinsleyLab", "", patient_id))
+
+wide_cancer_flow_metadata
+
+```
+
+# Make PCA plots for cancer data
+
+```{r}
+
+#dim(wide_cancer_flow_num_data)
+
+pca = prcomp(as.data.frame((na.omit(wide_cancer_flow_num_data)), center=TRUE, scale=FALSE))
+
+var = get_pca_var(pca)
+
+#head(var$coord)
+
+pca_contributions = as.data.frame((var$contrib))
+
+sumPCA = summary(pca)
+
+#summary(pca)
+
+pca_variance = as.data.frame(t(sumPCA$importance))
+pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
+
+pcaScores= as.data.frame(pca$x)
+
+pcaScores
+
+pcaScores$patient_id_simple = row.names(pcaScores)
+
+pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
+
+pcaData = merge(wide_cancer_flow_metadata, pcaScores, by = "patient_id_simple")
+
+pcas = list()
+pcas[["fullData"]] = pcaData
+
+pcaLabels = list()
+pcaLabels[["fullData"]] = pcaLabels_
+
+pcaCorrelations = list()
+
+limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
+
+p <- ggplot(data = pcaData) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = patient_id, shape = group), size = 2, alpha = 0.8) + 
+  xlim(-limits[1], limits[1]) +
+  ylim(-limits[2], limits[2]) +
+  labs(color = "Patient ID") +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7)  # Make legend text smaller
+  ) +
+  guides(color = guide_legend(nrow = 6)) +  # Adjust legend to 2 rows
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+ggsave("../figures/pca_cancer_timepoint.png", plot = p, width = 9, height = 10)
 
 ```
