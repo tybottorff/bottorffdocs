@@ -26,6 +26,8 @@ library(readxl)
 library(circlize)
 library(Seurat)
 library(factoextra)
+library(lmerTest)
+library(gtsummary)
 
 ```
 
@@ -50,8 +52,12 @@ theme_set(
 
 ```{r}
 
-baseline_flow_data <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") %>%
+baseline_flow_data <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") #%>%
   # subset for only baseline visits
+
+baseline_flow_data
+
+```
   mutate(cleaned_visit_num = str_extract(`Visit Descriptor`, "\\d+")) %>%
   rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, irae_ex = `Documented irAE's (9/6/2024)`) %>%
   filter(cleaned_visit_num == 1 | is.na(cleaned_visit_num) & group %in% c("AID_Patient", "Healthy_Control")) %>%
@@ -118,7 +124,7 @@ stats_test
 ```{r}
 
 wide_baseline_flow_num_data <- baseline_flow_data %>%
-  filter(group %in% c("non-irAE", "irAE/SAE")) %>%
+  #filter(group %in% c("non-irAE", "irAE/SAE")) %>%
   select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
   drop_na(-c(group, patient_id, irae_ex, irae_severity_category, pneumonitis, thyroid_irae, skin_irae)) %>%
@@ -127,7 +133,7 @@ wide_baseline_flow_num_data <- baseline_flow_data %>%
 wide_baseline_flow_num_data
 
 wide_baseline_flow_metadata <- baseline_flow_data %>%
-  filter(group %in% c("non-irAE", "irAE/SAE")) %>%
+ #filter(group %in% c("non-irAE", "irAE/SAE")) %>%
   select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
   drop_na(-c(group, patient_id, irae_ex, irae_severity_category, pneumonitis, thyroid_irae, skin_irae)) %>%
@@ -182,8 +188,9 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = irae_severity_category), size = 2, alpha = 0.8) + 
-  scale_color_manual(values = c("Cancer group - no irAE" = "black", "Not severe" = "green", "Severe" = "red")) +  # Set custom colors
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
+  scale_color_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  #scale_color_manual(values = c("Cancer group - no irAE" = "black", "Not severe" = "green", "Severe" = "red")) +
   xlim(-limits[1], limits[1]) +
   ylim(-limits[2], limits[2]) +
   labs(color = "Group") +
@@ -1487,64 +1494,102 @@ dev.off()  # Close the PDF device
 
 ```
 
-# Try mixed effects modeling like in https://www.biorxiv.org/content/10.1101/2022.06.05.494592v1.full.pdf
+# Try mixed effects modeling (linear first, then GAMs if nonlinear) like in https://www.biorxiv.org/content/10.1101/2022.06.05.494592v1.full.pdf from longitudinal data
+
+ - need to reduce correlating variables? group and visit likely don't correlate so no worries
 
 ```{r}
 
-mixed_effects_model_df <- cancer_flow_data %>%
-  group_by(sort) %>%
-  filter(all(freq > 0)) %>%
-  ungroup() %>%
-  # getting rid of any sorts with any NA freqs gets rid of 27/80 sorts
-  mutate(visit = case_when(
-           cleaned_visit_num == 1 ~ "Pre-ICI",
-           cleaned_visit_num %in% c(2, 3) ~ "Post-ICI"),
-         patient_id_group_time = paste(patient_id, group, visit, sep = "_"),
-         group.time = paste(group, visit, sep = "."))
+mixed_effects_model_df <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") %>%
+  rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, irae_ex = `Documented irAE's (9/6/2024)`, visit_info = `Visit Descriptor`) %>%
+  select(patient_id, group, specific_group, irae_ex, visit_info, starts_with("pct_")) %>%
+  pivot_longer(
+    cols = starts_with("pct_"), 
+    names_to = "sort",
+    values_to = "freq") %>%
+  mutate(parent_population = gsub(".*_of_", "", sort),
+         parent_population = gsub("_", " ", parent_population),
+         parent_parent_population = str_extract(parent_population, "[^ ]+$"),
+         sort = gsub("pct_", "", sort),
+         sort = gsub("_", " ", sort)
+  ) %>%
+  mutate(irae_severity_category = case_when(
+    group == "irAE/SAE" & str_detect(irae_ex, "Encephalitis|Pleural effusion|pneumonitis|hepatitis|esophagitis|thyroid|Thyroid") ~ "Severe irAE",
+    group == "irAE/SAE" & !str_detect(irae_ex, "Encephalitis|Pleural effusion|pneumonitis|hepatitis|esophagitis|thyroid|Thyroid") ~ "Non-severe irAE",
+    group == "non-irAE" ~ "no irAE",
+    group == "Healthy_Control" ~ "HC",
+    TRUE ~ "AID"),
+    visit_info = case_when(
+      str_detect(visit_info, "1") | visit_info %in% c("AID_Patient", "Healthy_Control") ~ "Baseline",
+      visit_info %in% c("other", "Other") ~ "Other",
+      visit_info %in% c("Visit 2", "Visit 2, irAE") ~ "Visit 2",
+      visit_info %in% c("Visit 3", "Visit 3, irAE", "Visit 3, irAE F/U") ~ "Visit 3",
+      #visit_info != "irAE F/U" & str_detect(visit_info, "irAE") ~ "irAE",
+      #visit_info == "irAE F/U" ~ "irAE F/U",
+      TRUE ~ visit_info
+    )) %>%
+  filter(!(sort %in% c("granulocytes of live", "PD1pos of DN Bcells", "PD1pos of naive Bcells", "PD1pos of swMem Bcells", "PD1pos of unswMem Bcells", "basophils of nonGrans", "EMRA of Tconv Tcells", "CXCR6pos of NN CD8 Tcells", "CXCR6posGrzmBpos of NN CD8 Tcells")),
+         !str_detect(sort, "PD")) %>%
+  filter(freq > 0,
+         visit_info != "Other")
+  # getting rid of any sorts with any NA freqs gets rid of some sorts
 
-mixed_effects_model_wide_df <- mixed_effects_model_df %>%
-  select(patient_id_group_time, freq, sort) %>%
-  pivot_wider(names_from = patient_id_group_time, 
-              values_from = freq)
+visit_levels <- c("Baseline", "Visit 2", "Visit 3", "irAE", "irAE F/U")
+group_levels <- c("Healthy_Control", "AID_Patient", "non-irAE", "irAE/SAE")
 
-mixed_effects_model_matrix <- as.matrix(mixed_effects_model_wide_df %>% select(-sort))
+mixed_effects_model_df$visit_info <- factor(mixed_effects_model_df$visit_info, levels = visit_levels)
+mixed_effects_model_df$group <- factor(mixed_effects_model_df$group, levels = group_levels)
 
-rownames(mixed_effects_model_matrix) <- mixed_effects_model_wide_df$sort
+# mixed effects model, allow for variation between subjects in ref, 1|patient_id doesn't account for variation b/w subjects in response but group*time does (variation between irAE groups in response to ICI over time)
 
-library(edgeR)
+sorts <- unique(mixed_effects_model_df$sort)
 
-d0 <- DGEList(mixed_effects_model_matrix)
+results <- list()
 
-d0 <- calcNormFactors(d0)
+for (s in sorts) {
+  subset_data <- mixed_effects_model_df %>% filter(sort == s)
+  
+  fit <- lmer(freq ~ group * visit_info + (1 | patient_id), data = subset_data)
+  
+  results[[s]] <- summary(fit)
+}
 
-d0$samples$patient_id_group_time <- as.factor(rownames(d0$samples))
+results
 
-d0$samples <- d0$samples %>%
-  mutate(patient_id = as.factor(str_extract(patient_id_group_time, "^[^_]+")),
-         visit = as.factor(str_extract(patient_id_group_time, "(?<=_)Pre-ICI|(?<=_)Post-ICI")),
-         irae_group = as.factor(str_extract(patient_id_group_time, "(?<=_)[^_]+(?=_)")),
-         group.time = as.factor(paste(irae_group, visit, sep = ".")))
+```
 
-d0$samples
+# Plot significant results
 
-# fixed effect model (no patient ID)
-mm <- model.matrix(~0 + group.time, data = d0$samples)
+```{r}
 
-y <- voom(d0, mm, plot = T)
+# potential issue with only getting 1 irAE group interacting with visits at a time, but below are potentially interesting sorts
 
-# mixed effects model, allow for variation between subjects at baseline, 1|patient_id doesn't account for variation b/w subjects in response but group.time does (variation between irAE groups in response to ICI over time)
-library(lme4)
-fit <- lm(freq ~ 0 + group.time, data = as.data.frame(mixed_effects_model_df))
+# specific visit info: Tfr of NN Treg Tcells visit 3 irAE interaction effect, ICOSpos of Tfh Tconv Tcells and naive of Tconv Tcells visit 2 irAE interaction and EM of CD8 Tcells
 
-# use a constrast matrix L
-L <- matrix(c(
-  -0.5, 0.5, -0.5, 0.5,  # ICI treatment effects
-  -1, 1, 1, -1,          # ICI-associated irAE effects
-  1, 0, -1, 0            # Baseline effects
-), nrow = 3, byrow = TRUE)
-# 4 levels are
-# 1 = irAE baseline, 2 = irAE post-avelumab, 3 = no irAE baseline, 4 = no irAE post-avelumab (columns in matrix)
+# general visit info: naive of Tconv Tcells no irAE visit 2 interaction, ICOSpos of Tfh Tconv Tcells no irAE visits 2-3, EM of CD8 Tcells visit 2 no irAE int, CD56bright of NKcells visit 3 no irAE int
+# $`naive of Tconv Tcells`, ICOSpos of Tfh Tconv Tcells, EM of CD8 Tcells, CD56bright of NKcells
 
-fixed_effects <- fixef(fit)
+# heamtap interesting hits
+#Low in irAEs? GrzmBpos of NN CD8 Tcells, CCR6pos of NN CD8 Tcells, EMRA of CD8 Tcells, CD8 of Tcells, intermediate/nonclassical of monocytes
+#Tcells of nonGrans, CCR6pos of NN Tconv Cells, CXCR3posCCR6pos of NN Tconv Tcells, CXCR3pos of NN Tconv Tcells, CXCR3pos of NN CD8 Tcells
+
+# high in irAEs?
+#CCR4pos of NN CD8 Tcells, CM of CD8 Tcells, CD4 of Tcells, CM of Treg Tcells, CM of Tconv Tcells, CCR6pos of NN CD8 Tcells, EMRA of CD8 Tcells, CD8 of Tcells
+
+mixed_effects_model_df$irae_severity_category <- factor(mixed_effects_model_df$irae_severity_category, levels = c("HC", "AID", "no irAE", "Non-severe irAE", "Severe irAE"))
+
+p <- ggplot(mixed_effects_model_df %>% filter(sort %in% c("CD56bright of NKcells", "EM of CD8 Tcells", "ICOSpos of Tfh Tconv Tcells", "Tfr of NN Treg Tcells")), aes(x = interaction(visit_info, irae_severity_category), y = log10(freq), color = irae_severity_category)) +
+  geom_boxplot(aes(group = interaction(visit_info, irae_severity_category)), outlier.shape = NA, position = position_dodge(width = 0.75)) +  # Boxplots dodge by group
+  geom_point(size = 0.5, alpha = 0.5) +
+  geom_line(aes(group = interaction(patient_id, irae_severity_category)), color = "grey", alpha = 0.25) +
+  geom_smooth(aes(group = irae_severity_category, color = irae_severity_category), method = "lm", se = FALSE, linetype = "dashed") +
+  facet_wrap(~ sort, ncol = 2) +
+  labs(x = "Visit Information", y = "Percent of parent (log10)", color = "Group") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+        axis.title.x = element_blank(),
+        strip.text = element_text(size = 12)) +
+  scale_color_manual(values = c("HC" = "purple", "AID" = "blue", "no irAE" = "black", "Non-severe irAE" = "green", "Severe irAE" = "red"))
+
+ggsave("../figures/mixed_modeling_hits.png", plot = p, width = 8, height = 5)
 
 ```
