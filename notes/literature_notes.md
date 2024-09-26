@@ -1645,7 +1645,7 @@
  - avoidance of crossreactive T cells (engineering T cells to recognize neoantigen and not WT healthy tissue antigen): **position of amino acid substitution in neoantigen peptide matters as when mutation occurs at anchor position affinity of WT and mutant peptides to HLA are similar**
 # Induction of T cell exhaustion by JAK1/3 inhibition in the treatment of alopecia areata
  - alopecia areata is an autoimmune disease caused by T cell-mediated destruction of the hair follicle
- - JAK1/3 inhibitors disrupt γc cytokine signaling (important for T cell development, activation, homeostasis), selectively induces T cell exhaustion to help treat this autoimmune disease
+ - JAK1/3 inhibitors disrupt γc cytokine signaling (important for T cell development, activation, homeostasis), selectively induces T cell exhaustion to help treat this autoimmune disease, so **JAK/STAT perhaps negatively associates with T cell exhaustion, i.e. for connecting to AbATE ATAC results of JAK/STAT being up in CD127+ vs. DN**
 # Inhibition of IL-25/IL-17RA improves immune-related adverse events of checkpoint inhibitors and reveals antitumor activity
  - mouse model
  - prednisolone, anti IL-6, anti-TNFα, anti-IL-25 (IL-17E), and anti-IL-17RA all reduce irAEs in mice but only anti-IL25/17-RA also exert antitumor activity (and others actually add to tumor burden)
@@ -2123,6 +2123,15 @@
  - NKs are part of the innate immune system but are similar to cytotoxic T cells, they lack antigen specificity and are usually short-lived (< 10 days), so their exhaustion is likely less important
  - there are long-lived, somewhat antigen-specific NKs with memory recall though
  - B cell exhaustion: weaker antibody response (inhibited normal function)
+# Not-so-opposite ends of the spectrum: CD8<sup>+</sup> T cell dysfunction across chhronic infection, cancer, and autoimmunity
+ - review: 3 signals are 1) antigen/TCR, 2) costimulation (CD28?), and 3) inflammatory cytokines
+ - **dysfunction/hyporesponse from Tex in chronic infection may be integral for *persistent* response in chronic context**
+ - Tex comes from high, persistent antigen load
+ - **persistent antigen load also maintains Tex population (i.e. Tex do not persist well without antigen exposure)**
+ - **higher affinity T cells are deleted more, earlier (i.e. compared to lower affinity T cells that persist longer), this is good to try and prevent autoreactive T cells from damaging host i.e. a mechanism of peripheral tolerance (cross-tolerization specifically)**
+ - review: activated CD8s exert effector functions via direct cytotoxicity (GrzmB, PRF), cytokine production (effectors IFN-γ and TNF, IL-2 promoting proliferation)
+ - review: after clearing antigen, CD8 population contracts, subset persists as memory cells primed to regain effector function (that ability lost with extreme Tex)
+ - review: IRs transiently expressed during acute antigen exposure
 # Ocular adverse events associated with immune checkpoint inhibitors, a scoping review
  - they suggest irAEs can be broken into 2 categories: true irAEs (T cells activated against tumor and normal cells, theoretically this wanes after ICBs are stopped) and induction/exacerbation of paraneoplastic syndromes triggered by ICB (remote effects of cancer not caused by tumor/metastases, like immune response against tumor with cross-reaction of antibodies between tumor and self), **I don't really understand the difference between these two types here**
 # On the specificity of protein-protein interactions in the context of disorder
@@ -2668,6 +2677,8 @@
  - exhaustion phenotype progresses with increasing lupus severity
  - CD8s expand with rate of lupus disease
  - lupus mouse model
+# T cell exhaustion is associated with the risk of papillary thyroid carcinoma and can be a predictive and sensitive biomarker for diagnosis
+ - relation to Hasimoto's and Tex?
 # T cell immune awakening in response to immunotherapy is age-dependent
  - patients > 70 have more clonal TCRs after ICB, younger show more diverse TCRs with ICB
 # T cell invigoration to tumour burden ratio associated with anti-PD-1 response
@@ -3020,6 +3031,9 @@
  - antigen-reactive T cell fraction in peripheral immune naive repertoire very low, ~ 1 in 100,000 T cells
  - **interest in designing peptides that can activate T cells to be crossreactive against tumor associated antigens to improve immunogenicity (usually weak to tumor associated antigens)**
  - **some parts of body are immune privileged and lack HLA expression, like placenta and testis**
+# The GPR171 pathway suppresses T cell activation and limits antitumor immunity
+ - GPR171 regulates food uptake, anxiety
+ - GPR171 induced in T cells stimulated by antigen, as a kind of IR apparently as GPR171 interaction w/ ligand BigLEN suppresses T cell activation
 # The graft-versus-leukemia effect in AML
  - allogenic hematopoietic stem cell transplantation (allo-SCT) commonly used in cancer care, most potent anti-leukemic therapy in AML (acute myeloid leukemia) patients
  - donor T cells (and maybe other immune cells) eliminate residual leukemia cells after radio/chemotherapy = graft-versus-leukemia response
@@ -3266,6 +3280,10 @@
  - tumor-specific antigens: mutated proteins or oncogenic viral proteins
  - genetic cancer mouse model in which they can track tumor-specific CD8<sup>+</sup> T cell and self/shared antigen-specific CD8<sup>+</sup> T cell differentiation longitudinally as liver cancers develop
  - find that both tumor and self/shared antigen specific CD8<sup>+</sup> T cells lost effector function over time but in different ways: **tumor-specific CD8<sup>+</sup> T cells persist long term but are dysfunctional/exhausted (PD-1<sup>+</sup>, CD39<sup>+</sup>, TOX<sup>+</sup>) while self/shared antigen specific CD8<sup>+</sup> T cells exit cell cycle prematurely and disappear from liver lesions but persist in spleen in dysfunctional TCF1<sup>+</sup>PD-1<sup>-</sup> state unable to produce effector cytokines or proliferate in response to PD-1 blockade**
+# Tumor-reactive T cell clonotype dynamics underlying clinical response to TIL therapy in melanoma
+ - not surprisingly, baseline tumor enrichment with tumor-reactive TILs associates with better response
+ - *in vitro* expanding tumor-reactive TILs easier than *in vivo*, TME inhibits *in vivo* expansion of TILs?
+ - nonresponders have more of adoptive cell therapy (taking one's own T cells, expand them *in vitro*, then put back into self) T cells in blood instead of tumor?
 # Tumor resident memory CD8 T cells and concomitant tumor immunity develop independently of CD4 help
  - immune systems applies a form of 2FA: both CD4 and CD8 T cells need to recognize distinct antigen epitopes in same pathogen, signal integration at level of DC in draining lymph nodes (CD4 T cells license DCs to optimally generate Tcm CD8 T cells to cross presented antigen)
  - Trm: alternative population of memory CD8 T cells that remain in tissue/tumor
