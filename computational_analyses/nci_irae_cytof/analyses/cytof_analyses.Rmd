@@ -16,7 +16,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(beeswarm)
 library(Matrix)
 library(ggplot2)
-library(dplyr)
 library(stringr)
 library(scales)
 library(tidyr)
@@ -29,6 +28,8 @@ library(factoextra)
 library(lmerTest)
 library(gtsummary)
 library(ica)
+library(CytoExploreR)
+library(dplyr)
 
 ```
 
@@ -58,7 +59,7 @@ baseline_flow_data <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") 
   # subset for only baseline visits
   mutate(cleaned_visit_num = str_extract(`Visit Descriptor`, "\\d+")) %>%
   rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, irae_ex = `Documented irAE's (9/6/2024)`, age = `Age at Draw`, radiation = `Cancer Treated with Radiation?`, chemoradiation = `Cancer Treated with Chemoradiation?`, intravesicular_bcg = `Cancer Treated with Intravesicular BCG?`, intravesicular_chemo = `Cancer Treated with Intravesicular Chemotherapy?`) %>%
-  filter(cleaned_visit_num == 1 | is.na(cleaned_visit_num) & group %in% c("AID_Patient", "Healthy_Control")) %>%
+  dplyr::filter(cleaned_visit_num == 1 | is.na(cleaned_visit_num) & group %in% c("AID_Patient", "Healthy_Control")) %>%
   select(patient_id, group, specific_group, cleaned_visit_num, irae_ex, Batch, age, radiation, chemoradiation, intravesicular_bcg, intravesicular_chemo, starts_with("pct_")) %>%
   pivot_longer(
     cols = starts_with("pct_"), 
@@ -70,7 +71,7 @@ baseline_flow_data <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") 
          sort = gsub("pct_", "", sort),
          sort = gsub("_", " ", sort)
   ) %>%
-  filter(freq > 0) %>%
+  dplyr::filter(freq > 0) %>%
   mutate(irae_severity_category = case_when(
     group == "irAE/SAE" & str_detect(irae_ex, "Encephalitis|Pleural effusion|pneumonitis|hepatitis|esophagitis|thyroid|Thyroid") ~ "Severe",
     group == "irAE/SAE" & !str_detect(irae_ex, "Encephalitis|Pleural effusion|pneumonitis|hepatitis|esophagitis|thyroid|Thyroid") ~ "Not severe",
@@ -80,7 +81,7 @@ baseline_flow_data <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") 
     thyroid_irae = if_else(str_detect(irae_ex, "thyroid|Thyroid"), "Thyroid irAE", "No thyroid irAE"),
     skin_irae = if_else(str_detect(irae_ex, "skin|Rash|Pruritus|dermatitis"), "Skin irAE", "No skin irAE")
   ) %>%
-  filter(!(sort %in% c("granulocytes of live", "PD1pos of DN Bcells", "PD1pos of naive Bcells", "PD1pos of swMem Bcells", "PD1pos of unswMem Bcells", "basophils of nonGrans", "EMRA of Tconv Tcells", "CXCR6pos of NN CD8 Tcells", "CXCR6posGrzmBpos of NN CD8 Tcells")))
+  dplyr::filter(!(sort %in% c("granulocytes of live", "PD1pos of DN Bcells", "PD1pos of naive Bcells", "PD1pos of swMem Bcells", "PD1pos of unswMem Bcells", "basophils of nonGrans", "EMRA of Tconv Tcells", "CXCR6pos of NN CD8 Tcells", "CXCR6posGrzmBpos of NN CD8 Tcells")))
 
 baseline_flow_data
 
@@ -1645,6 +1646,8 @@ p <- ggplot(mixed_effects_model_df %>% filter(sort %in% c("CD56bright of NKcells
         strip.text = element_text(size = 12)) +
   scale_color_manual(values = c("HC" = "purple", "AID" = "blue", "no irAE" = "black", "Non-severe irAE" = "green", "Severe irAE" = "red"))
 
+p
+
 ggsave("../figures/mixed_modeling_hits.png", plot = p, width = 8, height = 5)
 
 ```
@@ -1780,5 +1783,123 @@ ica_df <- data.frame(Comp1 = ica_components[,1], Comp2 = ica_components[,2], pat
 ggplot(ica_df, aes(x=Comp1, y=Comp2)) +
   geom_point(aes(color=group), size=2) + 
   labs(x="ICA Component 1", y="ICA Component 2")
+
+```
+
+# Try regressing out confounders in baseline data
+
+```{r}
+
+regressing_out_confounders_df <- baseline_flow_data %>%
+  select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
+  pivot_wider(names_from = sort, values_from = freq) %>%
+  drop_na(-c(group, specific_group, irae_ex, Batch, age, radiation, chemoradiation, intravesicular_bcg, intravesicular_chemo, irae_severity_category, pneumonitis, thyroid_irae, skin_irae)) %>%
+  mutate(Batch = as.factor(Batch))
+
+regressing_out_confounders_df
+
+metadata_cols <- regressing_out_confounders_df[, 1:14]
+feature_cols <- regressing_out_confounders_df[, 15:ncol(regressing_out_confounders_df)]
+
+# Function to regress out confounders (donorId, age, batch) for each feature
+regress_out_confounders <- function(feature, donorId, age, batch) {
+  # Build the linear model and get residuals
+  model <- lm(feature ~ age + batch)
+  residuals(model)
+}
+
+adjusted_features <- as.data.frame(lapply(feature_cols, 
+                                          regress_out_confounders, 
+                                          age = regressing_out_confounders_df$age, 
+                                          batch = regressing_out_confounders_df$Batch))
+
+adjusted_data <- cbind(metadata_cols, adjusted_features)
+
+```
+
+# Plot PCA results for baseline data with batch/age regressed out
+
+```{r}
+
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:14] %>%
+  mutate(patient_id_simple = row_number())
+
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 15:ncol(adjusted_data)]
+
+#dim(wide_baseline_flow_num_data_confounders_regressed_out)
+
+pca = prcomp(as.data.frame((na.omit(wide_baseline_flow_num_data_confounders_regressed_out)), center=TRUE, scale=FALSE))
+
+var = get_pca_var(pca)
+
+#head(var$coord)
+
+pca_contributions = as.data.frame((var$contrib))
+
+sumPCA = summary(pca)
+
+#summary(pca)
+
+pca_variance = as.data.frame(t(sumPCA$importance))
+pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
+
+pcaScores= as.data.frame(pca$x)
+
+pcaScores
+
+pcaScores$patient_id_simple = row.names(pcaScores)
+
+pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
+
+pcaData = merge(wide_baseline_flow_metadata_confounders_regressed_out, pcaScores, by = "patient_id_simple")
+
+pcas = list()
+pcas[["fullData"]] = pcaData
+
+pcaLabels = list()
+pcaLabels[["fullData"]] = pcaLabels_
+
+pcaCorrelations = list()
+
+limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
+
+# find features contributing most to variation
+
+top_contributing_features_PC1 <- pca_contributions %>%
+    arrange(desc(Dim.1)) %>%
+    select(Dim.1) %>%
+    head(10)
+
+top_contributing_features_PC2 <- pca_contributions %>%
+    arrange(desc(Dim.2)) %>%
+    select(Dim.2) %>%
+    head(10)
+
+p <- ggplot(data = pcaData) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = age), size = 2, alpha = 0.8) + 
+  #scale_color_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
+  xlim(-limits[1], limits[1]) +
+  ylim(-limits[2], limits[2]) +
+  labs(color = "Group") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),  # Adjust legend text size
+    legend.title = element_blank(),  # Adjust legend title size
+    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
+    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
+  ) +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+#ggsave("../figures/baseline_pca_general_group_age_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+ggsave("../figures/baseline_pca_age_with_age_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
 
 ```
