@@ -166,6 +166,8 @@
  - ICB can only temporarily restore function of some exhausted T cells because of irreversible change in epigenetics of some terminally exhausted T cells
  - exhausted T cells lose effector functions, change epigenetic/transcriptional profiles, change metabolism, slow down proliferation, and respond more slowly to stimuli due to cytokine (IL-2, TNF, IFN-γ) deficiency
  - TOX is key inducer of T cell exhaustion, NFAT (upstream target of TOX) is key regulator of T cell exhaustion
+# A purine metabolic checkpoint that prevents autoimmunity and autoinflammation
+ - FAMIN (purine nucleoside enzyme)-enabled purine metabolon in DCs restrains T cell priming
 # A single-cell map of intratumoral changes during anti-PD1 treatment of patients with breast cancer
  - 1/3 of tumors had PD-1 expressing T cells, clonally expand with PD-1 blockade, mostly CD8<sup>+</sup> T cells with cytotoxic activity, immune-cell homing (*CXCL13*), and exhaustion markers (*LAG3*, *HAVCR2*) and CD4<sup>+</sup> T cells with Th1 (*IFNG*) and follicular helper (*BCL6*, *CXCR5*) signatures
 # Assessment of human leukocyte antigen-based neoantigen presentation to determine pan-cancer response to immunotherapy
@@ -255,6 +257,12 @@
 # Autoimmune dilated cardiomyopathy in PD-1 receptor-deficient mice
  - PD-1 prevents autoimmunity, here PD-1 KO leads to cardiomyocyte death
  - PD-L1 constitutively expressed in heart and kidney, as well as on APCs, likely that heart cells downregulate proliferation of autoreactive lymphocytes
+# Autoimmune dysregulation and purine metabolism adenosine deaminase deficiency
+ - genetic defects in adenosine deaminase (ADA) gene among most common causes for SCID (severe combined immunodeficiency)
+ - ADA present in all cell types but highly active in lymphoid tissue (thymus), also brain and gut, expressed intracellularly and on cell surface complexed with CD26
+ - lymphocyte development blocked in ADA-SCID
+ - adenosine is an anti-inflammatory mediator
+ - T cells more susceptible to apoptose in ADA-deficient mice, impaired function
 # Autoimmune panels as predictors of toxicity in patients treated with immune checkpoint inhibitors (ALERT)
  - auto antigen microarray to profile autoantibodies related to irAEs in patients receiving ICI
  - greater number of IgG and IgM reactivites in pre-ICI in patients vs. healthy controls
@@ -654,6 +662,8 @@
  - TCR repertoires of crossreactive and IAV-specific T cells reveals similarities
 ## Discussion
  - **heterologous immunity may be beneficial in short run (crossreactive memory T cells primed to quickly respond to new antigen) but may be detrimental in long run (narrows TCR diversity, promotes development of viral escape variants)**
+# CTCF mediates CD8<sup>+</sup> effector differentiation through dynamic redistribution and genomic reorganization
+ - CTCF promotes cytotoxic effector differentiation
 # CTLA-4 antibody-drug conjugte reveals autologous destruction of B lymphocytes associated with regulatory T cell impairment
  - cancer patients with irAEs have reduced peripheral B cells, unknown why
  - mice
@@ -1060,6 +1070,9 @@
  - TIGIT<sup>+</sup>KLRG1<sup>+</sup> is partially exhausted
  - alefacept resulted in preservation of endogenous insulin in 30% of subjects after 2 years, also depletes TEMs/TCMs and preserves Tregs
  - CD8<sup>+</sup>CD57<sup>+</sup> frequency maintained (more cytotoxic than canonically exhausted cells), CD8<sup>+</sup>PD-1<sup>+</sup> frequency recovered after therapy in responders, both of these populations have high inhibitory recepto rexpression, hypoproliferation following anti-CD3/anti-CD28
+# Exhausted tuning of PD-1 expression improves exhausted T cell function and viral control
+ - mouse model with deletion of exhaustion-specific PD-1 enhancer, alters PD-1 expression in CD8 T cells in chronic infection creating intermediate expression with optimized T cell function compared to WT and PD-1 KO (controls chronic infection i.e. reduced CD8 dysfunction, but without additional immunopathology)
+ - prior literature: in mouse models of acute infection, PD-1 KO leads to defective CD8 memory T cell formation, persistence, re-expansion with secondary infection, and in chronic infection mouse models PD-1 KO leads to CD8s proliferating more early in infection but more prone to death and less functional (lower cytokines) late in infection
 # Exhaust the exhausters: targeting regulatory T cells in the tumor microenvironment
  - Tregs can suppress anti-tumor immunity
 # Expansion of pathogenic cardiac macrophages in immune checkpoint inhibitor myocarditis
@@ -1205,6 +1218,10 @@
  - evidence for shared antigen mechanism: high levels of muscle-specific antigens (desmin and troponin) in both patient tumors
 # Functionally specialized human CD4<sup>+</sup> T cell subsets express physiochemically distinct TCRs
  - **CDR3s of effector/memory Tregs had most hydrophobic and strongly interacting residues which might promote crossreactivity, recapitulated features in naive Tregs suggesting lineage fate predetermined by selection events in thymus, also short CDR3s which might limit crossreactivity**
+# Hallmarks of CD8 T cell dysfunction are established within hours of tumor antigen encounter prior to cell division
+ - despite robust proliferation/activation, tumor-specific T cells had effector impairment even before cell division and acquired epigenetic changes associated with later dysfunction/exhaustion
+ - continued antigen/tumore exposure drives progressive epigenetic remodeling, "imprinting" dysfunctional state
+ - strong TCR signal leads to proliferation/activation but lack of innate inflammatory signals in tumors leads to failure to induce TFs regulating effector differentiation
 # Hallmarks of response, resistance, and toxicity to immune checkpoint blockade
 ## Other immune checkpoints: positive immune regulation
  - ICOS (immune co-stimulator) expressed on T cells, enhances function/expansion of CD8<sup>+</sup> T cells and Tregs
@@ -1327,6 +1344,13 @@
  - naive T cells significant proportion (~20-50%) of T cells in lymph nodes decades after thymic output stops
 ## T cell effector and memory differentiation
  - clonal expansion (activated pathogen-specific T cells expand and differentiate into effector T cells), contraction (majority of effector T cells die by apoptosis following clearance of pathogen), and memory (some primed T cells persist as long term memory T cells to protect against subsequent infections even decades later)
+# Humoral and cellular correlates of a novel immune-related adverse event and its treatment
+ - patient presentation (i.e. n = 1 for irAE patient..., 56 year old woman with smoking history), advanced lung cancer, receiving anti-PD-1 (pembrolizumab, biopsy of tumor revealed PD-L1 staining > 50%), developed delayed-onset visual/ocular toxicity/irAE (blurry vision 1 yr after ICB) treated with corticosteroids
+ - longitudinal biospecimens from PBMCs (baseline, 2 weeks, 6 weeks, 3 months, every 3 months after, after corticosteroid treatment), serial autoantibodies (profiled for 124 autoantigens), cytokines, cellular populations (CyTOF using 36 antibodies, CD45+ cells)
+ - months after ICI and preceeding clinical toxicity, patient developed broad increases in cytokines (9 months out, IL-6, IFNgamma, CXCL2, CCL17) and autoantibodies as well as CD8s and plasmablasts, do not observe these changes in HCs (n = 2, baseline and 2 weeks) or those without irAEs treated with ICI (n = 2)
+ - corticosteroid treatment reduced cytokines, autoantibodies, inflammatory cells
+ - increased effector memory and terminal effector CD8s, plasmablasts, and CD14<sup>+</sup>CD27<sup>-</sup> B cells in irAE patient vs. no irAE/HCs at 3, 6, 9 months post-ICI
+ - **reasons why we don't see results in our cohort: didn't follow patients out long enough? 9 months here for immune changes? i.e. maybe some non-irAE patients will develop irAEs later...**
 # Hydrophobic CDR3 residues promote the development of self-reactive T cells
  - **hydrophobicity at positions 6 and 7 of CDR3 β promote development of self-reactive T cells**
 # Hypervariable sites in the mtDNA control region are mutational hotspots
@@ -1346,7 +1370,8 @@
  - **public peanut antigen-specific CDR3s are more germline-like (fewer N-nucleotide insertions than private ones) and show evidence of convergent recombination**
 # Identification of human progenitors of exhausted CD8<sup>+</sup> T cells associated with elevated IFN-γ response in early phase of viral infection
  - high magnitude of IFN-γ response associated with rapid viral immune escape, associated with early onset of exhaustion
- - **model: early presence of antigen leads to rapid clonal expansion and high IFN-γ response and precursor cells differentiating into cytotoxic and exhausted subsets (related to low-affinity but prolonged antigens maintaining Tex) vs. reduced/delayed antigen stimulation results in less likely differentiation into exhaustion/effector subsets but rather promotes expansion of memory precursor subsets**
+ - **DP CD127+ may be like the memory-like Tpex described here**
+ - **model: early presence of antigen leads to rapid clonal expansion and high IFN-γ response and precursor cells differentiating into cytotoxic and exhausted subsets (related to low-affinity but prolonged antigens maintaining Tex) vs. reduced/delayed antigen stimulation results in less likely differentiation into exhaustion/effector subsets but rather promotes expansion of memory precursor subsets, possible connection to autoimmunity being more progenitor/earlier in lineage cells may be bad due to less exhaustion/less strong antigen driving differentiation into Tex?**
 # Identification of neoantigens for individualized cancer immunotherapy
  - neoepitopes are attractive targets for therapeutic cancer vaccines, **but most cancer mutations are unique for individual patients (neoantigenome), requiring individualized treatment**
  - **not all tumor mutations give rise to neoantigens, neoepitope-specific T cells reflect only 1-2% of mutations in an individual tumor, this could be due to not all tumor mutations giving rise to neoantigens and from T cell repertoire not recognizing all neoantigens perhaps as well**
@@ -1559,6 +1584,8 @@
  - **mechanistic model: CTLA-4 blockade induces autoreactivity by mobilizing newly detectable clones, irAE-mediating clones may be enriched within population of activated T cells, distinct from other tissue-specific immunopathologies driven by oligoclonal response to specific antigens like celiac**
 ## Discussion
  - **with how early TCR diversification is here compared to how late irAEs can develop, TCR repertoire changes can't be the only factor in irAE development**
+# Immunodeficiency and autoimmunity: companions not opposites
+ - PNP (purine nucleoside phosphorylase) mediates phosphorolysis of inosine, deoxyinosine, guanosine, deoxyguanosine, PNP deficiency leads to accumulation of (deoxy)guanosine and dGTP
 # Immunogenic correlates of immune-related adverse events for anti-programmed cell death 1 therapy
 ## Abstract
  - 9,104 patients across 21 cancer types
@@ -1831,6 +1858,7 @@
  - perhaps try lower dose of ICIs
 # Lower frequencies of circulating suppressive regulatory T cells and higher frequencies of CD4<sup>+</sup> naive T cells at baseline are associated with severe immune-related adverse events in immune checkpoint inhibitor-treated melanoma
  - severe irAE patients had higher frequencies of CD4 naive T cells, lower frequencies of CD16<sup>+</sup> NK cells at all time points, lower frequencies of TIGIT<sup>+</sup> Tregs at baseline, higher frequencies of CD38<sup>+</sup> CD4 TCMs and CD39<sup>+</sup> HLA-DR<sup>+</sup> CD8 TCMs at peak irAE time
+ - 43 marker mass cytometry panel, 28 patients with melanoma across 29 lines of ICI therapy, baseline, pre-irAE, and peak-irAE samples, 18 severe irAE patients and 11 non-severe irAE patients
 # Low TCR binding strength results in increased progenitor-like CD8<sup>+</sup> tumor-infiltrating lymphocytes
  - TILs with low TCR affinity to tumor-associated antigen had progenitor-like phenotypes and increased quiescence, higher affinity TCR TILs had more cell division and faster progression to T-cell exhaustion programs
 # LRT: integrative analysis of scRNA-seq and scTCR-seq data to investigate clonal differentiation heterogeneity
@@ -2123,6 +2151,9 @@
  - NKs are part of the innate immune system but are similar to cytotoxic T cells, they lack antigen specificity and are usually short-lived (< 10 days), so their exhaustion is likely less important
  - there are long-lived, somewhat antigen-specific NKs with memory recall though
  - B cell exhaustion: weaker antibody response (inhibited normal function)
+# Nonlinear dynamics of multi-omics profiles during human aging
+ - nonlinear important here given acceleration of mortality risk after specific time points
+ - methods ideas for NCI irAE longitudinal data
 # Not-so-opposite ends of the spectrum: CD8<sup>+</sup> T cell dysfunction across chhronic infection, cancer, and autoimmunity
  - review: 3 signals are 1) antigen/TCR, 2) costimulation (CD28?), and 3) inflammatory cytokines
  - **dysfunction/hyporesponse from Tex in chronic infection may be integral for *persistent* response in chronic context**
@@ -2268,7 +2299,19 @@
  - SPRY1<sup>+</sup> CD8s correlate with ICB response as expected of progenitor Tex
  - progenitor TFs: TBX21, REL, NFKB1, FOXO1
  - terminal TFs: TOX, EOMES
-# Protective effect of low-intensity pulsed ultrasound on immune checkpoint inhibitor-related myocarditis via fune-tuning of CD4<sup>+</sup> T cell differentiation
+# Purine nucleoside phosphorylase enables dual metabolic checkpoints that prevent T cell immunodeficiency and TLR7-associated autoimmunity
+ - purine nucleoside phosphorylase (PNP) enables breakdown and recycling of guanine nucleosides
+ - PNP insufficiency associated with immunodeficiency AND autoimmunity
+ - PNP inactivation synthetically lethal with downregulation of dNTP triphosphohydrolase SAHMD1 in T cell development
+ - previous literature: nucleotide metabolism controls immune cell development and function, purine nucleoside adenosine sensed by A2<sub>A/B</sub> receptors which mediate immunosuppressive effects, PNP controls levels of purine nucleosides, PNP deficiency associated with T cell immunodeficiency and increased susceptibility to infections AND autoimmunity
+# Purinergic signaling and purine base metabolism at the crossroads between immunity, metabolism, and cancer: a review
+ - purinergic receptor P2x7 activates NLRP3 inflammasome in immune cells
+ - ADA (adenosine deaminase) was first purine metabolic enzyme documented with role in immune function (activity positively correlated with maturation of monocytes to macrophages)
+ - adenine nucleotides and ATP derivatives can stimulate/inhibit T cells via purinoceptors by altering intracellular cAMP levels
+ - ATP inhibits activation of peripheral CD4s via P2Y<sub>11</sub> purinoceptor, extracellular ATP induces T cell death via activation of P2X<sub>7</sub>, ATP pro-inflammatory (released by injured cells, stimulates immune response)
+ - Tregs generate adenosine to mediate immunosuppression and reduce proinflammatory activation of Teffs
+ - ADA-severe combined immunodeficiency: accumulation of toxic adenosine/deoxyadenosine nucleotides
+ - PNP deficiency inhibits T cell function
 # Quantifiable predictive features define epitope-specific T cell receptor repertoires
 ## Abstract
  - TCR is heterodimer, mediates pathogen-associated epitope recognition through interactions between peptide and MHC, generated by genomic rearrangement of germline TCR locus (VDJ recombination) to allow potentially 10^15 to 10^61 unique receptors
@@ -2340,6 +2383,7 @@
  - terminal Tex high in TOX, EOMES, IRs (PD-1, TIM-3, LAG-3), CD39, CD69, CD101
  - progenitor Tex: TCF1
  - TOX high in progenitor and term Tex, low in effector Tex...
+ - **in absence of CD4 T cells or APCs, Tpex differentiate straight to terminal Tex rather than going through effector Tex first**
 # Rigorous benchmarking of T cell receptor repertoire profiling methods for cancer RNA sequencing
 ## Abstract
  - benchmarking ability of RNAseq methods (vs. gold standard of targeted TCRseq) to profile TCR repertoires, examine 19 bulk RNAseq samples across 4 cancer cohorts, T cell rich/poor tissue
@@ -2950,7 +2994,7 @@
  - 3 month time point: reduced expression of TCR receptor/activation genes in responders
  - CD8s: increased expression of exhaustion/immune regulation genes after teplizumab treatment
  - differentiation of CD8s after teplizumab treatment (pseudotime analyses)
- - **IL7R* expression reduced and patients with lower CD127 expression had longer diabetes free intervals**
+ - **IL7R* expression reduced with teplizumab and patients with lower CD127 expression had longer diabetes free intervals**
  - frequency of autoantigen reactive CD8s expanded in placebo group over 18 months, didn't increase in teplizumab group
 ## Results
  - higher % (of parent CD3) of CD4 (at 6 months) and CD8 (at 3 months) T cells in R
@@ -2993,9 +3037,13 @@
  - previous literature: CD318 is CD6 ligand (CD6 on T cells)
 # The changing landscape of naive T cell receptor repertoire with human aging
  - aging associated with loss of thymus productivity, yet naive T cells still maintain abundance by division in periphery for many years
- - **shorter CDR3 β, less added N nucleotides within CDR3 β with aging**
+ - **shorter CDR3β, less added N nucleotides within CDR3 β with aging**
  - **increase in publicness of CD4 but not CD8 naive T cell repertoires with aging**
  - **increased clonality with aging, as expected with clonal expansion over time**
+# The current state and future of T cell exhaustion research
+ - loss of effector function with Tex characterized by loss of IL-2, TNFα, IFNγ production
+ - **EOMES important for memory formation**
+ - Tbet drives expression of effector molecules, represses PD-1
 # The diverse functions of the PD1 inhibitory pathway
 ## Key points
  - PD1: inhibitory receptor expressed by all T cells during activation (also B cells, NKs, some myeloid cells), regulates effector functions, often high and sustained expression in persistent antigen exposure (chronic infections, cancer) and can limit protective immunity in these cases, limits autoreactive T cells
@@ -3200,6 +3248,8 @@
  - *TIGIT* mostly expressed on T, NK cells
  - TIGIT blockade inhibits Tregs by downregulating Foxp3, reducing secretion of immunosuppressive cytokines, **could be similar mechanism for Tregs being up/relating to irAEs**
  - TIGIT blockade facilitates NK activation, stimulating CD8s
+# TIM-3<sup>+</sup> CD8 T cells with a terminally exhausted phenotype retain functional capacity in hematological malignancies
+ - paradoxical retainment of function with Tex cells, distinct Tex apparently from those in chronic viral infections
 # Tissue-resident memory and circulating T cells are early responders to pre-surgical cancer immunotherapy
 ## Abstract
  - **treatment-responsive T cell clones recognize self-antigens including tumor antigens**
