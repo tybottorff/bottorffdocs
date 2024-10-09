@@ -87,6 +87,31 @@ baseline_flow_data
 
 ```
 
+# Define logit transform func
+
+```{r}
+
+logitNorm <- function(v){
+  newVals <- v
+  # Check to see if it's 0 to 1 or 0 to 100, and then switch it to 0 to 1
+  if( any(v>1) & all(v<=100) ){
+    newVals <- v/100
+  }
+  # if there are 0s or 1s, add/subtract a small value
+  # so the logit norm is defined
+  epsilon <- min(newVals[newVals!=0])/2
+  newVals[newVals==0] <- epsilon
+  newVals[newVals==1] <- 1-epsilon
+  # Do the logit norm
+  newVals <- log2(newVals/(1-newVals))
+  if( any(is.na(newVals))){
+    print(head(data.frame(v,newVals)))
+  }
+  return(newVals)
+}
+
+```
+
 # Stats tests for baseline data
 
 ```{r}
@@ -116,31 +141,6 @@ stats_test
 # HC vs. cancer: CD38hiCD127neg of NN CD8 Tcells, Treg of CD4 Tcells
 # HC vs. non-irAE: CRTH2pos of NN Tconv Tcells, Treg of CD4 Tcells, CD38hiCD127neg of NN CD8 Tcells, CRTH2pos of NN CD8 Tcells, SCM of Tconv Tcells
 # HC vs. irAE: none
-
-```
-
-# Define logit transform func
-
-```{r}
-
-logitNorm <- function(v){
-  newVals <- v
-  # Check to see if it's 0 to 1 or 0 to 100, and then switch it to 0 to 1
-  if( any(v>1) & all(v<=100) ){
-    newVals <- v/100
-  }
-  # if there are 0s or 1s, add/subtract a small value
-  # so the logit norm is defined
-  epsilon <- min(newVals[newVals!=0])/2
-  newVals[newVals==0] <- epsilon
-  newVals[newVals==1] <- 1-epsilon
-  # Do the logit norm
-  newVals <- log2(newVals/(1-newVals))
-  if( any(is.na(newVals))){
-    print(head(data.frame(v,newVals)))
-  }
-  return(newVals)
-}
 
 ```
 
@@ -1801,23 +1801,22 @@ regressing_out_confounders_df
 metadata_cols <- regressing_out_confounders_df[, 1:14]
 feature_cols <- regressing_out_confounders_df[, 15:ncol(regressing_out_confounders_df)]
 
-# Function to regress out confounders (donorId, age, batch) for each feature
-regress_out_confounders <- function(feature, donorId, age, batch) {
+# Function to regress out confounders (batch) for each feature
+regress_out_confounders <- function(feature, batch) {
   # Build the linear model and get residuals
-  model <- lm(feature ~ age + batch)
+  model <- lm(feature ~ batch)
   residuals(model)
 }
 
 adjusted_features <- as.data.frame(lapply(feature_cols, 
                                           regress_out_confounders, 
-                                          age = regressing_out_confounders_df$age, 
                                           batch = regressing_out_confounders_df$Batch))
 
 adjusted_data <- cbind(metadata_cols, adjusted_features)
 
 ```
 
-# Plot PCA results for baseline data with batch/age regressed out
+# Plot PCA results for baseline data with batch regressed out
 
 ```{r}
 
@@ -1878,12 +1877,12 @@ top_contributing_features_PC2 <- pca_contributions %>%
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = age), size = 2, alpha = 0.8) + 
-  #scale_color_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
-  scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
+  scale_color_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  #scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
   xlim(-limits[1], limits[1]) +
   ylim(-limits[2], limits[2]) +
-  labs(color = "Group") +
+  labs(color = "Batch") +
   theme_bw() +
   theme(
     legend.position = "bottom", 
@@ -1899,7 +1898,93 @@ p <- ggplot(data = pcaData) +
 
 p
 
-#ggsave("../figures/baseline_pca_general_group_age_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
-ggsave("../figures/baseline_pca_age_with_age_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+ggsave("../figures/baseline_pca_general_group_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+#ggsave("../figures/baseline_pca_batch_with_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+
+```
+
+# Make VP of changes between irAE and no irAE groups
+
+```{r}
+
+df <- adjusted_data
+
+irae_group <- df %>% filter(group == "irAE/SAE")
+no_irae_group <- df %>% filter(group == "non-irAE")
+
+non_feature_cols <- c("patient_id", "group", "specific_group", "irae_ex", "Batch", 
+                      "age", "radiation", "chemoradiation", "intravesicular_bcg", 
+                      "intravesicular_chemo", "irae_severity_category", "pneumonitis", 
+                      "thyroid_irae", "skin_irae")
+feature_columns <- setdiff(colnames(df), non_feature_cols)
+
+# Calculate mean residuals for each feature
+irae_means <- irae_group %>% select(all_of(feature_columns)) %>% summarise_all(mean)
+no_irae_means <- no_irae_group %>% select(all_of(feature_columns)) %>% summarise_all(mean)
+
+fc <- (as.numeric(irae_means) / as.numeric(no_irae_means))
+log2_fc <- sign(fc) * log2(abs(fc))
+
+pvals <- sapply(feature_columns, function(feature) {
+  t.test(irae_group[[feature]], no_irae_group[[feature]])$p.value
+})
+
+padj <- p.adjust(pvals, method = "BH")
+
+volcano_df <- data.frame(
+  feature = feature_columns,
+  log2_fc = log2_fc,
+  padj = padj,
+  neg_log10_padj = -log10(padj)
+)
+
+ggplot(volcano_df, aes(x = log2_fc, y = neg_log10_padj)) +
+  geom_point(aes(color = padj < 0.05)) +
+  theme_minimal() +
+  labs(x = "irAE/SAE vs. no irAE FC (log2)", y = "-log10(padj)") +
+  geom_vline(xintercept = 0, linetype = "dashed") + # Vertical line at 0 fold change +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed") + # horizontal line at sig threshold
+  geom_text_repel(data = subset(volcano_df, neg_log10_padj > 0.5 & abs(log2fc) > 2), 
+                  aes(label = feature), size = 3, box.padding = 0.5, max.overlaps = 10)
+
+```
+
+# Make a boxplot for 1 ~significant (after FDR) feature
+
+```{r}
+
+adjusted_data %>% select(non_feature_cols, PD1pos.of.CM.Tconv.Tcells) %>%
+  pivot_longer(cols = PD1pos.of.CM.Tconv.Tcells, names_to = "sort", values_to = "freq") %>%
+  ggplot(aes(x = group, y = freq, fill = group)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(color = "grey") +
+  labs(x = "", y = "PD1+ of CM Tconv Tcells\nresiduals (batch regressed out)") +
+  scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  theme(axis.text.x = element_blank())
+
+```
+
+# Re-do stats old way after regressing out batch to resolve discrepancy b/w methods
+
+```{r}
+
+feature_columns <- colnames(adjusted_data)[!(colnames(adjusted_data) %in% non_feature_cols)]
+
+irae_group <- adjusted_data %>% filter(group == "irAE/SAE")
+non_irae_group <- adjusted_data %>% filter(group == "non-irAE")
+
+pvals <- sapply(feature_columns, function(feature) {
+  wilcox.test(irae_group[[feature]], non_irae_group[[feature]], paired = FALSE, exact = FALSE)$p.value
+})
+
+padj <- p.adjust(pvals, method = "BH")
+
+stats_test <- data.frame(
+  feature = feature_columns,
+  pval = pvals,
+  adj_pval = padj
+) %>% arrange(adj_pval)
+
+stats_test
 
 ```
