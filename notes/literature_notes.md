@@ -910,6 +910,7 @@
  - chronic antigen exposure leads to T cell exhaustion with reduced effector function
  - do all antigen-specific T cell clones follow the same T<sub>ex</sub> differentiation trajectory?
  - results: high T cell receptor signaling aviditiy correlates with T<sub>ex</sub> terminal phenotype, low avidity correlates with effector-like T<sub>ex</sub> KLR fate (so higher signaling response from TCR activation leads to higher exhaustion)
+ - **divergent (terminal and KLR, split, Tex) clones most expanded, then terminal Tex, then KLR Tex... (this makes sense with higher avidity for terminal Tex and lower for KLR Tex)**
 # Divergent outcomes of anti-PD-L1 treatment coupled with host-intrinsic differences in TCR repertoire and distinct T cell activation states in responding versus non-responding tumors
  - squamous cell carcinoma mouse model
  - treatment efficacy requires CD8 T cells, positively correlates with effector functions of CD8 TILs
