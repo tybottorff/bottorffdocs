@@ -30,6 +30,7 @@ library(gtsummary)
 library(ica)
 library(CytoExploreR)
 library(dplyr)
+library(ggrepel)
 
 ```
 
@@ -141,6 +142,9 @@ stats_test
 # HC vs. cancer: CD38hiCD127neg of NN CD8 Tcells, Treg of CD4 Tcells
 # HC vs. non-irAE: CRTH2pos of NN Tconv Tcells, Treg of CD4 Tcells, CD38hiCD127neg of NN CD8 Tcells, CRTH2pos of NN CD8 Tcells, SCM of Tconv Tcells
 # HC vs. irAE: none
+
+# 71 features, most sig (but padj > 0.15) are PD1pos of CM Tconv Tcells, Tph of NN Tconv Tcells...
+# 43 patients...
 
 ```
 
@@ -1790,10 +1794,12 @@ ggplot(ica_df, aes(x=Comp1, y=Comp2)) +
 
 ```{r}
 
+# 12 cancer patients lost because of > 1 NA in > 1 feature
+
 regressing_out_confounders_df <- baseline_flow_data %>%
-  select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
+  select(-c(parent_population, parent_parent_population, cleaned_visit_num, irae_ex, age, radiation, chemoradiation, intravesicular_bcg, intravesicular_chemo, irae_severity_category, pneumonitis, thyroid_irae, skin_irae)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
-  drop_na(-c(group, specific_group, irae_ex, Batch, age, radiation, chemoradiation, intravesicular_bcg, intravesicular_chemo, irae_severity_category, pneumonitis, thyroid_irae, skin_irae)) %>%
+  drop_na(-c(group, specific_group)) %>%
   mutate(Batch = as.factor(Batch))
 
 regressing_out_confounders_df
@@ -1944,21 +1950,21 @@ ggplot(volcano_df, aes(x = log2_fc, y = neg_log10_padj)) +
   labs(x = "irAE/SAE vs. no irAE FC (log2)", y = "-log10(padj)") +
   geom_vline(xintercept = 0, linetype = "dashed") + # Vertical line at 0 fold change +
   geom_hline(yintercept = -log10(0.05), linetype = "dashed") + # horizontal line at sig threshold
-  geom_text_repel(data = subset(volcano_df, neg_log10_padj > 0.5 & abs(log2fc) > 2), 
+  geom_text_repel(data = subset(volcano_df, neg_log10_padj > 0.5 & abs(log2_fc) > 2), 
                   aes(label = feature), size = 3, box.padding = 0.5, max.overlaps = 10)
 
 ```
 
-# Make a boxplot for 1 ~significant (after FDR) feature
+# Make a boxplot for features of interest after regressing out batch
 
 ```{r}
 
-adjusted_data %>% select(non_feature_cols, PD1pos.of.CM.Tconv.Tcells) %>%
-  pivot_longer(cols = PD1pos.of.CM.Tconv.Tcells, names_to = "sort", values_to = "freq") %>%
+adjusted_data %>% select(group, KLRG1posTIGITpos.of.NN.CD8.Tcells) %>%
+  pivot_longer(cols = KLRG1posTIGITpos.of.NN.CD8.Tcells, names_to = "sort", values_to = "freq") %>%
   ggplot(aes(x = group, y = freq, fill = group)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(color = "grey") +
-  labs(x = "", y = "PD1+ of CM Tconv Tcells\nresiduals (batch regressed out)") +
+  labs(x = "", y = "TIGIT+KLRG1+ of NN\nCD8 Tcells residuals\n(batch regressed out)") +
   scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
   theme(axis.text.x = element_blank())
 
