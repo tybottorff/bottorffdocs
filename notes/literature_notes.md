@@ -277,9 +277,10 @@
 # Autoreactive CD8<sup>+</sup> T cells are restrained by an exhaustion-like program that is maintained by LAG3
  - **intra-islet CD8s phenotypically, transcriptionally, epigenetically, metabolically possess features of canonically exhausted cells, important differences though**
  - mice
- - LAG3 (IR) KO accelerates disease, enhanced T cell effector functions, enhanced islet trafficking, diminished exhaustion phenotype
+ - LAG3 (IR) KO accelerates autoimmune disease via enhanced T cell effector functions, enhanced islet trafficking, diminished exhaustion phenotype
  - TFs TCF1 and TOX are critical modulators of exhaustion program
  - in mouse model of systemic lupus erythematosus, kidney infiltrating T cells have been shown to be functionally, metabolically, transcriptionally exhausted but this doesn't prevent autoimmunity, likely not all cells are exhausted and/or it's partial exhaustion
+ - **high IR expression on T cells correlates with reduced autoimmune symptoms and responsiveness to anti-CD3 in T1D**
  - effector CD4s considered drivers of T1D, growing appreciation for CD8s and for stem-like population in pancreatic LN that renews effector pool
 # Autoreactive napsin A-specific T cells are enriched in lung tumors and inflammatory lung lesions during immune checkpoint blockade
 ## Summary
