@@ -282,6 +282,12 @@
  - in mouse model of systemic lupus erythematosus, kidney infiltrating T cells have been shown to be functionally, metabolically, transcriptionally exhausted but this doesn't prevent autoimmunity, likely not all cells are exhausted and/or it's partial exhaustion
  - **high IR expression on T cells correlates with reduced autoimmune symptoms and responsiveness to anti-CD3 in T1D**
  - effector CD4s considered drivers of T1D, growing appreciation for CD8s and for stem-like population in pancreatic LN that renews effector pool
+ - IRs TIM3/CTLA4 lowly expressed on intra-islet CD8s, unlike canonical exhausted T cells
+ - identify memory precursor population (identified by others) that likely propagates disease (stem-like pool of cells that gives rise to effector cells?)
+ - **see more TOX<sup>+</sup> CD8s as disease progresses, and with more TOX<sup>+</sup> CD8s also see more IRs (PD1, TIGIT, LAG3), so over time subpopulations of intra-islet CD8s may be differentiating towards exhaustion**
+ - **canonical exhaustion vs. restrained: similarities (EOMES, TOX, CD39, PD1, impaired metabolism, altered epigenome/transcriptome) and differences (primary IRs LAG3/TIGIT in restrained cells, primary IRs CTLA4/TIM3 and secondary IRs LAG3/TIGIT in canonical exhaustion)**
+ - hypoxia may contribute to immune dysfunction in islet (beta cells induce localized hypoxia due to high oxygen consumption demands to produce insulin)
+ - LAG3 expression may limit epitope spreading, avidity maturation, disease progression in islet-reactive CD8s (LAG3 KO in CD8s leads to enhanced recognition of secondary islet antigens, clonal expansion, more unique TCR clones)
 # Autoreactive napsin A-specific T cells are enriched in lung tumors and inflammatory lung lesions during immune checkpoint blockade
 ## Summary
  - DITAS: discovery of tumor-associated self-antigens to find peptides that induce both antitumor and irAE responses, analyze shared antigens between NSCLC and lung tissue, determine which HLA peptides bind to, predicting CD8<sup>+</sup> T cell epitopes of peptides
@@ -765,6 +771,7 @@
  - clear cell renal cell carcinoma: most common subtype of kidney cancer, immunogenic, most tumor mutational burden (comparable to "cold" tumors, 10-fold lower than melanoma, TMB doesn't associate with ICB response)
 # Developmental relationships of four exhausted CD8<sup>+</sup> T cell subsets reveals underlying transcriptional and epigenetic landscape control mechanisms
  - TCF1 more progenitor TF, Tbet more terminal TF, TOX could be either?
+ - SLAMF6 more progenitor
 # Development of TCRB CDR3 length repertoire of human T lymphocytes
  - previous literature: CDR3s of CD4 thymocytes become shorter during thymic development, i.e. thymocytes with longer CDR3s are more likely to be deleted
  -repertoire distribution patterns depend on use of the BV gene; BV‐dependent patterns were shaped during thymic selections and maintained in the peripheral blood
@@ -2618,6 +2625,8 @@
  - Gaussian-like distribution in length pattern, given large number of small effects (random mechanism of junction diversity) acting additively and independently on CDR3 length
 # Stem-like precursors are the fount to sustain persistent CD8<sup>+</sup> T cell responses
  - progenitor Tex: TCF1, CXCR5, CD73, ID3
+ - pathogen-specific T cell populations in latent infections can (like in CMV) grow in size (memory inflation)
+ - memory precursor cells: subpopulation from contracted effector pool that can develop into memory T cells (heterogeneous pool, Tcm, Tem, Tscm...) that can give rise to effector T cells via antigen reexposure
 # Stitchr: stitching coding TCR nucleotide sequences from V/J/CDR3 information
  - leader sequence/signal peptide just refers to signal for TCR to be trafficked to cell membrane
 # Strategies to reinvigorate exhausted CD8<sup>+</sup> T cells in tumor microenvironment
@@ -2638,6 +2647,10 @@
  - γδ TCRs recognize more diverse ligands, though both γδ and αβ TCRs share CD3 (Ab targeting CD3 used to bind complex to image)
 # Subsets of exhausted CD8<sup>+</sup> T cells differentially mediate tumor control and respond to checkpoint blockade
  - exhausted CD8 TILs include subpopulation of progenitor exhausted cells that retain polyfunctionality, persist long term, differentiate into terminally exhausted TILs
+ - progenitor exhausted: SLAMF6, cytokines (TNF, IL2), costimulatory molecules (ICOS, TNFSF14), survival/memory (IL7R, ID3, SATB1)
+ - terminal exhausted: co-IRs (ENTPD1, CD244), effector molecules (GZMB, PRF1, IFNG), TFs (ID2, RUNX1, PRDM1)
+ - **also see cytotoxicity program up in terminal Tex vs. progenitor Tex**
+ - **good evidence for progenitor Tex giving rise to terminal Tex with adoptive transfer experiments (only progenitor Tex transfer gives rise to both, terminal Tex transfer doesn't give rise to progenitor), antigen-dependent differentiation**
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
  - ICI-induced inflammatory arthritis has been reported
