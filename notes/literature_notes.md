@@ -280,6 +280,7 @@
  - LAG3 (IR) KO accelerates autoimmune disease via enhanced T cell effector functions, enhanced islet trafficking, diminished exhaustion phenotype
  - TFs TCF1 and TOX are critical modulators of exhaustion program
  - in mouse model of systemic lupus erythematosus, kidney infiltrating T cells have been shown to be functionally, metabolically, transcriptionally exhausted but this doesn't prevent autoimmunity, likely not all cells are exhausted and/or it's partial exhaustion
+ - LAG3+ vs. LAG3- cells: up in PDCD1, TOX, BATF, TIGIT, EOMES, NR4A2, KLRG1, LAG3, Slamf6, CTLA4, Fas, ICOS, CD48, CD28, FasI, CD160, CD274, lots of TNF receptors (TNFSF4, TNFRSF8, TNFRSF4, TNFRSF1B... more)...
  - **high IR expression on T cells correlates with reduced autoimmune symptoms and responsiveness to anti-CD3 in T1D**
  - effector CD4s considered drivers of T1D, growing appreciation for CD8s and for stem-like population in pancreatic LN that renews effector pool
  - IRs TIM3/CTLA4 lowly expressed on intra-islet CD8s, unlike canonical exhausted T cells
