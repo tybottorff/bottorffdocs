@@ -1562,7 +1562,7 @@ dev.off()  # Close the PDF device
 
 mixed_effects_model_df <- read_excel("../raw_data/holly_flow_data_all_visits.xlsx") %>%
   rename(patient_id = `Subject ID`, group = `General irAE Classification 9-8-24`, specific_group = `Patient Type`, irae_ex = `Documented irAE's (9/6/2024)`, visit_info = `Visit Descriptor`) %>%
-  select(patient_id, group, specific_group, irae_ex, visit_info, starts_with("pct_")) %>%
+  select(patient_id, group, specific_group, irae_ex, visit_info, Batch, starts_with("pct_")) %>%
   pivot_longer(
     cols = starts_with("pct_"), 
     names_to = "sort",
@@ -1580,22 +1580,25 @@ mixed_effects_model_df <- read_excel("../raw_data/holly_flow_data_all_visits.xls
     group == "Healthy_Control" ~ "HC",
     TRUE ~ "AID"),
     visit_info = case_when(
-      str_detect(visit_info, "1") | visit_info %in% c("AID_Patient", "Healthy_Control") ~ "Baseline",
-      visit_info %in% c("other", "Other") ~ "Other",
-      visit_info %in% c("Visit 2", "Visit 2, irAE") ~ "Visit 2",
-      visit_info %in% c("Visit 3", "Visit 3, irAE", "Visit 3, irAE F/U") ~ "Visit 3",
-      #visit_info != "irAE F/U" & str_detect(visit_info, "irAE") ~ "irAE",
-      #visit_info == "irAE F/U" ~ "irAE F/U",
-      TRUE ~ visit_info
+      str_detect(visit_info, "1") | visit_info %in% c("AID_Patient", "Healthy_Control") ~ 1,
+      visit_info %in% c("other", "Other") ~ 6,
+      visit_info %in% c("Visit 2", "Visit 2, irAE") ~ 2,
+      visit_info %in% c("Visit 3", "Visit 3, irAE", "Visit 3, irAE F/U") ~ 3,
+      visit_info != "irAE F/U" & str_detect(visit_info, "irAE") ~ 4,
+      visit_info == "irAE F/U" ~ 5
     )) %>%
   filter(!(sort %in% c("granulocytes of live", "PD1pos of DN Bcells", "PD1pos of naive Bcells", "PD1pos of swMem Bcells", "PD1pos of unswMem Bcells", "basophils of nonGrans", "EMRA of Tconv Tcells", "CXCR6pos of NN CD8 Tcells", "CXCR6posGrzmBpos of NN CD8 Tcells")),
          !str_detect(sort, "PD")) %>%
   filter(freq > 0,
-         visit_info != "Other")
+         visit_info != 6) %>%
   # getting rid of any sorts with any NA freqs gets rid of some sorts
+  mutate(freq = logitNorm(freq)) %>%
+  filter(!(is.na(patient_id)))
+  
+unique(mixed_effects_model_df$visit_info)
 
-visit_levels <- c("Baseline", "Visit 2", "Visit 3", "irAE", "irAE F/U")
-group_levels <- c("Healthy_Control", "AID_Patient", "non-irAE", "irAE/SAE")
+visit_levels <- c(1, 2, 3, 4, 5)
+group_levels <- c("non-irAE", "irAE/SAE", "Healthy_Control", "AID_Patient")
 
 mixed_effects_model_df$visit_info <- factor(mixed_effects_model_df$visit_info, levels = visit_levels)
 mixed_effects_model_df$group <- factor(mixed_effects_model_df$group, levels = group_levels)
@@ -1605,16 +1608,46 @@ mixed_effects_model_df$group <- factor(mixed_effects_model_df$group, levels = gr
 sorts <- unique(mixed_effects_model_df$sort)
 
 results <- list()
+residuals_combined <- list()
 
 for (s in sorts) {
   subset_data <- mixed_effects_model_df %>% filter(sort == s)
   
-  fit <- lmer(freq ~ group * visit_info + (1 | patient_id), data = subset_data)
+  # Get unique combinations of patient_id and visit_info to combine as metadata w/ residuals df
+  unique_combinations <- subset_data %>%
+    select(patient_id, visit_info, group)
   
-  results[[s]] <- summary(fit)
+  # Fit the mixed-effects model
+  fit <- lmer(freq ~ group * visit_info + Batch + (1 | patient_id), data = subset_data)
+  
+  # Extract residuals
+  residuals_data <- residuals(fit)
+  
+  # Combine residuals with unique_combinations
+  residuals_df <- cbind(unique_combinations, residuals = residuals_data)
+  
+  # Store in the list
+  residuals_combined[[s]] <- residuals_df
 }
 
-results
+combined_residuals_df <- bind_rows(lapply(names(residuals_combined), function(s) {
+  residuals_combined[[s]] %>%
+    mutate(sort = s)
+}))
+
+```
+
+# Look for baseline effects subtracting group/time effects, observe none
+
+```{r}
+
+combined_residuals_df %>%
+  filter(group %in% c("non-irAE", "irAE/SAE") & visit_info == 1) %>%
+  group_by(sort) %>%
+  summarize(pval = wilcox.test(residuals[group == "irAE/SAE"], residuals[group == "non-irAE"], paired = FALSE, exact = FALSE)$p.value) %>%
+  mutate(adj_pval = p.adjust(pval, method = "BH")) %>%
+  arrange(adj_pval) %>%
+  print()
 
 ```
 
@@ -1622,23 +1655,18 @@ results
 
 ```{r}
 
-# potential issue with only getting 1 irAE group interacting with visits at a time, but below are potentially interesting sorts
+"yes vs. no irAE over time
+CD56bright of NKcells"
 
-# specific visit info: Tfr of NN Treg Tcells visit 3 irAE interaction effect, ICOSpos of Tfh Tconv Tcells and naive of Tconv Tcells visit 2 irAE interaction and EM of CD8 Tcells
-
-# general visit info: naive of Tconv Tcells no irAE visit 2 interaction, ICOSpos of Tfh Tconv Tcells no irAE visits 2-3, EM of CD8 Tcells visit 2 no irAE int, CD56bright of NKcells visit 3 no irAE int
-# $`naive of Tconv Tcells`, ICOSpos of Tfh Tconv Tcells, EM of CD8 Tcells, CD56bright of NKcells
-
-# heamtap interesting hits
-#Low in irAEs? GrzmBpos of NN CD8 Tcells, CCR6pos of NN CD8 Tcells, EMRA of CD8 Tcells, CD8 of Tcells, intermediate/nonclassical of monocytes
-#Tcells of nonGrans, CCR6pos of NN Tconv Cells, CXCR3posCCR6pos of NN Tconv Tcells, CXCR3pos of NN Tconv Tcells, CXCR3pos of NN CD8 Tcells
-
-# high in irAEs?
-#CCR4pos of NN CD8 Tcells, CM of CD8 Tcells, CD4 of Tcells, CM of Treg Tcells, CM of Tconv Tcells, CCR6pos of NN CD8 Tcells, EMRA of CD8 Tcells, CD8 of Tcells
+"severe vs. nonsevere/no irAE over time
+CD4 of Tcells
+EMRA of CD8 Tcells
+EM of CD8 Tcells
+CD8 of Tcells"
 
 mixed_effects_model_df$irae_severity_category <- factor(mixed_effects_model_df$irae_severity_category, levels = c("HC", "AID", "no irAE", "Non-severe irAE", "Severe irAE"))
 
-p <- ggplot(mixed_effects_model_df %>% filter(sort %in% c("CD56bright of NKcells", "EM of CD8 Tcells", "ICOSpos of Tfh Tconv Tcells", "Tfr of NN Treg Tcells")), aes(x = interaction(visit_info, irae_severity_category), y = log10(freq), color = irae_severity_category)) +
+p <- ggplot(mixed_effects_model_df %>% filter(sort %in% c("CD4 of Tcells", "CD8 of Tcells", "EM of CD8 Tcells", "EMRA of CD8 Tcells")), aes(x = interaction(visit_info, irae_severity_category), y = (freq), color = irae_severity_category)) +
   geom_boxplot(aes(group = interaction(visit_info, irae_severity_category)), outlier.shape = NA, position = position_dodge(width = 0.75)) +  # Boxplots dodge by group
   geom_point(size = 0.5, alpha = 0.5) +
   geom_line(aes(group = interaction(patient_id, irae_severity_category)), color = "grey", alpha = 0.25) +
