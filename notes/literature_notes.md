@@ -1171,6 +1171,11 @@
 # Graft-versus-host disease versus graft-versus-leukemia
  - graft-versus-host is characterized by robust T cell activation and proliferation followed by infiltration of host target structures
  - it's less clear to what degree T cell activation and proliferation are required for effective graft-versus-leukemia, so perhaps controlling T cell proliferation can uncouple graft-versus-leukemia from graft-versus host
+# Granzyme K<sup>+</sup> CD8 T cells in autoimmunity
+ - CD8s expressing GZMK enriched in synovial tissue from RA patients (and expanded, so recognizing antigen, but other evidence suggests GZMB<sup>+</sup> CD8s are instead the antigen-specific CD8s in RA synovium...), and in other AID tissue
+ - GZMK can't activate caspase cascades (protease but with different specificity, unlike GZMB for example that can cleave caspases to initiate apoptosis) but can cleave other proteins that can lead to cell death or inflammation without cell death
+ - GZMK<sup>+</sup> CD8s express low levels of perforin, so no granzyme able to get into target cells
+ - transcriptional similarity between GZMK<sup>+</sup> and NK cells may argue for antigen-independent regulation (as NK cells are by definition antigen-independent), so maybe cytokine-mediated proliferation, selective migration...
 # Guidelines for bioinformatics of single cell sequencing data analysis in Alzheimer's disease: review, recommendation, implementation and application
 ## Quality control
  - remove sources of technical variation introduced during generation of scRNA data while maintaining true biological variation
@@ -3051,6 +3056,12 @@
  - CD318 expressed on some human DCs, activated monocytes
  - CD318<sup>+</sup> DCs suppress autoreactive T cells specific for GAD65 (self-antigen in T1D)
  - previous literature: CD318 is CD6 ligand (CD6 on T cells)
+# The CD8<sup>+</sup> T cell tolerance checkpoint triggers a distinct differentiate state defined by protein translation defects
+ - induction of "tolerant" T cells can occur early during initial antigen recognition in absence of infection/inflammation, so the cells are deleted/become anergic instead (depending on antigen load)
+ - tolerant gene signature overlaps with that of exhausted T cells
+ - here, they find that tolerant CD8s resemble defectively primed cells from tumor-draining LNs but are otherwise distinct from effector, exhausted, memory cells
+ - they find that tolerant cells diverge early/progressively from effector cells (not merely stalled effector cells)
+ - strong TCR signaling and inflammation required to break tolerance
 # The changing landscape of naive T cell receptor repertoire with human aging
  - aging associated with loss of thymus productivity, yet naive T cells still maintain abundance by division in periphery for many years
  - **shorter CDR3β, less added N nucleotides within CDR3 β with aging**
@@ -3153,6 +3164,8 @@
  - **can see same clonotypes of T cells reactive against tumor and self in irAEs**
  - **higher tumor mutational burden and therefore antigenicity increase probability of crossreactivity because there are more distinct clonotypes of activated T cells and therefore more chances for a crossreactive clonotype to induce irAEs**, alternative hypothesis is that high tumor mutational burden correlates with ICI response therefore patients live longer and are more likely to eventually experience irAEs
  - another caveat: < 1% of non-synonymous single nucleotide variants in expressed genes result in detectable CD4/CD8 positive T cell reactivity in tumor-infiltrating leukocytes, **would any be predicted in periphery?**, **frameshift mutations much more likely to lead to neoantigens**
+# The pseudokinase Trib1 regulates the transition of exhausted T cells to a KLR<sup>+</sup> CD8<sup>+</sup> effector state and its deletion improves checkpoint blockade
+ - deleting Trib1 shifts Tex towards intermediate state (CX3CR1<sup>+</sup>) with enrichment of KLR<sup>+</sup> CD8s via clonal expansion, augmented PD-L1 blockade to improve viral clearance by expanding KLR CD8 population
 # The relationship between hydrophobicity and drug-protein binding in human serum albumin: a quartz crystal microbalance study
  - positive correlation between drug hydrophobicity and binding strength to human serum albumin, **perhaps in contrast to hypothesis of increased crossreactivity from more hydrophobic TCRs, assuming increased crossreactivity means lower strength binding for each or a lower possible maximum...**
 # The role of immune checkpoints in antitumor response: a potential antitumor immunotherapy
@@ -3330,6 +3343,8 @@
  - FoxP3 is main Treg transcription factor, associated with high CD25 expression
  - Tregs defined as CD3<sup>+</sup>CD4<sup>+</sup>CD25<sup>high</sup>FoxP3<sup>+</sup>CD127<sup>low</sup>
  - Tregs can develop in thymus (tTregs, express FoxP3, high autoaffinity TCR, provide tolerance to autoantigens) or peripherally (pTregs, prevent local inflammation in presence of exogenous antigens) from effector cells
+# Trib1 inhibition promotes the Klr effector state and augments checkpoint blockade to enhance T cell function during T cell exhaustion
+ - mice, same as bioRxiv paper already annotated
 # tRNA-m<sup>1</sup>A modification promotes T cell expansion via efficient MYC protein synthesis
  - naive T cells undergo radical changes during transition from dormant to hyperactive state, necesitating *de novo* transcription and translation
  - here, they propose mechanism for enhanced translation efficiency to promote this transition
