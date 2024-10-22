@@ -3,6 +3,7 @@
  - **switch to limma rather than Seurat for bulk... just start from counts matrix, look for markers (`FindAllMarkers` equivalent) and try linear modeling for each peak using sorts in hypothesized differentiation order as like a "visit time" as I did for NCI irAE? Use Basilin code**
  - **look at quality of data as possible explanation for 2 DP CD57 outliers**
  - **try pseudotime/monocle in Kirsten's data (ask Basilin for data object? it's a different P3XX)**
+ - compare expansion levels of TCRseq in R vs. NR in Erin's data? would expect more expansion in R with more terminal cells? Did Erin already do this?
  - retry cluster profiler using background as all unique genes from peaks
  - check out ROAST, it's like GSEA?
  - try to incorporate/do something similar to what I did for mean gene set accessibilities but for gene coverage plots (i.e. weak purine signal in peaks but it looked stronger in coverage plots?)
@@ -28,10 +29,9 @@
 
 # High priority NCI TODOs:
  - **prepare for 10/23 update (update labdb after)**
- - **for every feature look for correlation b/w irAE grade and feature freqs (i.e. at baseline but also over time later...)**
- - **re-do baseline LM thing only using visit a var not also group (i.e. worried I took away important group signal by using group*time...), hope time will take into account group*time interaction though**
- - **add figs to slides of ICI/ICI+group effects (batch corrected, logit transformed data, logit easy just need to make sure batch is corrected for... so look at residuals I guess as y-axis now?), shortlist of features in .Rmd but also check features from last presentation**
- - try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd
+ - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
+ - re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals...
+ - check for correlations b/w CTCAE grade and irAE severity not just at baseline
  - look at ratio of IRs to activation markers
  - try PCAs and stats again using LOGIT + Z-scored freqs
  - try plotting % change from baseline for longitudinal visits rather than absolute % or transformed values?
