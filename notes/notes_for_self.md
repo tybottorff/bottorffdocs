@@ -1,7 +1,10 @@
 # High priority P576/AbATE/TN10 TODOs:
- - **switch to limma rather than Seurat for bulk... just start from counts matrix, re-try regressing out R status (for sorts) and sorts (for R vs. NR comparisons) and of course donor/replicate for both, look for markers (`FindAllMarkers` equivalent) and try linear modeling for each peak using sorts in hypothesized differentiation order as like a "visit time" as I did for NCI irAE? Use Basilin code**
+ - **re-do exhaustion mean gene set adding CD38, ENTPD1/CD39 (in terminal exh gene set but not in exh gene set as far as I know)**
+ - **check Lrp10 in mean peak signal: https://pmc.ncbi.nlm.nih.gov/articles/PMC11315911/, also IL7R/STAT5/Bcl2 (downstream of IL7R)**
+ - **delete all Seurat code, erroneous use (normalization different for scRNAseq vs. ATAC)**
+ - **switch to limma rather than Seurat for bulk... just start from counts matrix, re-try regressing out R status (for sorts) and sorts (for R vs. NR comparisons) and of course donor/replicate for both, look for markers (`FindAllMarkers` equivalent?) and try linear modeling for each peak using sorts in hypothesized differentiation order as like a "visit time" as I did for NCI irAE? Use Basilin code**
  - **try pseudotime/monocle in Kirsten's data (ask Basilin for data object? it's a different P3XX)**
- - **retry clusterprofiler using background as all unique genes from peaks**
+ - **retry clusterprofiler using background as all unique genes from peaks (rather than whole genome as background)**
  - **look at quality of data as possible explanation for 2 DP CD57 outliers**
  - **try to incorporate/do something similar to what I did for mean gene set accessibilities but for gene coverage plots (i.e. weak purine signal in peaks but it looked stronger in coverage plots?)**
  - compare expansion levels of TCRseq in R vs. NR in Erin's data? would expect more expansion in R with more terminal cells? Did Erin already do this?
@@ -16,7 +19,6 @@
  - leave 1 out analyses to deal with strong outlier patients, see what trends consistent of all leave 1 outs (1/10 outs patients, 1/50 outs samples?)
  - look more into upset plot for sharing/unique MT vars for helping decipher models
  - ask for Ki67+ from same samples to test change from baseline in Ki67 vs. MT SNV counts
- - check again for literature supporting MT SNV counts as division tracker
  - work with heavy water/glucose data (pulse chase mass spec), CD57+ less heavy (diliuted over divisions)?
  - pseudotime analyses: re-analyze Tex sub-UMAP (iffy on pseudotime here...), maybe better ylab is "Mean z score of..."? why is scale 1-20 in plot_genes_in_pseudotime but 1-10 elsewhere? once resolving this, test more progenitor vs. effector/terminal Tex genes. https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep
  - napkin math connecting vars to divisions, just rough fold
