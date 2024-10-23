@@ -3000,6 +3000,13 @@
  - Tex importance depends on pre-treatment terminal Tex infiltration: low terminal Tex baseline infiltration responsive tumors had PD-1 blockade increasing these cells (increased infiltration or expansion of these cells, consistent with increased exhausted-like T cells with ICB), but high terminal Tex baseline infiltration responsive tumors had opposite pattern (decreased frequency with ICB)
 ### Local expansion of pre-existing Texp cells
  - local expansion of pre-existing Texp cells drives Texp accumulation, as does clonal revival (from periphery)
+# Teplizumab's immunomodulatory effects on pancreatic beta-cell function in type 1 diabetes mellitus
+ - teplizumab: humanized mAb targeting CD3 (epsilon subunit) antigen, CD3 functions as TCR coreceptor (activating/differentiating naive T cells), so teplizumab prevents T cell activation i.e. autoreactive CD8s, teplizumab also increases CD4 Tregs (temporary increase in proportion of FOXP3<sup>+</sup> T cells) to help self-tolerance
+ - loss of insulin secretion can be rapid/gradual, adults often retain residual insulin production (detectable/higher c-peptide), **c-peptide marks insulin production**
+ - circulating pancreatic islet (of Langerhans) autoantibodies mark T1D risk/development, autoantigens including ICA (islet cell cytoplasmic antibody), IAA (insulin antibody), GAD65 (glutamic acid decarboxylase isoform 65), IA-2 (insulinoma antigen 2/islet tyrosine phosphatase 2), ZnT8 (zinc transporter 8), GAD65 being the most common T1D autoantibody in adults, numbers/titers of autoantibodies correlate with risk of T1D development
+ - beta cell autoantigens released after cell turnover/damage and are presented to CD4s by APCs
+ - **beta cell antigen-specific CD8s activated by IL-2 from activated Th1 CD4s, transforming into cytotoxic CD8s and entering pancreatic islets**
+ - islets comprise 1-2% of pancreas, beta cells accompanied by alpha, delta, epsilon cells, connective tissue separates these cells from acinar cells, "immune privileged" (so beta cells normally protected from immune cells but immune cells infiltrate in T1D)
 # Teplizumab improves and stabilizes β cell function in antibody positive high-risk individuals
  - 1 14 day course of teplizumab in non-diabetics at high risk for T1D, helps people remain T1D-free
  - changes in C-peptide with teplizumab treatment associated with increases in partially exhausted memory KLRG1<sup>+</sup>TIGIT<sup>+</sup> CD8s that showed reduced secretion of IFNγ and TNFα
