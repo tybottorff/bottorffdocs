@@ -29,6 +29,15 @@
 
 # High priority NCI TODOs:
  - **prepare for 10/23 update (update labdb after)**
+ - new TODOs from 10/23 presentation:
+ 1) HC + just AID (w/ subgroups) PCA
+ 2) conclusion slide 1A/1B +/- regressing age out, cancer/AID subgroups now (not) different?
+ 3) do those with irAEs have older immunotypes (since age contributes to variation in immunotypes)
+ 4) subset PCA for irAE vs. no irAE to just use features that are most (marginally) significant in comparison
+ 5) see if batch 7 (batch effect) is more biased to a specific group (like irAE?)
+ 6) try PCA for cancer group colored by irAE type (baseline)
+ 7) project cancer patients onto AID subgroup PCA space where T1D split from RA
+ 8) don't cut patients for LM due to NA, cut features (NA because parent freq is 0)
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
  - **re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals...**
  - **check for correlations b/w CTCAE grade and irAE severity not just at baseline**
