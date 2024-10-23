@@ -1,9 +1,7 @@
 ---
-title: "Molly Fisher Thomas colitis data"
+title: "CyTOF analyses for NCI irAE project"
 output: pdf_document
 ---
-
- - data mining of https://villani.mgh.harvard.edu/ircolitis/
  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -122,9 +120,26 @@ logitNorm <- function(v){
 
 stats_test <- baseline_flow_data %>%
   mutate(freq = logitNorm(freq)) %>%
-  filter(!(is.na(irae_severity_based_on_ctcae))) %>%
   group_by(sort) %>%
-  summarize(pval = wilcox.test(freq[irae_severity_based_on_ctcae == "Non-irAE"], freq[irae_severity_based_on_ctcae == "Non-serious irAE/SAE"], paired = FALSE, exact = FALSE)$p.value) %>%
+  # dropping the 12 patients also results in significance for PD1+ of CM Tconv Tcells here...
+  #filter(patient_id %in% adjusted_data$patient_id) %>%
+  summarize(
+    # Perform Shapiro-Wilk test for normality in each group
+    shapiro_non_irae = shapiro.test(freq[group == "non-irAE"])$p.value,
+    shapiro_irae = shapiro.test(freq[group == "irAE/SAE"])$p.value,
+    
+    # Choose between t-test and Wilcoxon test based on normality
+    pval = ifelse(
+      shapiro_non_irae > 0.05 & shapiro_irae > 0.05,
+      t.test(freq[group == "non-irAE"], 
+             freq[group == "irAE/SAE"], 
+             paired = FALSE)$p.value,
+      wilcox.test(freq[group == "non-irAE"], 
+                  freq[group == "irAE/SAE"], 
+                  paired = FALSE, exact = FALSE)$p.value
+    )
+  ) %>%
+  # Adjust p-values using BH method
   mutate(adj_pval = p.adjust(pval, method = "BH")) %>%
   arrange(adj_pval)
 
@@ -139,7 +154,7 @@ stats_test
 ```{r}
 
 wide_baseline_flow_num_data <- baseline_flow_data %>%
-  filter(group == "AID_Patient") %>%
+  #filter(group == "AID_Patient") %>%
   #filter(group %in% c("non-irAE", "irAE/SAE")) %>%
   mutate(freq = logitNorm(freq)) %>%
   select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
@@ -243,12 +258,12 @@ p <- ggplot(data = pcaData) +
   #scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
   xlim(-limits[1], limits[1]) +
   ylim(-limits[2], limits[2]) +
-  labs(color = "Group") +
+  labs(color = "") +
   theme_bw() +
   theme(
     legend.position = "bottom", 
     legend.text = element_text(size = 7),  # Adjust legend text size
-    legend.title = element_blank(),  # Adjust legend title size
+    #legend.title = element_blank(),  # Adjust legend title size
     legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
     legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
   ) +
@@ -261,6 +276,7 @@ p
 
 #ggsave("../figures/baseline_pca_specific_irae_group.png", plot = p, width = 3, height = 3.5)
 ggsave("../figures/baseline_pca_group.png", plot = p, width = 3, height = 3.5)
+#ggsave("../figures/baseline_pca_batch.png", plot = p, width = 3.5, height = 3.5)
 
 ```
 
@@ -1437,15 +1453,20 @@ ggplot(ica_df, aes(x=Comp1, y=Comp2)) +
 # 12 cancer patients lost because of > 1 NA in > 1 feature
 
 regressing_out_confounders_df <- baseline_flow_data %>%
-  select(-c(parent_population, parent_parent_population, cleaned_visit_num, age, irae_severity_based_on_ctcae)) %>%
+  select(-c(parent_population, parent_parent_population, cleaned_visit_num, irae_severity_based_on_ctcae)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
+  # don't drop NA rows if instead removing features (cols)
   drop_na(-c(group, specific_group, ctcae_grade)) %>%
   mutate(Batch = as.factor(Batch))
 
 regressing_out_confounders_df
 
-metadata_cols <- regressing_out_confounders_df[, 1:14]
-feature_cols <- regressing_out_confounders_df[, 15:ncol(regressing_out_confounders_df)]
+metadata_cols <- regressing_out_confounders_df[, 1:6]
+feature_cols <- regressing_out_confounders_df[, 7:ncol(regressing_out_confounders_df)]
+
+# could also try removing 14/71 features with NAs instead of removing the patients
+na_count_per_feature <- colSums(is.na(feature_cols))
+feature_cols_filtered <- feature_cols[, na_count_per_feature == 0]
 
 # Function to regress out confounders (batch) for each feature
 regress_out_confounders <- function(feature, batch) {
@@ -1466,10 +1487,27 @@ adjusted_data <- cbind(metadata_cols, adjusted_features)
 
 ```{r}
 
-wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:5] %>%
-  mutate(patient_id_simple = row_number())
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:6] %>%
+  mutate(patient_id_simple = row_number()) %>%
+  mutate(group = case_when(
+    group == "Healthy_Control" ~ "HC",
+    group == "AID_Patient" ~ "AID",
+    TRUE ~ group
+  ),
+  subgroup = case_when(
+    group == "AID" & specific_group == "Type 1 Diabetes" ~ "T1D",
+    group == "AID" & specific_group == "RA" ~ "RA",
+    group == "AID" & str_detect(specific_group, "Ulcerative Colitis") ~ "Gut",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Renal Cancer, Bladder Cancer", "Bladder Cancer") ~ "Bladder/\nrenal\ncancer",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Urinary Tract Cancer", "Urethral Cancer") ~ "Urinary\ntract/\nurethral\ncancer",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Lung Disease, Lung Cancer", "Lung Cancer") ~ "Lung\ncancer/\ndisease",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer, Lung Cancer" ~ "Head\nand\nneck/\nlung\ncancer",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer" ~ "Head\nand\nneck\ncancer",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Gastric Cancer" ~ "Gastric\ncancer",
+    TRUE ~ specific_group
+  ))
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 6:ncol(adjusted_data)]
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 7:ncol(adjusted_data)]
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1524,16 +1562,16 @@ p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
-  scale_color_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  scale_color_manual(values = c("HC" = "purple", "AID" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
   #scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
   xlim(-limits[1], limits[1]) +
   ylim(-limits[2], limits[2]) +
-  labs(color = "Batch") +
+  labs(color = "") +
   theme_bw() +
   theme(
     legend.position = "bottom", 
     legend.text = element_text(size = 7),  # Adjust legend text size
-    legend.title = element_blank(),  # Adjust legend title size
+    #legend.title = element_blank(),  # Adjust legend title size
     legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
     legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
   ) +
@@ -1544,8 +1582,11 @@ p <- ggplot(data = pcaData) +
 
 p
 
-ggsave("../figures/baseline_pca_general_group_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
-#ggsave("../figures/baseline_pca_batch_with_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+#ggsave("../figures/baseline_pca_age_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+#ggsave("../figures/baseline_pca_cancer_type_batch_regressed_out.png", plot = p, width = 3.5, height = 3.5)
+#ggsave("../figures/baseline_pca_aid_subgroup_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+#ggsave("../figures/baseline_pca_general_group_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+#ggsave("../figures/baseline_pca_batch_batch_regressed_out.png", plot = p, width = 3.5, height = 3.5)
 
 ```
 
@@ -1559,38 +1600,36 @@ irae_group <- df %>% filter(group == "irAE/SAE")
 no_irae_group <- df %>% filter(group == "non-irAE")
 
 non_feature_cols <- c("patient_id", "group", "specific_group", "irae_ex", "Batch", 
-                      "age", "radiation", "chemoradiation", "intravesicular_bcg", 
-                      "intravesicular_chemo", "irae_severity_category", "pneumonitis", 
-                      "thyroid_irae", "skin_irae")
+                      "age", "ctcae_grade")
 feature_columns <- setdiff(colnames(df), non_feature_cols)
 
 # Calculate mean residuals for each feature
-irae_means <- irae_group %>% select(all_of(feature_columns)) %>% summarise_all(mean)
+irae_means <- (irae_group %>% select(all_of(feature_columns)) %>% summarise_all(mean))
 no_irae_means <- no_irae_group %>% select(all_of(feature_columns)) %>% summarise_all(mean)
 
-fc <- (as.numeric(irae_means) / as.numeric(no_irae_means))
-log2_fc <- sign(fc) * log2(abs(fc))
+abs_diff <- (as.numeric(irae_means) - as.numeric(no_irae_means))
+#log2_fc <- sign(fc) * log2(abs(fc))
 
 pvals <- sapply(feature_columns, function(feature) {
-  t.test(irae_group[[feature]], no_irae_group[[feature]])$p.value
+  wilcox.test(irae_group[[feature]], no_irae_group[[feature]])$p.value
 })
 
 padj <- p.adjust(pvals, method = "BH")
 
 volcano_df <- data.frame(
   feature = feature_columns,
-  log2_fc = log2_fc,
+  abs_diff = abs_diff,
   padj = padj,
   neg_log10_padj = -log10(padj)
 )
 
-ggplot(volcano_df, aes(x = log2_fc, y = neg_log10_padj)) +
+ggplot(volcano_df, aes(x = abs_diff, y = neg_log10_padj)) +
   geom_point(aes(color = padj < 0.05)) +
   theme_minimal() +
-  labs(x = "irAE/SAE vs. no irAE FC (log2)", y = "-log10(padj)") +
+  labs(x = "irAE/SAE vs. no irAE (absolute difference in mean of residuals)", y = "-log10(padj)") +
   geom_vline(xintercept = 0, linetype = "dashed") + # Vertical line at 0 fold change +
   geom_hline(yintercept = -log10(0.05), linetype = "dashed") + # horizontal line at sig threshold
-  geom_text_repel(data = subset(volcano_df, neg_log10_padj > 0.5 & abs(log2_fc) > 2), 
+  geom_text_repel(data = subset(volcano_df, padj < 0.1), 
                   aes(label = feature), size = 3, box.padding = 0.5, max.overlaps = 10)
 
 ```
@@ -1599,14 +1638,20 @@ ggplot(volcano_df, aes(x = log2_fc, y = neg_log10_padj)) +
 
 ```{r}
 
-adjusted_data %>% select(group, KLRG1posTIGITpos.of.NN.CD8.Tcells) %>%
-  pivot_longer(cols = KLRG1posTIGITpos.of.NN.CD8.Tcells, names_to = "sort", values_to = "freq") %>%
+p <- adjusted_data %>% select(group, PD1posTIGITpos.of.EM.Tconv.Tcells, PD1pos.of.CM.Tconv.Tcells, KLRG1posTIGITpos.of.NN.CD8.Tcells) %>%
+  pivot_longer(cols = c(PD1posTIGITpos.of.EM.Tconv.Tcells, PD1pos.of.CM.Tconv.Tcells, KLRG1posTIGITpos.of.NN.CD8.Tcells), names_to = "sort", values_to = "freq") %>%
   ggplot(aes(x = group, y = freq, fill = group)) +
   geom_boxplot(outlier.shape = NA) +
-  geom_jitter(color = "grey") +
-  labs(x = "", y = "TIGIT+KLRG1+ of NN\nCD8 Tcells residuals\n(batch regressed out)") +
+  facet_wrap(~ sort, ncol = 3) +
+  geom_jitter(color = "grey", size = 0.5) +
+  labs(x = "", y = "Residuals (batch regressed out)") +
   scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
-  theme(axis.text.x = element_blank())
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(size = 8))
+
+p
+
+ggsave("../figures/batch_regressed_out_residuals_by_feature_hits.png", plot = p, width = 10, height = 5)
 
 ```
 
@@ -1614,23 +1659,48 @@ adjusted_data %>% select(group, KLRG1posTIGITpos.of.NN.CD8.Tcells) %>%
 
 ```{r}
 
+# Define feature columns
 feature_columns <- colnames(adjusted_data)[!(colnames(adjusted_data) %in% non_feature_cols)]
 
+# Filter groups
 irae_group <- adjusted_data %>% filter(group == "irAE/SAE")
 non_irae_group <- adjusted_data %>% filter(group == "non-irAE")
 
-pvals <- sapply(feature_columns, function(feature) {
-  wilcox.test(irae_group[[feature]], non_irae_group[[feature]], paired = FALSE, exact = FALSE)$p.value
-})
+# Initialize lists for p-values and test types used
+pvals <- c()
+test_type <- c()
 
+# Loop over features and decide on test based on normality
+for (feature in feature_columns) {
+  # Perform Shapiro-Wilk test for normality
+  shapiro_irae <- shapiro.test(irae_group[[feature]])$p.value
+  shapiro_non_irae <- shapiro.test(non_irae_group[[feature]])$p.value
+  
+  # If both groups are normally distributed (p > 0.05), use t-test
+  if (shapiro_irae > 0.05 & shapiro_non_irae > 0.05) {
+    pval <- t.test(irae_group[[feature]], non_irae_group[[feature]], paired = FALSE)$p.value
+    test_type <- c(test_type, "t-test")
+  } else {
+    # Otherwise, use Wilcoxon test
+    pval <- wilcox.test(irae_group[[feature]], non_irae_group[[feature]], paired = FALSE, exact = FALSE)$p.value
+    test_type <- c(test_type, "wilcox")
+  }
+  
+  pvals <- c(pvals, pval)
+}
+
+# Adjust p-values using BH method
 padj <- p.adjust(pvals, method = "BH")
 
+# Create results data frame with the test type
 stats_test <- data.frame(
   feature = feature_columns,
   pval = pvals,
-  adj_pval = padj
+  adj_pval = padj,
+  test_type = test_type
 ) %>% arrange(adj_pval)
 
+# Output stats_test dataframe
 stats_test
 
 ```
