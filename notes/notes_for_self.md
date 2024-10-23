@@ -1,15 +1,13 @@
 # High priority P576/AbATE/TN10 TODOs:
- - **re-do diffbind regressing out sort fixing this line, replace PCA for ITN presentation: `consensusPeaks_grouped_regress_out_sort = dba.contrast(consensusPeaks_grouped_regress_out_sort, categories=DBA_CONDITION, block = c(DBA_REPLICATE, DBA_TISSUE))`**
- - **switch to limma rather than Seurat for bulk... just start from counts matrix, look for markers (`FindAllMarkers` equivalent) and try linear modeling for each peak using sorts in hypothesized differentiation order as like a "visit time" as I did for NCI irAE? Use Basilin code**
- - **look at quality of data as possible explanation for 2 DP CD57 outliers**
+ - **switch to limma rather than Seurat for bulk... just start from counts matrix, re-try regressing out R status (for sorts) and sorts (for R vs. NR comparisons) and of course donor/replicate for both, look for markers (`FindAllMarkers` equivalent) and try linear modeling for each peak using sorts in hypothesized differentiation order as like a "visit time" as I did for NCI irAE? Use Basilin code**
  - **try pseudotime/monocle in Kirsten's data (ask Basilin for data object? it's a different P3XX)**
+ - **retry clusterprofiler using background as all unique genes from peaks**
+ - **look at quality of data as possible explanation for 2 DP CD57 outliers**
+ - **try to incorporate/do something similar to what I did for mean gene set accessibilities but for gene coverage plots (i.e. weak purine signal in peaks but it looked stronger in coverage plots?)**
  - compare expansion levels of TCRseq in R vs. NR in Erin's data? would expect more expansion in R with more terminal cells? Did Erin already do this?
- - retry cluster profiler using background as all unique genes from peaks
  - check out ROAST, it's like GSEA?
- - try to incorporate/do something similar to what I did for mean gene set accessibilities but for gene coverage plots (i.e. weak purine signal in peaks but it looked stronger in coverage plots?)
  - Google search "glue atac rna", possible use for bulk atac? basically predicting RNA levels from promoter accessibilities? Azimuth does have ATAC refs (stuff like CD8 TCM/TEM), as does shendure lab, perhaps they can shed light on cell types here... this is called deconvolution (https://www.nature.com/articles/s41467-023-40611-4#Sec9) and is probably hard to get useful results but maybe worth trying...
  - Homer: DP CD127 vs. other DP separately
- - thinking about how old my MT SNV method I used is... why not use new methods?
  - make dummy df with high JAK/STAT signal --> KEGG, see if lack of results due to KEGG (not in set) or signal:noise...
  - look at all interesting gene sets in Erin's RNAseq (DN vs. DPs)
  - try every sort vs. all 4 other sorts to get sort-specific info (wasn't super helpful for non-exh CD127+ vs. others but try anyways)
@@ -30,8 +28,8 @@
 # High priority NCI TODOs:
  - **prepare for 10/23 update (update labdb after)**
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
- - re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals...
- - check for correlations b/w CTCAE grade and irAE severity not just at baseline
+ - **re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals...**
+ - **check for correlations b/w CTCAE grade and irAE severity not just at baseline**
  - look at ratio of IRs to activation markers
  - try PCAs and stats again using LOGIT + Z-scored freqs
  - try plotting % change from baseline for longitudinal visits rather than absolute % or transformed values?
@@ -43,7 +41,7 @@
 
 # Key notes
 ## Professional
- - **explain things clearly (motivations, methods, evidence for results, takeaways)**
+ - ***explain things clearly (motivations, methods, evidence for results, graphs, takeaways like 1/slide), don't rush through presentations***
  - Speak up more in meetings
  - Be in the office (not remote) as often as possible
 ## Biology
