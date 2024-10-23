@@ -1876,6 +1876,11 @@
  - 43 marker mass cytometry panel, 28 patients with melanoma across 29 lines of ICI therapy, baseline, pre-irAE, and peak-irAE samples, 18 severe irAE patients and 11 non-severe irAE patients
 # Low TCR binding strength results in increased progenitor-like CD8<sup>+</sup> tumor-infiltrating lymphocytes
  - TILs with low TCR affinity to tumor-associated antigen had progenitor-like phenotypes and increased quiescence, higher affinity TCR TILs had more cell division and faster progression to T-cell exhaustion programs
+# Lrp10 suppresses IL7R limiting CD8 T cell homeostatic expansion and anti-tumor immunity
+ - mice, forward genetic screen in randomly mutagenized mice, measure proportionsof T cells circulating in periphery
+ - LoF of Lrp10 leads to accumulation of CD8 TCMs in periphery (accumulation is dependent on diverse TCR repertoire, i.e. replacing TCR repertoire with one specific to ovalbumin limits this accumulation)
+ - T cell activation induces Lrp10 expression, Lrp10 post-translationally suppresses IL7R levels, so LoF of Lrp10 leads to T cell expansion via IL7R signaling
+ - **less terminal exhaustion of tumor-reactive CD8s in Lrp10 deficient mice (Lrp10 promotes CD8 CM differentiation via suppression of IL7R?), so maybe more IL7R means less terminal exhaustion?**
 # LRT: integrative analysis of scRNA-seq and scTCR-seq data to investigate clonal differentiation heterogeneity
  - LRT uses transcriptomics info from RNAseq to construct cell trajectories, uses TCRseq to identify clonotype clusters with differentiation biases, aims to correct the error that you get only using RNAseq for trajectory analysis of T cells (cells with same differentiation state may come from different founder cells, instead use TCRseq info as same clonotype assumed to mean same progenitor)
 # m<sup>6</sup>A mRNA methylation controls T cell homeostatis by targeting IL-7/STAT5/SOCS pathway
@@ -2544,6 +2549,8 @@
  - testing hypothesis: scRNAseq to identify TCR clonotypes and transcript phenotypes, apply analysis to islet antigen reactive CD4<sup>+</sup> memory T cells from T1D and healthy control subjects following activation with pooled islet peptides
  - TCR results: extensive TCR clonotype sharing in antigen activated cells especially from T1D subjects, consistent with *in vivo* T cell expansion during disease progression, stable clonotypes (detect at repeat visits), see no clonotype sharing between subjects ("private" TCR specificities), IGRP seems to be a trigger for CD4<sup>+</sup> T cell expansion (recognized by expanded clones from two T1D subjects)
  - transcript results: overall transcript profiles from healthy controls and T1D subjects similar, most expanded clone profiles distinctive though
+# Single cell RNA sequencing of murine islets shows high cellular complexity at all stages of autoimmune diabetes
+ - resident macrophages undergo stepwise activation program, polarization of macrophage subpopulations into terminal proinflammatory state
 # Single cell RNA sequencing reveals distinct T cell populations in immune-related adverse events of checkpoint inhibitors
 ## Abstract
  - different subsets of T cells are associated with irAEs, can use these cells before ICI treatment as biomarkers to predict irAEs
@@ -3000,6 +3007,10 @@
  - Tex importance depends on pre-treatment terminal Tex infiltration: low terminal Tex baseline infiltration responsive tumors had PD-1 blockade increasing these cells (increased infiltration or expansion of these cells, consistent with increased exhausted-like T cells with ICB), but high terminal Tex baseline infiltration responsive tumors had opposite pattern (decreased frequency with ICB)
 ### Local expansion of pre-existing Texp cells
  - local expansion of pre-existing Texp cells drives Texp accumulation, as does clonal revival (from periphery)
+# Teplizumab: a disease-modifying therapy for type 1 diabetes that preserves beta-cell function
+ - teplizumab: humanized immunoglobulin G1 mAb binding epsilon chain of CD3 with high affinity, CDR derived from OKT3 (first mAb licensed for human use), intraveneously infused
+ - **AbATE: autoimmunity-blocking antibody for tolerance in recently diagnosed type 1 diabetes, randomized phase 2 trial, second dose of teplizumab administered 1 year later to prolong duration of response, 14 day course with 4 days of escalation and 10 days of full dosing based on body surface area**
+ - **TN10: stage 2 study, conducted by TrialNet, single course of teplizumab, does it delay/prevent T1D in those with stage 2 (early-stage)?**
 # Teplizumab's immunomodulatory effects on pancreatic beta-cell function in type 1 diabetes mellitus
  - teplizumab: humanized mAb targeting CD3 (epsilon subunit) antigen, CD3 functions as TCR coreceptor (activating/differentiating naive T cells), so teplizumab prevents T cell activation i.e. autoreactive CD8s, teplizumab also increases CD4 Tregs (temporary increase in proportion of FOXP3<sup>+</sup> T cells) to help self-tolerance
  - loss of insulin secretion can be rapid/gradual, adults often retain residual insulin production (detectable/higher c-peptide), **c-peptide marks insulin production**
@@ -3343,6 +3354,10 @@
 # Transcriptomic profiling of human effector and regulatory T cell subsets identifies predictive population signatures
  - Tregs less transcriptionally diverse than Th cells, likely reflects dominant role of Foxp3 on Treg transcriptome
  - most Tregs develop in thymus upon encountering self-antigen, some Tregs may also develop at barrier sites upon encountering harmless environmental antigens (like skin/intestinal microbiome components)
+# Treatment of type 1 diabetes with teplizumab: clinical and immunological follow-up after 7 years from diagnosis
+ - teplizumab-treated responders had higher frequencies of PD1<sup>+</sup> CM and anergic CD8s at follow up
+ - higher frequency of PD-1<sup>+</sup> CM CD8s in responders, as well as exhausted PD-1<sup>+</sup>KLRG1<sup>+</sup> as well as anergic T cells
+ - PD-1<sup>+</sup> CM CD8s weren't induced by PHA to make IL2 (did make IFNG, both made by EM CD8s)
 # Treg heterogeneity, function, and homeostasis
  - Tregs ensure tolerance to autoantigens, antigens of commensal microflora, limit excess immune responses, induce tolerance to food antigens
  - IL-10 and TGF-β are primary suppressive cytokines
