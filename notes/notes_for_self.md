@@ -1,8 +1,6 @@
 # High priority P576/AbATE/TN10 TODOs:
- - **re-do exhaustion mean gene set adding CD38, ENTPD1/CD39 (in terminal exh gene set but not in exh gene set as far as I know)**
- - **check Lrp10 in mean peak signal: https://pmc.ncbi.nlm.nih.gov/articles/PMC11315911/, also IL7R/STAT5/Bcl2 (downstream of IL7R)**
- - **delete all Seurat code, erroneous use (normalization different for scRNAseq vs. ATAC)**
  - **switch to limma rather than Seurat for bulk... just start from counts matrix, re-try regressing out R status (for sorts) and sorts (for R vs. NR comparisons) and of course donor/replicate for both, look for markers (`FindAllMarkers` equivalent?) and try linear modeling for each peak using sorts in hypothesized differentiation order as like a "visit time" as I did for NCI irAE? Use Basilin code**
+ - **DP vs. NAND CD127+: maybe IL7R signaling perturbed in DP? IL7R and Bcl2 higher accessibility in NAND (not true for STAT5A/B though...), try IL7R interactome? https://maayanlab.cloud/Harmonizome/gene_set/IL7R/Hub+Proteins+Protein-Protein+Interactions**
  - **try pseudotime/monocle in Kirsten's data (ask Basilin for data object? it's a different P3XX)**
  - **retry clusterprofiler using background as all unique genes from peaks (rather than whole genome as background)**
  - **look at quality of data as possible explanation for 2 DP CD57 outliers**
@@ -28,16 +26,6 @@
  - TEAseq analyses. Hannah has fastq files if needed, may need permission from Claire Gustafson at Allen (claire.gustafson@alleninstitute.org). Try sc MT lineage mapping using ATACseq data, also look at RNA (HC, then DS) using antibodies to know it's non-naive CD8 and what subtype? Tri-modal single cell profiling reveals a distinct pediatric CD8αα T cell subset and broad age-related molecular reprogramming across the T cell compartment. https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE214546, start with RAW.tar looking for non-naive CD8 cluster
 
 # High priority NCI TODOs:
- - **prepare for 10/23 update (update labdb after)**
- - new TODOs from 10/23 presentation:
- 1) HC + just AID (w/ subgroups) PCA
- 2) conclusion slide 1A/1B +/- regressing age out, cancer/AID subgroups now (not) different?
- 3) do those with irAEs have older immunotypes (since age contributes to variation in immunotypes)
- 4) subset PCA for irAE vs. no irAE to just use features that are most (marginally) significant in comparison
- 5) see if batch 7 (batch effect) is more biased to a specific group (like irAE?)
- 6) try PCA for cancer group colored by irAE type (baseline)
- 7) project cancer patients onto AID subgroup PCA space where T1D split from RA
- 8) don't cut patients for LM due to NA, cut features (NA because parent freq is 0)
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
  - **re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals...**
  - **check for correlations b/w CTCAE grade and irAE severity not just at baseline**
