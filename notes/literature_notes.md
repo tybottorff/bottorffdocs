@@ -966,6 +966,8 @@
  - ankylosing spondylitis: autoimmune condition
  - see that good responders to biologics have increased TCR repertoire diversity
  - positive correlation between TCR repertoire diversity and IL-23 levels
+# Dysfunctional CD8 T cells form a proliferative, dynamically regulated compartment within human melanoma
+ - CD8s in tumors previously thought as "exhausted" may actually be proliferating, clonal, differentiating, independent from a rare population of cytotoxic CD8s in tumors
 # Dysregulation of CD4<sup>+</sup> and CD8<sup>+</sup> T resident memory T, myeloid, and stromal cells in steroid-experienced, checkpoint inhibitor colitis
  - CD4 and CD8 resident memory T cells are progenitors for cytotoxic effectors (TCR clonotype analyses)
  - **activated (CD38<sup>+</sup> HLA-DR<sup>+</sup>) CD4 resident memory T cells and cytotoxic CD8s up in colitis tissue**
@@ -2174,6 +2176,15 @@
 # Nonlinear dynamics of multi-omics profiles during human aging
  - nonlinear important here given acceleration of mortality risk after specific time points
  - methods ideas for NCI irAE longitudinal data
+# Normalizing and denoising protein expression data from droplet-based single cell profiling
+ - dsb: denoised and scaled by background, to normalize and denoise droplet-based protein expression data
+ - noise originates from unbound antibodies encapsulated during droplet generation (so empty droplet protein levels can be used to estimate noise)
+ - isotype control antibodies and background average signal in cells correlates, shared variance can correct cell-to-cell technical noise
+ - CITE-seq: DNA-barcoded antibodies + transcriptome
+ - ASAP-seq: DNA-barcoded antibodies + chromatin accessibility
+ - DNA-barcoded antibody measurements give readouts of protein levels in terms of antibody-derived tag (ADT) counts/protein
+ - scRNAseq normalization (by library size, i.e. total mRNA/cell i.e. total UMI count/modality per cell) not appropriate here for several reasons (higher background, higher variance)
+ - CLR (centered log ratio) transformation can be used to normalize ADT data, CLR can be relative to other proteins or other cells
 # Not-so-opposite ends of the spectrum: CD8<sup>+</sup> T cell dysfunction across chhronic infection, cancer, and autoimmunity
  - review: 3 signals are 1) antigen/TCR, 2) costimulation (CD28?), and 3) inflammatory cytokines
  - **dysfunction/hyporesponse from Tex in chronic infection may be integral for *persistent* response in chronic context**
@@ -2319,6 +2330,9 @@
  - SPRY1<sup>+</sup> CD8s correlate with ICB response as expected of progenitor Tex
  - progenitor TFs: TBX21, REL, NFKB1, FOXO1
  - terminal TFs: TOX, EOMES
+# PTPN2 regulates the generation of exhausted CD8<sup>+</sup> T cell subpopulations and restrains tumor immunity
+ - PTPN2 regulates differentiation of terminally exhausted subpopulation by attenuating type 1 IFN signaling
+ - PTPN2 deletion increases generation, proliferation, and cytotoxicity of terminally differentiated CD8s (TIM-3<sup>+</sup>), so PTPN2 restrains function of terminally differentiated CD8s?
 # Purine nucleoside phosphorylase enables dual metabolic checkpoints that prevent T cell immunodeficiency and TLR7-associated autoimmunity
  - purine nucleoside phosphorylase (PNP) enables breakdown and recycling of guanine nucleosides
  - PNP insufficiency associated with immunodeficiency AND autoimmunity
@@ -2493,6 +2507,8 @@
 # scRNAseq defines dynamic T cell subsets in longitudinal colon and peripheral blood samples in immune checkpoint inhibitor-induced colitis
  - n = 1 but has PBMC and colon scRNA/TCR data...
  - colon Trm, also circulating T cells, driving inflammation in colon
+# Selective expansion of a subset of exhausted CD8 T cells by alphaPD-L1 blockade
+ - 2 subsets of exhausted CD8s in chronic viral infection in mice: 1 rescued by PD-L1 blockade (less terminally differentiated), 1 not (more terminally differentiated)
 # Serum cytokines predict efficacy and toxicity, but are not useful for disease monitoring in lung cancer treated with PD-(L)1 inhibitors
  - baseline levels of IL-1β and angiogenin associated with irAEs
 # Serum immune modulators associated with immune-related toxicities and efficacy of atezolizumab in patients with non-small cell lung cancer
@@ -2662,7 +2678,7 @@
  - exhausted CD8 TILs include subpopulation of progenitor exhausted cells that retain polyfunctionality, persist long term, differentiate into terminally exhausted TILs
  - progenitor exhausted: SLAMF6, cytokines (TNF, IL2), costimulatory molecules (ICOS, TNFSF14), survival/memory (IL7R, ID3, SATB1)
  - terminal exhausted: co-IRs (ENTPD1, CD244), effector molecules (GZMB, PRF1, IFNG), TFs (ID2, RUNX1, PRDM1)
- - **also see cytotoxicity program up in terminal Tex vs. progenitor Tex**
+ - **also see cytotoxicity program up in terminal Tex (that are short-lived) vs. progenitor Tex (that persist longer)**
  - **good evidence for progenitor Tex giving rise to terminal Tex with adoptive transfer experiments (only progenitor Tex transfer gives rise to both, terminal Tex transfer doesn't give rise to progenitor), antigen-dependent differentiation**
 # Successful treatment of arthritis induced by checkpoint inhibitors with tocilizumab: a case series
  - irAEs are inflammatory side effects from ICIs
@@ -3392,6 +3408,9 @@
  - Trm: alternative population of memory CD8 T cells that remain in tissue/tumor
 # Tutorial: guidelines for annotating single cell transcriptomic maps using automated and manual methods
  - Seurat reference method is reference-based automatic annotation
+# Two subsets of stem-like CD8<sup>+</sup> memory T cell progenitors with distinct fate commitments in humans
+ - **progenitors expressing PD-1/TIGIT commited to dysfunctional/exhausted-like lineage while progenitors not expressing PD-1/TIGIT (Tstem?) committed to functional lineage**
+ - 2 progenitor populations clonally and phenotypically distinct, suggesting early branching point in memory compartment associated with initial antigen recognition
 # Type 1/type 2 immunity in infectious diseases
  - Th1 (T helper type 1) cells secrete IL-2, interferon-γ, lymphotoxin-α and stimulate type 1 immunity (intense phagocytic activity), more or less synonymous with cell-mediated immunity but some antibodies are still produced, protective for most infections
  - Th2 cells secrete IL-4/5/9/10/13 and stimulate type 2 immunity (high antibody titers), more or less synonymous with humoral immunity (Th2 cells suppress phagocytosis), resolves cell-mediated inflammation
@@ -3512,3 +3531,6 @@
  - γδ T cells (TCRs with γ and δ chains instead of the usual α and β ones) can respond to varied infections/tumor challenges in a non-MHC-restricted manner, involved in immune surveillance (pleiotropic i.e. more than one effector functions)
 # ZEB1 transcription factor promotes immune escape in melanoma
  - ZEB1 expression in melanoma cells associated with decreased CD8 T cell infiltration
+# *ZNF683* marks a CD8<sup>+</sup> T cell population associated with anti-tumor immunity following anti-PD-1 therapy for Richter syndrome
+ - Richter syndrome is an aggressive B cell lymphoma, responsive to PD-1 blockade
+ - PD-1 blockade response associated with intermediate exhausted CD8 effector/EM cells with high expression of TF *ZNF683*, divergent from terminally exhausted cells
