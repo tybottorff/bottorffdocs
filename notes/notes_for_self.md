@@ -1,10 +1,11 @@
 # High priority P576/AbATE/TN10 TODOs:
- - **switch to limma rather than Seurat for bulk... just start from counts matrix, re-try regressing out R status (for sorts) and sorts (for R vs. NR comparisons) and of course donor/replicate for both, look for markers (`FindAllMarkers` equivalent?) and try linear modeling for each peak using sorts in hypothesized differentiation order as like a "visit time" as I did for NCI irAE? Use Basilin code**
- - **DP vs. NAND CD127+: maybe IL7R signaling perturbed in DP? IL7R and Bcl2 higher accessibility in NAND (not true for STAT5A/B though...), try IL7R interactome? https://maayanlab.cloud/Harmonizome/gene_set/IL7R/Hub+Proteins+Protein-Protein+Interactions**
- - **try pseudotime/monocle in Kirsten's data (ask Basilin for data object? it's a different P3XX)**
+ - **draw ellipses around sorts in Diffbind PCA, and do stats**
+ - **compare CD127 expression levels between 2 progenitor clusters (2 and 4) from Erin's T1DAL, can we differentiate between there being CD127+ only progenitors or also CD127- ones? i.e. relating to depleting IL7R blockade and assuming DP function necessary for benefit**
+ - **compare top/bottom buckets of cells by pseudotime for # unique TCRs in Basilin's HC + T1D (expect less unique clonotypes given expansion in CD57+ terminal cells)**
  - **retry clusterprofiler using background as all unique genes from peaks (rather than whole genome as background)**
- - **look at quality of data as possible explanation for 2 DP CD57 outliers**
- - **try to incorporate/do something similar to what I did for mean gene set accessibilities but for gene coverage plots (i.e. weak purine signal in peaks but it looked stronger in coverage plots?)**
+ - **compare mean gene coverage for all genes in a gene set across sorts at a time somehow...**
+ - Limma/DESEQ2: didn't find anything new for change along trajectory of differentiation but maybe can retry with these methods 1 sort vs. all others for unique markers
+ - check KLRG1/EOMES peaks up in DN, near gene body or far away? (could be repressor?)
  - compare expansion levels of TCRseq in R vs. NR in Erin's data? would expect more expansion in R with more terminal cells? Did Erin already do this?
  - check out ROAST, it's like GSEA?
  - Google search "glue atac rna", possible use for bulk atac? basically predicting RNA levels from promoter accessibilities? Azimuth does have ATAC refs (stuff like CD8 TCM/TEM), as does shendure lab, perhaps they can shed light on cell types here... this is called deconvolution (https://www.nature.com/articles/s41467-023-40611-4#Sec9) and is probably hard to get useful results but maybe worth trying...
@@ -26,11 +27,30 @@
  - TEAseq analyses. Hannah has fastq files if needed, may need permission from Claire Gustafson at Allen (claire.gustafson@alleninstitute.org). Try sc MT lineage mapping using ATACseq data, also look at RNA (HC, then DS) using antibodies to know it's non-naive CD8 and what subtype? Tri-modal single cell profiling reveals a distinct pediatric CD8αα T cell subset and broad age-related molecular reprogramming across the T cell compartment. https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE214546, start with RAW.tar looking for non-naive CD8 cluster
 
 # High priority NCI TODOs:
+ - **draw ellipses around irAE/no irAE clusters to see if different (do this for all future PCAs...), stats package**
+```{r}
+geom_ellipse
+last_plot() + stat_ellipse(data = var.null.hc, aes(x = get(x), y = get(y)), color = cbPalette[1], size = 2, linetype = 3)
+stats for PCA clusters
+var.test = var.pic
+compVar = var.test[c("PC1", "PC2", "PC3", "group", "treatment")]
+compVar$group = factor(compVar$group, levels = c("HC", "T1D"))
+res = compareGroups(group ~ PC1+PC2+PC3 , data = compVar, p.corrected = TRUE, method = 2)
+#res = compareGroups(PC1 ~ group+treatment , data = compVar, p.corrected = TRUE, method = 1)
+summary(res)
+createTable(res, show.p.overall = TRUE
+```
+ - **raise padj threshold? look again at batch corrected baseline irAE vs. no irAE VP (and send to Peter), subsetting features not patients**
+ - **look at features others have studied for irAEs (look in Excel), then don't need to adjust pvals? for DP look at all DPs to see if they trend in same direction (i.e. all DPs of all parents available)**
+ - **try module approach: combine top 6 features into module (mean freq across module?) and compare b/w irAE groups (also do for bottom module with bottom 6 features as comparison)**
+ - **regress out age for any comparisons with substantially different age distributions (like T1D vs. RA)**
+ - **try PCAs and stats again using LOGIT + Z-scored freqs (+ z-score being new here, will make all features equally important)**
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
+ - **try Alex H.'s approach of clustering (baseline) samples then seeing if clusters enriched for study group?**
  - **re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals...**
  - **check for correlations b/w CTCAE grade and irAE severity not just at baseline**
+ - see if batch 7 is biased to a specific irAE group
  - look at ratio of IRs to activation markers
- - try PCAs and stats again using LOGIT + Z-scored freqs
  - try plotting % change from baseline for longitudinal visits rather than absolute % or transformed values?
 - look for distinct immunotypes at baseline and then seeing if there are group enrichments?
  - AID vs. irAE group over ICI PCA: quantify shift in high dimensional PCA-space per patient from baseline to last visit (moving to AID centroid?)
@@ -44,6 +64,8 @@
  - Speak up more in meetings
  - Be in the office (not remote) as often as possible
 ## Biology
+ - **more cytotoxic phenotype has been observed in more terminal Tex before (chronic viral/mice context likely, I forget), but they are short-lived (vs. less cytotoxic but longer-lived progenitor Tex)**
+ - **IL7R blockade is depleting via starvation (selectively deplete IL7-dependent cells)**
  - **DP PD-1+ in bifurcated model as terminal Tex leading to effector Tex doesn't make the most sense...?**
  - **perhaps more specific label for DP CD127+ instead of Tpex is memory-like Tpex, especially in linear model as intermediate Tex (DP PD-1+) can be thought of as a 2nd subset of Tpex along with DP CD127+**
  - **IL7R* expression reduced with teplizumab and patients with lower CD127 expression had longer diabetes free intervals, lower CD127 expression associated with slower disease progression**
@@ -69,6 +91,7 @@
  - AbATE is 6 month timepoint, peak response is 3 months
  - maybe teplizumab hits all sorts in R and not all sorts in NR, but then would expect higher MT SNV counts in R vs. NR which we don't really see
 ## Computational
+ - **draw ellipses around clusters/groups for all PCAs/UMAPs**
  - **limma > DESeq2 for less false positives, for non-simple models I should move out of Seurat/Diffbind (take normalized data) and into limma separately**
  - **try enrichR as an alternative to stringdb for online enrichment help**
  - **use beeswarm instead of jitter**
