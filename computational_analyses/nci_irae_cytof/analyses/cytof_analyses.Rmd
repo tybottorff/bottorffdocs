@@ -59,11 +59,11 @@ baseline_flow_data <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
   # subset for only baseline visits
   mutate(cleaned_visit_num = str_extract(`Visit Descriptor`, "\\d+")) %>%
   # CTCAE Grade (Highest) is the column for (ir)AE grade
-  rename(patient_id = `Subject ID`, ctcae_grade = `CTCAE Grade (Highest)`, group = `General irAE Classification`, specific_group = `Patient Type`, age = `Age at Draw`) %>%
+  rename(patient_id = `Subject ID`, ctcae_grade = `CTCAE Grade (Highest)`, group = `General irAE Classification`, specific_group = `Patient Type`, age = `Age at Draw`, irae_ex = `irAE Documented (if any)`) %>%
   # if CTCAE grade is not-NA, group should be irAE... (some grade 1-2 ctcae were in non-irAE group before using updated category 9/6/24, using `General irAE Classification` as its cleaner metadata though otherwise
   mutate(group = if_else(!is.na(ctcae_grade), "irAE/SAE", group)) %>%
   dplyr::filter(cleaned_visit_num == 1 | is.na(cleaned_visit_num) & group %in% c("AID_Patient", "Healthy_Control")) %>%
-  select(patient_id, group, ctcae_grade, specific_group, cleaned_visit_num, Batch, age, starts_with("pct_")) %>%
+  select(patient_id, group, ctcae_grade, specific_group, cleaned_visit_num, Batch, age, irae_ex, starts_with("pct_")) %>%
   pivot_longer(
     cols = starts_with("pct_"), 
     names_to = "sort",
@@ -80,9 +80,14 @@ baseline_flow_data <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
     group == "irAE/SAE" & ctcae_grade > 2 ~ "Serious irAE/SAE",
     group == "irAE/SAE" & ctcae_grade < 3 ~ "Non-serious irAE/SAE",
     group == "non-irAE" ~ "Non-irAE",
-    TRUE ~ NA
-  ))
-
+    TRUE ~ NA),
+    thyroid_irae = if_else(str_detect(irae_ex, regex("thyroid", ignore_case = TRUE)),
+                                "Thyroid irAE", 
+                                "No thyroid irAE"),
+    skin_irae = if_else(str_detect(irae_ex, regex("rash|Rash|Pruritus", ignore_case = TRUE)),
+                                "Skin irAE", 
+                                "No skin irAE"))
+    
 # only 2 patients with serious (grade > 2) irAEs
 
 baseline_flow_data
@@ -121,8 +126,6 @@ logitNorm <- function(v){
 stats_test <- baseline_flow_data %>%
   mutate(freq = logitNorm(freq)) %>%
   group_by(sort) %>%
-  # dropping the 12 patients also results in significance for PD1+ of CM Tconv Tcells here...
-  #filter(patient_id %in% adjusted_data$patient_id) %>%
   summarize(
     # Perform Shapiro-Wilk test for normality in each group
     shapiro_non_irae = shapiro.test(freq[group == "non-irAE"])$p.value,
@@ -154,25 +157,29 @@ stats_test
 ```{r}
 
 wide_baseline_flow_num_data <- baseline_flow_data %>%
-  #filter(group == "AID_Patient") %>%
-  #filter(group %in% c("non-irAE", "irAE/SAE")) %>%
+  #filter(group %in% c("AID_Patient")) %>%
+  dplyr::filter(group %in% c("non-irAE", "irAE/SAE")) %>%
   mutate(freq = logitNorm(freq)) %>%
   select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
-  select(-c(patient_id, group, specific_group, Batch, age, irae_severity_based_on_ctcae, ctcae_grade)) %>%
+  select(-c(patient_id, group, specific_group, Batch, age, irae_severity_based_on_ctcae, ctcae_grade, irae_ex, thyroid_irae, skin_irae)) %>%
   # have to get rid of patients with > 1 NA in any feature for PCA (could also get rid of features instead...)
-  drop_na()
+  drop_na() #%>%
+  # just look at features most discriminatory between irAE and no irAE groups
+  #select("unswMem of Bcells", "CM of Tconv Tcells", "PD1pos of CM Tconv Tcells", "CCR6pos of NN Tconv Tcells", "DN of Bcells", "pDC of nonGrans")
 
 wide_baseline_flow_num_data
 
 wide_baseline_flow_metadata <- baseline_flow_data %>%
   mutate(freq = logitNorm(freq)) %>%
-  #filter(group == "AID_Patient") %>%
-  #filter(group %in% c("non-irAE", "irAE/SAE")) %>%
-  #mutate(specific_group = case_when(
-  #       specific_group == "Type 1 Diabetes" ~ "T1D",
-  #       specific_group == "RA" ~ "RA",
-  #       TRUE ~ "Gut")) %>%
+  #filter(group %in% c("AID_Patient")) %>%
+  dplyr::filter(group %in% c("non-irAE", "irAE/SAE")) %>%
+  mutate(specific_group = case_when(
+         group == "AID_Patient" & specific_group == "Type 1 Diabetes" ~ "T1D",
+         group == "AID_Patient" & specific_group == "RA" ~ "RA",
+         group == "AID_Patient" & !(is.na(specific_group)) ~ "Gut",
+         group == "Healthy_Control" ~ "HC",
+         TRUE ~ specific_group)) %>%
   #mutate(specific_group = case_when(
   #       specific_group %in% c("Renal Cancer, Bladder Cancer", "Bladder Cancer") ~ "Bladder/\nrenal\ncancer",
   #       specific_group %in% c("Urinary Tract Cancer", "Urethral Cancer") ~ "Urinary\ntract/\nurethral\ncancer",
@@ -183,8 +190,8 @@ wide_baseline_flow_metadata <- baseline_flow_data %>%
   #       TRUE ~ specific_group)) %>%
   select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
-  drop_na(-c(group, patient_id, Batch, age, irae_severity_based_on_ctcae, ctcae_grade)) %>%
-  select(c(patient_id, group, specific_group, Batch, age, irae_severity_based_on_ctcae, ctcae_grade)) %>%
+  drop_na(-c(group, patient_id, Batch, age, irae_severity_based_on_ctcae, ctcae_grade, irae_ex, thyroid_irae, skin_irae)) %>%
+  select(c(patient_id, group, specific_group, Batch, age, irae_severity_based_on_ctcae, ctcae_grade, irae_ex, thyroid_irae, skin_irae)) %>%
   mutate(patient_id_simple = row_number()) %>%
   mutate(group = case_when(
     group == "Healthy_Control" ~ "HC",
@@ -195,7 +202,27 @@ wide_baseline_flow_metadata <- baseline_flow_data %>%
 wide_baseline_flow_metadata
 
 ```
+# Look at DP (feature lost in regressing out covars)
 
+```{r}
+
+plot_data <- baseline_flow_data %>%
+  mutate(freq = logitNorm(freq)) %>%
+  dplyr::filter(sort == "DP of Tcells")
+
+p <- plot_data %>%
+  ggplot(aes(x = group, y = freq, fill = group)) +
+  geom_boxplot(outlier.shape = NA) +
+  #facet_wrap(~ sort, ncol = 3) +
+  geom_jitter(color = "grey", size = 0.5) +
+  labs(x = "", y = "DP of Tcells freq (logit-\ntransformed % of parent)") +
+  scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(size = 8))
+
+p
+
+```
 # Make PCA plots for baseline data
 
 ```{r}
@@ -249,34 +276,42 @@ top_contributing_features_PC2 <- pca_contributions %>%
     select(Dim.2) %>%
     head(10)
 
+# Plot PCA with ellipses around clusters
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
-  scale_color_manual(values = c("HC" = "purple", "AID" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
-  #scale_color_manual(values = c("Cancer group - no irAE" = "black", "Not severe" = "green", "Severe" = "red")) +
-  #scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) +
+  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
   xlim(-limits[1], limits[1]) +
   ylim(-limits[2], limits[2]) +
-  labs(color = "") +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2], color = "") +
   theme_bw() +
   theme(
     legend.position = "bottom", 
-    legend.text = element_text(size = 7),  # Adjust legend text size
-    #legend.title = element_blank(),  # Adjust legend title size
-    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
-    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+    legend.text = element_text(size = 7),
+    legend.spacing.y = unit(0.1, 'cm'),
+    legend.spacing.x = unit(0.3, 'cm')
   ) +
-  guides(
-    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
-  ) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))
 
 p
 
+# Statistical comparison of clusters using compareGroups
+compVar <- pcaData %>%
+  select(PC1, PC2, PC3, group, treatment) %>%
+  mutate(group = factor(group, levels = c("HC", "T1D")))  # Adjust levels as needed
+
+# Run statistical test on PCA components by group
+res <- compareGroups(group ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 2)
+summary(res)
+
+# Display comparison table
+createTable(res, show.p.overall = TRUE)
+
 #ggsave("../figures/baseline_pca_specific_irae_group.png", plot = p, width = 3, height = 3.5)
-ggsave("../figures/baseline_pca_group.png", plot = p, width = 3, height = 3.5)
+#ggsave("../figures/baseline_pca_group.png", plot = p, width = 3, height = 3.5)
 #ggsave("../figures/baseline_pca_batch.png", plot = p, width = 3.5, height = 3.5)
+#ggsave("../figures/baseline_pca_specific_aid_and_hc.png", plot = p, width = 3, height = 3.5)
 
 ```
 
@@ -1450,21 +1485,22 @@ ggplot(ica_df, aes(x=Comp1, y=Comp2)) +
 
 ```{r}
 
-# 12 cancer patients lost because of > 1 NA in > 1 feature
+# lose some features because of NA (don't drop patients, drop features) due to 0 freq in parent
 
 regressing_out_confounders_df <- baseline_flow_data %>%
   select(-c(parent_population, parent_parent_population, cleaned_visit_num, irae_severity_based_on_ctcae)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
-  # don't drop NA rows if instead removing features (cols)
-  drop_na(-c(group, specific_group, ctcae_grade)) %>%
-  mutate(Batch = as.factor(Batch))
+  # don't drop NA rows, instead remove features (cols) with an NA
+  mutate(Batch = as.factor(Batch),
+         age = as.factor(age)) %>%
+  dplyr::filter(!(is.na(patient_id)))
 
 regressing_out_confounders_df
 
-metadata_cols <- regressing_out_confounders_df[, 1:6]
-feature_cols <- regressing_out_confounders_df[, 7:ncol(regressing_out_confounders_df)]
+metadata_cols <- regressing_out_confounders_df[, 1:9]
+feature_cols <- regressing_out_confounders_df[, 10:ncol(regressing_out_confounders_df)]
 
-# could also try removing 14/71 features with NAs instead of removing the patients
+# remove 14/71 features with NAs instead of removing the patients
 na_count_per_feature <- colSums(is.na(feature_cols))
 feature_cols_filtered <- feature_cols[, na_count_per_feature == 0]
 
@@ -1475,7 +1511,7 @@ regress_out_confounders <- function(feature, batch) {
   residuals(model)
 }
 
-adjusted_features <- as.data.frame(lapply(feature_cols, 
+adjusted_features <- as.data.frame(lapply(feature_cols_filtered, 
                                           regress_out_confounders, 
                                           batch = regressing_out_confounders_df$Batch))
 
@@ -1483,21 +1519,22 @@ adjusted_data <- cbind(metadata_cols, adjusted_features)
 
 ```
 
-# Plot PCA results for baseline data with batch regressed out
+# Plot PCA results for baseline data with batch (+/- age) regressed out
 
 ```{r}
 
-wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:6] %>%
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:9] %>%
   mutate(patient_id_simple = row_number()) %>%
   mutate(group = case_when(
     group == "Healthy_Control" ~ "HC",
     group == "AID_Patient" ~ "AID",
     TRUE ~ group
   ),
+  age = as.numeric(as.character(age)),
   subgroup = case_when(
     group == "AID" & specific_group == "Type 1 Diabetes" ~ "T1D",
     group == "AID" & specific_group == "RA" ~ "RA",
-    group == "AID" & str_detect(specific_group, "Ulcerative Colitis") ~ "Gut",
+    group == "AID" & str_detect(specific_group, "Ulcer") ~ "Gut",
     group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Renal Cancer, Bladder Cancer", "Bladder Cancer") ~ "Bladder/\nrenal\ncancer",
     group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Urinary Tract Cancer", "Urethral Cancer") ~ "Urinary\ntract/\nurethral\ncancer",
     group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Lung Disease, Lung Cancer", "Lung Cancer") ~ "Lung\ncancer/\ndisease",
@@ -1505,9 +1542,10 @@ wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:6] %>
     group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer" ~ "Head\nand\nneck\ncancer",
     group %in% c("non-irAE", "irAE/SAE") & specific_group == "Gastric Cancer" ~ "Gastric\ncancer",
     TRUE ~ specific_group
-  ))
+  )) %>%
+ dplyr::filter((group %in% c("non-irAE", "irAE/SAE")))
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 7:ncol(adjusted_data)]
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 10:ncol(adjusted_data)] #%>% select("unswMem.of.Bcells", "CM.of.Tconv.Tcells", "PD1pos.of.CM.Tconv.Tcells", "CCR6pos.of.NN.Tconv.Tcells", "DN.of.Bcells", "pDC.of.nonGrans")
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1562,7 +1600,8 @@ p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
-  scale_color_manual(values = c("HC" = "purple", "AID" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
+  #scale_color_manual(values = c("HC" = "purple", "AID" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
   #scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
   xlim(-limits[1], limits[1]) +
   ylim(-limits[2], limits[2]) +
@@ -1582,11 +1621,50 @@ p <- ggplot(data = pcaData) +
 
 p
 
+#ggsave("../figures/baseline_pca_aid_subgroup_batch_regressed_out.png", plot = p, width = 3.5, height = 3.5)
+#ggsave("../figures/baseline_pca_irae_groups_all_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+#ggsave("../figures/baseline_pca_age_age_and_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
 #ggsave("../figures/baseline_pca_age_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
 #ggsave("../figures/baseline_pca_cancer_type_batch_regressed_out.png", plot = p, width = 3.5, height = 3.5)
-#ggsave("../figures/baseline_pca_aid_subgroup_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+#ggsave("../figures/baseline_pca_aid_subgroup_age_and_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
 #ggsave("../figures/baseline_pca_general_group_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
 #ggsave("../figures/baseline_pca_batch_batch_regressed_out.png", plot = p, width = 3.5, height = 3.5)
+
+```
+
+# Plot cancer baseline data on AID PCA
+
+```{r}
+
+cancer_data <- adjusted_data %>% 
+  filter(group %in% c("non-irAE", "irAE/SAE")) %>% 
+  select(10:ncol(adjusted_data))
+
+cancer_metadata <- adjusted_data %>% 
+  filter(group %in% c("non-irAE", "irAE/SAE")) %>% 
+  select(1:9)
+
+# Scale and center cancer data to match the original PCA scaling
+cancer_projected_scores <- as.data.frame(scale(cancer_data, center = pca$center, scale = pca$scale) %*% pca$rotation)
+cancer_projected_scores$patient_id_simple <- row.names(cancer_projected_scores)
+cancer_projected_scores$group <- cancer_metadata$group
+
+ggplot(data = cancer_projected_scores) +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
+  xlim(-limits[1], limits[1]) +
+  ylim(-limits[2], limits[2]) +
+  labs(color = "", shape = "") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),
+    legend.spacing.y = unit(0.1, 'cm'), 
+    legend.spacing.x = unit(0.3, 'cm')
+  ) +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
+  labs(x = pcaLabels[[1]][1], y = pcaLabels[[1]][2])
 
 ```
 
@@ -1596,11 +1674,11 @@ p
 
 df <- adjusted_data
 
-irae_group <- df %>% filter(group == "irAE/SAE")
-no_irae_group <- df %>% filter(group == "non-irAE")
+irae_group <- df %>% dplyr::filter(group == "irAE/SAE")
+no_irae_group <- df %>% dplyr::filter(group == "non-irAE")
 
 non_feature_cols <- c("patient_id", "group", "specific_group", "irae_ex", "Batch", 
-                      "age", "ctcae_grade")
+                      "age", "ctcae_grade", "thyroid_irae", "skin_irae")
 feature_columns <- setdiff(colnames(df), non_feature_cols)
 
 # Calculate mean residuals for each feature
@@ -1624,12 +1702,12 @@ volcano_df <- data.frame(
 )
 
 ggplot(volcano_df, aes(x = abs_diff, y = neg_log10_padj)) +
-  geom_point(aes(color = padj < 0.05)) +
+  geom_point(aes(color = padj < 0.1)) +
   theme_minimal() +
   labs(x = "irAE/SAE vs. no irAE (absolute difference in mean of residuals)", y = "-log10(padj)") +
   geom_vline(xintercept = 0, linetype = "dashed") + # Vertical line at 0 fold change +
-  geom_hline(yintercept = -log10(0.05), linetype = "dashed") + # horizontal line at sig threshold
-  geom_text_repel(data = subset(volcano_df, padj < 0.1), 
+  geom_hline(yintercept = -log10(0.1), linetype = "dashed") + # horizontal line at sig threshold
+  geom_text_repel(data = subset(volcano_df, padj < 0.35), 
                   aes(label = feature), size = 3, box.padding = 0.5, max.overlaps = 10)
 
 ```
@@ -1638,20 +1716,30 @@ ggplot(volcano_df, aes(x = abs_diff, y = neg_log10_padj)) +
 
 ```{r}
 
-p <- adjusted_data %>% select(group, PD1posTIGITpos.of.EM.Tconv.Tcells, PD1pos.of.CM.Tconv.Tcells, KLRG1posTIGITpos.of.NN.CD8.Tcells) %>%
-  pivot_longer(cols = c(PD1posTIGITpos.of.EM.Tconv.Tcells, PD1pos.of.CM.Tconv.Tcells, KLRG1posTIGITpos.of.NN.CD8.Tcells), names_to = "sort", values_to = "freq") %>%
+# features of interest from literature
+# DN of Bcells"                    "CD8 of Tcells"                   "CD38hiCD127neg of NN CD8 Tcells"
+
+plot_data <- adjusted_data %>% select(group, DN.of.Bcells, CD8.of.Tcells, CD38hiCD127neg.of.NN.CD8.Tcells) %>%
+  pivot_longer(cols = c(DN.of.Bcells, CD8.of.Tcells, CD38hiCD127neg.of.NN.CD8.Tcells), names_to = "sort", values_to = "freq") %>%
+  mutate(sort = case_when(
+    sort == "CD8.of.Tcells" ~ "CD8 of Tcells",
+    sort == "CD38hiCD127neg.of.NN.CD8.Tcells" ~ "CD38hiCD127-\nof NN CD8s",
+    sort == "DN.of.Bcells" ~ "DN of Bcells"
+  ))
+
+p <- plot_data %>%
   ggplot(aes(x = group, y = freq, fill = group)) +
   geom_boxplot(outlier.shape = NA) +
   facet_wrap(~ sort, ncol = 3) +
   geom_jitter(color = "grey", size = 0.5) +
-  labs(x = "", y = "Residuals (batch regressed out)") +
+  labs(x = "", y = "Residuals (batch\nregressed out)") +
   scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
   theme(axis.text.x = element_blank(),
         strip.text = element_text(size = 8))
 
 p
 
-ggsave("../figures/batch_regressed_out_residuals_by_feature_hits.png", plot = p, width = 10, height = 5)
+ggsave("../figures/batch_regressed_out_residuals_by_feature_hits.png", plot = p, width = 7, height = 3.5)
 
 ```
 
@@ -1700,7 +1788,88 @@ stats_test <- data.frame(
   test_type = test_type
 ) %>% arrange(adj_pval)
 
-# Output stats_test dataframe
 stats_test
+
+```
+
+# Find features associating with age in HC/AID groups (to see if those who develop irAEs have older immunotypes)
+
+```{r}
+
+non_cancer_data <- adjusted_data %>%
+  mutate(age = as.numeric(as.character(age))) %>%
+  filter(group %in% c("AID_Patient", "Healthy_Control"))
+
+immune_features <- non_cancer_data[, 10:ncol(non_cancer_data)]
+
+correlation_results <- immune_features %>%
+  summarise(across(everything(), ~ cor.test(.x, non_cancer_data$age, method = "spearman")$estimate)) %>%
+  pivot_longer(cols = everything(), names_to = "feature", values_to = "correlation")
+
+p_values <- immune_features %>%
+  summarise(across(everything(), ~ cor.test(.x, non_cancer_data$age, method = "spearman")$p.value)) %>%
+  pivot_longer(cols = everything(), names_to = "feature", values_to = "p_value")
+
+correlation_summary <- left_join(correlation_results, p_values, by = "feature") %>%
+  mutate(padj = p.adjust(p_value, method = "BH")) %>%
+  arrange(padj) %>%
+  filter(padj < 0.05)
+
+correlation_summary
+
+ggplot(non_cancer_data, aes(x = age, y = naive.of.CD8.Tcells, color = group)) +
+  geom_point(alpha = 0.6) +  # Scatter points
+  geom_smooth(method = "lm", color = "black", se = FALSE)
+
+```
+
+# Use LMs from non-cancer group (with age as factor) on cancer data to predict immunotype scores for features associating with age in non-cancer group
+
+```{r}
+
+# Fit a linear model for each age-correlated feature
+models <- lapply(correlation_summary$feature, function(feature) {
+  lm(as.formula(paste(feature, "~ age")), data = non_cancer_data)
+})
+names(models) <- correlation_summary$feature  # Name each model with its corresponding feature
+
+models
+
+cancer_data <- adjusted_data %>%
+  mutate(age = as.numeric(as.character(age))) %>%
+  filter(!(group %in% c("AID_Patient", "Healthy_Control")))
+
+predict_immunotype_score <- function(model, age) {
+  intercept <- coef(model)[1]
+  slope <- coef(model)[2]
+  return(intercept + slope * age)
+}
+
+predicted_scores <- data.frame(patient_id = cancer_data$patient_id)
+
+# Loop through each model and predict scores for cancer patients
+for (feature in names(models)) {
+  predicted_scores[[feature]] <- sapply(cancer_data$age, function(age) predict_immunotype_score(models[[feature]], age))
+}
+
+# Rename the scores column to a more descriptive name
+colnames(predicted_scores)[-1] <- paste0("immunotype_age_score_", names(models))
+
+predicted_scores_with_metadata <- left_join(cancer_data %>% select(patient_id, group), predicted_scores, by = "patient_id")
+
+predicted_scores_with_metadata
+
+# Reshape data to long format for ggplot
+predicted_scores_with_metadata_long <- predicted_scores_with_metadata %>%
+  pivot_longer(cols = starts_with("immunotype_age_score"), 
+               names_to = "immunotype", 
+               values_to = "score") %>%
+  mutate(immunotype = gsub("immunotype_age_score_", "", immunotype))
+
+ggplot(predicted_scores_with_metadata_long, aes(x = immunotype, y = score, color = group)) +
+  geom_point(position = position_jitter(width = 0.2), size = 1) +  # Add jitter for better visibility
+  geom_boxplot(alpha = 0.5, outlier.shape = NA) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) +
+  labs(x = "", y = "Predicted score based\non HC/AID data")
 
 ```
