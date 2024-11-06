@@ -1,22 +1,16 @@
 # High priority P576/AbATE/TN10 TODOs:
- - **draw ellipses around sorts in Diffbind PCA, and do stats**
  - **compare CD127 expression levels between 2 progenitor clusters (2 and 4) from Erin's T1DAL, can we differentiate between there being CD127+ only progenitors or also CD127- ones? i.e. relating to depleting IL7R blockade and assuming DP function necessary for benefit**
- - **compare top/bottom buckets of cells by pseudotime for # unique TCRs in Basilin's HC + T1D (expect less unique clonotypes given expansion in CD57+ terminal cells)**
- - **retry clusterprofiler using background as all unique genes from peaks (rather than whole genome as background)**
- - **compare mean gene coverage for all genes in a gene set across sorts at a time somehow...**
+ - **compare expansion levels of TCRseq in R vs. NR in Erin's data? would expect more expansion in R with more terminal cells? Did Erin already do this?**
+ - compare mean gene coverage for all genes in a gene set across sorts at a time somehow... this may be noisy as these aren't necessarily peaks...
+ - fix mean peak code to work on genes with only 1 peak
+ - retry clusterprofiler using background as all unique genes from peaks (rather than whole genome as background), there were at least 15k unique genes though already so not pressing
  - Limma/DESEQ2: didn't find anything new for change along trajectory of differentiation but maybe can retry with these methods 1 sort vs. all others for unique markers
  - check KLRG1/EOMES peaks up in DN, near gene body or far away? (could be repressor?)
- - compare expansion levels of TCRseq in R vs. NR in Erin's data? would expect more expansion in R with more terminal cells? Did Erin already do this?
- - check out ROAST, it's like GSEA?
  - Google search "glue atac rna", possible use for bulk atac? basically predicting RNA levels from promoter accessibilities? Azimuth does have ATAC refs (stuff like CD8 TCM/TEM), as does shendure lab, perhaps they can shed light on cell types here... this is called deconvolution (https://www.nature.com/articles/s41467-023-40611-4#Sec9) and is probably hard to get useful results but maybe worth trying...
  - Homer: DP CD127 vs. other DP separately
- - make dummy df with high JAK/STAT signal --> KEGG, see if lack of results due to KEGG (not in set) or signal:noise...
- - look at all interesting gene sets in Erin's RNAseq (DN vs. DPs)
- - try every sort vs. all 4 other sorts to get sort-specific info (wasn't super helpful for non-exh CD127+ vs. others but try anyways)
  - learn how to put custom gene sets into KEGG somehow
  - try splitting atac data into distal (> 2 kb from nearest TSS) and proximal (< 2 kb from nearest TSS) to see if that helps resolve any of above attempts to discriminate b/w cell sorts better... (like this paper did: https://www.med.upenn.edu/ifi/assets/user-content/documents/human.pdf), could also try gene activity scores (computed from open chromatin region accessibility weighted by distance as done here: https://www.nature.com/articles/s41590-022-01337-5)
  - leave 1 out analyses to deal with strong outlier patients, see what trends consistent of all leave 1 outs (1/10 outs patients, 1/50 outs samples?)
- - look more into upset plot for sharing/unique MT vars for helping decipher models
  - ask for Ki67+ from same samples to test change from baseline in Ki67 vs. MT SNV counts
  - work with heavy water/glucose data (pulse chase mass spec), CD57+ less heavy (diliuted over divisions)?
  - pseudotime analyses: re-analyze Tex sub-UMAP (iffy on pseudotime here...), maybe better ylab is "Mean z score of..."? why is scale 1-20 in plot_genes_in_pseudotime but 1-10 elsewhere? once resolving this, test more progenitor vs. effector/terminal Tex genes. https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep
@@ -27,32 +21,16 @@
  - TEAseq analyses. Hannah has fastq files if needed, may need permission from Claire Gustafson at Allen (claire.gustafson@alleninstitute.org). Try sc MT lineage mapping using ATACseq data, also look at RNA (HC, then DS) using antibodies to know it's non-naive CD8 and what subtype? Tri-modal single cell profiling reveals a distinct pediatric CD8αα T cell subset and broad age-related molecular reprogramming across the T cell compartment. https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE214546, start with RAW.tar looking for non-naive CD8 cluster
 
 # High priority NCI TODOs:
- - **draw ellipses around irAE/no irAE clusters to see if different (do this for all future PCAs...), stats package**
-```{r}
-geom_ellipse
-last_plot() + stat_ellipse(data = var.null.hc, aes(x = get(x), y = get(y)), color = cbPalette[1], size = 2, linetype = 3)
-stats for PCA clusters
-var.test = var.pic
-compVar = var.test[c("PC1", "PC2", "PC3", "group", "treatment")]
-compVar$group = factor(compVar$group, levels = c("HC", "T1D"))
-res = compareGroups(group ~ PC1+PC2+PC3 , data = compVar, p.corrected = TRUE, method = 2)
-#res = compareGroups(PC1 ~ group+treatment , data = compVar, p.corrected = TRUE, method = 1)
-summary(res)
-createTable(res, show.p.overall = TRUE
-```
- - **raise padj threshold? look again at batch corrected baseline irAE vs. no irAE VP (and send to Peter), subsetting features not patients**
- - **look at features others have studied for irAEs (look in Excel), then don't need to adjust pvals? for DP look at all DPs to see if they trend in same direction (i.e. all DPs of all parents available)**
- - **try module approach: combine top 6 features into module (mean freq across module?) and compare b/w irAE groups (also do for bottom module with bottom 6 features as comparison)**
- - **regress out age for any comparisons with substantially different age distributions (like T1D vs. RA)**
- - **try PCAs and stats again using LOGIT + Z-scored freqs (+ z-score being new here, will make all features equally important)**
+ - **look for correlations b/w baseline cell freqs & time to irAE onset**
+ - **summarize cohort info: time to treatment/irAE, previous therapies**
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
- - **try Alex H.'s approach of clustering (baseline) samples then seeing if clusters enriched for study group?**
- - **re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals...**
+ - **try Alex H.'s approach of clustering (baseline) samples then seeing if clusters enriched for study group? just need to do for ICA (PCA done)**
+ - **re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals... look at early changes differentiating irAE vs. no irAE**
  - **check for correlations b/w CTCAE grade and irAE severity not just at baseline**
- - see if batch 7 is biased to a specific irAE group
+ - regress out age for any comparisons with substantially different age distributions (like T1D vs. RA)
  - look at ratio of IRs to activation markers
  - try plotting % change from baseline for longitudinal visits rather than absolute % or transformed values?
-- look for distinct immunotypes at baseline and then seeing if there are group enrichments?
+ - look for distinct immunotypes at baseline and then seeing if there are group enrichments?
  - AID vs. irAE group over ICI PCA: quantify shift in high dimensional PCA-space per patient from baseline to last visit (moving to AID centroid?)
  - investigate effect of time from first cancer treatment (`Previous Cancer Treatment Year(s)`) to first ICI infusion (``Cancer Therapy Agent Start Date`), dates are messy though and inconsistent so lower priority
  - create a box subfolder with these kinds of follow up figs that I haven't yet presented, then can email group sharing that figs are in box? if making progress before next meeting
@@ -61,8 +39,8 @@ createTable(res, show.p.overall = TRUE
 # Key notes
 ## Professional
  - ***explain things clearly (motivations, methods, evidence for results, graphs, takeaways like 1/slide), don't rush through presentations***
- - Speak up more in meetings
- - Be in the office (not remote) as often as possible
+ - speak up more in meetings
+ - be in the office (not remote) as often as possible
 ## Biology
  - **more cytotoxic phenotype has been observed in more terminal Tex before (chronic viral/mice context likely, I forget), but they are short-lived (vs. less cytotoxic but longer-lived progenitor Tex)**
  - **IL7R blockade is depleting via starvation (selectively deplete IL7-dependent cells)**
