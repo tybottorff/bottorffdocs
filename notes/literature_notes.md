@@ -36,6 +36,8 @@
  - CTLA-4 expressed on tumor infiltrating Tregs, binds to B7 on surface of APCs
  - myocardium infiltrating lymphocytes mostly CD8 T cells in ICI-myocarditis patients
  - irAE hypotheses: ICIs bind to cell surface proteins (like CTLA-4) in normal tissue leading to T cell infiltration (**this is an obvious one I don't think about much**), crossreactive T cells (T cells recognizing tumor antigens enter circulation and identify similar antigens in healthy tissue), via cytokines (promote infiltration of inflammatory molecules into nontarget tissue, ICIs increase circulating cytokine levels, **this is a good one I don't think about much**), autoantibodies
+# A fresh look at a neglected regulatory lineage: CD8<sup>+</sup>Foxp3<sup>+</sup> regulatory T cells
+ - similar transcriptional profile to CD4 Tregs
 # A genetic bottleneck of mitochondrial DNA during human lymphocyte development
 ## Introduction
  - mtDNA mutates 5-10x rate of nuclear DNA (lack of DNA repair, ROS)
@@ -336,6 +338,12 @@
  - increased frequency of public TCRs in IAR T cells of new-onset T1D patients relative to established T1D patients, perhaps due to a dilution of specificities as epitope spreading occurs, migration of islet antigen-specific T cells to pancreas, or clone contraction due to antigen loss during islet destruction
  - **would expect more germline-like TCRs to be more cross-reactive (lower sequence complexity)**
  - **cross-reactivity need not result from sequence similarity (3D structural similarity more important than 1D sequence similarity)**
+# Autoreactive T effector memory differentiation mirrors beta cell function in type 1 diabetes
+ - interested in disease relevance of circulating (peripheral) autoreactive CD8s
+ - change in beta cell-specific CD8 TEMs expressing CD57 positively correlated with C-peptide change in young subjects, **expansion of beta cell-specific CD57<sup>+</sup> CD8 TEMs associated with C-peptide retention, i.e. they're good**
+ - autoreactive CD57<sup>+</sup> CD8 TEMs bore effector function (higher granzyme B expression, lower CD28 expression) than CD57<sup>-</sup> counterparts
+ - **I think what they're saying here is that in some patients (with honeymoon period), endogenous beta cell function recovers and this functional recovery promotes the appearance of CD57<sup>+</sup> CD8 TEMs resulting in increased beta cell killing and waning of CD8 T response... so more CD57<sup>+</sup> CD8s isn't good per se?**
+ - **CD57 is a marker of antigen experience, an IR, but cells expressing CD57 are known to be able to exhibit higher cytotoxic activity and produce more cytokine than less differentiated cells**
 # AXL receptor tyrosine kinase inhibition improves the anti-tumor effects of CD8<sup>+</sup> T cells by inducing CD103<sup>+</sup> dendritic cell-mediated T cell priming
  - AXL inhibited clonal expansion of tumor-specific CD8<sup>+</sup> T cells
 # Baseline risk factors associated with immune-related adverse events and atezolizumab
@@ -446,6 +454,9 @@
  - histological infiltration comparisons between irAE colitis and non-irAE colitis (like ulcerative colitis, ischemic colitis)
  - **irAE colitis: CD8<sup>+</sup> infiltration greater than CD4<sup>+</sup> infiltration**
  - CD8<sup>+</sup> infiltration higher in irAE colitis than in non-irAE colitis
+# CD8<sup>+</sup> regulatory T cells are critical in prevention of autoimmune-mediated diabetes
+ - here, CD8 Tregs can prevent onset of streptozotocin-induced diabetes by rodent intestinal nematode
+ - **compared to HCs, those with T1D have fewer CD8 Tregs**
 # CD8<sup>+</sup> T cells in the cancer-immunity cycle
 ## Introduction
  - 3 signal model for effective T cell priming and differentiation: 1) TCR signaling by antigens presented by MHCs, 2) co-stimulation, 3) cytokines, all 3 signals necessary to effectively prime naive T cells and differentiate them into effector T cells, perhaps a fourth signal being nutrients/metabolites fueling T cell metabolism
@@ -541,6 +552,8 @@
 # Circulating pre-treatment T cell repertoire as a predictive biomarker in advanced or metastatic non-small-cell lung cancer patients treated with pembrolizumab alone or in combination with chemotherapy
  - association between reduced number of unique clones and clinical benefit for pembrolizumab, but for pembrolizumab with chemotherapy see opposite effect
  - reduced number of pre-treatment unique clones could mean enrichment for tumor-specific T cells (good response to treatment)
+# Circulating tumor reactive KIR<sup>+</sup>CD8<sup>+</sup> T cells suppress anti-tumor immunity in patients with melanoma
+ - **idea is that KIR<sup>+</sup> CD8s are ~Tregs?**
 # Clinical characteristics and treatment of immune-related adverse events of immune checkpoint inhibitors
 ## Mechanisms of irAEs
  - hypotheses: ICI usage breaks up homeostasis and reduces T cell tolerance, cross-reactivity of T cells between tumor cells and normal tissue, ICI usage can increase pre-existing autoantibody levels as well as inflammatory cytokine levels, ICI can disturb CTLA-4/PD-L1 blocks in tissue expressing those inhibitory receptors to protect normal tissue
@@ -706,10 +719,10 @@
  - high counts/genes could also just mean large cells
 # CXCL12-CXCR4 mediates CD57<sup>+</sup> CD8<sup>+</sup> T cell responses in the progression of type 1 diabetes
  - **CD57 marks TEM, marked by cytotoxicity, pro-inflammatory cytokine production, intracellular glucose uptake, involved in T1D pathophysiology**
- - increase in peripheral CD57<sup>+</sup> CD8s in 1 T1D patient with STAT3 (TF) mutation
+ - increase in peripheral CD57<sup>+</sup> CD8s in 1 T1D patient with STAT3 (TF) mutation, **so n = 1 (case report)**
  - CXCL12-CXCR4 axis promotes expansion/function of CD57<sup>+</sup> CD8s via Erk1/2
  - changes in serum CXCL12 concentrations during peri-remission phase of T1D
- - treatment with CXCR4 agonist reduces infiltration of CD57<sup>+</sup> CD8s and mitigates hyperglycemia in T1D mouse model
+ - treatment with CXCR4 agonist reduces infiltration of CD57<sup>+</sup> CD8s and mitigates hyperglycemia in T1D mouse model, **so CD57<sup>+</sup> CD8s bad here?**
 # CXCL16-dependent scavenging of oxidized lipids by islet macrophages promotes differentiation of pathogenic CD8<sup>+</sup> T cells in diabetic autoimmunity
  - *Cxcl16* KO in NOD mice suppresses T1D via islet-specific mechanism (impaired clearance of oxidized LDLs by islet macrophages leads to reduced islet transitory Tex CD8s)
  - pancreatic islet microenvironment is highly oxidative (β cells vulnerable to autoinflammatory insults)
@@ -783,6 +796,7 @@
  - perhaps KO of these IRs could help prevent irAEs in case of adoptive transfer of tumor-specific T cells? **this seems backwards to me...**
  - cell cycle genes downregulated in PD-1 KO, these genes' expression preserved in TIGIT KO
  - PD-1 KO and TIGIT KO T cells show higher anti-tumor reactivity than WT (**I believe this makes sense with these IRs inhibiting overactivation**)
+ - TIGIT KO T cells more effective at inhibiting tumor cell proliferation and persist longer within tumors than PD-1 KO T cells...
 # Differential requirements for CD4<sup>+</sup> T cells in the efficacy of the anti-PD-1<sup>+</sup> LAG-3 and anti-PD-1<sup>+</sup> CTLA-4 combinations in melanoma flank and brain metastases models
  - mouse melanoma models
  - anti-PD-1<sup>+</sup> CTLA-4 associated with FOXP3<sup>+</sup> CD4<sup>+</sup> T cells (Tregs) infiltrating, fewer activated CD4<sup>+</sup> T cells, accumulation of CD8<sup>+</sup> T cells secreting IFNγ
@@ -1170,6 +1184,8 @@
  - GPR120 implicated in regulating metabolism, inflammation
  - DSS (dextran sodium sulfate)-induced colitis model
  - mice
+# Graded expression of the chemokine receptor CX3CR1 marks differentiation states of human and murine T cells and enables cross-species interpretation
+ - **T cell differentiation gradient: more granzyme A/B and perforin produced, less IL-2 produced, more CX3CR1 expressed with more differentiated T cells**
 # Graft-versus-host disease versus graft-versus-leukemia
  - graft-versus-host is characterized by robust T cell activation and proliferation followed by infiltration of host target structures
  - it's less clear to what degree T cell activation and proliferation are required for effective graft-versus-leukemia, so perhaps controlling T cell proliferation can uncouple graft-versus-leukemia from graft-versus host
@@ -1267,6 +1283,8 @@
  - PD-1 stabilizes TCF-1<sup>+</sup> Tex precursor pool (that maintains a chronically stimulated Tex pool)
 # High-affinity oligoclonal TCRs define effective adoptive T cell therapy targeting mutant KRAS-G12D
  - only mutant G12D but not WT peptides stabilized HLA-C*08:02 (critical anchor salt bridge to HLA-C), so instance of no/less crossreactivity between TCR and WT/mutant peptide
+# High common-gamma cytokine receptor levels promote expression of interleukin-2/interleukin-7 receptor alpha-chains with implications on T cell differentiation and function
+ - hugh expression of common-gamma cytokine promotes expression of IL-2/IL-7 receptor alpha chains on activated naive T cells
 # High IGKC-expressing intratumoral plasma cells predict response to immune checkpoint blockade
  - potential new dataset
 # High proinsulin:C-peptide ratio identifies individuals with stage 2 type 1 diabetes at high risk for progression to clinical diagnosis and responses to teplizumab treatment
@@ -1821,6 +1839,15 @@
  - JAK-STAT has roles in immune responses, also here in regulating immune cell homeostasis
  - JAK-STAT-mediated transcription and chromatina accessibility across 12 mouse models (KO all STAT TFs, TYK2 kinase)
  - JAK-STAT signaling contributes to poised epigenetic and transcriptional state to help prepare cells for rapid response to immune stimuli
+# KIR<sup>+</sup>CD8<sup>+</sup> T cells suppress pathogenic T cells and are active in autoimmune diseases and COVID-19
+ - CD8s can suppress pathogenic CD4s via cytolytic activity
+ - KIRs (killer cell immunoglobulin-like receptors) are the human counterpart of the mouse Ly49 family
+ - see higher frequency of KIR<sup>+</sup> CD8s in blood and inflammed tissue of AID patients
+ - expression of inhibitory KIRs suppresses activation/cytotoxic function of KIR<sup>+</sup> CD8s
+# KIR2DL5<sup>+</sup>CD8<sup>+</sup> T cells associate with dietary lipid intake and are active in type 1 diabetes
+ - negative correlation between frequencies of circulating KIR<sup>+</sup> CD8 T cells and titers of ZnT8 autoantibodies in T1D individuals, supporting their suppressive function
+ - KIR2DL5<sup>+</sup> CD8s positively associate with dietary fat intake, increased perforin expression and reduced PD-1 expression
+ - KIR2DL5<sup>+</sup> CD8s more proliferative than other KIR<sup>+</sup> CD8s
 # Lactate modulates RNA splicing to promote CTLA-4 expression in tumor-infiltrating regulatory T cells
  - lactate uptake by Tregs contributes to efficacy of CTLA-4 blockade
  - RNA splicing machinery correlated with tumor-infiltrating Treg cell signatures
@@ -2271,6 +2298,8 @@
  - **non-exhausted T cells from periphery may be key in explaining ICB response**
 ## Main
  - parallel expansion in tumor and normal adjacent tissue may be from infiltration of T cells from periphery (extravasating into both tumor and normal adjacent tissue from blood)
+# Phenotypic profiling of human induced regulatory T cells at early differentiation: insights into distinct immunosuppressive potential
+ - iTregs express FOXP3 as well as Treg-associated markers (CD25, PD1, CD137, CCR4, CCR7, CXCR3, CD103)
 # Phenotypic signatures of circulating neoantigen-reactive CD8<sup>+</sup> T cells in patients with metastatic cancers
 ## Abstract
  - circulating antitumor T cells are rarer and less dysfunctional than neoantigen TILs but target same neoantigens, only partially share TCR repertoire with TILs
@@ -2554,6 +2583,8 @@
  - CD8<sup>+</sup> T cell activation via ICB successful in microsatellite instable (MSI, high TMB, more TILs) colorectal cancer, limited success against microsatellite stable (MSS, lower TMB, fewer TILs) colorectal cancer
  - MSI CD8<sup>+</sup> T cells show tumor-specific activation, MSS CD8<sup>+</sup> T cells show tumor unspecific or bystander features
  - **prior literature: T cells that crossreact have higher *EOMES* and *KLRG1* expression**
+# Single cell multi-omics of mitochondrial DNA disorders reveals dynamics of purifying selection across human immune cells
+ - pathogenic mtDNA deletions can be selected against in T cells, CD8s seem more sensitive than CD4s (distinct metabolic demands)
 # Single cell profiling reveals unique features of diabetogenic T cells in anti-PD-1-induced type 1 diabetes mice
  - PD-1 blockade-induced T1D vs. spontaneous T1D in NOD mice
  - PD-1 blockade induces expansion of terminally exhausted/effector-like CD8s in pancreas, increase in T-bet<sup>high</sup> CD4s (FoxP3<sup>-</sup>), decrease in memory CD4s (also FoxP3<sup>-</sup>) in contrast to spontaneous T1D
