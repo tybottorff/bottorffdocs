@@ -202,6 +202,7 @@ wide_baseline_flow_metadata <- baseline_flow_data %>%
 wide_baseline_flow_metadata
 
 ```
+
 # Look at DP (feature lost in regressing out covars)
 
 ```{r}
@@ -223,6 +224,7 @@ p <- plot_data %>%
 p
 
 ```
+
 # Make PCA plots for baseline data
 
 ```{r}
@@ -1488,6 +1490,7 @@ ggplot(ica_df, aes(x=Comp1, y=Comp2)) +
 # lose some features because of NA (don't drop patients, drop features) due to 0 freq in parent
 
 regressing_out_confounders_df <- baseline_flow_data %>%
+  mutate(freq = logitNorm(freq)) %>%
   select(-c(parent_population, parent_parent_population, cleaned_visit_num, irae_severity_based_on_ctcae)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
   # don't drop NA rows, instead remove features (cols) with an NA
@@ -1498,7 +1501,9 @@ regressing_out_confounders_df <- baseline_flow_data %>%
 regressing_out_confounders_df
 
 metadata_cols <- regressing_out_confounders_df[, 1:9]
-feature_cols <- regressing_out_confounders_df[, 10:ncol(regressing_out_confounders_df)]
+feature_cols <- regressing_out_confounders_df[, 10:ncol(regressing_out_confounders_df)] %>%
+  # Z-score normalize across patients for each feature
+  mutate(across(where(is.numeric), ~ scale(.)))
 
 # remove 14/71 features with NAs instead of removing the patients
 na_count_per_feature <- colSums(is.na(feature_cols))
@@ -1516,6 +1521,64 @@ adjusted_features <- as.data.frame(lapply(feature_cols_filtered,
                                           batch = regressing_out_confounders_df$Batch))
 
 adjusted_data <- cbind(metadata_cols, adjusted_features)
+
+```
+
+# Try module approach from "top" features
+
+```{r}
+
+wide_baseline_flow_data_confounders_regressed_out <- adjusted_data %>%
+  mutate(group = case_when(
+    group == "Healthy_Control" ~ "HC",
+    group == "AID_Patient" ~ "AID",
+    TRUE ~ group
+  ),
+  age = as.numeric(as.character(age)),
+  subgroup = case_when(
+    group == "AID" & specific_group == "Type 1 Diabetes" ~ "T1D",
+    group == "AID" & specific_group == "RA" ~ "RA",
+    group == "AID" & str_detect(specific_group, "Ulcer") ~ "Gut",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Renal Cancer, Bladder Cancer", "Bladder Cancer") ~ "Bladder/\nrenal\ncancer",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Urinary Tract Cancer", "Urethral Cancer") ~ "Urinary\ntract/\nurethral\ncancer",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Lung Disease, Lung Cancer", "Lung Cancer") ~ "Lung\ncancer/\ndisease",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer, Lung Cancer" ~ "Head\nand\nneck/\nlung\ncancer",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer" ~ "Head\nand\nneck\ncancer",
+    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Gastric Cancer" ~ "Gastric\ncancer",
+    TRUE ~ specific_group
+  )) %>%
+  dplyr::filter((group %in% c("non-irAE", "irAE/SAE"))) %>%
+  select("patient_id", "group", "unswMem.of.Bcells", "CM.of.Tconv.Tcells", "PD1pos.of.CM.Tconv.Tcells", "CCR6pos.of.NN.Tconv.Tcells", "DN.of.Bcells", "pDC.of.nonGrans") %>%
+  rowwise() %>%
+  mutate(mean_value = mean(c_across(starts_with("unswMem.of.Bcells"):last_col()), na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(patient_id, group, mean_value)
+
+wide_baseline_flow_data_confounders_regressed_out
+
+wide_baseline_flow_data_confounders_regressed_out %>%
+  summarize(
+    # Perform Shapiro-Wilk test for normality in each group
+    shapiro_non_irae = shapiro.test(mean_value[group == "non-irAE"])$p.value,
+    shapiro_irae = shapiro.test(mean_value[group == "irAE/SAE"])$p.value,
+    
+    # Choose between t-test and Wilcoxon test based on normality
+    pval = ifelse(
+      shapiro_non_irae > 0.05 & shapiro_irae > 0.05,
+      t.test(mean_value[group == "non-irAE"], 
+             mean_value[group == "irAE/SAE"], 
+             paired = FALSE)$p.value,
+      wilcox.test(mean_value[group == "non-irAE"], 
+                  mean_value[group == "irAE/SAE"], 
+                  paired = FALSE, exact = FALSE)$p.value
+    )
+  ) %>%
+  print()
+
+ggplot(wide_baseline_flow_data_confounders_regressed_out, aes(x = group, y = mean_value, color = group)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  labs(y = "Top feature module score", x = "")
 
 ```
 
@@ -1629,6 +1692,41 @@ p
 #ggsave("../figures/baseline_pca_aid_subgroup_age_and_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
 #ggsave("../figures/baseline_pca_general_group_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
 #ggsave("../figures/baseline_pca_batch_batch_regressed_out.png", plot = p, width = 3.5, height = 3.5)
+
+```
+
+# Determine clusters in PCA space, then test for enrichment of study groups in clusters
+
+```{r}
+
+# Elbow method to determine optimal number of clusters
+set.seed(123)
+wss <- sapply(1:10, function(k) {
+  kmeans(pcaData[, c("PC1", "PC2", "PC3")], centers = k, nstart = 25)$tot.withinss
+})
+
+# Plot the Elbow curve
+plot(1:10, wss, type = "b", pch = 19, frame = FALSE, xlab = "Number of clusters", ylab = "Total within-cluster sum of squares")
+
+kmeans_result <- kmeans(pcaData[, c("PC1", "PC2", "PC3")], centers = 6, nstart = 25)
+
+# Add cluster assignments to the data
+pcaData$cluster <- factor(kmeans_result$cluster)
+
+p <- ggplot(data = pcaData) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = cluster), size = 2, alpha = 0.8) +  # Color by cluster
+  labs(color = "Cluster") +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+table_result <- table(pcaData$cluster, pcaData$group)
+
+chisq_test <- chisq.test(table_result)
+
+fisher_test <- fisher.test(table_result)
 
 ```
 
