@@ -1034,6 +1034,8 @@
  - **trying to find evidence for increased hydrophobicity relating to cross-reactivity of TCRs: here they discuss how a particular PKA/AKAP interface demonstrates promiscuity in part due to the number of interactions this hydrophobic interface allows, which allows many alternative contacts (increased entropy, drives forward binding) with other binding partners hence promiscuity**
 # EP08.01-009 TRBV haplotype profile was related to immune-induced adverse events in Chinese patients with advanced NSCLC
  - irAEs related to *TRBV* genes and uncommon V alleles
+# Epigenetic control of Cdkn2a.Arf protects tumor-infiltrating lymphocytes from metabolic exhaustion
+ - Cdkn2a.Arf-mediated p53-independent mechanism of EZH2 inhibition leading to mitochondrial dysfunction and exhaustion
 # Epigenetic regulation of monoallelic rearrangement (allelic exclusion) of antigen receptor genes
 ## Summary
  - ~10% of genes are expressed monoallelically (any given cell expressed only paternal or maternal allele but not both)
