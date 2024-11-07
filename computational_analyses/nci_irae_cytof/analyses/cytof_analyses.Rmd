@@ -317,7 +317,7 @@ createTable(res, show.p.overall = TRUE)
 
 ```
 
-# Look for correlation b/w irAE grade and freq for each feature/subset (baseline)
+# Look for correlation b/w irAE grade (and also try time to irAE) and freq for each feature/subset (baseline)
 
 ```{r}
 
@@ -325,6 +325,27 @@ ctcae_cor_df <- baseline_flow_data %>%
   filter(!(is.na(ctcae_grade))) %>%
   group_by(sort) %>%
   summarize(cor_result = list(cor.test(ctcae_grade, freq, method = "spearman")), .groups = 'drop') %>%
+  mutate(
+    estimate = map_dbl(cor_result, ~ .x$estimate),
+    p.value = map_dbl(cor_result, ~ .x$p.value)
+  ) %>%
+  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
+  select(sort, estimate, p.adj) %>%
+  arrange(p.adj) %>%
+  print()
+
+time_to_irae_df <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
+  filter(`General irAE Classification` == "irAE/SE",
+         `Visit Descriptor` %in% c("Visit 1", "visit 1")) %>%
+  mutate(`Infusion date` = as.Date(as.numeric(`Infusion date`), origin = "1899-12-30"),
+         `First irAE Onset or Thyroid Test Date` = as.Date(as.numeric(`First irAE Onset or Thyroid Test Date`), origin = "1899-12-30"),
+         days_to_irae = as.numeric(difftime(`First irAE Onset or Thyroid Test Date`, `Infusion date`, units = "days"))) %>%
+  select(`Subject ID`, days_to_irae) %>%
+  filter(!(is.na(days_to_irae))) %>%
+  rename(patient_id = `Subject ID`) %>%
+  left_join(baseline_flow_data, by = "patient_id") %>%
+  group_by(sort) %>%
+  summarize(cor_result = list(cor.test(days_to_irae, freq, method = "spearman")), .groups = 'drop') %>%
   mutate(
     estimate = map_dbl(cor_result, ~ .x$estimate),
     p.value = map_dbl(cor_result, ~ .x$p.value)
@@ -1349,140 +1370,6 @@ p
 
 ```
 
-# Prepare for ICA on baseline data (logit transform)
-
-```{r}
-
-# Transform data (logit) to be more normally distributed
-
-logit_baseline_flow_data <- baseline_flow_data %>%
-  mutate(logit_freq = logitNorm(freq)) %>%
-  select(-c(parent_population, parent_parent_population, cleaned_visit_num, freq)) %>%
-  pivot_wider(names_from = sort, values_from = logit_freq) %>%
-  drop_na(-c(group, patient_id, irae_ex, irae_severity_category, pneumonitis, thyroid_irae, skin_irae, Batch, age, radiation, chemoradiation, intravesicular_bcg, intravesicular_chemo)) %>%
-  select(-c(patient_id, group, specific_group, irae_ex, irae_severity_category, pneumonitis, thyroid_irae, skin_irae, Batch, age, radiation, chemoradiation, intravesicular_bcg, intravesicular_chemo))
-
-logit_baseline_flow_data
-
-logit_baseline_flow_data_metadata <- baseline_flow_data %>%
-  mutate(logit_freq = logitNorm(freq)) %>%
-  select(-c(parent_population, parent_parent_population, cleaned_visit_num, freq)) %>%
-  pivot_wider(names_from = sort, values_from = logit_freq) %>%
-  drop_na(-c(group, patient_id, irae_ex, irae_severity_category, pneumonitis, thyroid_irae, skin_irae, Batch, age, radiation, chemoradiation, intravesicular_bcg, intravesicular_chemo)) %>%
-  select(c(patient_id, group, specific_group, irae_ex, irae_severity_category, pneumonitis, thyroid_irae, skin_irae, Batch, age, radiation, chemoradiation, intravesicular_bcg, intravesicular_chemo)) %>%
-  mutate(patient_id_simple = row_number())
-
-logit_baseline_flow_data_metadata
-
-```
-
-# Find optimal number of components for ICA
-
-```{r}
-
-library(ggplot2);theme_set(theme_bw(20) + theme(panel.grid.major = element_blank(),
-                                                panel.grid.minor = element_blank(),
-                                                panel.border = element_rect(colour="black", fill=NA, size=1),
-                                                axis.text=element_text(colour="black"),
-                                                axis.ticks=element_line(colour="black"))+
-                             theme(legend.key = element_blank()))
-
-# below is how to infer the appropriate number of components in ICA
-
-### Show example of one splitting iteration
-# Split the features into 2 ~equal sets
-## Set seed for reproducibility
-feats1 <- sample(colnames(logit_baseline_flow_data),round(ncol(logit_baseline_flow_data)/2) )
-feats2 <- colnames(logit_baseline_flow_data)[!colnames(logit_baseline_flow_data) %in% feats1]
-print( paste0("Num features: ", length(feats1), ", ", length(feats2)) )
-
-# Generate 2 ICA models with the split genes with 8 components
-ncomps <- 8
-ica1 <- icafast(logit_baseline_flow_data[,feats1], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
-print(paste0("Sample ICA Weight Matrix Dimensions: ", nrow(ica1$S)," by ", ncol(ica1$S)) )
-ica2 <- icafast(logit_baseline_flow_data[,feats2], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
-
-## Correlate the components together
-cormat <- cor(ica1$S, ica2$S,method="spearman")
-rowMaxes <- apply(abs(cormat),1,max)
-rownames(cormat) <- as.character( signif(rowMaxes,3))
-Heatmap(abs(cormat), name="Pearson\nCorrelation",column_title="Pairwise Correlations Between Split ICA Models")
-# Get the worst best correlation
-minMaxR <- min( apply(abs(cormat),1,max) )
-print( paste0("Worst best component correlation: ",minMaxR) )
-
-## Function to compute worst best component correlation for a sequence of component numbers
-getSplitMinMaxR <- function(nCompsSequence, data.tmp=logit_baseline_flow_data){ # get the minimum spearman correlation between the ICA components from the two splits
-  
-  # Split the features into 2 equal sets
-  feats1 <- sample(colnames(logit_baseline_flow_data),round(ncol(logit_baseline_flow_data)/2) )
-  feats2 <- colnames(logit_baseline_flow_data)[!colnames(logit_baseline_flow_data) %in% feats1]
-  
-  getMinMaxR <- function(ncomps){
-    print(ncomps)
-    ica1 <- icafast(logit_baseline_flow_data[,feats1], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
-    ica2 <- icafast(logit_baseline_flow_data[,feats2], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
-    cormat <- cor(ica1$S, ica2$S,method="spearman")
-    vals <- c( minMaxR = min( apply(abs(cormat),2,max)), ncomps=ncomps )
-  }
-  
-  minMaxRs <- data.frame( t(sapply( nCompsSequence, getMinMaxR)) )
-  return(minMaxRs)
-}
-
-# Do two splits
-nCompsSequence <- 2:15
-numShuffles <- 2
-minMaxRs <- lapply(1:numShuffles, function(i) getSplitMinMaxR(nCompsSequence, logit_baseline_flow_data) )
-for( i in 1:length(minMaxRs) ){
-  minMaxRs[[i]]$shuffleNumber <- i
-}
-print("Min Max Rs: ")
-print(minMaxRs)
-numShuffles <- length(minMaxRs)
-
-getCorDiffs <- function( minMaxR ){
-  corDiffs <- minMaxR$minMaxR[2:nrow(minMaxR)] - minMaxR$minMaxR[1:(nrow(minMaxR)-1) ]
-  biggestDecline <- minMaxR$ncomps[ which( corDiffs == min(corDiffs)) ]
-  print( paste0("Biggest Correlation Decline: ", biggestDecline, " to ", biggestDecline+1 ) )
-  return(biggestDecline)
-}
-
-biggestDeclines <- sapply(minMaxRs,getCorDiffs)
-biggestDeclineTab <- table(biggestDeclines)
-ggplot() + geom_histogram( aes(x=biggestDeclines)) + labs(x="# of components before the largest decline")
-optimalCompNum <- as.numeric( names(biggestDeclineTab)[biggestDeclineTab==max(biggestDeclineTab)] )
-print(optimalCompNum)
-
-## Make boxplot of results of correlations for all 50 subsamples
-minMaxRsLong <- do.call(rbind,minMaxRs)
-ggplot(minMaxRsLong,aes(x=ncomps,y=minMaxR)) + geom_boxplot(aes(group=ncomps)) + geom_line(aes(group=shuffleNumber), alpha=0.1,color="red") + labs(x="number of ICA components",y="Lowest Component\nSpearman Correlation",title=paste0( numShuffles," Feature 2-Way Splits\nMinMax Component Correlation")) + geom_vline(xintercept = optimalCompNum, linetype="dashed",color="blue")
-
-```
-
-# Run ICA with optimal num of components
-
-```{r}
-
-optimalCompNum <- 8  # or set to your identified number of components
-ica_model <- icafast(logit_baseline_flow_data, optimalCompNum, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(optimalCompNum), alg = "par", fun = "logcosh", alpha = 1)
-
-# Extract the ICA components
-ica_components <- ica_model$S
-
-logit_baseline_flow_data_metadata$patient_id_simple <- as.character(logit_baseline_flow_data_metadata$patient_id_simple)
-
-# Create a data frame with the first 2 or 3 components for visualization
-ica_df <- data.frame(Comp1 = ica_components[,1], Comp2 = ica_components[,2], patient_id_simple = as.character(rownames(logit_baseline_flow_data))) %>%
-  left_join(logit_baseline_flow_data_metadata, by = "patient_id_simple")
-
-# Plot the first 2 components
-ggplot(ica_df, aes(x=Comp1, y=Comp2)) +
-  geom_point(aes(color=group), size=2) + 
-  labs(x="ICA Component 1", y="ICA Component 2")
-
-```
-
 # Try regressing out confounders in baseline data
 
 ```{r}
@@ -1605,8 +1492,7 @@ wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:9] %>
     group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer" ~ "Head\nand\nneck\ncancer",
     group %in% c("non-irAE", "irAE/SAE") & specific_group == "Gastric Cancer" ~ "Gastric\ncancer",
     TRUE ~ specific_group
-  )) %>%
- dplyr::filter((group %in% c("non-irAE", "irAE/SAE")))
+  )) 
 
 wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 10:ncol(adjusted_data)] #%>% select("unswMem.of.Bcells", "CM.of.Tconv.Tcells", "PD1pos.of.CM.Tconv.Tcells", "CCR6pos.of.NN.Tconv.Tcells", "DN.of.Bcells", "pDC.of.nonGrans")
 
@@ -1887,6 +1773,140 @@ stats_test <- data.frame(
 ) %>% arrange(adj_pval)
 
 stats_test
+
+```
+
+# Find optimal number of components for ICA
+
+```{r}
+
+### Show example of one splitting iteration
+# Split the features into 2 ~equal sets
+## Set seed for reproducibility
+feats1 <- sample(colnames(wide_baseline_flow_num_data_confounders_regressed_out),round(ncol(wide_baseline_flow_num_data_confounders_regressed_out)/2) )
+feats2 <- colnames(wide_baseline_flow_num_data_confounders_regressed_out)[!colnames(wide_baseline_flow_num_data_confounders_regressed_out) %in% feats1]
+print( paste0("Num features: ", length(feats1), ", ", length(feats2)) )
+
+# Generate 2 ICA models with the split genes with 8 components
+ncomps <- 8
+ica1 <- icafast(wide_baseline_flow_num_data_confounders_regressed_out[,feats1], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
+print(paste0("Sample ICA Weight Matrix Dimensions: ", nrow(ica1$S)," by ", ncol(ica1$S)) )
+ica2 <- icafast(wide_baseline_flow_num_data_confounders_regressed_out[,feats2], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
+
+## Correlate the components together
+cormat <- cor(ica1$S, ica2$S,method="spearman")
+rowMaxes <- apply(abs(cormat),1,max)
+rownames(cormat) <- as.character( signif(rowMaxes,3))
+Heatmap(abs(cormat), name="Pearson\nCorrelation",column_title="Pairwise Correlations Between Split ICA Models")
+# Get the worst best correlation
+minMaxR <- min( apply(abs(cormat),1,max) )
+print( paste0("Worst best component correlation: ",minMaxR) )
+
+## Function to compute worst best component correlation for a sequence of component numbers
+getSplitMinMaxR <- function(nCompsSequence, data.tmp=wide_baseline_flow_num_data_confounders_regressed_out){ # get the minimum spearman correlation between the ICA components from the two splits
+  
+  # Split the features into 2 equal sets
+  feats1 <- sample(colnames(wide_baseline_flow_num_data_confounders_regressed_out),round(ncol(wide_baseline_flow_num_data_confounders_regressed_out)/2) )
+  feats2 <- colnames(wide_baseline_flow_num_data_confounders_regressed_out)[!colnames(wide_baseline_flow_num_data_confounders_regressed_out) %in% feats1]
+  
+  getMinMaxR <- function(ncomps){
+    print(ncomps)
+    ica1 <- icafast(wide_baseline_flow_num_data_confounders_regressed_out[,feats1], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
+    ica2 <- icafast(wide_baseline_flow_num_data_confounders_regressed_out[,feats2], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
+    cormat <- cor(ica1$S, ica2$S,method="spearman")
+    vals <- c( minMaxR = min( apply(abs(cormat),2,max)), ncomps=ncomps )
+  }
+  
+  minMaxRs <- data.frame( t(sapply( nCompsSequence, getMinMaxR)) )
+  return(minMaxRs)
+}
+
+# Do two splits
+nCompsSequence <- 2:15
+numShuffles <- 2
+minMaxRs <- lapply(1:numShuffles, function(i) getSplitMinMaxR(nCompsSequence, wide_baseline_flow_num_data_confounders_regressed_out) )
+for( i in 1:length(minMaxRs) ){
+  minMaxRs[[i]]$shuffleNumber <- i
+}
+print("Min Max Rs: ")
+print(minMaxRs)
+numShuffles <- length(minMaxRs)
+
+getCorDiffs <- function( minMaxR ){
+  corDiffs <- minMaxR$minMaxR[2:nrow(minMaxR)] - minMaxR$minMaxR[1:(nrow(minMaxR)-1) ]
+  biggestDecline <- minMaxR$ncomps[ which( corDiffs == min(corDiffs)) ]
+  print( paste0("Biggest Correlation Decline: ", biggestDecline, " to ", biggestDecline+1 ) )
+  return(biggestDecline)
+}
+
+biggestDeclines <- sapply(minMaxRs,getCorDiffs)
+biggestDeclineTab <- table(biggestDeclines)
+ggplot() + geom_histogram( aes(x=biggestDeclines)) + labs(x="# of components before the largest decline")
+optimalCompNum <- as.numeric( names(biggestDeclineTab)[biggestDeclineTab==max(biggestDeclineTab)] )
+print(optimalCompNum)
+
+## Make boxplot of results of correlations for all 50 subsamples
+minMaxRsLong <- do.call(rbind,minMaxRs)
+ggplot(minMaxRsLong,aes(x=ncomps,y=minMaxR)) + geom_boxplot(aes(group=ncomps)) + geom_line(aes(group=shuffleNumber), alpha=0.1,color="red") + labs(x="number of ICA components",y="Lowest Component\nSpearman Correlation",title=paste0( numShuffles," Feature 2-Way Splits\nMinMax Component Correlation")) + geom_vline(xintercept = optimalCompNum, linetype="dashed",color="blue")
+
+```
+
+# Run ICA with optimal num of components
+
+```{r}
+
+optimalCompNum <- 8  # or set to your identified number of components
+ica_model <- icafast(wide_baseline_flow_num_data_confounders_regressed_out, optimalCompNum, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(optimalCompNum), alg = "par", fun = "logcosh", alpha = 1)
+
+# Extract the ICA components
+ica_components <- ica_model$S
+
+wide_baseline_flow_metadata_confounders_regressed_out$patient_id_simple <- as.character(wide_baseline_flow_metadata_confounders_regressed_out$patient_id_simple)
+
+# Create a data frame with the first 2 or 3 components for visualization
+ica_df <- data.frame(Comp1 = ica_components[,1], Comp2 = ica_components[,2], patient_id_simple = as.character(rownames(wide_baseline_flow_num_data_confounders_regressed_out))) %>%
+  left_join(wide_baseline_flow_metadata_confounders_regressed_out, by = "patient_id_simple") %>%
+  # just look at cancer patients (baseline)
+  filter(!(is.na(group)))
+
+# Plot the first 2 components
+ggplot(ica_df, aes(x=Comp1, y=Comp2)) +
+  geom_point(aes(color=group), size=2) + 
+  labs(x="ICA Component 1", y="ICA Component 2")
+
+```
+
+# Cluster baseline cancer samples in ICA space, test for enrichment of irAE groups
+
+```{r}
+
+wss <- sapply(1:10, function(k) {
+  kmeans(ica_df[, c("Comp1", "Comp2")], centers = k, nstart = 25)$tot.withinss
+})
+
+# Plot the Elbow curve
+plot(1:10, wss, type = "b", pch = 19, frame = FALSE, xlab = "Number of clusters", ylab = "Total within-cluster sum of squares")
+
+kmeans_result <- kmeans(ica_df[, c("Comp1", "Comp2")], centers = 6, nstart = 25)
+
+# Add cluster assignments to the data
+ica_df$cluster <- factor(kmeans_result$cluster)
+
+ggplot(ica_df, aes(x = Comp1, y = Comp2, color = cluster)) +
+  geom_point(size = 2, alpha = 0.8) +
+  labs(x = "ICA Component 1", y = "ICA Component 2", color = "Cluster") +
+  theme_minimal()
+
+# Create contingency table for clusters vs. group
+table_result <- table(ica_df$cluster, ica_df$group)
+
+# Perform Chi-square and Fisher's Exact tests
+chisq_test <- chisq.test(table_result)
+fisher_test <- fisher.test(table_result)
+
+# Display results
+chisq_test
+fisher_test
 
 ```
 
