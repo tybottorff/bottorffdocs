@@ -56,6 +56,10 @@ theme_set(
 ```{r}
 
 baseline_flow_data <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
+  rename(thyroid_cat = `Thyroid Category (JB)`) %>%
+  mutate(`Infusion date` = as.Date(as.numeric(`Infusion date`), origin = "1899-12-30"),
+         `First irAE Onset or Thyroid Test Date` = as.Date(as.numeric(`First irAE Onset or Thyroid Test Date`), origin = "1899-12-30"),
+         days_to_irae = as.numeric(difftime(`First irAE Onset or Thyroid Test Date`, `Infusion date`, units = "days"))) %>%
   # subset for only baseline visits
   mutate(cleaned_visit_num = str_extract(`Visit Descriptor`, "\\d+")) %>%
   # CTCAE Grade (Highest) is the column for (ir)AE grade
@@ -63,7 +67,7 @@ baseline_flow_data <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
   # if CTCAE grade is not-NA, group should be irAE... (some grade 1-2 ctcae were in non-irAE group before using updated category 9/6/24, using `General irAE Classification` as its cleaner metadata though otherwise
   mutate(group = if_else(!is.na(ctcae_grade), "irAE/SAE", group)) %>%
   dplyr::filter(cleaned_visit_num == 1 | is.na(cleaned_visit_num) & group %in% c("AID_Patient", "Healthy_Control")) %>%
-  select(patient_id, group, ctcae_grade, specific_group, cleaned_visit_num, Batch, age, irae_ex, starts_with("pct_")) %>%
+  select(patient_id, group, ctcae_grade, specific_group, cleaned_visit_num, Batch, age, irae_ex, days_to_irae, thyroid_cat, starts_with("pct_")) %>%
   pivot_longer(
     cols = starts_with("pct_"), 
     names_to = "sort",
@@ -81,6 +85,11 @@ baseline_flow_data <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
     group == "irAE/SAE" & ctcae_grade < 3 ~ "Non-serious irAE/SAE",
     group == "non-irAE" ~ "Non-irAE",
     TRUE ~ NA),
+    irae_ex = if_else(is.na(irae_ex), "None", irae_ex),
+    thyroid_cat = if_else(is.na(thyroid_cat), "None", thyroid_cat),
+    thyroid_irae_including_oor = if_else(str_detect(irae_ex, regex("thyroid", ignore_case = TRUE)) | str_detect(thyroid_cat, regex("Abnormal", ignore_case = TRUE)),
+                                "Thyroid irAE", 
+                                "No thyroid irAE"),
     thyroid_irae = if_else(str_detect(irae_ex, regex("thyroid", ignore_case = TRUE)),
                                 "Thyroid irAE", 
                                 "No thyroid irAE"),
@@ -119,90 +128,6 @@ logitNorm <- function(v){
 
 ```
 
-# Stats tests for baseline data
-
-```{r}
-
-stats_test <- baseline_flow_data %>%
-  mutate(freq = logitNorm(freq)) %>%
-  group_by(sort) %>%
-  summarize(
-    # Perform Shapiro-Wilk test for normality in each group
-    shapiro_non_irae = shapiro.test(freq[group == "non-irAE"])$p.value,
-    shapiro_irae = shapiro.test(freq[group == "irAE/SAE"])$p.value,
-    
-    # Choose between t-test and Wilcoxon test based on normality
-    pval = ifelse(
-      shapiro_non_irae > 0.05 & shapiro_irae > 0.05,
-      t.test(freq[group == "non-irAE"], 
-             freq[group == "irAE/SAE"], 
-             paired = FALSE)$p.value,
-      wilcox.test(freq[group == "non-irAE"], 
-                  freq[group == "irAE/SAE"], 
-                  paired = FALSE, exact = FALSE)$p.value
-    )
-  ) %>%
-  # Adjust p-values using BH method
-  mutate(adj_pval = p.adjust(pval, method = "BH")) %>%
-  arrange(adj_pval)
-
-stats_test
-
-# no sig results for different pairwise comparisons b/w cancer irAE/no irAE subgroups (grade > 2 irAE vs. < 2 for example)
-
-```
-
-# Prepare data for PCA from baseline data (logit transformed freqs)
-
-```{r}
-
-wide_baseline_flow_num_data <- baseline_flow_data %>%
-  #filter(group %in% c("AID_Patient")) %>%
-  dplyr::filter(group %in% c("non-irAE", "irAE/SAE")) %>%
-  mutate(freq = logitNorm(freq)) %>%
-  select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
-  pivot_wider(names_from = sort, values_from = freq) %>%
-  select(-c(patient_id, group, specific_group, Batch, age, irae_severity_based_on_ctcae, ctcae_grade, irae_ex, thyroid_irae, skin_irae)) %>%
-  # have to get rid of patients with > 1 NA in any feature for PCA (could also get rid of features instead...)
-  drop_na() #%>%
-  # just look at features most discriminatory between irAE and no irAE groups
-  #select("unswMem of Bcells", "CM of Tconv Tcells", "PD1pos of CM Tconv Tcells", "CCR6pos of NN Tconv Tcells", "DN of Bcells", "pDC of nonGrans")
-
-wide_baseline_flow_num_data
-
-wide_baseline_flow_metadata <- baseline_flow_data %>%
-  mutate(freq = logitNorm(freq)) %>%
-  #filter(group %in% c("AID_Patient")) %>%
-  dplyr::filter(group %in% c("non-irAE", "irAE/SAE")) %>%
-  mutate(specific_group = case_when(
-         group == "AID_Patient" & specific_group == "Type 1 Diabetes" ~ "T1D",
-         group == "AID_Patient" & specific_group == "RA" ~ "RA",
-         group == "AID_Patient" & !(is.na(specific_group)) ~ "Gut",
-         group == "Healthy_Control" ~ "HC",
-         TRUE ~ specific_group)) %>%
-  #mutate(specific_group = case_when(
-  #       specific_group %in% c("Renal Cancer, Bladder Cancer", "Bladder Cancer") ~ "Bladder/\nrenal\ncancer",
-  #       specific_group %in% c("Urinary Tract Cancer", "Urethral Cancer") ~ "Urinary\ntract/\nurethral\ncancer",
-  #       specific_group %in% c("Lung Disease, Lung Cancer", "Lung Cancer") ~ "Lung\ncancer/\ndisease",
-  #       specific_group == "Head and Neck Cancer, Lung Cancer" ~ "Head\nand\nneck/\nlung\ncancer",
-  #       specific_group == "Head and Neck Cancer" ~ "Head\nand\nneck\ncancer",
-  #       specific_group == "Gastric cancer" ~ "Gastric\ncancer",
-  #       TRUE ~ specific_group)) %>%
-  select(-c(parent_population, parent_parent_population, cleaned_visit_num)) %>%
-  pivot_wider(names_from = sort, values_from = freq) %>%
-  drop_na(-c(group, patient_id, Batch, age, irae_severity_based_on_ctcae, ctcae_grade, irae_ex, thyroid_irae, skin_irae)) %>%
-  select(c(patient_id, group, specific_group, Batch, age, irae_severity_based_on_ctcae, ctcae_grade, irae_ex, thyroid_irae, skin_irae)) %>%
-  mutate(patient_id_simple = row_number()) %>%
-  mutate(group = case_when(
-    group == "Healthy_Control" ~ "HC",
-    group == "AID_Patient" ~ "AID",
-    TRUE ~ group
-  ))
-
-wide_baseline_flow_metadata
-
-```
-
 # Look at DP (feature lost in regressing out covars)
 
 ```{r}
@@ -222,1003 +147,6 @@ p <- plot_data %>%
         strip.text = element_text(size = 8))
 
 p
-
-```
-
-# Make PCA plots for baseline data
-
-```{r}
-
-#dim(wide_baseline_flow_num_data)
-
-pca = prcomp(as.data.frame((na.omit(wide_baseline_flow_num_data)), center=TRUE, scale=FALSE))
-
-var = get_pca_var(pca)
-
-#head(var$coord)
-
-pca_contributions = as.data.frame((var$contrib))
-
-sumPCA = summary(pca)
-
-#summary(pca)
-
-pca_variance = as.data.frame(t(sumPCA$importance))
-pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
-
-pcaScores= as.data.frame(pca$x)
-
-pcaScores
-
-pcaScores$patient_id_simple = row.names(pcaScores)
-
-pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
-
-pcaData = merge(wide_baseline_flow_metadata, pcaScores, by = "patient_id_simple")
-
-pcas = list()
-pcas[["fullData"]] = pcaData
-
-pcaLabels = list()
-pcaLabels[["fullData"]] = pcaLabels_
-
-pcaCorrelations = list()
-
-limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
-
-# find features contributing most to variation
-
-top_contributing_features_PC1 <- pca_contributions %>%
-    arrange(desc(Dim.1)) %>%
-    select(Dim.1) %>%
-    head(10)
-
-top_contributing_features_PC2 <- pca_contributions %>%
-    arrange(desc(Dim.2)) %>%
-    select(Dim.2) %>%
-    head(10)
-
-# Plot PCA with ellipses around clusters
-p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
-  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) +
-  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
-  xlim(-limits[1], limits[1]) +
-  ylim(-limits[2], limits[2]) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[2], color = "") +
-  theme_bw() +
-  theme(
-    legend.position = "bottom", 
-    legend.text = element_text(size = 7),
-    legend.spacing.y = unit(0.1, 'cm'),
-    legend.spacing.x = unit(0.3, 'cm')
-  ) +
-  guides(color = guide_legend(nrow = 2, byrow = TRUE))
-
-p
-
-# Statistical comparison of clusters using compareGroups
-compVar <- pcaData %>%
-  select(PC1, PC2, PC3, group, treatment) %>%
-  mutate(group = factor(group, levels = c("HC", "T1D")))  # Adjust levels as needed
-
-# Run statistical test on PCA components by group
-res <- compareGroups(group ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 2)
-summary(res)
-
-# Display comparison table
-createTable(res, show.p.overall = TRUE)
-
-#ggsave("../figures/baseline_pca_specific_irae_group.png", plot = p, width = 3, height = 3.5)
-#ggsave("../figures/baseline_pca_group.png", plot = p, width = 3, height = 3.5)
-#ggsave("../figures/baseline_pca_batch.png", plot = p, width = 3.5, height = 3.5)
-#ggsave("../figures/baseline_pca_specific_aid_and_hc.png", plot = p, width = 3, height = 3.5)
-
-```
-
-# Look for correlation b/w irAE grade (and also try time to irAE) and freq for each feature/subset (baseline)
-
-```{r}
-
-ctcae_cor_df <- baseline_flow_data %>%
-  filter(!(is.na(ctcae_grade))) %>%
-  group_by(sort) %>%
-  summarize(cor_result = list(cor.test(ctcae_grade, freq, method = "spearman")), .groups = 'drop') %>%
-  mutate(
-    estimate = map_dbl(cor_result, ~ .x$estimate),
-    p.value = map_dbl(cor_result, ~ .x$p.value)
-  ) %>%
-  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
-  select(sort, estimate, p.adj) %>%
-  arrange(p.adj) %>%
-  print()
-
-time_to_irae_df <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
-  filter(`General irAE Classification` == "irAE/SE",
-         `Visit Descriptor` %in% c("Visit 1", "visit 1")) %>%
-  mutate(`Infusion date` = as.Date(as.numeric(`Infusion date`), origin = "1899-12-30"),
-         `First irAE Onset or Thyroid Test Date` = as.Date(as.numeric(`First irAE Onset or Thyroid Test Date`), origin = "1899-12-30"),
-         days_to_irae = as.numeric(difftime(`First irAE Onset or Thyroid Test Date`, `Infusion date`, units = "days"))) %>%
-  select(`Subject ID`, days_to_irae) %>%
-  filter(!(is.na(days_to_irae))) %>%
-  rename(patient_id = `Subject ID`) %>%
-  left_join(baseline_flow_data, by = "patient_id") %>%
-  group_by(sort) %>%
-  summarize(cor_result = list(cor.test(days_to_irae, freq, method = "spearman")), .groups = 'drop') %>%
-  mutate(
-    estimate = map_dbl(cor_result, ~ .x$estimate),
-    p.value = map_dbl(cor_result, ~ .x$p.value)
-  ) %>%
-  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
-  select(sort, estimate, p.adj) %>%
-  arrange(p.adj) %>%
-  print()
-
-```
-
-# Heatmap (using Z scores of freqs in subsets across patients) for cancer subgroups (baseline)
-
-```{r}
-
-flow_data_filtered <- baseline_flow_data %>%
-  filter(group %in% c("non-irAE", "irAE/SAE"))
-
-# Define the order of groups
-group_order <- c("Non-irAE", "Non-serious irAE/SAE", "Serious irAE/SAE")
-
-# Reorder the patient_group factor by irae_severity_based_on_ctcae
-flow_data_filtered$irae_severity_based_on_ctcae <- factor(flow_data_filtered$irae_severity_based_on_ctcae, levels = group_order)
-
-# Recreate the patient_group column to reflect the new order
-flow_data_filtered$patient_group <- paste(flow_data_filtered$patient_id, flow_data_filtered$irae_severity_based_on_ctcae, sep = "_")
-
-# Reshape the data to wide format (rows: sort, cols: patient_id + irae_severity_based_on_ctcae)
-heatmap_data <- reshape2::dcast(flow_data_filtered, sort ~ patient_group, value.var = "freq")
-
-# Convert to matrix format for the heatmap
-mat <- as.matrix(heatmap_data[, -1])
-rownames(mat) <- heatmap_data$sort
-
-# Compute Z-scores for the matrix
-mat_z <- t(scale(t(mat)))  # Scale (across rows)
-
-# Extract patient ID and group from column names
-col_names <- colnames(mat)
-patient_ids <- sub("_(.*)", "", col_names)  # Extract patient ID
-groups <- sub("^[^_]*_", "", col_names)     # Extract group
-
-# Create a dataframe for sorting columns
-col_info <- data.frame(
-  patient_id = patient_ids,
-  group = factor(groups, levels = group_order),
-  col_name = col_names
-)
-
-# Order by group first and then by patient ID
-sorted_col_info <- col_info %>%
-  arrange(group, patient_id)
-
-# Reorder the matrix based on sorted columns
-sorted_columns <- sorted_col_info$col_name
-mat_z <- mat_z[, sorted_columns]
-
-# Create column annotations
-col_annotations <- data.frame(Group = sorted_col_info$group)
-
-# Define colors for column annotations
-annotation_colors <- list(
-  Group = c("Non-irAE" = "black", "Non-serious irAE/SAE" = "green", "Serious irAE/SAE" = "red")
-)
-
-# Create HeatmapAnnotation for columns
-col_anno <- HeatmapAnnotation(
-  Group = col_annotations$Group,
-  col = annotation_colors
-)
-
-# Create a dataframe for sorting rows
-row_info <- data.frame(
-  sort = rownames(mat_z),
-  parent_pop = gsub(".* of ", "", rownames(mat)),
-  parent_parent_population = str_extract(gsub(".* of ", "", rownames(mat)), "[^ ]+$")
-) %>%
-  # Reorder rows based on parent pop
-  arrange(parent_parent_population)
-
-sorted_rows <- row_info$sort
-mat_z <- mat_z[match(sorted_rows, rownames(mat_z)), ]
-
-# Create row annotations
-row_annotations <- data.frame(ParentparentPop = row_info$parent_parent_population)
-
-# Alphabetize the unique parent_parent_population values
-sorted_parent_parent_pops <- sort(unique(row_info$parent_parent_population))
-
-# Define Viridis colors for the alphabetized parent_parent_population values
-viridis_colors <- viridis::viridis(length(sorted_parent_parent_pops))
-
-# Map colors to alphabetized ParentPop values
-row_annotation_colors <- setNames(viridis_colors, sorted_parent_parent_pops)
-
-# Ensure ParentPop factor levels are ordered alphabetically
-row_annotations$ParentparentPop <- factor(row_annotations$ParentparentPop, levels = sorted_parent_parent_pops)
-
-# Create HeatmapAnnotation for rows
-row_anno <- rowAnnotation(
-  ParentparentPop = row_annotations$ParentparentPop,
-  col = list(ParentparentPop = row_annotation_colors)
-)
-
-# Plot the heatmap
-heatmap_obj <- Heatmap(
-  mat_z,
-  cluster_rows = TRUE,
-  cluster_columns = FALSE,
-  row_names_gp = gpar(fontsize = 7),  # Adjust font size if needed
-  top_annotation = col_anno,  # Annotation for columns
-  right_annotation = row_anno,  # Annotation for rows
-  col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
-  show_row_names = TRUE,
-  show_column_names = FALSE,
-  heatmap_legend_param = list(title = "Z-score")
-)
-
-# Save the heatmap to a PDF file
-pdf(file = "../figures/heatmap_z_scores_baseline_cancer.pdf", width = 10, height = 8)  # Adjust width and height as needed
-draw(heatmap_obj)  # Render the heatmap
-dev.off()  # Close the PDF device
-
-```
-
-# Heatmap (using Z scores of freqs in subsets across patients) for all baseline groups
-
-```{r}
-
-flow_data_filtered <- baseline_flow_data
-
-# Define the order of groups
-group_order <- c("Healthy_Control", "AID_Patient", "irAE/SAE", "non-irAE")
-
-# Reorder the patient_group factor by group
-flow_data_filtered$group <- factor(flow_data_filtered$group, levels = group_order)
-
-# Recreate the patient_group column to reflect the new order
-flow_data_filtered$patient_group <- paste(flow_data_filtered$patient_id, flow_data_filtered$group, sep = "_")
-
-# Reshape the data to wide format (rows: sort, cols: patient_id + group)
-heatmap_data <- reshape2::dcast(flow_data_filtered, sort ~ patient_group, value.var = "freq")
-
-# Convert to matrix format for the heatmap
-mat <- as.matrix(heatmap_data[, -1])
-rownames(mat) <- heatmap_data$sort
-
-# Compute Z-scores for the matrix
-mat_z <- t(scale(t(mat)))  # Scale (across rows)
-
-# Extract patient ID and group from column names
-col_names <- colnames(mat)
-patient_ids <- sub("_(.*)", "", col_names)  # Extract patient ID
-groups <- sub("^[^_]*_", "", col_names)     # Extract group
-
-# Create a dataframe for sorting columns
-col_info <- data.frame(
-  patient_id = patient_ids,
-  group = factor(groups, levels = group_order),
-  col_name = col_names
-)
-
-# Order by group first and then by patient ID
-sorted_col_info <- col_info %>%
-  arrange(group, patient_id)
-
-# Reorder the matrix based on sorted columns
-sorted_columns <- sorted_col_info$col_name
-mat_z <- mat_z[, sorted_columns]
-
-# Create column annotations
-col_annotations <- data.frame(Group = sorted_col_info$group)
-
-# Define colors for column annotations
-annotation_colors <- list(
-  Group = c("Healthy_Control" = "black", "AID_Patient" = "blue", "irAE/SAE" = "red", "non-irAE" = "green")
-)
-
-# Create HeatmapAnnotation for columns
-col_anno <- HeatmapAnnotation(
-  Group = col_annotations$Group,
-  col = annotation_colors
-)
-
-# Create a dataframe for sorting rows
-row_info <- data.frame(
-  sort = rownames(mat_z),
-  parent_pop = gsub(".* of ", "", rownames(mat)),
-  parent_parent_population = str_extract(gsub(".* of ", "", rownames(mat)), "[^ ]+$")
-) %>%
-  mutate(top_var = if_else(sort %in% rownames(top_contributing_features_PC1) | sort %in% rownames(top_contributing_features_PC2), "top_var", "not_top_var")) %>%
-  # Reorder rows based on parent pop
-  arrange(top_var, parent_parent_population)
-
-sorted_rows <- row_info$sort
-mat_z <- mat_z[match(sorted_rows, rownames(mat_z)), ]
-
-# Create row annotations
-row_annotations <- data.frame(ParentparentPop = row_info$parent_parent_population)
-
-# Alphabetize the unique parent_parent_population values
-sorted_parent_parent_pops <- sort(unique(row_info$parent_parent_population))
-
-# Define Viridis colors for the alphabetized parent_parent_population values
-viridis_colors <- viridis::viridis(length(sorted_parent_parent_pops))
-
-# Map colors to alphabetized ParentPop values
-row_annotation_colors <- setNames(viridis_colors, sorted_parent_parent_pops)
-
-# Ensure ParentPop factor levels are ordered alphabetically
-row_annotations$ParentparentPop <- factor(row_annotations$ParentparentPop, levels = sorted_parent_parent_pops)
-
-# Create HeatmapAnnotation for rows
-row_anno <- rowAnnotation(
-  ParentparentPop = row_annotations$ParentparentPop,
-  col = list(ParentparentPop = row_annotation_colors)
-)
-
-row.subsections <- c(53, 18)
-
-# Plot the heatmap
-heatmap_obj <- Heatmap(
-  mat_z,
-  cluster_rows = TRUE,
-  cluster_columns = FALSE,
-  row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
-  top_annotation = col_anno,  # Annotation for columns
-  right_annotation = row_anno,  # Annotation for rows
-  col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
-  show_row_names = TRUE,
-  show_column_names = FALSE,
-  heatmap_legend_param = list(title = "Z-score"),
-  row_split = data.frame(rep(c("Not top contributor to PCs 1-2", "Top contributor to PCs 1-2"), row.subsections))
-)
-
-# Save the heatmap to a PDF file
-pdf(file = "../figures/heatmap_z_scores_all_baseline.pdf", width = 10, height = 8)  # Adjust width and height as needed
-draw(heatmap_obj)  # Render the heatmap
-dev.off()  # Close the PDF device
-
-```
-
-# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for AID vs. cancer (baseline)
-
-```{r}
-
-flow_data_filtered <- baseline_flow_data %>%
-  filter(group != "HC")
-
-# Define the order of groups
-group_order <- c("AID", "irAE/SAE", "non-irAE")
-
-# Reorder the patient_group factor by group
-flow_data_filtered$group <- factor(flow_data_filtered$group, levels = group_order)
-
-# Recreate the patient_group column to reflect the new order
-flow_data_filtered$patient_group <- paste(flow_data_filtered$patient_id, flow_data_filtered$group, sep = "_")
-
-# Reshape the data to wide format (rows: sort, cols: patient_id + group)
-heatmap_data <- reshape2::dcast(flow_data_filtered, sort ~ patient_group, value.var = "freq")
-
-# Convert to matrix format for the heatmap
-mat <- as.matrix(heatmap_data[, -1])
-rownames(mat) <- heatmap_data$sort
-
-# Compute Z-scores for the matrix
-mat_z <- t(scale(t(mat)))  # Scale (across rows)
-
-# Extract patient ID and group from column names
-col_names <- colnames(mat)
-patient_ids <- sub("_(.*)", "", col_names)  # Extract patient ID
-groups <- sub("^[^_]*_", "", col_names)     # Extract group
-
-# Create a dataframe for sorting columns
-col_info <- data.frame(
-  patient_id = patient_ids,
-  group = factor(groups, levels = group_order),
-  col_name = col_names
-)
-
-# Order by group first and then by patient ID
-sorted_col_info <- col_info %>%
-  arrange(group, patient_id)
-
-# Reorder the matrix based on sorted columns
-sorted_columns <- sorted_col_info$col_name
-mat_z <- mat_z[, sorted_columns]
-
-# Create column annotations
-col_annotations <- data.frame(Group = sorted_col_info$group)
-
-# Define colors for column annotations
-annotation_colors <- list(
-  Group = c("AID" = "blue", "irAE/SAE" = "red", "non-irAE" = "green")
-)
-
-# Create HeatmapAnnotation for columns
-col_anno <- HeatmapAnnotation(
-  Group = col_annotations$Group,
-  col = annotation_colors
-)
-
-# significant populations (AID vs. cancer, 13)
-sig_list <- c("Treg of CD4 Tcells", "naive of CD8 Tcells", "Tcells of nonGrans", "NKcells of nonGrans", "Tfh of NN Tconv Tcells", "CXCR3pos of NN CD8 Tcells", "CD11cpos of Bcells", "MAIT of NN CD8 Tcells", "naive of Treg Tcells", "CRTH2pos of NN CD8 Tcells", "unswMem of Bcells", "Bcells of nonGrans", "CCR4pos of NN Tconv Tcells")
-
-# Create a dataframe for sorting rows based on if significant for AID vs. cancer
-row_info <- data.frame(
-  sort = rownames(mat_z),
-  parent_pop = gsub(".* of ", "", rownames(mat))
-) %>%
-  mutate(special = if_else(sort %in% sig_list, "Yes", "No"),
-        # Trim leading/trailing spaces and standardize capitalization
-        parent_pop = trimws(parent_pop),
-        parent_pop = tolower(parent_pop)) %>%
-  # Reorder rows based on if in significant list above + parent pop
-  arrange(special, parent_pop)
-
-sorted_rows <- row_info$sort
-mat_z <- mat_z[match(sorted_rows, rownames(mat_z)), ]
-
-# Create row annotations
-row_annotations <- data.frame(ParentPop = row_info$parent_pop)
-
-# Alphabetize the unique parent_pop values
-sorted_parent_pops <- sort(unique(row_info$parent_pop))
-
-# Define Viridis colors for the alphabetized parent_pop values
-viridis_colors <- viridis::viridis(length(sorted_parent_pops))
-
-# Map colors to alphabetized ParentPop values
-row_annotation_colors <- setNames(viridis_colors, sorted_parent_pops)
-
-# Ensure ParentPop factor levels are ordered alphabetically
-row_annotations$ParentPop <- factor(row_annotations$ParentPop, levels = sorted_parent_pops)
-
-# Create HeatmapAnnotation for rows
-row_anno <- rowAnnotation(
-  ParentPop = row_annotations$ParentPop,
-  col = list(ParentPop = row_annotation_colors)
-)
-
-row.subsections <- c(58, 13)
-
-# Plot the heatmap
-heatmap_obj <- Heatmap(
-  mat_z,
-  cluster_rows = TRUE,
-  cluster_columns = FALSE,
-  row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
-  top_annotation = col_anno,  # Annotation for columns
-  right_annotation = row_anno,  # Annotation for rows
-  col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
-  show_row_names = TRUE,
-  show_column_names = FALSE,
-  heatmap_legend_param = list(title = "Z-score"),
-  row_split = data.frame(rep(c("Not significant\nAID vs. cancer", "Significant AID\nvs. cancer"), row.subsections)),
-  border = FALSE  # remove borders between splits
-)
-
-# Save the heatmap to a PDF file
-pdf(file = "../figures/heatmap_z_scores_AID_vs_cancer.pdf", width = 10, height = 8)  # Adjust width and height as needed
-draw(heatmap_obj)  # Render the heatmap
-dev.off()  # Close the PDF device
-
-```
-
-# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for irAE vs. AID (baseline)
-
-```{r}
-
-flow_data_filtered <- baseline_flow_data %>%
-  filter(group %in% c("AID_Patient", "irAE/SAE"))
-
-# Define the order of groups
-group_order <- c("AID_Patient", "irAE/SAE")
-
-# Reorder the patient_group factor by group
-flow_data_filtered$group <- factor(flow_data_filtered$group, levels = group_order)
-
-# Recreate the patient_group column to reflect the new order
-flow_data_filtered$patient_group <- paste(flow_data_filtered$patient_id, flow_data_filtered$group, sep = "_")
-
-# Reshape the data to wide format (rows: sort, cols: patient_id + group)
-heatmap_data <- reshape2::dcast(flow_data_filtered, sort ~ patient_group, value.var = "freq")
-
-# Convert to matrix format for the heatmap
-mat <- as.matrix(heatmap_data[, -1])
-rownames(mat) <- heatmap_data$sort
-
-# Compute Z-scores for the matrix
-mat_z <- t(scale(t(mat)))  # Scale (across rows)
-
-# Extract patient ID and group from column names
-col_names <- colnames(mat)
-patient_ids <- sub("_(.*)", "", col_names)  # Extract patient ID
-groups <- sub("^[^_]*_", "", col_names)     # Extract group
-
-# Create a dataframe for sorting columns
-col_info <- data.frame(
-  patient_id = patient_ids,
-  group = factor(groups, levels = group_order),
-  col_name = col_names
-)
-
-# Order by group first and then by patient ID
-sorted_col_info <- col_info %>%
-  arrange(group, patient_id)
-
-# Reorder the matrix based on sorted columns
-sorted_columns <- sorted_col_info$col_name
-mat_z <- mat_z[, sorted_columns]
-
-# Create column annotations
-col_annotations <- data.frame(Group = sorted_col_info$group)
-
-# Define colors for column annotations
-annotation_colors <- list(
-  Group = c("AID_Patient" = "blue", "irAE/SAE" = "red")
-)
-
-# Create HeatmapAnnotation for columns
-col_anno <- HeatmapAnnotation(
-  Group = col_annotations$Group,
-  col = annotation_colors
-)
-
-# significant populations (AID vs. irAE/SAE, 11)
-sig_list <- c("CD11cpos of Bcells", "NKcells of nonGrans", "Tcells of nonGrans", "Tfh of NN Tconv Tcells", "Tfh of NN Tconv Tcells", "naive of CD8 Tcells", "unswMem of Bcells", "Bcells of nonGrans", "CXCR3pos of NN CD8 Tcells", "naive of Treg Tcells", "DN of Bcells")
-
-# Create a dataframe for sorting rows based on if significant for AID vs. irAE/SAE
-row_info <- data.frame(
-  sort = rownames(mat_z),
-  parent_pop = gsub(".* of ", "", rownames(mat))
-) %>%
-  mutate(special = if_else(sort %in% sig_list, "Yes", "No"),
-        # Trim leading/trailing spaces and standardize capitalization
-        parent_pop = trimws(parent_pop),
-        parent_pop = tolower(parent_pop)) %>%
-  # Reorder rows based on if in significant list above + parent pop
-  arrange(special, parent_pop)
-
-sorted_rows <- row_info$sort
-mat_z <- mat_z[match(sorted_rows, rownames(mat_z)), ]
-
-# Create row annotations
-row_annotations <- data.frame(ParentPop = row_info$parent_pop)
-
-# Alphabetize the unique parent_pop values
-sorted_parent_pops <- sort(unique(row_info$parent_pop))
-
-# Define Viridis colors for the alphabetized parent_pop values
-viridis_colors <- viridis::viridis(length(sorted_parent_pops))
-
-# Map colors to alphabetized ParentPop values
-row_annotation_colors <- setNames(viridis_colors, sorted_parent_pops)
-
-# Ensure ParentPop factor levels are ordered alphabetically
-row_annotations$ParentPop <- factor(row_annotations$ParentPop, levels = sorted_parent_pops)
-
-# Create HeatmapAnnotation for rows
-row_anno <- rowAnnotation(
-  ParentPop = row_annotations$ParentPop,
-  col = list(ParentPop = row_annotation_colors)
-)
-
-row.subsections <- c(69, 11)
-
-# Plot the heatmap
-heatmap_obj <- Heatmap(
-  mat_z,
-  cluster_rows = TRUE,
-  cluster_columns = FALSE,
-  row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
-  top_annotation = col_anno,  # Annotation for columns
-  right_annotation = row_anno,  # Annotation for rows
-  col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
-  show_row_names = TRUE,
-  show_column_names = FALSE,
-  heatmap_legend_param = list(title = "Z-score"),
-  row_split = data.frame(rep(c("Not significant\nAID vs. irAE", "Significant AID\nvs. irAE"), row.subsections)),
-  border = FALSE  # remove borders between splits
-)
-
-# Save the heatmap to a PDF file
-pdf(file = "../figures/heatmap_z_scores_AID_vs_irAE.pdf", width = 10, height = 8)  # Adjust width and height as needed
-draw(heatmap_obj)  # Render the heatmap
-dev.off()  # Close the PDF device
-
-```
-
-# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for non-irAE vs. AID (baseline)
-
-```{r}
-
-flow_data_filtered <- baseline_flow_data %>%
-  filter(group %in% c("AID_Patient", "non-irAE"))
-
-# Define the order of groups
-group_order <- c("AID_Patient", "non-irAE")
-
-# Reorder the patient_group factor by group
-flow_data_filtered$group <- factor(flow_data_filtered$group, levels = group_order)
-
-# Recreate the patient_group column to reflect the new order
-flow_data_filtered$patient_group <- paste(flow_data_filtered$patient_id, flow_data_filtered$group, sep = "_")
-
-# Reshape the data to wide format (rows: sort, cols: patient_id + group)
-heatmap_data <- reshape2::dcast(flow_data_filtered, sort ~ patient_group, value.var = "freq")
-
-# Convert to matrix format for the heatmap
-mat <- as.matrix(heatmap_data[, -1])
-rownames(mat) <- heatmap_data$sort
-
-# Compute Z-scores for the matrix
-mat_z <- t(scale(t(mat)))  # Scale (across rows)
-
-# Extract patient ID and group from column names
-col_names <- colnames(mat)
-patient_ids <- sub("_(.*)", "", col_names)  # Extract patient ID
-groups <- sub("^[^_]*_", "", col_names)     # Extract group
-
-# Create a dataframe for sorting columns
-col_info <- data.frame(
-  patient_id = patient_ids,
-  group = factor(groups, levels = group_order),
-  col_name = col_names
-)
-
-# Order by group first and then by patient ID
-sorted_col_info <- col_info %>%
-  arrange(group, patient_id)
-
-# Reorder the matrix based on sorted columns
-sorted_columns <- sorted_col_info$col_name
-mat_z <- mat_z[, sorted_columns]
-
-# Create column annotations
-col_annotations <- data.frame(Group = sorted_col_info$group)
-
-# Define colors for column annotations
-annotation_colors <- list(
-  Group = c("AID_Patient" = "blue", "non-irAE" = "green")
-)
-
-# Create HeatmapAnnotation for columns
-col_anno <- HeatmapAnnotation(
-  Group = col_annotations$Group,
-  col = annotation_colors
-)
-
-# significant populations (AID vs. non-irAE, 10)
-sig_list <- c("Treg of CD4 Tcells", "naive of CD8 Tcells", "CCR4pos of NN Tconv Tcells", "CRTH2pos of NN CD8 Tcells", "ICOSpos of Tfh Tconv Tcells", "CRTH2pos of NN Tconv Tcells", "SCM of Tconv Tcells", "EMRA of CD8 Tcells", "KLRG1posTIGITpos of CD8 Tcells", "Tcells of nonGrans")
-
-# Create a dataframe for sorting rows based on if significant for AID vs. irAE/SAE
-row_info <- data.frame(
-  sort = rownames(mat_z),
-  parent_pop = gsub(".* of ", "", rownames(mat))
-) %>%
-  mutate(special = if_else(sort %in% sig_list, "Yes", "No"),
-        # Trim leading/trailing spaces and standardize capitalization
-        parent_pop = trimws(parent_pop),
-        parent_pop = tolower(parent_pop)) %>%
-  # Reorder rows based on if in significant list above + parent pop
-  arrange(special, parent_pop)
-
-sorted_rows <- row_info$sort
-mat_z <- mat_z[match(sorted_rows, rownames(mat_z)), ]
-
-# Create row annotations
-row_annotations <- data.frame(ParentPop = row_info$parent_pop)
-
-# Alphabetize the unique parent_pop values
-sorted_parent_pops <- sort(unique(row_info$parent_pop))
-
-# Define Viridis colors for the alphabetized parent_pop values
-viridis_colors <- viridis::viridis(length(sorted_parent_pops))
-
-# Map colors to alphabetized ParentPop values
-row_annotation_colors <- setNames(viridis_colors, sorted_parent_pops)
-
-# Ensure ParentPop factor levels are ordered alphabetically
-row_annotations$ParentPop <- factor(row_annotations$ParentPop, levels = sorted_parent_pops)
-
-# Create HeatmapAnnotation for rows
-row_anno <- rowAnnotation(
-  ParentPop = row_annotations$ParentPop,
-  col = list(ParentPop = row_annotation_colors)
-)
-
-row.subsections <- c(70, 10)
-
-# Plot the heatmap
-heatmap_obj <- Heatmap(
-  mat_z,
-  cluster_rows = TRUE,
-  cluster_columns = FALSE,
-  row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
-  top_annotation = col_anno,  # Annotation for columns
-  right_annotation = row_anno,  # Annotation for rows
-  col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
-  show_row_names = TRUE,
-  show_column_names = FALSE,
-  heatmap_legend_param = list(title = "Z-score"),
-  row_split = data.frame(rep(c("Not significant\nAID vs. non-irAE", "Significant AID\nvs. non-irAE"), row.subsections)),
-  border = FALSE  # remove borders between splits
-)
-
-# Save the heatmap to a PDF file
-pdf(file = "../figures/heatmap_z_scores_AID_vs_non_irAE.pdf", width = 10, height = 8)  # Adjust width and height as needed
-draw(heatmap_obj)  # Render the heatmap
-dev.off()  # Close the PDF device
-
-```
-
-# Heatmap (using Z scores of freqs in subsets across patients) for significant hits for non-irAE vs. HC (baseline)
-
-```{r}
-
-flow_data_filtered <- baseline_flow_data %>%
-  filter(group %in% c("Healthy_Control", "non-irAE"))
-
-# Define the order of groups
-group_order <- c("Healthy_Control", "non-irAE")
-
-# Reorder the patient_group factor by group
-flow_data_filtered$group <- factor(flow_data_filtered$group, levels = group_order)
-
-# Recreate the patient_group column to reflect the new order
-flow_data_filtered$patient_group <- paste(flow_data_filtered$patient_id, flow_data_filtered$group, sep = "_")
-
-# Reshape the data to wide format (rows: sort, cols: patient_id + group)
-heatmap_data <- reshape2::dcast(flow_data_filtered, sort ~ patient_group, value.var = "freq")
-
-# Convert to matrix format for the heatmap
-mat <- as.matrix(heatmap_data[, -1])
-rownames(mat) <- heatmap_data$sort
-
-# Compute Z-scores for the matrix
-mat_z <- t(scale(t(mat)))  # Scale (across rows)
-
-# Extract patient ID and group from column names
-col_names <- colnames(mat)
-patient_ids <- sub("_(.*)", "", col_names)  # Extract patient ID
-groups <- sub("^[^_]*_", "", col_names)     # Extract group
-
-# Create a dataframe for sorting columns
-col_info <- data.frame(
-  patient_id = patient_ids,
-  group = factor(groups, levels = group_order),
-  col_name = col_names
-)
-
-# Order by group first and then by patient ID
-sorted_col_info <- col_info %>%
-  arrange(group, patient_id)
-
-# Reorder the matrix based on sorted columns
-sorted_columns <- sorted_col_info$col_name
-mat_z <- mat_z[, sorted_columns]
-
-# Create column annotations
-col_annotations <- data.frame(Group = sorted_col_info$group)
-
-# Define colors for column annotations
-annotation_colors <- list(
-  Group = c("Healthy_Control" = "black", "non-irAE" = "green")
-)
-
-# Create HeatmapAnnotation for columns
-col_anno <- HeatmapAnnotation(
-  Group = col_annotations$Group,
-  col = annotation_colors
-)
-
-# significant populations (HC vs. non-irAE, 5)
-sig_list <- c("CRTH2pos of NN Tconv Tcells", "Treg of CD4 Tcells", "CD38hiCD127neg of NN CD8 Tcells", "CRTH2pos of NN CD8 Tcells", "SCM of Tconv Tcells")
-
-# Create a dataframe for sorting rows based on if significant for AID vs. irAE/SAE
-row_info <- data.frame(
-  sort = rownames(mat_z),
-  parent_pop = gsub(".* of ", "", rownames(mat))
-) %>%
-  mutate(special = if_else(sort %in% sig_list, "Yes", "No"),
-        # Trim leading/trailing spaces and standardize capitalization
-        parent_pop = trimws(parent_pop),
-        parent_pop = tolower(parent_pop)) %>%
-  # Reorder rows based on if in significant list above + parent pop
-  arrange(special, parent_pop)
-
-sorted_rows <- row_info$sort
-mat_z <- mat_z[match(sorted_rows, rownames(mat_z)), ]
-
-# Create row annotations
-row_annotations <- data.frame(ParentPop = row_info$parent_pop)
-
-# Alphabetize the unique parent_pop values
-sorted_parent_pops <- sort(unique(row_info$parent_pop))
-
-# Define Viridis colors for the alphabetized parent_pop values
-viridis_colors <- viridis::viridis(length(sorted_parent_pops))
-
-# Map colors to alphabetized ParentPop values
-row_annotation_colors <- setNames(viridis_colors, sorted_parent_pops)
-
-# Ensure ParentPop factor levels are ordered alphabetically
-row_annotations$ParentPop <- factor(row_annotations$ParentPop, levels = sorted_parent_pops)
-
-# Create HeatmapAnnotation for rows
-row_anno <- rowAnnotation(
-  ParentPop = row_annotations$ParentPop,
-  col = list(ParentPop = row_annotation_colors)
-)
-
-row.subsections <- c(75, 5)
-
-# Plot the heatmap
-heatmap_obj <- Heatmap(
-  mat_z,
-  cluster_rows = TRUE,
-  cluster_columns = FALSE,
-  row_names_gp = gpar(fontsize = 8),  # Adjust font size if needed
-  top_annotation = col_anno,  # Annotation for columns
-  right_annotation = row_anno,  # Annotation for rows
-  col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
-  show_row_names = TRUE,
-  show_column_names = FALSE,
-  heatmap_legend_param = list(title = "Z-score"),
-  row_split = data.frame(rep(c("Not significant\nHC vs. non-irAE", "Significant HC\nvs. non-irAE"), row.subsections)),
-  border = FALSE  # remove borders between splits
-)
-
-# Save the heatmap to a PDF file
-pdf(file = "../figures/heatmap_z_scores_HC_vs_non_irAE.pdf", width = 10, height = 8)  # Adjust width and height as needed
-draw(heatmap_obj)  # Render the heatmap
-dev.off()  # Close the PDF device
-
-```
-
-# PCA from all visits of cancer patients + AID baseline
-
-```{r}
-
-longitudinal_data <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
-  # subset for only cancer + AID patients
-  filter(`General Patient Type` %in% c("Cancer_Patient", "AID_Patient")) %>%
-  rename(patient_id = `Subject ID`, ctcae_grade = `CTCAE Grade (Highest)`, group = `General irAE Classification`, specific_group = `Patient Type`, age = `Age at Draw`, visit_info = `Visit Descriptor`) %>%
-  # if CTCAE grade is not-NA, group should be irAE... (some grade 1-2 ctcae were in non-irAE group before using updated category 9/6/24, using `General irAE Classification` as its cleaner metadata though otherwise
-  mutate(group = if_else(!is.na(ctcae_grade), "irAE/SAE", group)) %>%
-  mutate(irae_severity_based_on_ctcae = case_when(
-    group == "irAE/SAE" & ctcae_grade > 2 ~ "Serious irAE/SAE",
-    group == "irAE/SAE" & ctcae_grade < 3 ~ "Non-serious irAE/SAE",
-    group == "non-irAE" ~ "Non-irAE",
-    TRUE ~ NA
-  )) %>%
-  dplyr::select(patient_id, group, specific_group, visit_info, ctcae_grade, irae_severity_based_on_ctcae, starts_with("pct_")) %>%
-  pivot_longer(
-    cols = starts_with("pct_"), 
-    names_to = "sort",
-    values_to = "freq") %>%
-  mutate(parent_population = gsub(".*_of_", "", sort),
-         parent_population = gsub("_", " ", parent_population),
-         parent_parent_population = str_extract(parent_population, "[^ ]+$"),
-         sort = gsub("pct_", "", sort),
-         sort = gsub("_", " ", sort)
-  ) %>%
-  mutate(visit_info = case_when(
-    str_detect(visit_info, "1") | visit_info == "AID_Patient" ~ "Baseline",
-    visit_info %in% c("other", "Other") ~ "Other",
-    #visit_info != "irAE F/U" & str_detect(visit_info, "irAE") ~ "irAE",
-    #visit_info == "irAE F/U" ~ "irAE F/U",
-    TRUE ~ visit_info
-    )) %>%
-  filter(!(sort %in% c("granulocytes of live", "PD1pos of DN Bcells", "PD1pos of naive Bcells", "PD1pos of swMem Bcells", "PD1pos of unswMem Bcells", "basophils of nonGrans", "EMRA of Tconv Tcells", "CXCR6pos of NN CD8 Tcells", "CXCR6posGrzmBpos of NN CD8 Tcells")),
-         !str_detect(sort, "PD"))
-
-longitudinal_data
-  
-```
-
-# Prepare data for PCA from longitudinal + AID data
-
-```{r}
-
-wide_longitudinal_num_data <- longitudinal_data %>%
-  mutate(freq = logitNorm(freq)) %>%
-  select(-c(parent_population, parent_parent_population)) %>%
-  pivot_wider(names_from = sort, values_from = freq) %>%
-  drop_na(-c(group, patient_id, visit_info, ctcae_grade, irae_severity_based_on_ctcae)) %>%
-  select(-c(patient_id, group, specific_group, visit_info, ctcae_grade, irae_severity_based_on_ctcae))
-
-wide_longitudinal_num_data
-
-wide_longitudinal_metadata <- longitudinal_data %>%
-  mutate(freq = logitNorm(freq)) %>%
-  select(-c(parent_population, parent_parent_population)) %>%
-  pivot_wider(names_from = sort, values_from = freq) %>%
-  drop_na(-c(group, patient_id, ctcae_grade, irae_severity_based_on_ctcae)) %>%
-  select(c(patient_id, group, specific_group, visit_info, ctcae_grade, irae_severity_based_on_ctcae)) %>%
-  mutate(patient_id_simple = row_number())
-
-wide_longitudinal_metadata
-
-```
-
-# Make PCA plots for longitudinal + AID data
-
-```{r}
-
-#dim(wide_longitudinal_num_data)
-
-pca = prcomp(as.data.frame((na.omit(wide_longitudinal_num_data)), center=TRUE, scale=FALSE))
-
-var = get_pca_var(pca)
-
-#head(var$coord)
-
-pca_contributions = as.data.frame((var$contrib))
-
-sumPCA = summary(pca)
-
-#summary(pca)
-
-pca_variance = as.data.frame(t(sumPCA$importance))
-pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
-
-pcaScores= as.data.frame(pca$x)
-
-pcaScores
-
-pcaScores$patient_id_simple = row.names(pcaScores)
-
-pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
-
-pcaData = merge(wide_longitudinal_metadata, pcaScores, by = "patient_id_simple")
-
-pcas = list()
-pcas[["fullData"]] = pcaData
-
-pcaLabels = list()
-pcaLabels[["fullData"]] = pcaLabels_
-
-pcaCorrelations = list()
-
-limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
-
-pcaData$visit_info <- factor(pcaData$visit_info, 
-                             levels = c("Baseline", "Visit 2", "Visit 2, irAE", "Visit 3", "Visit 3, irAE", "Visit 3, irAE F/U", "irAE", "irAE F/U", "Other"))
-
-p <- ggplot(data = pcaData %>% filter(irae_severity_based_on_ctcae == "Serious irAE/SAE" | group == "AID_Patient")) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
-  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, shape = group, color = visit_info), size = 1.5, alpha = 0.8) + 
-  scale_color_manual(values = c("Baseline" = "#440154FF", "Visit 2" = "#414487FF", "Visit 2, irAE" = "#414487FF", "Visit 3" = "#2A788EFF", "Visit 3, irAE" = "#2A788EFF", "Visit 3, irAE F/U" = "#2A788EFF", "irAE" = "#22A884FF", "irAE F/U" = "#7AD151FF", "Other" = "#FDE725FF")) +  # Set custom colors
-  xlim(-limits[1], limits[1]) +
-  ylim(-limits[2], limits[2]) +
-  #labs(color = "Visit") +
-  theme_bw() +
-  theme(
-    legend.position = "right", 
-    legend.text = element_text(size = 7),  # Adjust legend text size
-    legend.title = element_blank(),  # Adjust legend title size
-    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
-    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
-  ) +
-  #guides(
-  #  color = guide_legend(nrow = 1, byrow = TRUE),  # Use 2 rows for color legend
-  #  shape = guide_legend(nrow = 1, byrow = TRUE)
-  #) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[2])
-
-p
-
-#ggsave("../figures/longitudinal_pca_general_group.png", plot = p, width = 4.5, height = 3.5)
 
 ```
 
@@ -1370,7 +298,7 @@ p
 
 ```
 
-# Try regressing out confounders in baseline data
+# Regress out confounding batch in baseline data
 
 ```{r}
 
@@ -1385,14 +313,12 @@ regressing_out_confounders_df <- baseline_flow_data %>%
          age = as.factor(age)) %>%
   dplyr::filter(!(is.na(patient_id)))
 
-regressing_out_confounders_df
-
-metadata_cols <- regressing_out_confounders_df[, 1:9]
-feature_cols <- regressing_out_confounders_df[, 10:ncol(regressing_out_confounders_df)] %>%
+metadata_cols <- regressing_out_confounders_df[, 1:12]
+feature_cols <- regressing_out_confounders_df[, 13:ncol(regressing_out_confounders_df)] %>%
   # Z-score normalize across patients for each feature
   mutate(across(where(is.numeric), ~ scale(.)))
 
-# remove 14/71 features with NAs instead of removing the patients
+# remove 15/71 features with NAs
 na_count_per_feature <- colSums(is.na(feature_cols))
 feature_cols_filtered <- feature_cols[, na_count_per_feature == 0]
 
@@ -1407,7 +333,30 @@ adjusted_features <- as.data.frame(lapply(feature_cols_filtered,
                                           regress_out_confounders, 
                                           batch = regressing_out_confounders_df$Batch))
 
-adjusted_data <- cbind(metadata_cols, adjusted_features)
+adjusted_data <- cbind(metadata_cols, adjusted_features) %>%
+  filter(group %in% c("irAE/SAE", "non-irAE"))
+
+adjusted_data
+
+```
+
+# Re-do stats now with batch-corrected data
+
+```{r}
+
+stats_df <- adjusted_data %>%
+  pivot_longer(cols = -c(patient_id, group, ctcae_grade, specific_group, Batch, age, irae_ex, thyroid_irae, thyroid_irae_including_oor, skin_irae, days_to_irae, thyroid_cat), names_to = "sort", values_to = "value") %>%
+  group_by(sort) %>%
+  summarize(
+    Test_Type = if(all(shapiro.test(value[group == "non-irAE"])$p.value > 0.05,
+                       shapiro.test(value[group == "irAE/SAE"])$p.value > 0.05)) "t-test" else "Wilcoxon",
+    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    .groups = "drop"
+  ) %>%
+  mutate(padj = p.adjust(pval, method = "BH")) %>%
+  filter(pval < 0.1)
+
+stats_df
 
 ```
 
@@ -1416,32 +365,12 @@ adjusted_data <- cbind(metadata_cols, adjusted_features)
 ```{r}
 
 wide_baseline_flow_data_confounders_regressed_out <- adjusted_data %>%
-  mutate(group = case_when(
-    group == "Healthy_Control" ~ "HC",
-    group == "AID_Patient" ~ "AID",
-    TRUE ~ group
-  ),
-  age = as.numeric(as.character(age)),
-  subgroup = case_when(
-    group == "AID" & specific_group == "Type 1 Diabetes" ~ "T1D",
-    group == "AID" & specific_group == "RA" ~ "RA",
-    group == "AID" & str_detect(specific_group, "Ulcer") ~ "Gut",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Renal Cancer, Bladder Cancer", "Bladder Cancer") ~ "Bladder/\nrenal\ncancer",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Urinary Tract Cancer", "Urethral Cancer") ~ "Urinary\ntract/\nurethral\ncancer",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Lung Disease, Lung Cancer", "Lung Cancer") ~ "Lung\ncancer/\ndisease",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer, Lung Cancer" ~ "Head\nand\nneck/\nlung\ncancer",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer" ~ "Head\nand\nneck\ncancer",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Gastric Cancer" ~ "Gastric\ncancer",
-    TRUE ~ specific_group
-  )) %>%
-  dplyr::filter((group %in% c("non-irAE", "irAE/SAE"))) %>%
-  select("patient_id", "group", "unswMem.of.Bcells", "CM.of.Tconv.Tcells", "PD1pos.of.CM.Tconv.Tcells", "CCR6pos.of.NN.Tconv.Tcells", "DN.of.Bcells", "pDC.of.nonGrans") %>%
+  # take "top" features
+  select("patient_id", "group", stats_df$sort) %>%
   rowwise() %>%
-  mutate(mean_value = mean(c_across(starts_with("unswMem.of.Bcells"):last_col()), na.rm = TRUE)) %>%
+  mutate(mean_value = mean(c_across(starts_with("CCR6pos.of.NN.Tconv.Tcells"):last_col()), na.rm = TRUE)) %>%
   ungroup() %>%
   select(patient_id, group, mean_value)
-
-wide_baseline_flow_data_confounders_regressed_out
 
 wide_baseline_flow_data_confounders_regressed_out %>%
   summarize(
@@ -1465,7 +394,7 @@ wide_baseline_flow_data_confounders_regressed_out %>%
 ggplot(wide_baseline_flow_data_confounders_regressed_out, aes(x = group, y = mean_value, color = group)) +
   geom_boxplot() +
   geom_jitter(width = 0.2, alpha = 0.6) +
-  labs(y = "Top feature module score", x = "")
+  labs(y = "Top features module score", x = "")
 
 ```
 
@@ -1473,28 +402,10 @@ ggplot(wide_baseline_flow_data_confounders_regressed_out, aes(x = group, y = mea
 
 ```{r}
 
-wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:9] %>%
-  mutate(patient_id_simple = row_number()) %>%
-  mutate(group = case_when(
-    group == "Healthy_Control" ~ "HC",
-    group == "AID_Patient" ~ "AID",
-    TRUE ~ group
-  ),
-  age = as.numeric(as.character(age)),
-  subgroup = case_when(
-    group == "AID" & specific_group == "Type 1 Diabetes" ~ "T1D",
-    group == "AID" & specific_group == "RA" ~ "RA",
-    group == "AID" & str_detect(specific_group, "Ulcer") ~ "Gut",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Renal Cancer, Bladder Cancer", "Bladder Cancer") ~ "Bladder/\nrenal\ncancer",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Urinary Tract Cancer", "Urethral Cancer") ~ "Urinary\ntract/\nurethral\ncancer",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group %in% c("Lung Disease, Lung Cancer", "Lung Cancer") ~ "Lung\ncancer/\ndisease",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer, Lung Cancer" ~ "Head\nand\nneck/\nlung\ncancer",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Head and Neck Cancer" ~ "Head\nand\nneck\ncancer",
-    group %in% c("non-irAE", "irAE/SAE") & specific_group == "Gastric Cancer" ~ "Gastric\ncancer",
-    TRUE ~ specific_group
-  )) 
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:12] %>%
+  mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 10:ncol(adjusted_data)] #%>% select("unswMem.of.Bcells", "CM.of.Tconv.Tcells", "PD1pos.of.CM.Tconv.Tcells", "CCR6pos.of.NN.Tconv.Tcells", "DN.of.Bcells", "pDC.of.nonGrans")
+wide_baseline_flow_num_data_confounders_regressed_out <- (adjusted_data)[, 13:ncol(adjusted_data)] %>% select(stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1513,11 +424,8 @@ sumPCA = summary(pca)
 pca_variance = as.data.frame(t(sumPCA$importance))
 pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
 
-pcaScores= as.data.frame(pca$x)
-
-pcaScores
-
-pcaScores$patient_id_simple = row.names(pcaScores)
+pcaScores = as.data.frame(pca$x) %>%
+  mutate(patient_id_simple = row_number())
 
 pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
 
@@ -1552,8 +460,8 @@ p <- ggplot(data = pcaData) +
   stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
   #scale_color_manual(values = c("HC" = "purple", "AID" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
   #scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
-  xlim(-limits[1], limits[1]) +
-  ylim(-limits[2], limits[2]) +
+  #xlim(-limits[1], limits[1]) +
+  #ylim(-limits[2], limits[2]) +
   labs(color = "") +
   theme_bw() +
   theme(
@@ -1570,14 +478,402 @@ p <- ggplot(data = pcaData) +
 
 p
 
-#ggsave("../figures/baseline_pca_aid_subgroup_batch_regressed_out.png", plot = p, width = 3.5, height = 3.5)
-#ggsave("../figures/baseline_pca_irae_groups_all_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
-#ggsave("../figures/baseline_pca_age_age_and_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
-#ggsave("../figures/baseline_pca_age_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
-#ggsave("../figures/baseline_pca_cancer_type_batch_regressed_out.png", plot = p, width = 3.5, height = 3.5)
-#ggsave("../figures/baseline_pca_aid_subgroup_age_and_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
-#ggsave("../figures/baseline_pca_general_group_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
-#ggsave("../figures/baseline_pca_batch_batch_regressed_out.png", plot = p, width = 3.5, height = 3.5)
+ggsave("../figures/baseline_pca_irae_groups_top_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+
+compVar <- data.frame(PC1 = pcaData$PC1,
+                      PC2 = pcaData$PC2,
+                      PC3 = pcaData$PC3,
+                      group = pcaData$group)
+res <- compareGroups(group ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
+res
+
+# using "top" features, PC1 pops out as differential:
+
+p <- ggplot(pcaData, aes(x = group, y = PC1, color = group)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  labs(y = "PC1", x = "")
+
+p
+
+ggsave("../figures/baseline_pc1_boxplot_irae_groups_top_features_batch_regressed_out.png", plot = p, width = 5, height = 3.5)
+
+```
+
+# Plot PCA results for baseline data with batch (+/- age) regressed out, thyroid irAEs specifically
+
+```{r}
+
+thyroid_stats_df <- adjusted_data %>%
+  pivot_longer(cols = -c(patient_id, group, ctcae_grade, specific_group, Batch, age, irae_ex, thyroid_irae, thyroid_irae_including_oor, skin_irae, days_to_irae, thyroid_cat), names_to = "sort", values_to = "value") %>%
+  group_by(sort) %>%
+  summarize(
+    Test_Type = if(all(shapiro.test(value[thyroid_irae == "Thyroid irAE"])$p.value > 0.05,
+                       shapiro.test(value[thyroid_irae == "No thyroid irAE"])$p.value > 0.05)) "t-test" else "Wilcoxon",
+    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    .groups = "drop"
+  ) %>%
+  mutate(padj = p.adjust(pval, method = "BH")) %>%
+  filter(pval < 0.1)
+
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:12] %>%
+  mutate(patient_id_simple = row_number())
+
+wide_baseline_flow_num_data_confounders_regressed_out <- (adjusted_data)[, 13:ncol(adjusted_data)] #%>% select(thyroid_stats_df$sort)
+
+#dim(wide_baseline_flow_num_data_confounders_regressed_out)
+
+pca = prcomp(as.data.frame((na.omit(wide_baseline_flow_num_data_confounders_regressed_out)), center=TRUE, scale=FALSE))
+
+var = get_pca_var(pca)
+
+#head(var$coord)
+
+pca_contributions = as.data.frame((var$contrib))
+
+sumPCA = summary(pca)
+
+#summary(pca)
+
+pca_variance = as.data.frame(t(sumPCA$importance))
+pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
+
+pcaScores = as.data.frame(pca$x) %>%
+  mutate(patient_id_simple = row_number())
+
+pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
+
+pcaData = merge(wide_baseline_flow_metadata_confounders_regressed_out, pcaScores, by = "patient_id_simple")
+
+pcas = list()
+pcas[["fullData"]] = pcaData
+
+pcaLabels = list()
+pcaLabels[["fullData"]] = pcaLabels_
+
+pcaCorrelations = list()
+
+limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
+
+# find features contributing most to variation
+
+top_contributing_features_PC1 <- pca_contributions %>%
+    arrange(desc(Dim.1)) %>%
+    select(Dim.1) %>%
+    head(10)
+
+top_contributing_features_PC2 <- pca_contributions %>%
+    arrange(desc(Dim.2)) %>%
+    select(Dim.2) %>%
+    head(10)
+
+p <- ggplot(data = pcaData) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = thyroid_irae), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC2, color = thyroid_irae), size = 1, linetype = 2) +
+  labs(color = "") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),  # Adjust legend text size
+    #legend.title = element_blank(),  # Adjust legend title size
+    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
+    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
+  ) +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+ggsave("../figures/baseline_pca_thyroid_irae_groups_all_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+
+compVar <- data.frame(PC1 = pcaData$PC1,
+                      PC2 = pcaData$PC2,
+                      PC3 = pcaData$PC3,
+                      thyroid_irae = pcaData$thyroid_irae)
+res <- compareGroups(thyroid_irae ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
+res
+
+# using "top" features, PC1 pops out as differential:
+
+p <- ggplot(pcaData, aes(x = thyroid_irae, y = PC1, color = thyroid_irae)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  labs(y = "PC1", x = "")
+
+p
+
+ggsave("../figures/baseline_pc1_boxplot_thyroid_irae_groups_all_features_batch_regressed_out.png", plot = p, width = 5, height = 3.5)
+
+```
+
+# Plot PCA results for baseline data with batch (+/- age) regressed out, thyroid irAEs (including OOR) specifically
+
+```{r}
+
+thyroid_with_oor_stats_df <- adjusted_data %>%
+  pivot_longer(cols = -c(patient_id, group, ctcae_grade, specific_group, Batch, age, irae_ex, thyroid_irae, thyroid_irae_including_oor, skin_irae, days_to_irae, thyroid_cat), names_to = "sort", values_to = "value") %>%
+  group_by(sort) %>%
+  summarize(
+    Test_Type = if(all(shapiro.test(value[thyroid_irae_including_oor == "Thyroid irAE"])$p.value > 0.05,
+                       shapiro.test(value[thyroid_irae_including_oor == "No thyroid irAE"])$p.value > 0.05)) "t-test" else "Wilcoxon",
+    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    .groups = "drop"
+  ) %>%
+  mutate(padj = p.adjust(pval, method = "BH")) %>%
+  filter(pval < 0.1)
+
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:12] %>%
+  mutate(patient_id_simple = row_number())
+
+wide_baseline_flow_num_data_confounders_regressed_out <- (adjusted_data)[, 13:ncol(adjusted_data)] %>% select(thyroid_with_oor_stats_df$sort)
+
+#dim(wide_baseline_flow_num_data_confounders_regressed_out)
+
+pca = prcomp(as.data.frame((na.omit(wide_baseline_flow_num_data_confounders_regressed_out)), center=TRUE, scale=FALSE))
+
+var = get_pca_var(pca)
+
+#head(var$coord)
+
+pca_contributions = as.data.frame((var$contrib))
+
+sumPCA = summary(pca)
+
+#summary(pca)
+
+pca_variance = as.data.frame(t(sumPCA$importance))
+pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
+
+pcaScores = as.data.frame(pca$x) %>%
+  mutate(patient_id_simple = row_number())
+
+pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
+
+pcaData = merge(wide_baseline_flow_metadata_confounders_regressed_out, pcaScores, by = "patient_id_simple")
+
+pcas = list()
+pcas[["fullData"]] = pcaData
+
+pcaLabels = list()
+pcaLabels[["fullData"]] = pcaLabels_
+
+pcaCorrelations = list()
+
+limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
+
+# find features contributing most to variation
+
+top_contributing_features_PC1 <- pca_contributions %>%
+    arrange(desc(Dim.1)) %>%
+    select(Dim.1) %>%
+    head(10)
+
+top_contributing_features_PC2 <- pca_contributions %>%
+    arrange(desc(Dim.2)) %>%
+    select(Dim.2) %>%
+    head(10)
+
+p <- ggplot(data = pcaData) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = thyroid_irae_including_oor), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC2, color = thyroid_irae_including_oor), size = 1, linetype = 2) +
+  labs(color = "") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),  # Adjust legend text size
+    #legend.title = element_blank(),  # Adjust legend title size
+    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
+    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
+  ) +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+ggsave("../figures/baseline_pca_thyroid_irae_with_oor_groups_all_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+
+compVar <- data.frame(PC1 = pcaData$PC1,
+                      PC2 = pcaData$PC2,
+                      PC3 = pcaData$PC3,
+                      thyroid_irae_including_oor = pcaData$thyroid_irae_including_oor)
+res <- compareGroups(thyroid_irae_including_oor ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
+res
+
+# using "top" features, PC1 pops out as differential:
+
+p <- ggplot(pcaData, aes(x = thyroid_irae_including_oor, y = PC1, color = thyroid_irae_including_oor)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  labs(y = "PC1", x = "")
+
+p
+
+ggsave("../figures/baseline_pc1_boxplot_thyroid_irae_with_oor_groups_all_features_batch_regressed_out.png", plot = p, width = 5, height = 3.5)
+
+```
+
+# Plot PCA results for baseline data with batch (+/- age) regressed out, skin irAEs specifically
+
+```{r}
+
+skin_stats_df <- adjusted_data %>%
+  pivot_longer(cols = -c(patient_id, group, ctcae_grade, specific_group, Batch, age, irae_ex, thyroid_irae, thyroid_irae_including_oor, skin_irae, days_to_irae, thyroid_cat), names_to = "sort", values_to = "value") %>%
+  group_by(sort) %>%
+  summarize(
+    Test_Type = if(all(shapiro.test(value[skin_irae == "Skin irAE"])$p.value > 0.05,
+                       shapiro.test(value[skin_irae == "No skin irAE"])$p.value > 0.05)) "t-test" else "Wilcoxon",
+    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    .groups = "drop"
+  ) %>%
+  mutate(padj = p.adjust(pval, method = "BH")) %>%
+  filter(pval < 0.1)
+
+skin_stats_df
+
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:12] %>%
+  mutate(patient_id_simple = row_number())
+
+wide_baseline_flow_num_data_confounders_regressed_out <- (adjusted_data)[, 13:ncol(adjusted_data)] %>% select(skin_stats_df$sort)
+
+#dim(wide_baseline_flow_num_data_confounders_regressed_out)
+
+pca = prcomp(as.data.frame((na.omit(wide_baseline_flow_num_data_confounders_regressed_out)), center=TRUE, scale=FALSE))
+
+var = get_pca_var(pca)
+
+#head(var$coord)
+
+pca_contributions = as.data.frame((var$contrib))
+
+sumPCA = summary(pca)
+
+#summary(pca)
+
+pca_variance = as.data.frame(t(sumPCA$importance))
+pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
+
+pcaScores = as.data.frame(pca$x) %>%
+  mutate(patient_id_simple = row_number())
+
+pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
+
+pcaData = merge(wide_baseline_flow_metadata_confounders_regressed_out, pcaScores, by = "patient_id_simple")
+
+pcas = list()
+pcas[["fullData"]] = pcaData
+
+pcaLabels = list()
+pcaLabels[["fullData"]] = pcaLabels_
+
+pcaCorrelations = list()
+
+limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
+
+# find features contributing most to variation
+
+top_contributing_features_PC1 <- pca_contributions %>%
+    arrange(desc(Dim.1)) %>%
+    select(Dim.1) %>%
+    head(10)
+
+top_contributing_features_PC2 <- pca_contributions %>%
+    arrange(desc(Dim.2)) %>%
+    select(Dim.2) %>%
+    head(10)
+
+p <- ggplot(data = pcaData) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = skin_irae), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC2, color = skin_irae), size = 1, linetype = 2) +
+  #scale_color_manual(values = c("HC" = "purple", "AID" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  #scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
+  #xlim(-limits[1], limits[1]) +
+  #ylim(-limits[2], limits[2]) +
+  labs(color = "") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),  # Adjust legend text size
+    #legend.title = element_blank(),  # Adjust legend title size
+    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
+    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
+  ) +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+ggsave("../figures/baseline_pca_skin_irae_groups_top_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+
+compVar <- data.frame(PC1 = pcaData$PC1,
+                      PC2 = pcaData$PC2,
+                      PC3 = pcaData$PC3,
+                      skin_irae = pcaData$skin_irae)
+res <- compareGroups(skin_irae ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
+res
+
+# using "top" features, PC1 pops out as differential:
+
+p <- ggplot(pcaData, aes(x = skin_irae, y = PC1, color = skin_irae)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  labs(y = "PC1", x = "")
+
+p
+
+ggsave("../figures/baseline_pc1_boxplot_skin_irae_groups_top_features_batch_regressed_out.png", plot = p, width = 5, height = 3.5)
+
+```
+
+# Look for correlation b/w irAE grade (and also try time to irAE) and freq for each feature/subset (baseline)
+
+```{r}
+
+ctcae_cor_df <- adjusted_data %>%
+  pivot_longer(cols = -c(patient_id, group, ctcae_grade, specific_group, Batch, age, irae_ex, thyroid_irae, thyroid_irae_including_oor, skin_irae, days_to_irae, thyroid_cat), names_to = "sort", values_to = "freq") %>%
+  filter(!(is.na(ctcae_grade))) %>%
+  group_by(sort) %>%
+  summarize(cor_result = list(cor.test(ctcae_grade, freq, method = "spearman")), .groups = 'drop') %>%
+  mutate(
+    estimate = map_dbl(cor_result, ~ .x$estimate),
+    p.value = map_dbl(cor_result, ~ .x$p.value)
+  ) %>%
+  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
+  select(sort, estimate, p.adj) %>%
+  arrange(p.adj) %>%
+  print()
+
+ggplot(adjusted_data %>% pivot_longer(cols = -c(patient_id, group, ctcae_grade, specific_group, Batch, age, irae_ex, thyroid_irae, thyroid_irae_including_oor, skin_irae, days_to_irae, thyroid_cat), names_to = "sort", values_to = "freq") %>% filter(sort == "swMem.of.Bcells"), aes(x = ctcae_grade, y = freq)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(
+    x = "CTCAE Grade",
+    y = "swMem of Bcells (residuals)")
+
+time_to_irae_df <- adjusted_data %>%
+  pivot_longer(cols = -c(patient_id, group, ctcae_grade, specific_group, Batch, age, irae_ex, thyroid_irae, thyroid_irae_including_oor, skin_irae, days_to_irae, thyroid_cat), names_to = "sort", values_to = "freq") %>%
+  filter(group == "irAE/SAE") %>%
+  group_by(sort) %>%
+  summarize(cor_result = list(cor.test(days_to_irae, freq, method = "spearman")), .groups = 'drop') %>%
+  mutate(
+    estimate = map_dbl(cor_result, ~ .x$estimate),
+    p.value = map_dbl(cor_result, ~ .x$p.value)
+  ) %>%
+  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
+  select(sort, estimate, p.adj) %>%
+  arrange(p.adj) %>%
+  print()
 
 ```
 
@@ -1594,7 +890,7 @@ wss <- sapply(1:10, function(k) {
 # Plot the Elbow curve
 plot(1:10, wss, type = "b", pch = 19, frame = FALSE, xlab = "Number of clusters", ylab = "Total within-cluster sum of squares")
 
-kmeans_result <- kmeans(pcaData[, c("PC1", "PC2", "PC3")], centers = 6, nstart = 25)
+kmeans_result <- kmeans(pcaData[, c("PC1", "PC2", "PC3")], centers = 10, nstart = 25)
 
 # Add cluster assignments to the data
 pcaData$cluster <- factor(kmeans_result$cluster)
@@ -1611,44 +907,9 @@ p
 table_result <- table(pcaData$cluster, pcaData$group)
 
 chisq_test <- chisq.test(table_result)
-
+chisq_test
 fisher_test <- fisher.test(table_result)
-
-```
-
-# Plot cancer baseline data on AID PCA
-
-```{r}
-
-cancer_data <- adjusted_data %>% 
-  filter(group %in% c("non-irAE", "irAE/SAE")) %>% 
-  select(10:ncol(adjusted_data))
-
-cancer_metadata <- adjusted_data %>% 
-  filter(group %in% c("non-irAE", "irAE/SAE")) %>% 
-  select(1:9)
-
-# Scale and center cancer data to match the original PCA scaling
-cancer_projected_scores <- as.data.frame(scale(cancer_data, center = pca$center, scale = pca$scale) %*% pca$rotation)
-cancer_projected_scores$patient_id_simple <- row.names(cancer_projected_scores)
-cancer_projected_scores$group <- cancer_metadata$group
-
-ggplot(data = cancer_projected_scores) +
-  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
-  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
-  xlim(-limits[1], limits[1]) +
-  ylim(-limits[2], limits[2]) +
-  labs(color = "", shape = "") +
-  theme_bw() +
-  theme(
-    legend.position = "bottom", 
-    legend.text = element_text(size = 7),
-    legend.spacing.y = unit(0.1, 'cm'), 
-    legend.spacing.x = unit(0.3, 'cm')
-  ) +
-  guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
-  labs(x = pcaLabels[[1]][1], y = pcaLabels[[1]][2])
+fisher_test
 
 ```
 
@@ -1662,7 +923,7 @@ irae_group <- df %>% dplyr::filter(group == "irAE/SAE")
 no_irae_group <- df %>% dplyr::filter(group == "non-irAE")
 
 non_feature_cols <- c("patient_id", "group", "specific_group", "irae_ex", "Batch", 
-                      "age", "ctcae_grade", "thyroid_irae", "skin_irae")
+                      "age", "ctcae_grade", "thyroid_irae", "thyroid_irae_including_oor", "skin_irae", "days_to_irae", "thyroid_cat")
 feature_columns <- setdiff(colnames(df), non_feature_cols)
 
 # Calculate mean residuals for each feature
@@ -1727,55 +988,6 @@ ggsave("../figures/batch_regressed_out_residuals_by_feature_hits.png", plot = p,
 
 ```
 
-# Re-do stats old way after regressing out batch to resolve discrepancy b/w methods
-
-```{r}
-
-# Define feature columns
-feature_columns <- colnames(adjusted_data)[!(colnames(adjusted_data) %in% non_feature_cols)]
-
-# Filter groups
-irae_group <- adjusted_data %>% filter(group == "irAE/SAE")
-non_irae_group <- adjusted_data %>% filter(group == "non-irAE")
-
-# Initialize lists for p-values and test types used
-pvals <- c()
-test_type <- c()
-
-# Loop over features and decide on test based on normality
-for (feature in feature_columns) {
-  # Perform Shapiro-Wilk test for normality
-  shapiro_irae <- shapiro.test(irae_group[[feature]])$p.value
-  shapiro_non_irae <- shapiro.test(non_irae_group[[feature]])$p.value
-  
-  # If both groups are normally distributed (p > 0.05), use t-test
-  if (shapiro_irae > 0.05 & shapiro_non_irae > 0.05) {
-    pval <- t.test(irae_group[[feature]], non_irae_group[[feature]], paired = FALSE)$p.value
-    test_type <- c(test_type, "t-test")
-  } else {
-    # Otherwise, use Wilcoxon test
-    pval <- wilcox.test(irae_group[[feature]], non_irae_group[[feature]], paired = FALSE, exact = FALSE)$p.value
-    test_type <- c(test_type, "wilcox")
-  }
-  
-  pvals <- c(pvals, pval)
-}
-
-# Adjust p-values using BH method
-padj <- p.adjust(pvals, method = "BH")
-
-# Create results data frame with the test type
-stats_test <- data.frame(
-  feature = feature_columns,
-  pval = pvals,
-  adj_pval = padj,
-  test_type = test_type
-) %>% arrange(adj_pval)
-
-stats_test
-
-```
-
 # Find optimal number of components for ICA
 
 ```{r}
@@ -1788,7 +1000,7 @@ feats2 <- colnames(wide_baseline_flow_num_data_confounders_regressed_out)[!colna
 print( paste0("Num features: ", length(feats1), ", ", length(feats2)) )
 
 # Generate 2 ICA models with the split genes with 8 components
-ncomps <- 8
+ncomps <- 6
 ica1 <- icafast(wide_baseline_flow_num_data_confounders_regressed_out[,feats1], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
 print(paste0("Sample ICA Weight Matrix Dimensions: ", nrow(ica1$S)," by ", ncol(ica1$S)) )
 ica2 <- icafast(wide_baseline_flow_num_data_confounders_regressed_out[,feats2], ncomps, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(ncomps), alg = "par", fun = "logcosh", alpha = 1)
@@ -1855,7 +1067,7 @@ ggplot(minMaxRsLong,aes(x=ncomps,y=minMaxR)) + geom_boxplot(aes(group=ncomps)) +
 
 ```{r}
 
-optimalCompNum <- 8  # or set to your identified number of components
+optimalCompNum <- 6  # or set to your identified number of components
 ica_model <- icafast(wide_baseline_flow_num_data_confounders_regressed_out, optimalCompNum, center = FALSE, maxit = 5000, tol = 1e-6, Rmat = diag(optimalCompNum), alg = "par", fun = "logcosh", alpha = 1)
 
 # Extract the ICA components
