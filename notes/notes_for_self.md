@@ -1,4 +1,5 @@
 # High priority P576/AbATE/TN10 TODOs:
+ - **paper writing: what do we need new experiments/analyses (on current data) wise? what can we combine P576 with? draft main figs (what we have and also what we could have...), what does Josh have that we could add in? could consider just going as is for a brief communications style journal paper...**
  - **compare CD127 expression levels between 2 progenitor clusters (2 and 4) from Erin's T1DAL, can we differentiate between there being CD127+ only progenitors or also CD127- ones? i.e. relating to depleting IL7R blockade and assuming DP function necessary for benefit**
  - compare mean gene coverage for all genes in a gene set across sorts at a time somehow... this may be noisy as these aren't necessarily peaks...
  - fix mean peak code to work on genes with only 1 peak
@@ -22,9 +23,7 @@
 # High priority NCI TODOs:
  - **summarize cohort info: time to treatment/irAE, previous therapies, like 1B from https://pmc.ncbi.nlm.nih.gov/articles/PMC9873824/pdf/main.pdf**
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
- - **try Alex H.'s approach of clustering (baseline) samples then seeing if clusters enriched for study group? just need to do for ICA (PCA done)**
- - **re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals... look at early changes differentiating irAE vs. no irAE**
- - **check for correlations b/w CTCAE grade and irAE severity not just at baseline**
+ - **higher priority given something positive better than nothing! look into treatment/treatment-ICI effects w/ GAMs: re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals... look at early changes differentiating irAE vs. no irAE. check for correlations b/w CTCAE grade and adjused freqs not just at baseline**
  - regress out age for any comparisons with substantially different age distributions (like T1D vs. RA)
  - look at ratio of IRs to activation markers
  - try plotting % change from baseline for longitudinal visits rather than absolute % or transformed values?
