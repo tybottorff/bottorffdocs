@@ -30,6 +30,7 @@ library(CytoExploreR)
 library(dplyr)
 library(ggrepel)
 library(purrr)
+library(compareGroups)
 
 ```
 
@@ -443,10 +444,10 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 # find features contributing most to variation
 
-top_contributing_features_PC1 <- pca_contributions %>%
+top_contributing_features_PC1_general <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
     select(Dim.1) %>%
-    head(10)
+    head(15)
 
 top_contributing_features_PC2 <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
@@ -557,10 +558,10 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 # find features contributing most to variation
 
-top_contributing_features_PC1 <- pca_contributions %>%
+top_contributing_features_PC1_thyroid <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
     select(Dim.1) %>%
-    head(10)
+    head(15)
 
 top_contributing_features_PC2 <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
@@ -779,10 +780,10 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 # find features contributing most to variation
 
-top_contributing_features_PC1 <- pca_contributions %>%
+top_contributing_features_PC1_skin <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
     select(Dim.1) %>%
-    head(10)
+    head(15)
 
 top_contributing_features_PC2 <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
@@ -833,6 +834,48 @@ p <- ggplot(pcaData, aes(x = skin_irae, y = PC1, color = skin_irae)) +
 p
 
 ggsave("../figures/baseline_pc1_boxplot_skin_irae_groups_top_features_batch_regressed_out.png", plot = p, width = 5, height = 3.5)
+
+```
+
+# Compare contributing features above
+ - complicated by different top features/top vs. all features
+ 
+```{r}
+
+all_features <- unique(c(
+  rownames(top_contributing_features_PC1_thyroid),
+  rownames(top_contributing_features_PC1_skin),
+  rownames(top_contributing_features_PC1_general)
+))
+
+merged_data <- data.frame(
+  PC1_thyroid = top_contributing_features_PC1_thyroid$Dim.1[match(all_features, rownames(top_contributing_features_PC1_thyroid))],
+  PC1_skin = top_contributing_features_PC1_skin$Dim.1[match(all_features, rownames(top_contributing_features_PC1_skin))],
+  PC1_general = top_contributing_features_PC1_general$Dim.1[match(all_features, rownames(top_contributing_features_PC1_general))]
+)
+
+rownames(merged_data) <- all_features
+
+merged_data[is.na(merged_data)] <- 0
+
+merged_data <- merged_data %>%
+  mutate(Sum = rowSums(.)) %>%
+  arrange(desc(Sum)) %>%
+  select(-Sum)
+
+rownames(merged_data) <- gsub("\\.", " ", rownames(merged_data))
+
+Heatmap(merged_data, 
+        name = "Contribution (%)", 
+        col = colorRamp2(c(0, max(merged_data)), c("white", "darkred")),
+        row_names_gp = gpar(fontsize = 10),
+        column_names_gp = gpar(fontsize = 10),
+        cluster_rows = FALSE, 
+        cluster_columns = FALSE,
+        cell_fun = function(j, i, x, y, width, height, fill) {
+          # Display raw contribution percentages in each cell
+          grid.text(sprintf("%.2f", merged_data[i, j]), x, y, gp = gpar(fontsize = 8, col = "black"))
+        })
 
 ```
 
