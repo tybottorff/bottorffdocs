@@ -609,6 +609,10 @@
  - IL-21 drives these thyrotoxic effector CD8<sup>+</sup> T cells (upregulated cytotoxic molecules), IL-21 secreted by intrathyroidal T follicular and T peripheral helper cells
 ## Results
  - thyroid-infiltrating immune cells in ICI-thyroiditis and HT (autoimmune) mostly CD4 and CD8 T cells, IL-21<sup>+</sup> CD4<sup>+</sup> Tfh and Tph cells specifically for CD4s, **more CD8s in ICI-thyroiditis than HT**
+# Clonal lineage tracing reveals mechanisms skewing CD8<sup>+</sup> T cell fate decisions in chronic infection
+ - intermediate cells arise from progenitor cells before bifurcating into terminal effector and exhausted subsets
+ - type 1 IFN drives exhaustion, IRF7-dependent
+ - Zeb2 critical for effector cells
 # Clonal replacement of tumor-specific T cells following PD-1 blockade
 ## Abstract
  - unclear if ICB relies/works on reinvigoration of pre-existing tumor infiltrating T cells or on recruitment of novel T cells
@@ -2236,6 +2240,8 @@
 # Pan-cancer analysis reveals alternative splicing characteristics associated with immune-related adverse events elicited by checkpoint immunotherapy
  - expression levels of some splicing factors correlates ok with irAE risk
  - **doesn't seem to be the case here that alternative splicing (as a source of neoantigens) is increased in irAE patients and irAEs were caused by increased neoantigen load, so their model instead is that splicing's effects on irAE risk instead perhaps due to altered protein function i.e. alternative splice variant has different function that leads to irAEs**
+# Pan-cancer T cell atlas links a cellular stress response state to immunotherapy resistance
+ - unique stress response state in T cells identified here, characterized by heat shock gene expression
 # Pan-MHC and cross-species prediction of T cell receptor-antigen binding
  - new AI assisted method
 # Partial exhaustion of CD8 T cells and clinical response to teplizumab in new-onset type 1 diabetes
@@ -2683,6 +2689,9 @@
  - ICI-induced myocarditis before third ICI cycle
 # Start codon variant in *LAG3* is associated with decreased LAG-3 expression and increased risk of autoimmune thyroid disease
  - GWAS hit shows rare 5' UTR variant in *LAG3* showing large effect, variant generates a novel start codon for an ORF upstream of the canonical start codon, leading to reduced mRNA and surface protein expression of LAG-3 coreceptor on activated lymphocytes
+# Stat5 opposes the transcription factor Tox and rewires exhausted CD8<sup>+</sup> T cells toward durable effector-like states during chronic antigen exposure
+ - **Stat5a directs intermediate Tex formation, re-instigates partial effector function/NK-like state in progenitor to intermediate Tex transition**
+ - Stat5a antagonizes Tox, Tox restrains Stat5 activity
 # Statistical analysis of CDR3 length distributions for the assessment of T and B cell repertoire biases
  - Gaussian-like distribution in length pattern, given large number of small effects (random mechanism of junction diversity) acting additively and independently on CDR3 length
 # Stem-like precursors are the fount to sustain persistent CD8<sup>+</sup> T cell responses
