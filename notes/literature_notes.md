@@ -2551,6 +2551,9 @@
 # Serum immune modulators associated with immune-related toxicities and efficacy of atezolizumab in patients with non-small cell lung cancer
  - high baseline levels of B cell-activating factor (BAFF) associated with irAE development
  - increased ICOS levels during first therapeutic cycle associated with survival
+# Shared and distinct biological circuits in effector, memory and exhausted CD8<sup>+</sup> T cells revealed by temporal single-cell transcriptomics and epigenetics
+ - **observe Zeb2-dependent NK-like Tex CD8 population, likely what I call terminal/effector Tex like DP CD57<sup>+</sup>**
+ - PD-1 blockade promotes differentiation of exhausted subsets
 # Sharing of T cell receptors in antigen-specific responses is driven by convergent recombination
  - convergent recombination, rather than recombination bias or selection, drives publicity
  - potential causes of publicity: self tolerance restricts capacity of TCRs to recognize some epitopes, different conformations of peptides in MHC groove (flat or prominent), degenerate binders
