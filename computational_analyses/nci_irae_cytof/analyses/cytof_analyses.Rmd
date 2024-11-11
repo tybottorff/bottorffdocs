@@ -104,6 +104,75 @@ baseline_flow_data
 
 ```
 
+# Summarize cohort metadata
+
+```{r}
+
+cohort_metadata_long <- baseline_flow_data %>%
+  group_by(patient_id) %>%
+  slice(1) %>%
+  ungroup() %>%
+  dplyr::rename(cancer_type = specific_group) %>%
+  dplyr::filter(group %in% c("irAE/SAE", "non-irAE")) %>%
+  # fix days to irae (also was days to thyroid test)
+  mutate(days_to_irae = if_else(group == "non-irAE", NA, days_to_irae),
+         irae_ex = if_else(group == "non-irAE", "None", irae_ex),
+         irae_ex = if_else(group == "irAE/SAE" & irae_ex == "None", "Unspecified", irae_ex)) %>%
+  # Split cancer_type and irae_ex into multiple rows for plotting separate points
+  separate_rows(cancer_type, sep = ",\\s*") %>%
+  separate_rows(irae_ex, sep = ";\\s*") %>%
+  # Standardize values for cancer types and toxicities
+  mutate(
+    cancer_type = case_when(
+      grepl("Head|Neck", cancer_type) ~ "Head/neck",
+      grepl("Lung", cancer_type) ~ "Lung",
+      grepl("Urinary|Urethral|Bladder|Renal", cancer_type) ~ "Urethral/bladder/renal",
+      grepl("Gastric", cancer_type) ~ "Gastric",
+      grepl("Esophageal", cancer_type) ~ "Esophageal",
+      TRUE ~ cancer_type
+    ),
+    irae_ex = case_when(
+      grepl("Rash", irae_ex) ~ "Rash",
+      grepl("Thyroid|Hypothyroidism|Hyperthyroidism", irae_ex) ~ "Thyroid",
+      grepl("Arthralgia|arthritis", irae_ex) ~ "Arthritis",
+      grepl("Encephalitis", irae_ex) ~ "Encephalitis",
+      grepl("Pruritus", irae_ex) ~ "Pruritus",
+      grepl("Pericardial/Pleural effusion", irae_ex) ~ "Pericardial/pleural effusion",
+      grepl("edema", irae_ex) ~ "Limb edema",
+      grepl("Effusion", irae_ex) ~ "Effusion",
+      grepl("arthalgia", irae_ex) ~ "Arthralgia",
+      TRUE ~ irae_ex
+    ),
+    patient_id = gsub("LinsleyLab", "", patient_id),
+    ctcae_grade = as.character(ctcae_grade),
+    age = as.character(age),
+    days_to_irae = as.character(days_to_irae)
+  ) %>%
+  # Gather variables into long format for plotting
+  pivot_longer(cols = c(cancer_type, irae_ex, ctcae_grade, age, days_to_irae),
+               names_to = "variable", values_to = "value") %>%
+  mutate(
+    variable = factor(variable, levels = c("cancer_type", "irae_ex", "ctcae_grade", "age", "days_to_irae")),
+  ) %>%
+  dplyr::filter(!(is.na(value))) %>%
+  mutate(variable = case_when(
+    variable == "cancer_type" ~ "Cancer\ntype",
+    variable == "irae_ex" ~ "irAE\ntype",
+    variable == "ctcae_grade" ~ "CTCAE\ngrade",
+    TRUE ~ variable
+  ))
+
+# Create ggplot with multiple 'y' variables
+p <- ggplot(cohort_metadata_long %>% dplyr::filter(variable %in% c("Cancer\ntype", "irAE\ntype", "CTCAE\ngrade")), aes(x = patient_id, y = value)) +
+  geom_point(aes(color = group), size = 1.5, alpha = 0.75) +
+  facet_grid(variable ~ group, scales = "free", space = "free_y") +
+  labs(x = "Patient ID", y = "") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))
+
+ggsave("../figures/metadata.png", p, width = 10, height = 9)
+
+```
+
 # Define logit transform func
 
 ```{r}
