@@ -1465,6 +1465,11 @@
  - expanded TILs also exit through draining LN to control distal tumor(s)
 # IL7 genetic variation and toxicity to immune checkpoint blockade in patients with melanoma
  - minor allele carries of *IL7* intron have increased severe irAE risk
+# IL-7 receptor blockade blunts antigen-specific memory T cell responses and chronic inflammation in primates
+ - **Tregs lowly express IL7R so blockade good (keeps natural regulators while targeting effectors as mature T cells highly express IL7R)**
+ - **IL7R activation induces proliferative/anti-apoptotic signals via JAK-STAT**
+ - no modification in T cell numbers, phenotype, function, metabolism in periphery with blockade
+ - **long-term *in vivo* hyporesponsiveness associated with decrease in frequency of antigen-specific T cells producing IFN-gamma upon antigen restimulation *ex vivo***
 # IL-7 receptor blockade reverses autoimmune diabetes by promoting inhibition of effector/memory T cells
  - NOD mice
  - IL-7 suppressed PD-1 expression on activated T cells *in vitro*, **perhaps supporting bifurcation (DP CD127 and DP PD-1 split)**
@@ -1854,6 +1859,9 @@
  - negative correlation between frequencies of circulating KIR<sup>+</sup> CD8 T cells and titers of ZnT8 autoantibodies in T1D individuals, supporting their suppressive function
  - KIR2DL5<sup>+</sup> CD8s positively associate with dietary fat intake, increased perforin expression and reduced PD-1 expression
  - KIR2DL5<sup>+</sup> CD8s more proliferative than other KIR<sup>+</sup> CD8s
+# KLRG1<sup>+</sup> memory CD8 T cells combine properties of short-lived effectors and long-lived memory
+ - CD127<sup>high</sup>KLRG1<sup>-</sup> CD8s are precursors to long-lived memory pool, while KLRG1<sup>+</sup>CD127<sup>low</sup> are ~short-lived effectors (some of which can be long-lived and persist into memory phase)
+ - KLRG1 downregulation perhaps not prerequisite to become long-lived productive memory T cell
 # Lactate modulates RNA splicing to promote CTLA-4 expression in tumor-infiltrating regulatory T cells
  - lactate uptake by Tregs contributes to efficacy of CTLA-4 blockade
  - RNA splicing machinery correlated with tumor-infiltrating Treg cell signatures
