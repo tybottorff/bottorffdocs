@@ -1,10 +1,11 @@
 # High priority P576/AbATE/TN10 TODOs:
- - **paper writing: what do we need new experiments/analyses (on current data) wise? what can we combine P576 with? draft main figs (what we have and also what we could have...), what does Josh have that we could add in? could consider just going as is for a brief communications style journal paper... what's the role of location... all PBMCs but literature describes term Tex as tissue-resident/in peripheral tissue and (some) prog Tex in lymphoid tissue (not as worried here as multiple prog Tex pops some lymphoid some peripheral apparently...), maybe DP CD57+ in blood here heading to peripheral tissue or moving back out idk... high cytotoxicity marker expression could also just mean antigen experience apparently... IL7R leads to JAK/STAT so that weak result is expected**
+ - **paper writing: what do we need new experiments/analyses (on current data) wise? what can we combine P576 with? draft main figs (what we have and also what we could have...), what does Josh have that we could add in? could consider just going as is for a brief communications style journal paper...**
+ - **retry clusterprofiler using background as all unique genes from peaks (rather than whole genome as background), there were at least 15k unique genes though already so not pressing but good to try and compare results for at least 1 contrast...**
  - what's the role of location... all PBMCs but literature describes term Tex as tissue-resident/in peripheral tissue and (some) prog Tex in lymphoid tissue (not as worried here as multiple prog Tex pops some lymphoid some peripheral apparently...), maybe DP CD57+ in blood here heading to peripheral tissue or moving back out idk...
  - high cytotoxicity marker expression could also just mean antigen experience apparently...
+ - IL7R leads to JAK/STAT so that weak result is expected
  - compare mean gene coverage for all genes in a gene set across sorts at a time somehow... this may be noisy as these aren't necessarily peaks...
  - fix mean peak code to work on genes with only 1 peak
- - retry clusterprofiler using background as all unique genes from peaks (rather than whole genome as background), there were at least 15k unique genes though already so not pressing
  - Limma/DESEQ2: didn't find anything new for change along trajectory of differentiation but maybe can retry with these methods 1 sort vs. all others for unique markers
  - check KLRG1/EOMES peaks up in DN, near gene body or far away? (could be repressor?)
  - Google search "glue atac rna", possible use for bulk atac? basically predicting RNA levels from promoter accessibilities? Azimuth does have ATAC refs (stuff like CD8 TCM/TEM), as does shendure lab, perhaps they can shed light on cell types here... this is called deconvolution (https://www.nature.com/articles/s41467-023-40611-4#Sec9) and is probably hard to get useful results but maybe worth trying...
@@ -21,6 +22,7 @@
  - TEAseq analyses. Hannah has fastq files if needed, may need permission from Claire Gustafson at Allen (claire.gustafson@alleninstitute.org). Try sc MT lineage mapping using ATACseq data, also look at RNA (HC, then DS) using antibodies to know it's non-naive CD8 and what subtype? Tri-modal single cell profiling reveals a distinct pediatric CD8αα T cell subset and broad age-related molecular reprogramming across the T cell compartment. https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE214546, start with RAW.tar looking for non-naive CD8 cluster
 
 # High priority NCI TODOs:
+ - **look into public datasets: apply PC1 signatures of mixed features onto public datasets, trickiness will be in finding datasets with same features (Alice W. for help on translating specific features)**
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
  - **higher priority given something positive better than nothing! look into treatment/treatment-ICI effects w/ GAMs: re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals... look at early changes differentiating irAE vs. no irAE. check for correlations b/w CTCAE grade and adjused freqs not just at baseline**
  - regress out age for any comparisons with substantially different age distributions (like T1D vs. RA)
@@ -99,7 +101,6 @@ fix issues with re-doing all KEGG from promoters instead of gene labels
 split term/eff Tex gene set into 2 and recolor VPs with 3 colors then. and stats for custom gene set stuff (would be nice to include FC in stats as kegg does...)
 might be nice to look at publically available ATACseq for context for magnitude of MT SNV counts (i.e. effect of infection, age), TEAseq could help answer this
 Erin's paper check for RUNX, RUNX3 was up in CD57 vs. PD-1 for Erin, look at her Homer results carefully
-fix/try heatmap of gene sets, not sure if peak scores are right... (PD1 always low...)
 homer: investigate donor bias (i.e. count instances of a TF motif in peaks by donor, do for couple top hits)
 Erin's data: copy how she looked for TF motifs within DEGs, like Erin's figure 4C, to try TF motifs within VARs??
 mean coverage plots: some already done but do all: CCR7, CD28, CD27, IL10, CXCR3, SELL, TCF7 high in CD127 cluster, TOX IRF4 IKZF2 IL2RB HAVCR2 RUNX3 BATF IL12RB1 PRDM1 CX3CR1 GZMB TBX21 IFNAR1 IFNG lower in CD127 cluster (heatmap of peak scores wasn't informative). make sure way I normalized bigwigs is ok, not really sure what y-axis means... (score sums not proportional to read counts...), why does coverage end at different positions sometimes in different cell sorts?
