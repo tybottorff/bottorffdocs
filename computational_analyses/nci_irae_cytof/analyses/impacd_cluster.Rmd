@@ -1,0 +1,965 @@
+---
+title: "NCI irAE - IMPACD analysis"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+editor_options: 
+  chunk_output_type: console
+---   
+
+# Dataset notes from Alice W.
+
+ - higher level subset identification gating and some QC metrics
+ - FlowJo workspace file with the gates
+ - NCI ICI data Batches 1-9 (or just 1-6?)
+ - set of 6 samples (Batch05_TubeB_....) that have a few edited gates which was applied to the appropriate tubes and the group "Batch05 TubeB"; the rest of the samples (all other Batch05 samples and all other batches) have the same gates as each other applied to the "All Samples" group
+ - exported the counts for all internal control samples (1 per tube, 4-5 per batch) and all samples in Batch05 Tube B. There is a spreadsheet containing this info in there
+ - README doc just emphasizing the different gates for Batch05 TubeB
+
+# Notes from shadowing Stephan
+ - immunologist manually gates markers of interest for each batch on a subset of data
+ - then we run IMPACD (high performance gating that generates counts-like object kind of like RNAseq)
+ - each cell ends up in multiple buckets (like CD16+, CD16+ICOS+, and CD16+ICOS+CD25+ for example could all be true for 1 cell)
+ - consensus gates: identify gates with diverging definitions and devise one consensus gate set/batch
+ - level 1: automated gating, gating of single markers and report findings (no permutations)
+ - level 2: do all permutations and gate them
+ - level 3: modifier analysis (iterate over all possible permutations up to deptbh 3 under root path, remove redundant subsets i.e. root/A+/B+ = root/B+/A+, select significant level 2/3 nodes, test information gain with each modifier using ranksum test on background subtracted % values between subsets with/without modifier i.e. if root/A+/C+ scores significant test it vs. root/C+ and if root/A+/B+/C+ scores then test it vs. root/A+/C+ and root/B+/C+, select significant modifiers, adjust paths with 2 modifiers but only 1 winning node like if root/A+/B+/C+ modified significantly only by A+ then reduce to root/A+/C+)
+ - need gates (.fcs files)
+ - gating set is R equivalent of flowjo workspace, need to make this to make comparison, take gates and transformations from flowjo workspace and apply to .fcs files to make R gating set, to make correlation plot (to see if we can pull out gates correctly)
+ - need to build (some) boolean gates (like not CD16+, CD16+ being a gate with coordinates) from scratch to not include parent
+ - create gates separately for each batch
+ - may run into issues with duplicate batches if script crashes then re-runs, or different root paths
+ - transformations: light intensities (raw data, ~log scale), use transformations for each marker (some hyperbolic trig function) to transform data, also different for different batches/samples
+
+# Set up directories
+
+```{r}
+
+baseDir = "/nfs/bioinformatics/workspace/tbottorff/nci_irae"
+dataDir = file.path(baseDir,'saved_data')
+plotsDir = file.path(baseDir,'figures')
+fcsDir = file.path(baseDir, "raw_data/all_fcs_files")
+
+# subdirectories
+rawCountsDir = file.path(dataDir, "raw_counts")
+processedCountsDir = file.path(dataDir, "counts")
+
+dir.create(dataDir, recursive = T, showWarnings = F)
+dir.create(plotsDir, recursive = T, showWarnings = F)
+dir.create(fcsDir, recursive = T, showWarnings = F)
+dir.create(rawCountsDir, recursive = T, showWarnings = F)
+dir.create(processedCountsDir, recursive = T, showWarnings = F)
+
+```
+
+# Load libraries
+
+```{r}
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(dplyr)
+library(ggplot2)
+library(ggpubr)
+library(ggrepel)
+
+library(readxl) # open excels
+library(circlize) # color gradients
+
+library(flowWorkspace)
+library(CytoML)
+library(IMPACD)
+
+library(UpSetR)
+library(tidyverse)
+library(betareg)
+library(limma)
+library(emmeans)
+library(circlize)
+library(ComplexHeatmap)
+library(openxlsx)
+library(VennDiagram)
+library(flowCore)
+
+```
+
+# Set up settings
+
+```{r knitr defaults}
+
+# opts_chunk$set(fig.width=6, fig.height=4.0, cache = TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='hide')
+opts_chunk$set(fig.width=6, fig.height=5, cache = TRUE, warning=FALSE, message=FALSE, fig.align = 'center')
+
+```
+
+# Explore vignette
+
+```{r}
+
+vignette("IMPACD")
+
+# notes
+# Load gate definitions from manual gating for markers of interest
+# - this gating step is usually done in flowJo but can be done in R/other tools
+# - data table must have these 4 columns: Annotation, Name, Marker Type, Gate Position, like below
+# head(gate_definitions)
+# A tibble: 6 × 4
+#   Annotation Name    `Marker Type` `Gate Position`   
+#   <chr>      <chr>   <chr>         <chr>             
+# 1 CD49b      Dy161Di 1D            76.400000000000006
+# 2 ICOS       Dy163Di 1D            48.1              
+
+# - here are logical gates from flowJo
+# A tibble: 6 × 4
+#   Annotation Name                `Marker Type` `Gate Position`                  
+#   <chr>      <chr>               <chr>         <chr>                            
+# 1 Teff       Tm169Di vs. Sm149Di 2D            (NOT) {96.4, 19.5} {23.9, 8.05} …
+# 2 Tregs      Tm169Di vs. Sm149Di 2D            {96.4, 19.5} {23.9, 8.05} {9.37,…
+
+# - coordinates usually in untransformed space, we need to transfer them into same space that gating was initially done in (IMPACD takes care of this but need to inform what transformations are for each marker, transformations stored in transformList object)
+ 
+# - can extract transformations from flowJo workspace file...
+# ws = open_flowjo_xml("path/to/flowJo_workspace.wsp")
+# gs_flowJo = flowjo_to_gatingset(ws)
+# trans = gh_get_transformations(gs_flowJo[[1]])
+# transList_wsp = transformList(from = names(trans), trans)
+
+# - ask IMPACD to process table with gates with processGates function (returns list, first entry is df listing all gates created and has info on gate types, positions in transformed space, kinds of subgates required for logical gates, 2nd entry has actual gate objects later applied to flow data)
+
+#output = processGates(gate_definitions, transList_wsp) 
+
+#gate_data = output[[1]]
+#head(gate_data)
+
+```
+
+# Some .fcs files have a width channel/col that others don't, remove it (doesn't seem important) and save as new .fcs files (only needs to be run 1X)
+
+```{r}
+
+# Batch01/03 files not being worked/copied/edited, just copy these over manually...
+
+#fcs_files <- list.files(fcsDir, pattern = "\\.fcs$", full.names = TRUE)
+
+# Directory to save the updated .fcs files
+#output_dir <- file.path(dataDir, "no_width_fcs_files/")
+
+#adjusted_files <- lapply(fcs_files, function(f) {
+#  # don't truncate
+#  fcs <- read.FCS(f, transformation = FALSE, truncate_max_range = FALSE)
+#  if ("Width" %in% colnames(fcs)) {
+#    expr <- exprs(fcs)
+#    expr <- expr[, colnames(expr) != "Width"]
+#    new_fcs <- flowFrame(expr, description = description(fcs))
+#    output_file <- file.path(output_dir, basename(f))
+#    write.FCS(new_fcs, output_file)
+#    return(output_file)
+#  }
+#  return(f) # If no 'Width' channel, just return the original file path
+#})
+
+```
+
+# Load flowjo workspace, plot gating set
+
+```{r}
+
+ws = open_flowjo_xml(file.path(baseDir, "raw_data/manual_gating_subsets_ics_and_batch5.wsp"))
+
+gs_flowJo = flowjo_to_gatingset(ws, 
+                                  skip_faulty_gate = TRUE, 
+                                  # name designates which group of samples to import, 2 here being the Batch05_Tube with different subset gates and 1 being all (other?) samples
+                                  name = 1,
+                                  # use updated (no width channel/col) .fcs files (Batch01/03 copied over manually)
+                                  path = file.path(baseDir, "saved_data/no_width_fcs_files/"))
+
+plot(gs_flowJo)
+
+```
+
+# Print nodelist
+
+```{r}
+
+nodelist = gs_get_pop_paths(gs_flowJo, path = "full")
+
+print(nodelist)
+
+```
+
+# Extract transformations from flowJo workspace
+
+```{r}
+
+trans = gh_get_transformations(gs_flowJo[[1]])
+
+transList_wsp = transformList(from = names(trans), trans)
+
+```
+
+# Create the design matrix
+
+```{r}
+
+# use adjusted .fcs files
+adjusted_fcs_files = list.files(file.path(dataDir, "no_width_fcs_files/"), pattern = ".fcs$", full.names = TRUE)
+
+design = data.frame(fcsFiles = adjusted_fcs_files)
+
+design$fcsName = basename(design$fcsFiles)
+design$sampleName = gsub(".fcs", "", design$fcsName)
+
+design$control = str_detect(design$sampleName, "Control")
+
+# add batch ID to design matrix:
+design$batch = as.numeric(gsub(".*Batch([0-9]+).*", "\\1", design$sampleName))
+
+table(design$batch)
+table(design$control)
+
+```
+
+# Apply gates/transformations from flowjo workspace to .fcs files to make R gating set (then test for perfect correlation to counts from Alice W.)
+- gating set is R equivalent of flowjo workspace, need to make this to make comparison, take gates and transformations from flowjo workspace and apply to .fcs files to make R gating set, to make correlation plot (to see if we can pull out gates correctly)
+
+# Setup gates
+
+```{r}
+
+gateList = data.frame(flowJoName = nodelist)
+
+# There appear to be multiple "levels" of nodes. We start with a topLevel path
+# /Non-granulocytes that most of our populations relate to
+topLevel = c("/root")
+# after that comes a set of X nodes that are all applied to that level
+
+# For gating now, the easiest path is going to be to start at the top of the list, and subsequently add the next level of nodes to the path
+
+# str split flowJoName by "/" and take the last element as the node
+gateList$node = sapply(strsplit(gateList$flowJoName, "/"), function(x) x[length(x)])
+gateList$parent = sapply(strsplit(gateList$flowJoName, "/"), function(x) paste0(x[1:(length(x) - 1)], collapse = "/"))
+gateList$parent[gateList$parent == ""] = "/root"
+
+# get rid of root, useless?
+gateList <- gateList %>%
+  dplyr::filter(node != "root")
+
+gateList
+
+```
+
+# Get controls
+
+```{r}
+
+samples = data.frame(flowJoName = sampleNames(gs_flowJo))
+samples$fcsName = gsub(".fcs_.*", ".fcs", samples$flowJoName)
+samples = merge(samples, design, by = "fcsName")
+
+table(samples$batch)
+
+```
+
+# Generate gate and transformer lists
+
+```{r}
+
+# start building out gates
+
+gates = list()
+trans = list()
+
+# Loop through all samples
+for (iControl in 1:nrow(samples)) {
+  batch_ = samples$batch[iControl]  # Get the batch for the current sample
+
+  # Get the gates for the current sample
+  gates_ = list()
+  for (i in 1:nrow(gateList)) {
+    # Apply gates from FlowJo to the sample
+    gates_[[i]] = gs_pop_get_gate(gs_flowJo, gateList$flowJoName[i])[[iControl]]
+  }
+  
+  # Store gates based on batch
+  gates[[batch_]] = gates_
+  
+  # Get transformations for the current sample
+  trans_ = gh_get_transformations(gs_flowJo[[iControl]])
+  
+  # Store transformations based on batch
+  trans[[batch_]] <- transformList(from = names(trans_), trans_)
+}
+
+```
+
+# Explore the T cell gate
+
+```{r}
+
+# The first pass of the validation
+gateList$flowJoName[gateList$node == "T cells"]
+idx = which(gateList$node == "T cells")
+
+# same for all batches (first [[]] here)?
+gate_ = gates[[1]][[idx]]
+gate_
+
+```
+
+# Transform fcs and setup validation gating sets
+
+```{r}
+
+fcs_transformed_directory = file.path(dataDir, "transformed_flow_data")
+
+design$transformedFcs = file.path(fcs_transformed_directory, design$fcsName)
+
+paths_ = unique(dirname(design$transformedFcs))
+for (path_ in paths_) {
+  dir.create(path_, showWarnings = F, recursive = T)
+}
+
+# Everytime we get a new gating set/workspace, we need to transform the fcs files again.
+for (iRow in 1:nrow(design)) {
+  print(iRow)
+  if (file.exists(design$transformedFcs[iRow])) {
+    next
+  }
+  ff = read.FCS(design$fcsFiles[iRow], truncate_max_range = FALSE)
+  ff_t = flowCore::transform(ff, trans[[design$batch[iRow]]])
+  
+  write.FCS(ff_t, file = design$transformedFcs[iRow])
+}
+
+```
+
+# Read in counts from Alice W.
+
+```{r}
+
+counts_alice_w = read_xlsx("raw_data/manual_gating_subsets_ics_and_batch5_counts.xlsx")
+
+# fix sample names
+counts_alice_w$`Sample:` <- gsub(" 19-Jan-2024", "", counts_alice_w$`Sample:`)
+
+```
+
+# Setup gating sets
+
+```{r}
+
+# After organizing the gates, we need to organize the fcs files into gating sets
+# instead of making folders and using symboling links (cyto_setup needs a folder to read files in)
+# let's see if we can build the gs objects with flowCore (flowSet() and GatingSet() )
+
+gs = list()
+
+  for (batch_ in unique(design$batch)) {
+    samples_ = dplyr::filter(design, batch == batch_)
+    # add a second filtering step to only keep files that Alice W. tested on
+    samples_ = dplyr::filter(samples_, fcsName %in% counts_alice_w$`Sample:`)
+    
+    
+    print(paste0(" batch: ", batch_, " samples: ", nrow(samples_)))
+    flowSet = read.flowSet(samples_$transformedFcs,
+                           truncate_max_range = FALSE)
+    
+    gs[[batch_]] = GatingSet(flowSet)
+  }
+
+```
+
+# Do gating (on all gates Alice W. provided)
+
+```{r}
+
+# this is a bit different than in previous iterations - now, instead of going by "hierarchical" and 
+# "leafs" I am going to just step through sequentially
+
+for (batch_ in unique(design$batch)) {
+  for (i in 1:nrow(gateList) ) {
+    gs_pop_add(gs[[batch_]], gates[[batch_]][[i]], parent = gateList$parent[i])
+    }
+  }
+
+```
+
+# Summarize event counts
+
+```{r}
+
+pop_counts = c()
+
+for (batch_ in unique(design$batch)) {
+  recompute(gs[[batch_]])
+    
+  pop_counts = rbind(pop_counts, 
+                     gs_pop_get_count_fast(gs[[batch_]], format = "long")
+                     )
+  }
+
+save(pop_counts, file = "saved_data/counts_all_pars_gating.Rdata")
+
+```
+
+# Validation with flowjo counts: compare the results to Alice W.'s counts
+
+```{r}
+
+merged_pop_counts_ = dplyr::select(pop_counts, fcsName = name, population = Population, countR = Count) %>%
+  mutate(population = gsub("/Non-granulocytes", "Non-granulocytes", population))
+
+counts_alice_w_long = counts_alice_w %>% 
+  pivot_longer(-`Sample:`, names_to = "population", values_to = "count_alice_w") %>%
+  mutate(population = gsub(" \\| Count", "", population))
+
+counts_alice_w_long = dplyr::select(counts_alice_w_long, fcsName = `Sample:`, population, count_alice_w = count_alice_w )
+
+merged_pop_counts = left_join(merged_pop_counts_, counts_alice_w_long, by = c("fcsName", "population"))
+
+merged_pop_counts = dplyr::filter(merged_pop_counts, !is.na(count_alice_w))
+
+```
+
+# Visualize results
+
+```{r}
+
+ggplot(merged_pop_counts, aes(x = countR, y = count_alice_w, color = fcsName)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey") +
+  facet_wrap(~population, scales = "free") +
+  theme_bw() +
+  # reduce fontsize
+  theme(text = element_text(size = 6)) +
+  labs(x = "Counts (Ty)", y = "Counts (Alice W.)") + 
+  # dont show legend
+  theme(legend.position = "none")
+
+#ggsave("plots/Tcells/validation/hierarchical_and_all_pars.pdf", width = 25, height = 15, units = "in")
+#ggsave("plots/Tcells/validation/hierarchical_and_all_pars.png", width = 25, height = 15, units = "in")
+
+```
+
+# IMPACD gating: setup functions
+
+```{r}
+
+# setup gating set
+getGatingSet = function(design) {
+  gs = list()
+  for (condition_ in unique(design$condition)) {
+    gs[[condition_]] = list()
+  }
+  
+  for (condition_ in unique(design$condition)) {
+    for (batch_ in unique(design$batch)) {
+      samples_ = dplyr::filter(design, condition == condition_, batch == batch_)
+      
+      print(paste0("group: ", condition_, " batch: ", batch_, " samples: ", nrow(samples_)))
+      flowSet = read.flowSet(samples_$transformedFcs,
+                             truncate_max_range = FALSE)
+      
+      gs[[condition_]][[batch_]] = GatingSet(flowSet)
+    }
+  }
+  
+  return(gs)
+}
+
+# gate for the rootpath - rootPathGates must be in the same order that you want the rootpath to be in
+getRootPathTcells = function(gs, design, gates, rootPathGates) {
+  
+  for (condition_ in unique(design$condition)) {
+    for (batch_ in unique(design$batch)) {
+      for (i in 1:nrow(rootPathGates) ) {
+        gs_pop_add(gs[[condition_]][[batch_]], gates[[condition_]][[batch_]][[rootPathGates$idx[i]]], parent = rootPathGates$parent[i])
+      }
+    }
+  }
+  
+  return(gs)
+}
+
+# level1 gating
+gateLevel1 = function(gs, design, level1_gates, level1_nodes, gatemetadata, root_path) {
+  # do the stage 1 gating
+  for (condition_ in unique(design$condition)) {
+    for (batch_ in unique(design$batch)) {
+      message(paste0("Stage 1 gating for batch ", batch_, " in group ", condition_))
+      level1_paths = level1Gating(gs[[condition_]][[batch_]], 
+                                  level1_nodes, 
+                                  gatemetadata, level1_gates[[condition_]][[batch_]], 
+                                  root_path) 
+    }
+  }
+  
+  return(gs)
+}
+
+# permutational gating
+gateIMPACD = function(gs, design, level1_gates, level1_nodes, gatemetadata, root_path) {
+  population_counts = list()
+  for (condition_ in unique(design$condition)) {
+    # population_counts[[condition_]] = list()
+    
+    for (batch_ in unique(design$batch)) {
+      message(paste0("Stage 2 gating for batch ", batch_, " in group ", condition_))
+      level2_paths = level2Gating(gs[[condition_]][[batch_]], 
+                                  level1_nodes, gatemetadata, level1_gates[[condition_]][[batch_]], 
+                                  root_path,
+                                  max_depth = 3,
+                                  level1_nodes = level1_nodes,
+                                  cellcountCutoff = 0) 
+      
+      # pop_counts_ = gs_pop_get_count_fast(gs[[condition_]][[batch_]], format = "long")
+      # population_counts[[condition_]][[batch_]] = pop_counts_
+    }
+  }
+  
+  return(gs)
+}
+
+getRawCounts = function(gs, design) {
+  population_counts = list()
+  for (condition_ in unique(design$condition)) {
+    population_counts[[condition_]] = list()
+    for (batch_ in unique(design$batch)) {
+      pop_counts_ = gs_pop_get_count_fast(gs[[condition_]][[batch_]], format = "long")
+      population_counts[[condition_]][[batch_]] = pop_counts_
+    }
+  }
+  
+  counts = c()
+  for (condition_ in unique(design$condition)) {
+    counts_ = bind_rows(population_counts[[condition_]])
+    counts_$condition = condition_
+    counts = rbind(counts, counts_)
+  }
+  counts$PercentParent = counts$Count/counts$ParentCount*100
+  counts$PercentParent[is.na(counts$PercentParent)] = NA
+
+  return(counts)
+}
+
+processGatingPaths = function(summary, max_depth = 1) {
+
+  columns = colnames(summary)
+
+  if (!"path" %in% columns) {
+    summary$path = summary$Population
+  }
+
+  # determine gating depth for each population
+  summary$depth = str_count(summary$path, "/")
+
+  # determine gating depth of the root path
+  root_path_length = max(summary$depth)-max_depth
+
+  # split all gating paths into a matrix so that gating results can be more
+  # easily extracted later
+  pathing = str_split(str_remove(summary$path, '^/'), "/", simplify = TRUE)
+
+  # determine the root path
+  # root_path = paste(pathing[nrow(summary), 1:root_path_length], collapse = "/")
+  # summary$root_node = root_path
+
+  # determine terminal node
+  summary$terminal_node = pathing[cbind(1:nrow(pathing), summary$depth)]
+
+  # determine gating depth after root path
+  summary$depth = summary$depth - root_path_length
+
+  # No need to extract modifiers if max_depth is 1
+  if (max_depth == 1) {return(summary)}
+
+  # determine what the maximum number of modifiers must have been
+  max_modifiers = max_depth -1
+
+  # determine all modifiers and add columns for them, will generate columns of
+  # the type modifier_1, modifier_2, ... up to the maximum number of modifiers
+  for (i_modifier in 1:max_modifiers ){
+    column_name = paste0("modifier", "_", i_modifier)
+
+    summary[[column_name]] = ""
+
+    idx = which(summary$depth>i_modifier)
+
+    summary[idx, column_name] = pathing[cbind(idx, root_path_length+i_modifier)]
+  }
+
+  return(summary)
+}
+
+assignRoot = function(nodes, rootPaths) {
+  # Escape both + and - signs in rootPaths
+  escaped_rootPaths <- sapply(rootPaths, function(path) {
+      path <- str_replace_all(path, "\\+", "\\\\+")  # Escape +
+      path <- str_replace_all(path, "\\-", "\\\\-")  # Escape -
+      return(path)
+    })
+  
+  # Create a new column in counts
+  nodes <- nodes %>%
+    rowwise() %>%  # rowwise to evaluate for each row
+    mutate(
+      rootPath = {
+        match <- sapply(names(escaped_rootPaths), function(x) {
+          # Match complete paths (followed by a '/' or end of string '$')
+          str_detect(path, paste0(escaped_rootPaths[[x]], "(/|$)"))
+        })
+        if(any(match)) {
+          names(escaped_rootPaths)[which(match)[1]]  # Return the first match's name from rootPaths
+        } else {
+          NA  # No match found
+        }
+      },
+      # Remove the rootPath portion from Population to get pathInCompartment
+      pathInCompartment = ifelse(!is.na(rootPath), 
+                                 str_remove(path, paste0(escaped_rootPaths[rootPath], "(/|$)")), 
+                                 NA)
+    ) %>%
+    ungroup()  # undo rowwise
+  
+  return (nodes)
+  
+} 
+
+
+convertToMatrix = function(counts, depths = c(1, 2, 3)) {
+  counts = dplyr::filter(counts, depth %in% depths)
+  
+  pctParent =     spread(dplyr::select(counts, sampleName, PercentParent, subset), key = sampleName, value = PercentParent)
+  parentCounts =  spread(dplyr::select(counts, sampleName, ParentCount,   subset), key = sampleName, value = ParentCount)
+  popCounts =     spread(dplyr::select(counts, sampleName, Count,         subset), key = sampleName, value = Count)
+  
+  rownames(pctParent) = pctParent$subset
+  rownames(parentCounts) = parentCounts$subset
+  rownames(popCounts) = popCounts$subset
+  
+  pctParent = dplyr::select(pctParent, -subset)
+  parentCounts = dplyr::select(parentCounts, -subset)
+  popCounts = dplyr::select(popCounts, -subset)
+  
+  return(list(pctParent = pctParent, parentCounts = parentCounts, popCounts = popCounts))
+}
+
+```
+
+# Setup leafnodes
+
+```{r}
+
+leaf_nodes = gateList[50:66, ]
+
+level1_nodes = leaf_nodes$node
+
+# create the list object with batch/sampletype specific gates that we can feed to IMPACD for the permutational gating
+level1_gates = list()
+for (condition_ in unique(design$condition)) {
+  level1_gates[[condition_]] = list()
+  
+  for (batch_ in unique(design$batch)) {
+    level1_gates[[condition_]][[batch_]] = gates[[condition_]][[batch_]][leaf_nodes$idx]
+    names(level1_gates[[condition_]][[batch_]]) = level1_nodes
+  }
+}
+
+
+# Besides the list of gates, we also need a gate "metadata frame". Below is the example from
+# the IMPACD documentation. Since we aren't going to use the metadata for building the gates,
+# we can make most columns NAs, we will just need the logical "gate" column, which, fortunately for us
+# is going to be all FALSE, since the only logical gate (PB) is part of the root path 
+# and was handled outside of IMPACD
+# head(gate_data)
+# name gate_type marker1 marker2 original_gate_position logical_gate transformed_gate_position
+# 1 CD49b+        1D Dy161Di             76.400000000000006        FALSE              c(138.34....
+# 2 CD49b-        1D Dy161Di             76.400000000000006        FALSE              c(138.34....
+gatemetadata = data.frame(name = level1_nodes, 
+                          gate_type = "2D", 
+                          marker1 = NA, 
+                          marker2 = NA, 
+                          original_gate_position = NA, 
+                          logical_gate = FALSE, 
+                          transformed_gate_position = NA)
+
+```
+
+# Global CD4+ Tcell gating
+
+```{r root path for global CD4s}
+
+gateList$flowJoName[1:14]
+
+# rootpath
+rootPathGates = gateList[c(1:11,13,14),]
+
+rootPaths = c()
+
+```
+
+#### AIM+: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/AIM+
+
+After validation of the gates, we can now kick off IMPACD!
+```{r set up clean gating sets again}
+gs = getGatingSet(design)
+```
+
+```{r gate the root path}
+# LYM/BC/Live/CD3+dump-/NKT/TCRgd/CD4+/AIM+
+
+# add the AIM+ node, and also update the parent since we are leaving out the Treg gate
+rootPathGates = rbind(rootPathGates, dplyr::filter(gateList, node == "CD4_AIM+"))
+rootPathGates$flowJoName[nrow(rootPathGates)] = paste(rootPathGates$flowJoName[nrow(rootPathGates) - 1], rootPathGates$node[nrow(rootPathGates)], sep = "/")
+rootPathGates$parent[nrow(rootPathGates)] = rootPathGates$flowJoName[nrow(rootPathGates) - 1]
+
+gs = getRootPathTcells(gs, design, gates, rootPathGates)
+
+```
+
+
+```{r gate}
+root_path = rootPathGates$flowJoName[nrow(rootPathGates)]
+
+rootPaths["global_CD4_AIM+"] = root_path
+
+print(root_path)
+
+gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+
+gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+```
+
+#### AIM++: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/AIM++
+```{r gate the root path}
+# Add the AIM++ gate
+
+rootPathGates = dplyr::filter(gateList, node %in% c("CD4_AIM++") )
+rootPathGates$parent[1] = dplyr::filter(gateList, node == "Treg-")$flowJoName[1]
+
+# add just the AIM++ node
+for (condition_ in unique(design$condition)) {
+  for (batch_ in unique(design$batch)) {
+      gs_pop_add(gs[[condition_]][[batch_]], gates[[condition_]][[batch_]][[rootPathGates$idx[1]]], parent = rootPathGates$parent[1])
+  }
+}
+
+# Root path for subsequent gating
+root_path = paste(rootPathGates$parent[1], rootPathGates$node[1], sep = "/")
+
+rootPaths["global_CD4_AIM++"] = root_path
+
+print(root_path)
+```
+
+```{r gate}
+gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+
+gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+```
+
+#### Process counts
+```{r summarize counts and save}
+counts = getRawCounts(gs, design)
+
+# write counts to an Rdata file
+save(counts, file = file.path(rawCountsDir, "CD4_AIM+_AIM++.Rdata"))
+```
+
+```{r process paths}
+
+# combine with design
+counts = merge(dplyr::select(counts, -condition), design, by.x = "name", by.y = "fcsName")
+# rename column name to fcsName
+colnames(counts)[colnames(counts) == "name"] = "fcsName"
+counts = dplyr::filter(counts, control == FALSE)
+
+# extract the populations
+nodes = data.frame(path = unique(counts$Population))
+nodes = processGatingPaths(nodes, max_depth = 3)
+
+
+nodes = assignRoot(nodes, rootPaths)
+
+nodes$compartment = ifelse(str_detect(nodes$path, "AIM"), "antigen_specific", "global") 
+
+nodes$subset = paste("CD4", nodes$rootPath, nodes$pathInCompartment, sep = "/")
+nodes$subset[is.na(nodes$rootPath)] = NA
+nodes$compartment[is.na(nodes$rootPath)] = NA
+
+counts = merge(counts, nodes, by.x = "Population", by.y = "path")
+
+```
+
+
+```{r turn into matrices}
+
+matrices = convertToMatrix(counts, depths = c(1, 2, 3))
+
+# save matrices
+save(matrices, nodes, file = file.path(processedCountsDir, "CD4_AIM+_AIM++.Rdata"))
+
+```
+
+### CD45RO+ cells
+
+```{r set up clean gating sets again}
+gs = getGatingSet(design)
+```
+
+#### CD45RO+: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/CD45RO+
+
+```{r root path for global CD4s}
+gateList$flowJoName[1:14]
+
+# rootpath
+rootPathGates = rbind(gateList[c(1:11,13,14),], dplyr::filter(gateList, node %in% c("CD4_RO+") ) )
+
+```
+
+```{r gate the root path}
+gs = getRootPathTcells(gs, design, gates, rootPathGates)
+
+```
+
+```{r run IMPACD for level 1}
+root_path = rootPathGates$flowJoName[nrow(rootPathGates)]
+
+rootPaths["CD4RO+"] = root_path
+
+gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+```
+
+```{r run full IMPACD on first root path}
+gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+```
+
+#### AIM+: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/CD45RO+/AIM+
+
+```{r gate the root path}
+# We ended up using the AIM++ gate for deciding on antigen specificity, hence AIM+ is commented out
+
+
+# Add the AIM+ gate
+# AIMp_gate = dplyr::filter(gateList, node %in% c("CD4_AIM+") )
+# 
+# # add just the AIM++ node
+# for (condition_ in unique(design$condition)) {
+#   for (batch_ in unique(design$batch)) {
+#       gs_pop_add(gs[[condition_]][[batch_]], gates[[condition_]][[batch_]][[AIMp_gate$idx]], parent = rootPaths["CD4RO+"])
+#   }
+# }
+# 
+# # Root path for subsequent gating
+# root_path = paste(rootPaths["CD4RO+"], AIMp_gate$node, sep = "/")
+# 
+# rootPaths["CD4RO+_AIM+"] = root_path
+# 
+# print(root_path)
+```
+
+```{r run level 1 and IMPACD}
+# gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+
+# gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+```
+
+#### AIM++: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/CD45RO+/AIM++
+```{r gate the root path}
+# Add the AIM+ gate
+AIMpp_gate = dplyr::filter(gateList, node %in% c("CD4_AIM++") )
+
+# add just the AIM++ node
+for (condition_ in unique(design$condition)) {
+  for (batch_ in unique(design$batch)) {
+      gs_pop_add(gs[[condition_]][[batch_]], gates[[condition_]][[batch_]][[AIMpp_gate$idx]], parent = rootPaths["CD4RO+"])
+  }
+}
+
+# Root path for subsequent gating
+root_path = paste(rootPaths["CD4RO+"], AIMpp_gate$node, sep = "/")
+
+rootPaths["CD4RO+_AIM++"] = root_path
+
+print(root_path)
+
+
+```
+
+```{r run IMPACD for level 1}
+gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+```
+
+```{r run full IMPACD on first root path}
+gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
+```
+
+#### Process counts 
+```{r summarize counts and save}
+counts = getRawCounts(gs, design)
+
+countsOrig = counts
+
+# write counts to an Rdata file
+save(counts, file = file.path(rawCountsDir, "CD4RO+.Rdata"))
+```
+
+```{r process paths}
+
+# combine with design
+counts = merge(dplyr::select(counts, -condition), design, by.x = "name", by.y = "fcsName")
+# rename column name to fcsName
+colnames(counts)[colnames(counts) == "name"] = "fcsName"
+counts = dplyr::filter(counts, control == FALSE)
+
+# extract the populations
+nodes = data.frame(path = unique(counts$Population))
+nodes$compartment = ifelse(str_detect(nodes$path, "AIM"), "antigen_specific", "global") 
+
+# split if up into antigen specific ones and global ones
+nodes_ = dplyr::filter(nodes, compartment == "antigen_specific")
+nodes = dplyr::filter(nodes, compartment != "antigen_specific")
+
+nodes = processGatingPaths(nodes, max_depth = 3)
+nodes_ = processGatingPaths(nodes_, max_depth = 3)
+
+names(rootPaths)
+
+nodes = assignRoot(nodes, rootPaths["CD4RO+"])
+nodes_ = assignRoot(nodes_, rootPaths[c("CD4RO+_AIM+", "CD4RO+_AIM++")])
+# We ended up using only the AIM++ gate for antigen specificity, hence I am going to remove any AIM+ nodes here
+# Note, the counts for AIM+ are still in the original raw data
+nodes_ = dplyr::filter(nodes_, rootPath != "CD4RO+_AIM+")
+
+nodes = rbind(nodes, nodes_)
+
+nodes$subset = paste("CD4RO+", nodes$compartment, nodes$pathInCompartment, sep = "/")
+# remove trailing / from subset
+nodes$subset = str_remove(nodes$subset, "/$")
+
+nodes$subset[is.na(nodes$rootPath)] = NA
+nodes$compartment[is.na(nodes$rootPath)] = NA
+
+
+counts = merge(counts, nodes, by.x = "Population", by.y = "path")
+# this is also going to remove all of the AIM+ nodes that we didn't use
+
+```
+
+#
+
+```{r turn into matrices}
+
+matrices = convertToMatrix(counts, depths = c(0, 1, 2, 3))
+
+matrices[["nodes"]] = nodes
+matrices[["design"]] = design
+
+# save matrices
+save(matrices, file = file.path(processedCountsDir, "CD4RO+.Rdata"))
+
+```
