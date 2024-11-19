@@ -22,6 +22,7 @@
  - TEAseq analyses. Hannah has fastq files if needed, may need permission from Claire Gustafson at Allen (claire.gustafson@alleninstitute.org). Try sc MT lineage mapping using ATACseq data, also look at RNA (HC, then DS) using antibodies to know it's non-naive CD8 and what subtype? Tri-modal single cell profiling reveals a distinct pediatric CD8αα T cell subset and broad age-related molecular reprogramming across the T cell compartment. https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE214546, start with RAW.tar looking for non-naive CD8 cluster
 
 # High priority NCI TODOs:
+ - make BRI GitHub
  - **look into public datasets: apply PC1 signatures of mixed features onto public datasets, trickiness will be in finding datasets with same features (Alice W. for help on translating specific features)**
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
  - **higher priority given something positive better than nothing! look into treatment/treatment-ICI effects w/ GAMs: re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals... look at early changes differentiating irAE vs. no irAE. check for correlations b/w CTCAE grade and adjused freqs not just at baseline**
@@ -67,6 +68,7 @@
  - AbATE is 6 month timepoint, peak response is 3 months
  - maybe teplizumab hits all sorts in R and not all sorts in NR, but then would expect higher MT SNV counts in R vs. NR which we don't really see
 ## Computational
+ - camelCase not snake_case
  - **draw ellipses around clusters/groups for all PCAs/UMAPs**
  - **limma > DESeq2 for less false positives, for non-simple models I should move out of Seurat/Diffbind (take normalized data) and into limma separately**
  - **try enrichR as an alternative to stringdb for online enrichment help**
