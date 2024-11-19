@@ -385,7 +385,7 @@ stats_df <- adjusted_data %>%
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
   arrange(pval) %>%
-  filter(pval < 0.07)
+  filter(pval < 0.2)
 
 stats_df
 
@@ -428,7 +428,7 @@ ggplot(wide_baseline_flow_data_confounders_regressed_out, aes(x = group, y = mea
 
 ```
 
-# Plot PCA results for baseline data with batch (+/- age) regressed out
+# Plot PCA results for baseline data with batch (+/- age) regressed out using top features
 
 ```{r}
 
@@ -475,13 +475,15 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 top_contributing_features_PC1_general <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
-    select(Dim.1) %>%
-    head(5)
+    select(Dim.1)
 
 top_contributing_features_PC2_general <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
-    select(Dim.2) %>%
-    head(10)
+    select(Dim.2)
+
+top_contributing_features_PC3_general <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
@@ -540,16 +542,18 @@ thyroid_stats_df <- adjusted_data %>%
   summarize(
     Test_Type = if(all(shapiro.test(value[thyroid_irae == "Thyroid irAE"])$p.value > 0.05,
                        shapiro.test(value[thyroid_irae == "No thyroid irAE"])$p.value > 0.05)) "t-test" else "Wilcoxon",
-    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    pval = if(Test_Type == "t-test") t.test(value ~ thyroid_irae)$p.value else wilcox.test(value ~ thyroid_irae)$p.value,
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  filter(pval < 0.1)
+  filter(pval < 0.2)
+
+thyroid_stats_df
 
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:15] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- (adjusted_data)[, 16:ncol(adjusted_data)] #%>% select(thyroid_stats_df$sort)
+wide_baseline_flow_num_data_confounders_regressed_out <- (adjusted_data)[, 16:ncol(adjusted_data)] %>% select(thyroid_stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -589,13 +593,15 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 top_contributing_features_PC1_thyroid <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
-    select(Dim.1) %>%
-    head(15)
+    select(Dim.1)
 
 top_contributing_features_PC2_thyroid <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
-    select(Dim.2) %>%
-    head(10)
+    select(Dim.2)
+
+top_contributing_features_PC3_thyroid <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
@@ -627,8 +633,6 @@ compVar <- data.frame(PC1 = pcaData$PC1,
 res <- compareGroups(thyroid_irae ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
 
-# using "top" features, PC1 pops out as differential:
-
 p <- ggplot(pcaData, aes(x = thyroid_irae, y = PC1, color = thyroid_irae)) +
   geom_boxplot() +
   geom_jitter(width = 0.2, alpha = 0.6) +
@@ -650,11 +654,13 @@ thyroid_with_oor_stats_df <- adjusted_data %>%
   summarize(
     Test_Type = if(all(shapiro.test(value[thyroid_irae_including_oor == "Thyroid irAE"])$p.value > 0.05,
                        shapiro.test(value[thyroid_irae_including_oor == "No thyroid irAE"])$p.value > 0.05)) "t-test" else "Wilcoxon",
-    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    pval = if(Test_Type == "t-test") t.test(value ~ thyroid_irae_including_oor)$p.value else wilcox.test(value ~ thyroid_irae_including_oor)$p.value,
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  filter(pval < 0.1)
+  filter(pval < 0.2)
+
+thyroid_with_oor_stats_df
 
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:15] %>%
   mutate(patient_id_simple = row_number())
@@ -699,13 +705,15 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 top_contributing_features_PC1_thyroid_with_oor <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
-    select(Dim.1) %>%
-    head(10)
+    select(Dim.1)
 
 top_contributing_features_PC2_thyroid_with_oor <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
-    select(Dim.2) %>%
-    head(10)
+    select(Dim.2)
+
+top_contributing_features_PC3_thyroid_with_oor <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
@@ -737,8 +745,6 @@ compVar <- data.frame(PC1 = pcaData$PC1,
 res <- compareGroups(thyroid_irae_including_oor ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
 
-# using "top" features, PC1 pops out as differential:
-
 p <- ggplot(pcaData, aes(x = thyroid_irae_including_oor, y = PC1, color = thyroid_irae_including_oor)) +
   geom_boxplot() +
   geom_jitter(width = 0.2, alpha = 0.6) +
@@ -760,11 +766,11 @@ skin_stats_df <- adjusted_data %>%
   summarize(
     Test_Type = if(all(shapiro.test(value[skin_irae == "Skin irAE"])$p.value > 0.05,
                        shapiro.test(value[skin_irae == "No skin irAE"])$p.value > 0.05)) "t-test" else "Wilcoxon",
-    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    pval = if(Test_Type == "t-test") t.test(value ~ skin_irae)$p.value else wilcox.test(value ~ skin_irae)$p.value,
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  filter(pval < 0.1)
+  filter(pval < 0.2)
 
 skin_stats_df
 
@@ -811,13 +817,15 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 top_contributing_features_PC1_skin <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
-    select(Dim.1) %>%
-    head(15)
+    select(Dim.1)
 
 top_contributing_features_PC2_skin <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
-    select(Dim.2) %>%
-    head(10)
+    select(Dim.2)
+
+top_contributing_features_PC3_skin <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
@@ -876,11 +884,11 @@ pneumonitis_stats_df <- adjusted_data %>%
   summarize(
     Test_Type = if(all(shapiro.test(value[pneumonitis_irae == "Pneumonitis"])$p.value > 0.05,
                        shapiro.test(value[pneumonitis_irae == "No pneumonitis"])$p.value > 0.05)) "t-test" else "Wilcoxon",
-    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    pval = if(Test_Type == "t-test") t.test(value ~ pneumonitis_irae)$p.value else wilcox.test(value ~ pneumonitis_irae)$p.value,
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  filter(pval < 0.1)
+  filter(pval < 0.2)
 
 pneumonitis_stats_df
 
@@ -927,13 +935,15 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 top_contributing_features_PC1_pneumonitis <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
-    select(Dim.1) %>%
-    head(15)
+    select(Dim.1)
 
 top_contributing_features_PC2_pneumonitis <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
-    select(Dim.2) %>%
-    head(10)
+    select(Dim.2)
+
+top_contributing_features_PC3_pneumonitis <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
@@ -992,11 +1002,11 @@ pneumonitis_including_effusion_stats_df <- adjusted_data %>%
   summarize(
     Test_Type = if(all(shapiro.test(value[pneumonitis_irae_including_effusion == "Pneumonitis"])$p.value > 0.05,
                        shapiro.test(value[pneumonitis_irae_including_effusion == "No pneumonitis"])$p.value > 0.05)) "t-test" else "Wilcoxon",
-    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    pval = if(Test_Type == "t-test") t.test(value ~ pneumonitis_irae_including_effusion)$p.value else wilcox.test(value ~ pneumonitis_irae_including_effusion)$p.value,
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  filter(pval < 0.1)
+  filter(pval < 0.2)
 
 pneumonitis_including_effusion_stats_df
 
@@ -1043,13 +1053,15 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 top_contributing_features_PC1_pneumonitis_including_effusion <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
-    select(Dim.1) %>%
-    head(15)
+    select(Dim.1)
 
 top_contributing_features_PC2_pneumonitis_including_effusion <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
-    select(Dim.2) %>%
-    head(10)
+    select(Dim.2)
+
+top_contributing_features_PC3_pneumonitis_including_effusion <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
@@ -1083,8 +1095,6 @@ compVar <- data.frame(PC1 = pcaData$PC1,
 res <- compareGroups(pneumonitis_irae_including_effusion ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
 
-# using "top" features, PC1 pops out as differential:
-
 ```
 
 # Plot PCA results for baseline data with batch (+/- age) regressed out, rheumatoid irAEs
@@ -1097,18 +1107,18 @@ rheumatoid_irae_stats_df <- adjusted_data %>%
   summarize(
     Test_Type = if(all(shapiro.test(value[rheumatoid_irae == "Rheumatoid irAE"])$p.value > 0.05,
                        shapiro.test(value[rheumatoid_irae == "No rheumatoid irAE"])$p.value > 0.05)) "t-test" else "Wilcoxon",
-    pval = if(Test_Type == "t-test") t.test(value ~ group)$p.value else wilcox.test(value ~ group)$p.value,
+    pval = if(Test_Type == "t-test") t.test(value ~ rheumatoid_irae)$p.value else wilcox.test(value ~ rheumatoid_irae)$p.value,
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  filter(pval < 0.1)
+  filter(pval < 0.2)
 
 rheumatoid_irae_stats_df
 
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:15] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- (adjusted_data)[, 16:ncol(adjusted_data)] %>% select(pneumonitis_including_effusion_stats_df$sort)
+wide_baseline_flow_num_data_confounders_regressed_out <- (adjusted_data)[, 16:ncol(adjusted_data)] %>% select(rheumatoid_irae_stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1148,13 +1158,15 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 top_contributing_features_PC1_rheumatoid_irae <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
-    select(Dim.1) %>%
-    head(15)
+    select(Dim.1)
 
 top_contributing_features_PC2_rheumatoid_irae <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
-    select(Dim.2) %>%
-    head(10)
+    select(Dim.2)
+
+top_contributing_features_PC3_rheumatoid_irae <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
@@ -1184,52 +1196,198 @@ compVar <- data.frame(PC1 = pcaData$PC1,
 res <- compareGroups(rheumatoid_irae ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
 
-# using "top" features, PC1 pops out as differential:
-
 ```
 
 # Plot PCA results for baseline data with batch (+/- age) regressed out, gastrointestinal irAEs
  - only 2 patients with gastrointestinal irAEs...
 
-# Compare contributing features above
- - complicated by different top features/top vs. all features
- 
+# Find features contributing most to variance for general and specific irAEs and compare
+
 ```{r}
 
 all_features <- unique(c(
   rownames(top_contributing_features_PC1_thyroid),
+  rownames(top_contributing_features_PC1_general),
   rownames(top_contributing_features_PC1_skin),
-  rownames(top_contributing_features_PC1_general)
-))
+  rownames(top_contributing_features_PC1_pneumonitis),
+  rownames(top_contributing_features_PC1_rheumatoid_irae),
+  rownames(top_contributing_features_PC2_thyroid),
+  rownames(top_contributing_features_PC2_general),
+  rownames(top_contributing_features_PC2_skin),
+  rownames(top_contributing_features_PC2_pneumonitis),
+  rownames(top_contributing_features_PC2_rheumatoid_irae),
+  rownames(top_contributing_features_PC3_thyroid),
+  rownames(top_contributing_features_PC3_general),
+  rownames(top_contributing_features_PC3_skin),
+  rownames(top_contributing_features_PC3_pneumonitis),
+  rownames(top_contributing_features_PC3_rheumatoid_irae)
+  ))
 
 merged_data <- data.frame(
-  PC1_thyroid = top_contributing_features_PC1_thyroid$Dim.1[match(all_features, rownames(top_contributing_features_PC1_thyroid))],
+  PC1_general = top_contributing_features_PC1_general$Dim.1[match(all_features, rownames(top_contributing_features_PC1_general))],
+  PC2_general = top_contributing_features_PC2_general$Dim.2[match(all_features, rownames(top_contributing_features_PC2_general))],
+  PC3_general = top_contributing_features_PC3_general$Dim.3[match(all_features, rownames(top_contributing_features_PC3_general))],
+
   PC1_skin = top_contributing_features_PC1_skin$Dim.1[match(all_features, rownames(top_contributing_features_PC1_skin))],
-  PC1_general = top_contributing_features_PC1_general$Dim.1[match(all_features, rownames(top_contributing_features_PC1_general))]
+  PC2_skin = top_contributing_features_PC2_skin$Dim.2[match(all_features, rownames(top_contributing_features_PC2_skin))],
+  PC3_skin = top_contributing_features_PC3_skin$Dim.3[match(all_features, rownames(top_contributing_features_PC3_skin))],
+
+  PC1_thyroid = top_contributing_features_PC1_thyroid$Dim.1[match(all_features, rownames(top_contributing_features_PC1_thyroid))],
+  PC2_thyroid = top_contributing_features_PC2_thyroid$Dim.2[match(all_features, rownames(top_contributing_features_PC2_thyroid))],
+  PC3_thyroid = top_contributing_features_PC3_thyroid$Dim.3[match(all_features, rownames(top_contributing_features_PC3_thyroid))],
+  
+  PC1_pneumonitis = top_contributing_features_PC1_pneumonitis$Dim.1[match(all_features, rownames(top_contributing_features_PC1_pneumonitis))],
+  PC2_pneumonitis = top_contributing_features_PC2_pneumonitis$Dim.2[match(all_features, rownames(top_contributing_features_PC2_pneumonitis))],
+  PC3_pneumonitis = top_contributing_features_PC3_pneumonitis$Dim.3[match(all_features, rownames(top_contributing_features_PC3_pneumonitis))],
+  
+  PC1_rheumatoid = top_contributing_features_PC1_rheumatoid_irae$Dim.1[match(all_features, rownames(top_contributing_features_PC1_rheumatoid_irae))],
+  PC2_rheumatoid = top_contributing_features_PC2_rheumatoid_irae$Dim.2[match(all_features, rownames(top_contributing_features_PC2_rheumatoid_irae))],
+  PC3_rheumatoid = top_contributing_features_PC3_rheumatoid_irae$Dim.3[match(all_features, rownames(top_contributing_features_PC3_rheumatoid_irae))]
 )
 
 rownames(merged_data) <- all_features
 
-merged_data[is.na(merged_data)] <- 0
+# Replace any NA values with 0
+#merged_data[is.na(merged_data)] <- 0
 
 merged_data <- merged_data %>%
-  mutate(Sum = rowSums(.)) %>%
-  arrange(desc(Sum)) %>%
-  select(-Sum)
+  mutate(MaxValue = apply(., 1, function(x) max(x, na.rm = TRUE))) %>%  # Compute the max value per row, ignoring NA values
+  arrange(desc(MaxValue)) %>%   # Order rows by the max value in descending order
+  select(-MaxValue)  # Remove the temporary MaxValue column
 
+# Clean up feature names (replace dots with spaces for clarity)
 rownames(merged_data) <- gsub("\\.", " ", rownames(merged_data))
 
-Heatmap(merged_data, 
+# Create a dataframe for column annotations (for irAE types and PC number)
+column_annotations <- data.frame(
+  irAE_type = c(rep("general", 3), rep("skin", 3), rep("thyroid", 3), rep("pneumonitis", 3), rep("rheumatoid", 3)),
+  PC = rep(1:3, 5)  # Each type has PC1, PC2, and PC3
+)
+
+column_annotations$irAE_type <- factor(column_annotations$irAE_type, 
+                                       levels = c("general", "skin", "thyroid", "pneumonitis", "rheumatoid"))
+
+# Define colors for column annotations
+annotation_colors <- list(
+  irAE_type = c("general" = "black", "skin" = "red", "thyroid" = "blue", "pneumonitis" = "green", "rheumatoid" = "pink"),
+  PC = c("1" = "#440154FF", "2" = "#21908CFF", "3" = "#FDE725FF")
+)
+
+# Ensure column annotations are in the correct order for merged_data
+rownames(column_annotations) <- colnames(merged_data)
+
+# Create HeatmapAnnotation for columns with color annotations
+col_anno <- HeatmapAnnotation(
+  irAE_type = column_annotations$irAE_type,
+  PC = column_annotations$PC,
+  col = annotation_colors
+)
+
+highlight_columns <- c(
+  # For general, PC1
+  "PC1_general", 
+  
+  # For thyroid, PC1 and PC3
+  "PC1_thyroid", "PC3_thyroid", 
+  
+  # For skin, PC1 and PC2
+  "PC1_skin", "PC2_skin", 
+  
+  # For pneumonitis, PC3
+  "PC3_pneumonitis", 
+  
+  # For rheumatoid, all three PCs
+  "PC1_rheumatoid", "PC2_rheumatoid", "PC3_rheumatoid"
+)
+
+# Create the heatmap with annotations for both the irAE type and PC number
+p <- Heatmap(merged_data, 
         name = "Contribution (%)", 
-        col = colorRamp2(c(0, max(merged_data)), c("white", "darkred")),
         row_names_gp = gpar(fontsize = 10),
         column_names_gp = gpar(fontsize = 10),
         cluster_rows = FALSE, 
         cluster_columns = FALSE,
-        cell_fun = function(j, i, x, y, width, height, fill) {
-          # Display raw contribution percentages in each cell
-          grid.text(sprintf("%.2f", merged_data[i, j]), x, y, gp = gpar(fontsize = 8, col = "black"))
-        })
+        show_column_names = FALSE, 
+        top_annotation = col_anno,
+        heatmap_legend_param = list(title = "Contribution (%)"),
+        # Add box annotations around significant columns
+        column_split = ifelse(colnames(merged_data) %in% highlight_columns, "p < 0.05", "p > 0.05"),  # Separate highlighted columns
+        show_row_names = TRUE)
+
+# Save the heatmap to a PDF file
+pdf(file = "../figures/irae_types_contributing_features_highlighted.pdf", width = 10, height = 8)  # Adjust width and height as needed
+draw(p)  # Render the heatmap
+dev.off()  # Close the PDF device
+
+```
+
+# Make plot of significant features for specific irAEs
+
+```{r}
+
+plot_data <- adjusted_data %>% select(thyroid_irae, CD38hiCD127neg.of.NN.CD8.Tcells) %>%
+  pivot_longer(cols = c(CD38hiCD127neg.of.NN.CD8.Tcells), names_to = "sort", values_to = "freq")
+
+p <- plot_data %>%
+  ggplot(aes(x = thyroid_irae, y = freq, fill = thyroid_irae)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(color = "grey", size = 0.5) +
+  labs(x = "", y = "CD38hi CD127- of NN\nCD8s (residuals)") +
+  scale_fill_manual(values = c("No thyroid irAE" = "black", "Thyroid irAE" = "red")) +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(size = 8))
+
+p
+
+ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_thyroid.png", plot = p, width = 7, height = 3.5)
+
+plot_data <- adjusted_data %>% select(skin_irae, CM.of.Tconv.Tcells) %>%
+  pivot_longer(cols = c(CM.of.Tconv.Tcells), names_to = "sort", values_to = "freq")
+
+p <- plot_data %>%
+  ggplot(aes(x = skin_irae, y = freq, fill = skin_irae)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(color = "grey", size = 0.5) +
+  labs(x = "", y = "CM of Tconv\nTcells (residuals)") +
+  scale_fill_manual(values = c("No skin irAE" = "black", "Skin irAE" = "red")) +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(size = 8))
+
+p
+
+ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_skin.png", plot = p, width = 7, height = 3.5)
+
+plot_data <- adjusted_data %>% select(pneumonitis_irae, PD1pos.of.NKcells) %>%
+  pivot_longer(cols = c(PD1pos.of.NKcells), names_to = "sort", values_to = "freq")
+
+p <- plot_data %>%
+  ggplot(aes(x = pneumonitis_irae, y = freq, fill = pneumonitis_irae)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(color = "grey", size = 0.5) +
+  labs(x = "", y = "PD1+ of NK\ncells (residuals)") +
+  scale_fill_manual(values = c("No pneumonitis" = "black", "Pneumonitis" = "red")) +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(size = 8))
+
+p
+
+ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_pneumonitis.png", plot = p, width = 7, height = 3.5)
+
+plot_data <- adjusted_data %>% select(rheumatoid_irae, naive.of.Bcells) %>%
+  pivot_longer(cols = c(naive.of.Bcells), names_to = "sort", values_to = "freq")
+
+p <- plot_data %>%
+  ggplot(aes(x = rheumatoid_irae, y = freq, fill = rheumatoid_irae)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(color = "grey", size = 0.5) +
+  labs(x = "", y = "Naive of B\ncells (residuals)") +
+  scale_fill_manual(values = c("No rheumatoid irAE" = "black", "Rheumatoid irAE" = "red")) +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(size = 8))
+
+p
+
+ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_rheumatoid.png", plot = p, width = 7, height = 3.5)
 
 ```
 
@@ -1349,7 +1507,7 @@ ggplot(volcano_df, aes(x = abs_diff, y = neg_log10_padj)) +
 
 ```
 
-# Make a boxplot for features of interest after regressing out batch
+# Make a boxplot for features of interest (from literature) after regressing out batch
 
 ```{r}
 
