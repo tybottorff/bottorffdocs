@@ -2,6 +2,8 @@
  - **paper writing: what do we need new experiments/analyses (on current data) wise? what can we combine P576 with? draft main figs (what we have and also what we could have...), what does Josh have that we could add in? could consider just going as is for a brief communications style journal paper... think about how to combine with Josh's manuscript**
  - **MT SNVs low vs. high freq + R vs. NR at the same time (have done separately before)**
  - **try custom background for GSEA, try new code/function like here**
+ - **MT SNVs from scRNAseq (mitoclone)**
+ - **CD127 degs from Josh's public data (CD8+TIGIT-CD127+ vs. CD8+CD127-?)**
  - what's the role of location... all PBMCs but literature describes term Tex as tissue-resident/in peripheral tissue and (some) prog Tex in lymphoid tissue (not as worried here as multiple prog Tex pops some lymphoid some peripheral apparently...), maybe DP CD57+ in blood here heading to peripheral tissue or moving back out idk...
  - high cytotoxicity marker expression could also just mean antigen experience (according to some paper I read)), but Peter doesn't see logic in this...
  - IL7R leads to JAK/STAT so that weak result is expected
@@ -24,6 +26,7 @@
 
 # High priority NCI TODOs:
  - make BRI GitHub
+ - **deal w/ batch effects properly: ask for help, Sid's feature alignment, plot freqs before/after regressing batch out**
  - **look into public datasets: apply PC1 signatures of mixed features onto public datasets, trickiness will be in finding datasets with same features (Alice W. for help on translating specific features)**
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
  - **higher priority given something positive better than nothing! look into treatment/treatment-ICI effects w/ GAMs: re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals... look at early changes differentiating irAE vs. no irAE. check for correlations b/w CTCAE grade and adjused freqs not just at baseline**
