@@ -1,3 +1,35 @@
+# Try another approach with batch as random effect
+
+```{r}
+
+# Function to regress out confounders (batch and patient_id) for each feature
+regress_out_confounders <- function(feature, batch, patient_id, group) {
+  # Create a data frame with the feature and the confounding variables
+  df <- data.frame(feature = feature, Batch = batch, patient_id = patient_id, group = group)
+  
+  # Fit the linear mixed-effects model with irAE as fixed effect and Batch as random effect
+  model <- lmer(feature ~ group + (1|Batch), data = df)
+  
+  # Predict the fitted values, excluding random effects (i.e., accounting only for group)
+  adjusted_data <- predict(model, re.form = ~0)  # Exclude random effects
+  
+  return(adjusted_data)
+}
+
+# Apply the function across each feature and regress out Batch and patient_id effects
+adjusted_features <- as.data.frame(lapply(limma_df[, 1:49], 
+                                          regress_out_confounders, 
+                                          batch = limma_df$Batch, 
+                                          patient_id = limma_df$patient_id, 
+                                          group = limma_df$group))
+
+# Combine the adjusted features with the metadata
+adjusted_data <- cbind(metadata_cols, adjusted_features)
+
+adjusted_data
+
+```
+
 # Try mixed effects modeling (linear first, then GAMs if nonlinear) like in https://www.biorxiv.org/content/10.1101/2022.06.05.494592v1.full.pdf from longitudinal data
 
  - need to reduce correlating variables? group and visit likely don't correlate so no worries
