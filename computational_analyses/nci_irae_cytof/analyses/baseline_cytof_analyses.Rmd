@@ -563,10 +563,12 @@ adjusted_features <- as.data.frame(lapply(feature_cols_filtered,
                                           batch = lmer_df$Batch,
                                           patient_id = lmer_df$patient_id))
 
-adjusted_data <- cbind(metadata_cols, adjusted_features) %>%
-  filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE"))
+adjusted_data <- cbind(metadata_cols, adjusted_features)
 
-adjusted_data
+write.csv(adjusted_data, "../saved_data/batch_effect_removed_data.csv")
+
+adjusted_data <- adjusted_data %>%
+  filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE"))
 
 ```
 
@@ -654,7 +656,8 @@ stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj)
+  arrange(padj) %>%
+  filter(pval < 0.25)
 
 stats_df
 
@@ -672,6 +675,88 @@ p <- plot_data %>%
 p
 
 ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_combined.png", plot = p, width = 6, height = 4)
+
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
+  mutate(patient_id_simple = row_number())
+
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) %>% select(stats_df$sort)
+
+#dim(wide_baseline_flow_num_data_confounders_regressed_out)
+
+pca = prcomp(as.data.frame((na.omit(wide_baseline_flow_num_data_confounders_regressed_out)), center=TRUE, scale=FALSE))
+
+var = get_pca_var(pca)
+
+#head(var$coord)
+
+pca_contributions = as.data.frame((var$contrib))
+
+sumPCA = summary(pca)
+
+#summary(pca)
+
+pca_variance = as.data.frame(t(sumPCA$importance))
+pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
+
+pcaScores = as.data.frame(pca$x) %>%
+  mutate(patient_id_simple = row_number())
+
+pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
+
+pcaData = merge(wide_baseline_flow_metadata_confounders_regressed_out, pcaScores, by = "patient_id_simple")
+
+pcas = list()
+pcas[["fullData"]] = pcaData
+
+pcaLabels = list()
+pcaLabels[["fullData"]] = pcaLabels_
+
+pcaCorrelations = list()
+
+limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
+
+# find features contributing most to variation
+
+top_contributing_features_PC1_thyroid <- pca_contributions %>%
+    arrange(desc(Dim.1)) %>%
+    select(Dim.1)
+
+top_contributing_features_PC2_thyroid <- pca_contributions %>%
+    arrange(desc(Dim.2)) %>%
+    select(Dim.2)
+
+# switch colors
+#pcaData$thyroid_irae <- factor(pcaData$thyroid_irae, levels = c("Thyroid irAE", "No thyroid irAE"))
+                                 
+p <- ggplot(data = pcaData) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
+  labs(color = "") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),  # Adjust legend text size
+    #legend.title = element_blank(),  # Adjust legend title size
+    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
+    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
+  ) +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+ggsave("../figures/baseline_pca_combined_irae_groups_top_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+
+compVar <- data.frame(PC1 = pcaData$PC1,
+                      PC2 = pcaData$PC2,
+                      PC3 = pcaData$PC3,
+                      group = pcaData$group)
+res <- compareGroups(group ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
+res
 
 ```
 
@@ -767,7 +852,7 @@ p <- ggplot(data = pcaData) +
 
 p
 
-ggsave("../figures/baseline_pca_thyroid_irae_groups_all_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+ggsave("../figures/baseline_pca_thyroid_irae_groups_top_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
 
 compVar <- data.frame(PC1 = pcaData$PC1,
                       PC2 = pcaData$PC2,
@@ -871,7 +956,7 @@ p <- ggplot(data = pcaData) +
 
 p
 
-ggsave("../figures/baseline_pca_thyroid_irae_with_oor_groups_all_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+ggsave("../figures/baseline_pca_thyroid_irae_with_oor_groups_top_features_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
 
 compVar <- data.frame(PC1 = pcaData$PC1,
                       PC2 = pcaData$PC2,
@@ -879,15 +964,6 @@ compVar <- data.frame(PC1 = pcaData$PC1,
                       thyroid_irae_including_oor = pcaData$thyroid_irae_including_oor)
 res <- compareGroups(thyroid_irae_including_oor ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
-
-p <- ggplot(pcaData, aes(x = thyroid_irae_including_oor, y = PC2, color = thyroid_irae_including_oor)) +
-  geom_boxplot() +
-  geom_jitter(width = 0.2, alpha = 0.6) +
-  labs(y = "PC2", x = "")
-
-p
-
-ggsave("../figures/baseline_pc2_boxplot_thyroid_irae_with_oor_groups_all_features_batch_regressed_out.png", plot = p, width = 5, height = 3.5)
 
 ```
 
@@ -1309,33 +1385,17 @@ dev.off()  # Close the PDF device
 ctcae_cor_df <- adjusted_data %>%
   filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE")) %>%
   pivot_longer(cols = -c(patient_id, group, ctcae_grade, Batch, age, thyroid_irae, thyroid_irae_including_oor, skin_irae, pneumonitis_irae, pneumonitis_irae_including_effusion, gastro_irae, rheumatoid_irae, days_to_irae, thyroid_cat, cancer_type, cleaned_visit_info), names_to = "sort", values_to = "freq") %>%
-  # replace non-irAE CTCAE grade (NA) with 0 to include in correlation analysis
+  # replace non-irAE CTCAE grade (NA) with 0 to include in analysis
   mutate(ctcae_grade = if_else(is.na(ctcae_grade), 0, ctcae_grade)) %>%
   group_by(sort) %>%
-  summarize(cor_result = list(cor.test(ctcae_grade, freq, method = "spearman")), .groups = 'drop') %>%
+  summarize(kruskal_result = list(kruskal.test(freq ~ as.factor(ctcae_grade))), .groups = 'drop') %>%
   mutate(
-    estimate = map_dbl(cor_result, ~ .x$estimate),
-    p.value = map_dbl(cor_result, ~ .x$p.value)
+    p.value = map_dbl(kruskal_result, ~ .x$p.value)
   ) %>%
   mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
-  select(sort, estimate, p.adj) %>%
+  select(sort, p.value, p.adj) %>%
   arrange(p.adj) %>%
   print()
-
-feature_of_interest <- "SCM.of.Tconv.Tcells"
-
-adjusted_data %>%
-  filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE")) %>%
-  pivot_longer(cols = -c(patient_id, group, ctcae_grade, Batch, age, thyroid_irae, thyroid_irae_including_oor, skin_irae, pneumonitis_irae, pneumonitis_irae_including_effusion, gastro_irae, rheumatoid_irae, days_to_irae, thyroid_cat, cancer_type, cleaned_visit_info), 
-               names_to = "sort", values_to = "freq") %>%
-  filter(sort == feature_of_interest) %>% # Select the specific feature
-  mutate(ctcae_grade = if_else(is.na(ctcae_grade), 0, ctcae_grade)) %>% # Replace NA with 0 for non-irAE
-  ggplot(aes(x = freq, y = ctcae_grade)) +
-  geom_point(alpha = 0.7) + # Scatter plot points
-  geom_smooth(method = "lm", formula = y ~ x, color = "blue") + # Regression line
-  labs(
-    x = "SCM of Tconv Tcells (residuals)",
-    y = "CTCAE Grade")
 
 time_to_irae_df <- adjusted_data %>%
   filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE")) %>%
