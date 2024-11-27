@@ -1,147 +1,145 @@
-# Try mixed effects modeling (linear first, then GAMs if nonlinear) like in https://www.biorxiv.org/content/10.1101/2022.06.05.494592v1.full.pdf from longitudinal data
+---
+title: "CyTOF analyses for NCI irAE project"
+output: pdf_document
+---
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
- - need to reduce correlating variables? group and visit likely don't correlate so no worries
+# Load necessary libraries
 
 ```{r}
 
-mixed_effects_model_df <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
-  mutate(cleaned_visit_num = str_extract(`Visit Descriptor`, "\\d+")) %>%
-  # CTCAE Grade (Highest) is the column for (ir)AE grade
-  rename(patient_id = `Subject ID`, ctcae_grade = `CTCAE Grade (Highest)`, group = `General irAE Classification`, specific_group = `Patient Type`, age = `Age at Draw`, visit_info = `Visit Descriptor`) %>%
-  # if CTCAE grade is not-NA, group should be irAE... (some grade 1-2 ctcae were in non-irAE group before using updated category 9/6/24, using `General irAE Classification` as its cleaner metadata though otherwise
-  mutate(group = if_else(!is.na(ctcae_grade), "irAE/SAE", group)) %>%
-  mutate(irae_severity_based_on_ctcae = case_when(
-    group == "irAE/SAE" & ctcae_grade > 2 ~ "Serious irAE/SAE",
-    group == "irAE/SAE" & ctcae_grade < 3 ~ "Non-serious irAE/SAE",
-    group == "non-irAE" ~ "Non-irAE",
-    TRUE ~ NA
-  )) %>%
-  select(patient_id, group, specific_group, irae_severity_based_on_ctcae, visit_info, ctcae_grade, Batch, starts_with("pct_")) %>%
-  pivot_longer(
-    cols = starts_with("pct_"), 
-    names_to = "sort",
-    values_to = "freq") %>%
-  mutate(parent_population = gsub(".*_of_", "", sort),
-         parent_population = gsub("_", " ", parent_population),
-         parent_parent_population = str_extract(parent_population, "[^ ]+$"),
-         sort = gsub("pct_", "", sort),
-         sort = gsub("_", " ", sort)
-  ) %>%
-  mutate(visit_info = case_when(
-          str_detect(visit_info, "1") | visit_info %in% c("AID_Patient", "Healthy_Control") ~ 1,
-          visit_info %in% c("other", "Other") ~ 6,
-          visit_info %in% c("Visit 2", "Visit 2, irAE") ~ 2,
-          visit_info %in% c("Visit 3", "Visit 3, irAE", "Visit 3, irAE F/U") ~ 3,
-          visit_info != "irAE F/U" & str_detect(visit_info, "irAE") ~ 4,
-          visit_info == "irAE F/U" ~ 5
-    )) %>%
-  filter(!(sort %in% c("granulocytes of live", "PD1pos of DN Bcells", "PD1pos of naive Bcells", "PD1pos of swMem Bcells", "PD1pos of unswMem Bcells", "basophils of nonGrans", "EMRA of Tconv Tcells", "CXCR6pos of NN CD8 Tcells", "CXCR6posGrzmBpos of NN CD8 Tcells")),
-         !str_detect(sort, "PD")) %>%
-  filter(freq > 0,
-         visit_info != 6) %>%
-  # getting rid of any sorts with any NA freqs gets rid of some sorts
-  mutate(freq = logitNorm(freq)) %>%
-  filter(!(is.na(patient_id))) %>%
-  # give ctcae grade of 0 for HC, AID, non-irAE
-  mutate(ctcae_grade = if_else(is.na(ctcae_grade), 0, ctcae_grade)) %>%
-  # filter for cancer patients if doing CTCAE-grade based approach (want 0 score ref to only be cancer patients)
-  filter(group %in% c("non-irAE", "irAE/SAE"))
+library(beeswarm)
+library(Matrix)
+library(ggplot2)
+library(stringr)
+library(scales)
+library(tidyr)
+library(ComplexHeatmap)
+library(viridis)
+library(readxl)
+library(circlize)
+library(factoextra)
+library(lmerTest)
+library(gtsummary)
+library(ica)
+library(dplyr)
+library(ggrepel)
+library(purrr)
+library(compareGroups)
+library(reshape2)
+library(limma)
+library(mgcv)
 
-unique(mixed_effects_model_df$visit_info)
+```
 
-visit_levels <- c(1, 2, 3, 4, 5)
-ctcae_levels <- c(0, 1, 2, 3)
-#group_levels <- c("non-irAE", "irAE/SAE", "Healthy_Control", "AID_Patient")
+# Set theme
 
-mixed_effects_model_df$visit_info <- factor(mixed_effects_model_df$visit_info, levels = visit_levels)
-#mixed_effects_model_df$group <- factor(mixed_effects_model_df$group, levels = group_levels)
-mixed_effects_model_df$ctcae_grade <- factor(mixed_effects_model_df$ctcae_grade, levels = ctcae_levels)
+```{r}
 
-# mixed effects model, allow for variation between subjects in ref, 1|patient_id doesn't account for variation b/w subjects in response but group*time does (variation between irAE groups in response to ICI over time)
+theme_set(
+  theme_bw(20) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour="black", fill = NA, size = 1),
+          axis.text = element_text(colour="black"),
+          axis.ticks = element_line(colour="black"),
+          axis.text.x = element_text(angle=0),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 7)))
 
-sorts <- unique(mixed_effects_model_df$sort)
+```
 
-results <- list()
-residuals_combined <- list()
+# Read in batch-effect removed data
 
-library(broom.mixed)
+```{r}
 
-for (s in sorts) {
-  subset_data <- mixed_effects_model_df %>% filter(sort == s)
-  
-  # Get unique combinations of patient_id and visit_info to combine as metadata w/ residuals df
-  unique_combinations <- subset_data %>%
-    select(patient_id, visit_info, ctcae_grade)
-  
-  # Fit the mixed-effects model
-  fit <- lmer(freq ~ visit_info*ctcae_grade + Batch + (1 | patient_id), data = subset_data)
-  # visit_info + visit_info:ctcae_grade to allow ctcae_grade as main effect (for baseline temporally stable effects)
-  # visit_info*ctcae_grade otherwise
-  
-  # Extract residuals
-  residuals_data <- residuals(fit)
-  
-  # Combine residuals with unique_combinations
-  residuals_df <- cbind(unique_combinations, residuals = residuals_data)
-  
-  # Store in the list
-  residuals_combined[[s]] <- residuals_df
-  
-  # Capture the model summary using broom.mixed
-  model_summary <- tidy(fit, effects = "fixed")
-  
-  # Store the summary in the results list
-  results[[s]] <- model_summary
+adjusted_data <- read.csv("../saved_data/batch_effect_removed_data.csv") %>%
+  select(-X) %>%
+  pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info, cancer_type, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, pneumonitis_irae_including_effusion, gastro_irae), names_to = "sort", values_to = "freq") %>%
+  mutate(cleaned_visit_info = if_else(cleaned_visit_info == "baseline", "1", cleaned_visit_info)) %>%
+  filter(cleaned_visit_info %in% c("1", "2", "3"),
+         group %in% c("non-irAE", "irAE/SAE")) %>%
+  mutate(cleaned_visit_info = factor(cleaned_visit_info, levels = c("1", "2", "3")),
+         group = factor(group, levels = c("non-irAE", "irAE/SAE")),
+         patient_id = as.factor(patient_id))
+
+adjusted_data
+
+```
+
+# Model freq changes over visits using GAMs
+
+```{r}
+
+# Split data by 'sort'
+data_by_sort <- split(adjusted_data, adjusted_data$sort)
+
+# Function to fit the GAM for each sort
+fit_gam <- function(data) {
+  tryCatch(
+    {
+      model <- gam(freq ~ 0 + group * cleaned_visit_info + s(patient_id, bs = "re"),
+                   data = data, method = 'REML')
+      list(summary = summary(model), plot = model)
+    },
+    error = function(e) list(error = e$message)
+  )
 }
 
-combined_residuals_df <- bind_rows(lapply(names(residuals_combined), function(s) {
-  residuals_combined[[s]] %>%
-    mutate(sort = s)
-
-}))
-
-combined_results_df <- bind_rows(results, .id = "sort")
+gam_results <- map(data_by_sort, fit_gam)
 
 ```
 
-# Look for baseline effects subtracting group/time effects, observe 1 hit (SCM of Tconv Tcells)
- - for this, important to NOT include group in model specification, only visit_info, batch, and donorID
+# Inspect results
 
 ```{r}
 
-combined_residuals_df %>%
-  filter(visit_info == 1) %>%
-  group_by(sort) %>%
-  summarize(pval = wilcox.test(residuals[ctcae_grade == "0"], residuals[ctcae_grade %in% c("1", "2", "3")], paired = FALSE, exact = FALSE)$p.value) %>%
-  mutate(adj_pval = p.adjust(pval, method = "BH")) %>%
-  arrange(adj_pval) %>%
-  print()
+# Create a tibble of parametric results across all sorts
+all_pvals <- map_dfr(
+  names(gam_results), 
+  function(sort_name) {
+    # Check if the sort has a summary (i.e., no errors in fitting)
+    if (!is.null(gam_results[[sort_name]]$summary)) {
+      # Extract p.table and add sort information
+      as_tibble(gam_results[[sort_name]]$summary$p.table, rownames = "term") %>%
+        mutate(sort = sort_name)
+    } else {
+      NULL
+    }
+  }
+)
+
+all_pvals <- all_pvals %>%
+  mutate(padj = p.adjust(`Pr(>|t|)`, method = "BH"))
+
+significant_pvals <- all_pvals %>%
+  filter(padj < 0.05) %>%
+  select(sort, term, padj) %>%
+  arrange(sort)
+
+significant_pvals
 
 ```
 
-# Plot significant results from LM
+# Plot significant results
 
 ```{r}
 
-# CCR6pos of NN Tconv Tcells & swMem of Bcells for possible ctcae level effects, others for possible interaction effects
+#EM.of.CD8.Tcells group/visit2
+#$GrzmBpos.of.NN.CD8.Tcells visit2
+#$SCM.of.Tconv.Tcells lots of stuff
 
-"yes vs. no irAE over time
-CD56bright of NKcells"
-
-p <- ggplot(mixed_effects_model_df %>% filter(sort %in% c("CCR6pos of NN Tconv Tcells", "swMem of Bcells")), aes(x = interaction(visit_info, ctcae_grade), y = (freq), color = ctcae_grade)) +
-  geom_boxplot(aes(group = interaction(visit_info, ctcae_grade)), outlier.shape = NA, position = position_dodge(width = 0.75)) +  # Boxplots dodge by group
-  geom_point(size = 0.5, alpha = 0.5) +
-  geom_line(aes(group = interaction(patient_id, ctcae_grade)), color = "grey", alpha = 0.25) +
-  geom_smooth(aes(group = ctcae_grade, color = ctcae_grade), method = "lm", se = FALSE, linetype = "dashed") +
+p <- adjusted_data %>% filter(sort %in% unique(significant_pvals$sort)) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = group)) +
+  geom_point() +
+  geom_smooth(aes(group = group),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
   facet_wrap(~ sort, ncol = 2) +
-  labs(x = "Visit Information", y = "Percent of parent (logit)", color = "CTCAE grade") +
-  theme(axis.text.x = element_blank(),
-        axis.title.x = element_blank(),
-        strip.text = element_text(size = 12)) +
-  scale_color_manual(values = c("0" = "#440154FF", "1" = "#31688EFF", "2" = "#35B779FF", "3" = "#FDE725FF"))
+  labs(x = "Visit", y = "Residuals", color = "Group")
 
 p
 
-#ggsave("../figures/mixed_modeling_hits.png", plot = p, width = 8, height = 5)
+ggsave("../figures/gam_results.png", p, width = 6, height = 10)
 
 ```
