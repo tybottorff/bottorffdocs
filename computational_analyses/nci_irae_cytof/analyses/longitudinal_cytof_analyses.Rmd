@@ -59,12 +59,7 @@ theme_set(
 adjusted_data <- read.csv("../saved_data/batch_effect_removed_data.csv") %>%
   select(-X) %>%
   pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info, cancer_type, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, pneumonitis_irae_including_effusion, gastro_irae), names_to = "sort", values_to = "freq") %>%
-  mutate(cleaned_visit_info = if_else(cleaned_visit_info == "baseline", "1", cleaned_visit_info)) %>%
-  filter(cleaned_visit_info %in% c("1", "2", "3"),
-         group %in% c("non-irAE", "irAE/SAE")) %>%
-  mutate(cleaned_visit_info = factor(cleaned_visit_info, levels = c("1", "2", "3")),
-         group = factor(group, levels = c("non-irAE", "irAE/SAE")),
-         patient_id = as.factor(patient_id))
+  mutate(cleaned_visit_info = if_else(cleaned_visit_info == "baseline", "1", cleaned_visit_info))
 
 adjusted_data
 
@@ -74,14 +69,22 @@ adjusted_data
 
 ```{r}
 
+model_data <- adjusted_data %>%
+  filter(cleaned_visit_info %in% c("1", "2", "3"),
+         group %in% c("non-irAE", "irAE/SAE")) %>%
+  mutate(cleaned_visit_info = factor(cleaned_visit_info, levels = c("1", "2", "3")),
+         group = factor(group, levels = c("non-irAE", "irAE/SAE")),
+         patient_id = as.factor(patient_id))
+
 # Split data by 'sort'
-data_by_sort <- split(adjusted_data, adjusted_data$sort)
+data_by_sort <- split(model_data, model_data$sort)
 
 # Function to fit the GAM for each sort
 fit_gam <- function(data) {
   tryCatch(
     {
-      model <- gam(freq ~ 0 + group * cleaned_visit_info + s(patient_id, bs = "re"),
+      # not using s() for visit as it's not numeric really it's categorical (i.e. visits 2/3 not always at same time from baseline for each patient? or are they?)
+      model <- gam(freq ~ thyroid_irae * cleaned_visit_info + s(patient_id, bs = "re"),
                    data = data, method = 'REML')
       list(summary = summary(model), plot = model)
     },
@@ -90,6 +93,18 @@ fit_gam <- function(data) {
 }
 
 gam_results <- map(data_by_sort, fit_gam)
+
+```
+
+# Check model
+
+```{r}
+
+#We need some checks to make sure that we have well-fit models
+gam.check(model_gam_time_exacerbation_interaction)
+#Here, small p-values indicate that residuals are not randomly distributed. This often means there are not enough basis functions. 
+
+#On the top-left is a Q-Q plot, which compares the model residuals to a normal distribution. A well-fit model's residuals will be close to a straight line. On bottom left is a histogram of residuals. We would expect this to have a symmetrical bell shape. On top-right is a plot of residual values. These should be evenly distributed around zero. Finally, on the bottom-right is plot of response against fitted values. A perfect model would form a straight line.
 
 ```
 
@@ -115,12 +130,27 @@ all_pvals <- map_dfr(
 all_pvals <- all_pvals %>%
   mutate(padj = p.adjust(`Pr(>|t|)`, method = "BH"))
 
+# focus away from intercept results, and just treatment effects, so focus on group/group-treatment interaction results
 significant_pvals <- all_pvals %>%
+  mutate(sort = gsub("\\.", " ", sort)) %>%
   filter(padj < 0.05) %>%
   select(sort, term, padj) %>%
-  arrange(sort)
+  filter(grepl(":", term)) %>%
+  arrange(padj) %>%
+  # just take top ones for many thyroid group-visit interaction results
+  head(4)
 
 significant_pvals
+
+# combined irAE: group effect (SCM of Tconv Tcells, padj = 0.015) and interaction effects (CD56bright of NK cells, EM of CD8s, SCM of Tconv)
+
+# if looking at pneumonitis instead of combined: some treatment effects and 1 group effect (swMem of Bcells padj = 0.003)
+
+# for skin, some treatment effects and 1 interaction (group-visit 3 for CD56bright of NK cells, padj = 0.036)
+
+# for thyroid, ssome treatment effects, group effects, and interactions, strongest interactions seem to be CD11c+ of Bcells (group-visit2), CM of CD8 Tcells (group-visit3), CCR6+ of NN CD8s (group-visit3), EMRA of CD8s (group-visit3), CD4 of Tcells (group-visit3)
+
+# for rheumatoid, interaction (group-visit3) effects for DN of Tcells (padj = 0.021) and CRTH2+ of NN Tconv Tcells (padj = 0.015)
 
 ```
 
@@ -128,18 +158,86 @@ significant_pvals
 
 ```{r}
 
-#EM.of.CD8.Tcells group/visit2
-#$GrzmBpos.of.NN.CD8.Tcells visit2
-#$SCM.of.Tconv.Tcells lots of stuff
+plot_data <- adjusted_data %>%
+  filter(group %in% c("non-irAE", "irAE/SAE"),
+         cleaned_visit_info != "Other") %>%
+  mutate(cleaned_visit_info = factor(cleaned_visit_info, levels = c("1", "2", "3", "irAE", "irAE F/U")),
+         group = factor(group, levels = c("irAE/SAE", "non-irAE")),
+         pnemonitis_irae = factor(pneumonitis_irae, levels = c("Pneumonitis", "No pneumonitis")),
+         thyroid_irae = factor(thyroid_irae, levels = c("Thyroid irAE", "No thyroid irAE"))) %>%
+    mutate(sort = gsub("\\.", " ", sort))
 
-p <- adjusted_data %>% filter(sort %in% unique(significant_pvals$sort)) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = group)) +
-  geom_point() +
-  geom_smooth(aes(group = group),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
-  facet_wrap(~ sort, ncol = 2) +
-  labs(x = "Visit", y = "Residuals", color = "Group")
+# good number of thyroid group-interaction effects
+
+p <- plot_data %>% filter(sort %in% significant_pvals$sort) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = thyroid_irae)) +
+  geom_jitter(width = 0.05, alpha = 0.75) +
+  geom_smooth(aes(group = thyroid_irae),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
+  facet_wrap(~ sort, ncol = 4) +
+  labs(x = "Visit", y = "Residuals", color = "Thyroid group") +
+  theme(strip.text = element_text(size = 13),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
 p
 
-ggsave("../figures/gam_results.png", p, width = 6, height = 10)
+ggsave("../figures/gam_results_thyroid_interactions.png", p, width = 13, height = 4)
+
+# if looking at pneumonitis instead of combined: some treatment effects and 1 group effect (swMem of Bcells padj = 0.003)
+
+p <- plot_data %>% filter(sort %in% c("swMem of Bcells")) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = pnemonitis_irae)) +
+  geom_jitter(width = 0.05, alpha = 0.75) +
+  geom_smooth(aes(group = pnemonitis_irae),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
+  labs(x = "Visit", y = "swMem of \nBcells (residuals)", color = "Pneumonitis group") +
+  theme(strip.text = element_text(size = 13),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+p
+
+ggsave("../figures/gam_results_pneumonitis.png", p, width = 6, height = 4)
+
+# all pvals < 0.05 except for **
+# CD56: visit3-group interaction
+# EM of CD8s: 2-group interaction
+
+p <- plot_data %>% filter(sort %in% c("CD56bright of NKcells", "EM of CD8 Tcells")) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = group)) +
+  #geom_boxplot(outliers = FALSE) +
+  geom_jitter(width = 0.05, alpha = 0.75) +
+  geom_smooth(aes(group = group),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
+  facet_wrap(~ sort, ncol = 2) +
+  labs(x = "Visit", y = "Residuals", color = "Group") +
+  theme(strip.text = element_text(size = 13),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+p
+
+ggsave("../figures/gam_results_treatment_visit_interactions.png", p, width = 8, height = 4)
+
+# CM of CD8s: visit2
+# CM of Tconv: visit 2, ** (padj < 0.01)
+# GzmB: visit2
+
+p <- plot_data %>% filter(sort %in% c("CM of CD8 Tcells", "CM of Tconv Tcells", "GrzmBpos of NN CD8 Tcells")) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = group)) +
+  geom_jitter(width = 0.05, alpha = 0.75) +
+  geom_smooth(aes(group = group),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
+  facet_wrap(~ sort, ncol = 3) +
+  labs(x = "Visit", y = "Residuals", color = "Group") +
+  theme(strip.text = element_text(size = 13),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+p
+
+ggsave("../figures/gam_results_visit_2.png", p, width = 11, height = 4)
+
+# SCM of Tconv: group, visit2, visits2/3+group interaction
+
+p <- plot_data %>% filter(sort %in% c("SCM of Tconv Tcells")) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = group)) +
+  geom_jitter(width = 0.05, alpha = 0.75) +
+  geom_smooth(aes(group = group),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
+  labs(x = "Visit", y = "SCM of Tconv\nTcells (residuals)", color = "Group") +
+  theme(strip.text = element_text(size = 13),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+p
+
+ggsave("../figures/gam_results_scm.png", p, width = 6, height = 4)
 
 ```
