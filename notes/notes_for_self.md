@@ -26,10 +26,9 @@
 
 # High priority NCI TODOs:
  - make BRI GitHub
- - **deal w/ batch effects properly: ask for help, Sid's feature alignment, plot freqs before/after regressing batch out**
  - **look into public datasets: apply PC1 signatures of mixed features onto public datasets, trickiness will be in finding datasets with same features (Alice W. for help on translating specific features)**
  - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
- - **higher priority given something positive better than nothing! look into treatment/treatment-ICI effects w/ GAMs: re-do LM stuff using CTCAE grade-based severity (just put grade 0 for no irAE?) and just do this for cancer groups (0 for AID/HC doesn't make sense?), like had hits in 1st .pptx, also some from irAE group LM, make sure any plots are batch corrected residuals... look at early changes differentiating irAE vs. no irAE. check for correlations b/w CTCAE grade and adjused freqs not just at baseline**
+ - **GAMs: ask Holly if visits 2/3 were same time from baseline for all patients, in that case may want to switch to s(visit_info) to deal with it as real numeric...? longitudinal work: do model check to make sure they're good!re-do GAMs using CTCAE grade-based severity (just put grade 0 for no irAE), look at early changes differentiating irAE vs. no irAE. check for correlations b/w CTCAE grade and adjused freqs not just at baseline**
  - regress out age for any comparisons with substantially different age distributions (like T1D vs. RA)
  - look at ratio of IRs to activation markers
  - try plotting % change from baseline for longitudinal visits rather than absolute % or transformed values?
