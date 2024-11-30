@@ -717,17 +717,14 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
 # find features contributing most to variation
 
-top_contributing_features_PC1_thyroid <- pca_contributions %>%
+top_contributing_features_PC1 <- pca_contributions %>%
     arrange(desc(Dim.1)) %>%
     select(Dim.1)
 
-top_contributing_features_PC2_thyroid <- pca_contributions %>%
+top_contributing_features_PC2 <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
     select(Dim.2)
 
-# switch colors
-#pcaData$thyroid_irae <- factor(pcaData$thyroid_irae, levels = c("Thyroid irAE", "No thyroid irAE"))
-                                 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +

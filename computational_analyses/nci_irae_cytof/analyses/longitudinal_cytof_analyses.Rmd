@@ -32,6 +32,8 @@ library(compareGroups)
 library(reshape2)
 library(limma)
 library(mgcv)
+library(tibble)
+library(tidyverse)
 
 ```
 
@@ -74,6 +76,8 @@ model_data <- adjusted_data %>%
          group %in% c("non-irAE", "irAE/SAE")) %>%
   mutate(cleaned_visit_info = factor(cleaned_visit_info, levels = c("1", "2", "3")),
          group = factor(group, levels = c("non-irAE", "irAE/SAE")),
+         ctcae_grade = if_else(is.na(ctcae_grade), "0", as.character(ctcae_grade)),
+         ctcae_grade = factor(ctcae_grade, levels = c("0", "1", "2", "3")),
          patient_id = as.factor(patient_id))
 
 # Split data by 'sort'
@@ -84,7 +88,7 @@ fit_gam <- function(data) {
   tryCatch(
     {
       # not using s() for visit as it's not numeric really it's categorical (i.e. visits 2/3 not always at same time from baseline for each patient? or are they?)
-      model <- gam(freq ~ thyroid_irae * cleaned_visit_info + s(patient_id, bs = "re"),
+      model <- gam(freq ~ group * cleaned_visit_info + s(patient_id, bs = "re"),
                    data = data, method = 'REML')
       list(summary = summary(model), plot = model)
     },
@@ -100,11 +104,14 @@ gam_results <- map(data_by_sort, fit_gam)
 
 ```{r}
 
-#We need some checks to make sure that we have well-fit models
-gam.check(model_gam_time_exacerbation_interaction)
-#Here, small p-values indicate that residuals are not randomly distributed. This often means there are not enough basis functions. 
+gam_data <- model_data %>%
+  filter(sort == "EMRA.of.CD8.Tcells")
 
-#On the top-left is a Q-Q plot, which compares the model residuals to a normal distribution. A well-fit model's residuals will be close to a straight line. On bottom left is a histogram of residuals. We would expect this to have a symmetrical bell shape. On top-right is a plot of residual values. These should be evenly distributed around zero. Finally, on the bottom-right is plot of response against fitted values. A perfect model would form a straight line.
+model <- gam(freq ~ group * cleaned_visit_info + s(patient_id, bs = "re"),
+                   data = gam_data, method = 'REML')
+
+gam.check(model)
+# looks well-fit (residuals ~straight line on QQ plot), histogram of residuals is normal
 
 ```
 
@@ -138,7 +145,7 @@ significant_pvals <- all_pvals %>%
   filter(grepl(":", term)) %>%
   arrange(padj) %>%
   # just take top ones for many thyroid group-visit interaction results
-  head(4)
+  head(10)
 
 significant_pvals
 
@@ -164,12 +171,32 @@ plot_data <- adjusted_data %>%
   mutate(cleaned_visit_info = factor(cleaned_visit_info, levels = c("1", "2", "3", "irAE", "irAE F/U")),
          group = factor(group, levels = c("irAE/SAE", "non-irAE")),
          pnemonitis_irae = factor(pneumonitis_irae, levels = c("Pneumonitis", "No pneumonitis")),
-         thyroid_irae = factor(thyroid_irae, levels = c("Thyroid irAE", "No thyroid irAE"))) %>%
+         thyroid_irae = factor(thyroid_irae, levels = c("Thyroid irAE", "No thyroid irAE")),
+         ctcae_grade = if_else(is.na(ctcae_grade), "0", as.character(ctcae_grade)),
+         ctcae_grade = factor(ctcae_grade, levels = c("0", "1", "2", "3"))) %>%
     mutate(sort = gsub("\\.", " ", sort))
+
+# ctcae grade visit interactions
+# grade3: visits 2/3: CD38hiCD127neg of NN CD8 Tcells	
+# different grades visit 3: CD56bright of NKcells, cDC of nonGrans, CM of Tconv Tcells
+
+p <- plot_data %>% filter(sort %in% c("CD38hiCD127neg of NN CD8 Tcells", "CD56bright of NKcells", "cDC of nonGrans", "CM of Tconv Tcells")) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = ctcae_grade)) +
+  geom_jitter(width = 0.05, alpha = 0.75) +
+  geom_smooth(aes(group = ctcae_grade),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
+  facet_wrap(~ sort, ncol = 4) +
+  labs(x = "Visit", y = "Residuals", color = "CTCAE grade") +
+  theme(strip.text = element_text(size = 13),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+p
+
+ggsave("../figures/gam_results_ctcae_grade_interactions.png", p, width = 13, height = 4)
+
+```
 
 # good number of thyroid group-interaction effects
 
-p <- plot_data %>% filter(sort %in% significant_pvals$sort) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = thyroid_irae)) +
+p <- plot_data %>% filter(sort %in% c("CD11cpos of Bcells", "CM of CD8 Tcells", "CCR6pos of NN CD8 Tcells", "EMRA of CD8 Tcells")) %>% ggplot(aes(x = cleaned_visit_info, y = freq, color = thyroid_irae)) +
   geom_jitter(width = 0.05, alpha = 0.75) +
   geom_smooth(aes(group = thyroid_irae),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
   facet_wrap(~ sort, ncol = 4) +
