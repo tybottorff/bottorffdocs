@@ -650,316 +650,91 @@ convertToMatrix = function(counts, depths = c(1, 2, 3)) {
 
 ```
 
-# Setup leafnodes
+# Apply stage 1 gating
 
 ```{r}
 
-leaf_nodes = gateList[50:66, ]
+level1_nodes = gate_definitions$Annotation[1:22]
 
-level1_nodes = leaf_nodes$node
+level1_paths = level1Gating(gs, level1_nodes, gate_data, gates, root_node)
 
-# create the list object with batch/sampletype specific gates that we can feed to IMPACD for the permutational gating
-level1_gates = list()
-for (condition_ in unique(design$condition)) {
-  level1_gates[[condition_]] = list()
+# level1_paths should look something like this
+#>      node                  parent                     population
+#> 1  CD49b+ root/Teff+/CD45RO+/TEM+ root/Teff+/CD45RO+/TEM+/CD49b+
+#> 2   ICOS+ root/Teff+/CD45RO+/TEM+  root/Teff+/CD45RO+/TEM+/ICOS+
+#> 3  TIGIT+ root/Teff+/CD45RO+/TEM+ root/Teff+/CD45RO+/TEM+/TIGIT+
+
+```
+
+# Get counts of cell populations for lvl 1 gating
+
+```{r}
+
+counts = gs_pop_get_count_fast(gs, format = "long")
+
+# Add percent parent
+counts$PercentParent = counts$Count/counts$ParentCount*100
+
+# Filter down to populations from stage 1 gating
+counts = dplyr::filter(counts, Population %in% level1_paths$gs_path)
+head(counts)
+
+# should see sample name (.fcs), pop, parent, count, parent count, % parent
+
+```
+
+# Compare counts in lvl 1 nodes by irAE group
+
+```{r}
+
+# Merge the annotation data into the counts frame
+counts = merge(counts, annotation, by.x = "name", by.y = "fcsName")
+
+summary = summarizePopulations(counts)
+stats = generateStatistics(counts, summary, "Control", c("Type 1 Diabetes", "DSRegistry"))
+
+stats$fdr[stats$condition == "DSRegistry"] = p.adjust(stats$pvalue[stats$condition == "DSRegistry"], method = "BH")
+
+stats$fdr[stats$condition == "Type 1 Diabetes"] = p.adjust(stats$pvalue[stats$condition == "Type 1 Diabetes"], method = "BH")
+
+head(stats)
+
+stats = processGatingPaths(stats, max_depth = 1)
+
+head(stats)
+
+```
+
+# Visualize significant hits
+
+```{r}
+
+gg_vp_stage1 = stats %>%
+  ggplot(aes(x = log2Fold, y = -log10(fdr), color = terminal_node)) + 
+  geom_point(alpha=0.7, size=2.5, shape = 19) +
+  facet_grid(. ~ condition, scales = "fixed") + 
+  theme_bw()
   
-  for (batch_ in unique(design$batch)) {
-    level1_gates[[condition_]][[batch_]] = gates[[condition_]][[batch_]][leaf_nodes$idx]
-    names(level1_gates[[condition_]][[batch_]]) = level1_nodes
-  }
-}
+gg_vp_stage1
 
+# pick only populations with significant fdrs in at least one of the experimental groups
+stats_significant = dplyr::filter(stats, fdr < 0.5) 
 
-# Besides the list of gates, we also need a gate "metadata frame". Below is the example from
-# the IMPACD documentation. Since we aren't going to use the metadata for building the gates,
-# we can make most columns NAs, we will just need the logical "gate" column, which, fortunately for us
-# is going to be all FALSE, since the only logical gate (PB) is part of the root path 
-# and was handled outside of IMPACD
-# head(gate_data)
-# name gate_type marker1 marker2 original_gate_position logical_gate transformed_gate_position
-# 1 CD49b+        1D Dy161Di             76.400000000000006        FALSE              c(138.34....
-# 2 CD49b-        1D Dy161Di             76.400000000000006        FALSE              c(138.34....
-gatemetadata = data.frame(name = level1_nodes, 
-                          gate_type = "2D", 
-                          marker1 = NA, 
-                          marker2 = NA, 
-                          original_gate_position = NA, 
-                          logical_gate = FALSE, 
-                          transformed_gate_position = NA)
+# process the gating paths
+counts = processGatingPaths(counts, max_depth = 1)
+
+gg_box_stage1 = counts %>% 
+    dplyr::filter(Population %in% stats_significant$path) %>%
+    ggplot(aes(x = condition, y = PercentParent, fill = condition) ) +
+    geom_boxplot(outlier.shape = NA) +
+    geom_jitter(aes(color = condition), position = position_jitter(0.15)) +
+    theme_bw() +
+    theme(axis.text.x = element_blank()) + 
+    ylab("Percent of parent population") + 
+    facet_wrap(.~ terminal_node, scales = "free", ncol = 3)
+
+gg_box_stage1
 
 ```
 
-# Global CD4+ Tcell gating
-
-```{r root path for global CD4s}
-
-gateList$flowJoName[1:14]
-
-# rootpath
-rootPathGates = gateList[c(1:11,13,14),]
-
-rootPaths = c()
-
-```
-
-#### AIM+: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/AIM+
-
-After validation of the gates, we can now kick off IMPACD!
-```{r set up clean gating sets again}
-gs = getGatingSet(design)
-```
-
-```{r gate the root path}
-# LYM/BC/Live/CD3+dump-/NKT/TCRgd/CD4+/AIM+
-
-# add the AIM+ node, and also update the parent since we are leaving out the Treg gate
-rootPathGates = rbind(rootPathGates, dplyr::filter(gateList, node == "CD4_AIM+"))
-rootPathGates$flowJoName[nrow(rootPathGates)] = paste(rootPathGates$flowJoName[nrow(rootPathGates) - 1], rootPathGates$node[nrow(rootPathGates)], sep = "/")
-rootPathGates$parent[nrow(rootPathGates)] = rootPathGates$flowJoName[nrow(rootPathGates) - 1]
-
-gs = getRootPathTcells(gs, design, gates, rootPathGates)
-
-```
-
-
-```{r gate}
-root_path = rootPathGates$flowJoName[nrow(rootPathGates)]
-
-rootPaths["global_CD4_AIM+"] = root_path
-
-print(root_path)
-
-gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-
-gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-```
-
-#### AIM++: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/AIM++
-```{r gate the root path}
-# Add the AIM++ gate
-
-rootPathGates = dplyr::filter(gateList, node %in% c("CD4_AIM++") )
-rootPathGates$parent[1] = dplyr::filter(gateList, node == "Treg-")$flowJoName[1]
-
-# add just the AIM++ node
-for (condition_ in unique(design$condition)) {
-  for (batch_ in unique(design$batch)) {
-      gs_pop_add(gs[[condition_]][[batch_]], gates[[condition_]][[batch_]][[rootPathGates$idx[1]]], parent = rootPathGates$parent[1])
-  }
-}
-
-# Root path for subsequent gating
-root_path = paste(rootPathGates$parent[1], rootPathGates$node[1], sep = "/")
-
-rootPaths["global_CD4_AIM++"] = root_path
-
-print(root_path)
-```
-
-```{r gate}
-gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-
-gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-```
-
-#### Process counts
-```{r summarize counts and save}
-counts = getRawCounts(gs, design)
-
-# write counts to an Rdata file
-save(counts, file = file.path(rawCountsDir, "CD4_AIM+_AIM++.Rdata"))
-```
-
-```{r process paths}
-
-# combine with design
-counts = merge(dplyr::select(counts, -condition), design, by.x = "name", by.y = "fcsName")
-# rename column name to fcsName
-colnames(counts)[colnames(counts) == "name"] = "fcsName"
-counts = dplyr::filter(counts, control == FALSE)
-
-# extract the populations
-nodes = data.frame(path = unique(counts$Population))
-nodes = processGatingPaths(nodes, max_depth = 3)
-
-
-nodes = assignRoot(nodes, rootPaths)
-
-nodes$compartment = ifelse(str_detect(nodes$path, "AIM"), "antigen_specific", "global") 
-
-nodes$subset = paste("CD4", nodes$rootPath, nodes$pathInCompartment, sep = "/")
-nodes$subset[is.na(nodes$rootPath)] = NA
-nodes$compartment[is.na(nodes$rootPath)] = NA
-
-counts = merge(counts, nodes, by.x = "Population", by.y = "path")
-
-```
-
-
-```{r turn into matrices}
-
-matrices = convertToMatrix(counts, depths = c(1, 2, 3))
-
-# save matrices
-save(matrices, nodes, file = file.path(processedCountsDir, "CD4_AIM+_AIM++.Rdata"))
-
-```
-
-### CD45RO+ cells
-
-```{r set up clean gating sets again}
-gs = getGatingSet(design)
-```
-
-#### CD45RO+: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/CD45RO+
-
-```{r root path for global CD4s}
-gateList$flowJoName[1:14]
-
-# rootpath
-rootPathGates = rbind(gateList[c(1:11,13,14),], dplyr::filter(gateList, node %in% c("CD4_RO+") ) )
-
-```
-
-```{r gate the root path}
-gs = getRootPathTcells(gs, design, gates, rootPathGates)
-
-```
-
-```{r run IMPACD for level 1}
-root_path = rootPathGates$flowJoName[nrow(rootPathGates)]
-
-rootPaths["CD4RO+"] = root_path
-
-gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-```
-
-```{r run full IMPACD on first root path}
-gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-```
-
-#### AIM+: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/CD45RO+/AIM+
-
-```{r gate the root path}
-# We ended up using the AIM++ gate for deciding on antigen specificity, hence AIM+ is commented out
-
-
-# Add the AIM+ gate
-# AIMp_gate = dplyr::filter(gateList, node %in% c("CD4_AIM+") )
-# 
-# # add just the AIM++ node
-# for (condition_ in unique(design$condition)) {
-#   for (batch_ in unique(design$batch)) {
-#       gs_pop_add(gs[[condition_]][[batch_]], gates[[condition_]][[batch_]][[AIMp_gate$idx]], parent = rootPaths["CD4RO+"])
-#   }
-# }
-# 
-# # Root path for subsequent gating
-# root_path = paste(rootPaths["CD4RO+"], AIMp_gate$node, sep = "/")
-# 
-# rootPaths["CD4RO+_AIM+"] = root_path
-# 
-# print(root_path)
-```
-
-```{r run level 1 and IMPACD}
-# gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-
-# gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-```
-
-#### AIM++: LYM/BC/Live/CD3+dump-/NKT-/TCRgd-/CD4+/Treg-/CD45RO+/AIM++
-```{r gate the root path}
-# Add the AIM+ gate
-AIMpp_gate = dplyr::filter(gateList, node %in% c("CD4_AIM++") )
-
-# add just the AIM++ node
-for (condition_ in unique(design$condition)) {
-  for (batch_ in unique(design$batch)) {
-      gs_pop_add(gs[[condition_]][[batch_]], gates[[condition_]][[batch_]][[AIMpp_gate$idx]], parent = rootPaths["CD4RO+"])
-  }
-}
-
-# Root path for subsequent gating
-root_path = paste(rootPaths["CD4RO+"], AIMpp_gate$node, sep = "/")
-
-rootPaths["CD4RO+_AIM++"] = root_path
-
-print(root_path)
-
-
-```
-
-```{r run IMPACD for level 1}
-gs = gateLevel1(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-```
-
-```{r run full IMPACD on first root path}
-gs = gateIMPACD(gs, design, level1_gates, level1_nodes, gatemetadata, root_path)
-```
-
-#### Process counts 
-```{r summarize counts and save}
-counts = getRawCounts(gs, design)
-
-countsOrig = counts
-
-# write counts to an Rdata file
-save(counts, file = file.path(rawCountsDir, "CD4RO+.Rdata"))
-```
-
-```{r process paths}
-
-# combine with design
-counts = merge(dplyr::select(counts, -condition), design, by.x = "name", by.y = "fcsName")
-# rename column name to fcsName
-colnames(counts)[colnames(counts) == "name"] = "fcsName"
-counts = dplyr::filter(counts, control == FALSE)
-
-# extract the populations
-nodes = data.frame(path = unique(counts$Population))
-nodes$compartment = ifelse(str_detect(nodes$path, "AIM"), "antigen_specific", "global") 
-
-# split if up into antigen specific ones and global ones
-nodes_ = dplyr::filter(nodes, compartment == "antigen_specific")
-nodes = dplyr::filter(nodes, compartment != "antigen_specific")
-
-nodes = processGatingPaths(nodes, max_depth = 3)
-nodes_ = processGatingPaths(nodes_, max_depth = 3)
-
-names(rootPaths)
-
-nodes = assignRoot(nodes, rootPaths["CD4RO+"])
-nodes_ = assignRoot(nodes_, rootPaths[c("CD4RO+_AIM+", "CD4RO+_AIM++")])
-# We ended up using only the AIM++ gate for antigen specificity, hence I am going to remove any AIM+ nodes here
-# Note, the counts for AIM+ are still in the original raw data
-nodes_ = dplyr::filter(nodes_, rootPath != "CD4RO+_AIM+")
-
-nodes = rbind(nodes, nodes_)
-
-nodes$subset = paste("CD4RO+", nodes$compartment, nodes$pathInCompartment, sep = "/")
-# remove trailing / from subset
-nodes$subset = str_remove(nodes$subset, "/$")
-
-nodes$subset[is.na(nodes$rootPath)] = NA
-nodes$compartment[is.na(nodes$rootPath)] = NA
-
-
-counts = merge(counts, nodes, by.x = "Population", by.y = "path")
-# this is also going to remove all of the AIM+ nodes that we didn't use
-
-```
-
-#
-
-```{r turn into matrices}
-
-matrices = convertToMatrix(counts, depths = c(0, 1, 2, 3))
-
-matrices[["nodes"]] = nodes
-matrices[["design"]] = design
-
-# save matrices
-save(matrices, file = file.path(processedCountsDir, "CD4RO+.Rdata"))
-
-```
+# Repeat above for stage 2, and stage 3 (after that, diminished returns for new info)
