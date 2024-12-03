@@ -294,6 +294,49 @@ p
 
 ```
 
+# Look at a feature pre/post batch correction
+
+```{r}
+
+plot_data <- flow_data %>%
+  # logit transform, Z-score across patients
+  group_by(sort) %>%
+  mutate(freq = scale(logitNorm(freq))) %>%
+  ungroup() %>%
+  filter(sort %in% c("SCM of Tconv Tcells" ,"CD38hiCD127neg of NN CD8 Tcells", "EM of CD8 Tcells", "intermediate of monocytes"),
+         cleaned_visit_info == "baseline")
+
+p <- plot_data %>%
+  ggplot(aes(x = group, y = freq, fill = group)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ sort, ncol = 2) +
+  geom_jitter(color = "grey", size = 0.5) +
+  labs(x = "", y = "Freq (logit-transformed\n% of parent, Z-scaled)") +
+  scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(size = 8))
+
+p
+
+plot_data <- adjusted_data %>%
+  pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info, cancer_type, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, pneumonitis_irae_including_effusion, gastro_irae), names_to = "sort", values_to = "freq") %>%
+  filter(sort %in% c("SCM.of.Tconv.Tcells" ,"CD38hiCD127neg.of.NN.CD8.Tcells", "EM.of.CD8.Tcells", "intermediate.of.monocytes"),
+         cleaned_visit_info == "baseline")
+
+p <- plot_data %>%
+  ggplot(aes(x = group, y = freq, fill = group)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ sort, ncol = 2) +
+  geom_jitter(color = "grey", size = 0.5) +
+  labs(x = "", y = "Freq (residuals from LM)") +
+  scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(size = 8))
+
+p
+
+```
+
 # Compare how cancer patients' features frequencies correlatations differ in each batch
  - these look different, i.e. batch effects
 
@@ -401,7 +444,7 @@ p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = Batch), size = 2, alpha = 0.8) + 
-  #stat_ellipse(aes(x = PC1, y = PC2, color = Batch), size = 1, linetype = 2) +
+  stat_ellipse(aes(x = PC1, y = PC2, color = Batch), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
   theme(
@@ -551,8 +594,6 @@ feature_cols <- lmer_df[, 17:ncol(lmer_df)] %>%
 na_count_per_feature <- colSums(is.na(feature_cols))
 feature_cols_filtered <- feature_cols[, na_count_per_feature == 0]
 
-
-
 # Function to regress out confounders (batch) for each feature
 regress_out_confounders <- function(freq, batch, patient_id) {
   # Build the linear model and get residuals
@@ -568,9 +609,6 @@ adjusted_features <- as.data.frame(lapply(feature_cols_filtered,
 adjusted_data <- cbind(metadata_cols, adjusted_features)
 
 write.csv(adjusted_data, "../saved_data/batch_effect_removed_data.csv")
-
-adjusted_data <- adjusted_data %>%
-  filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE"))
 
 ```
 
@@ -617,13 +655,15 @@ pcaCorrelations = list()
 
 limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
-# find features contributing most to variation
+# shuffle points to see if center cluster actually batch-9
+set.seed(1)
+pcaData <- pcaData[sample(nrow(pcaData)), ]
 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = Batch), size = 2, alpha = 0.8) + 
-  #stat_ellipse(aes(x = PC1, y = PC2, color = Batch), size = 1, linetype = 2) +
+  stat_ellipse(aes(x = PC1, y = PC2, color = Batch), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
   theme(
@@ -636,11 +676,21 @@ p <- ggplot(data = pcaData) +
   guides(
     color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
   ) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+  labs(x = pcaLabels_[1], y = pcaLabels_[2]) #+
+  #xlim(-1, 1) + ylim(-1, 1)
 
 p
 
 ggsave("../figures/baseline_pca_color_by_batch_batch_regressed_out.png", plot = p, width = 3, height = 3.5)
+
+```
+
+# Filter data for baseline cancer analyses below
+
+```{r}
+
+adjusted_data <- adjusted_data %>%
+  filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE"))
 
 ```
 
@@ -682,7 +732,7 @@ ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_combined.png", p
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) %>% select(stats_df$sort)
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) #%>% select(stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -764,7 +814,7 @@ res
 
 ```
 
-# Plot PCA results for baseline data with batch regressed out, thyroid irAEs specifically (using top features given lack of significant result, not able to separate here though)
+# Plot PCA results for baseline data with batch regressed out, thyroid irAEs specifically
 
 ```{r}
 
