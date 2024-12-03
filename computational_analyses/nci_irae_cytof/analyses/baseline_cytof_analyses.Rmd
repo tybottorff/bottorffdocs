@@ -551,10 +551,12 @@ feature_cols <- lmer_df[, 17:ncol(lmer_df)] %>%
 na_count_per_feature <- colSums(is.na(feature_cols))
 feature_cols_filtered <- feature_cols[, na_count_per_feature == 0]
 
+
+
 # Function to regress out confounders (batch) for each feature
-regress_out_confounders <- function(feature, batch, patient_id) {
+regress_out_confounders <- function(freq, batch, patient_id) {
   # Build the linear model and get residuals
-  model <- lmer(feature ~ batch + (1|patient_id))
+  model <- lmer(freq ~ batch + (1|patient_id))
   residuals(model)
 }
 
@@ -656,13 +658,14 @@ stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj) %>%
-  filter(pval < 0.25)
+  arrange(pval) %>%
+  #head(10) # use for heatmap of combined vs. specific irAE features
+  filter(pval < 0.13) # use for PCA, group comparisons
 
 stats_df
 
-plot_data <- adjusted_data %>% select(group, SCM.of.Tconv.Tcells	) %>%
-  pivot_longer(cols = c(SCM.of.Tconv.Tcells	), names_to = "sort", values_to = "freq")
+plot_data <- adjusted_data %>% select(group, SCM.of.Tconv.Tcells) %>%
+  pivot_longer(cols = c(SCM.of.Tconv.Tcells), names_to = "sort", values_to = "freq")
 
 p <- plot_data %>%
   ggplot(aes(x = group, y = freq, fill = group)) +
@@ -725,11 +728,15 @@ top_contributing_features_PC2 <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
     select(Dim.2)
 
+top_contributing_features_PC3 <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
+
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
-  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
+  geom_point(aes(x = PC1, y = PC3, color = group), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC3, color = group), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
   theme(
@@ -742,7 +749,7 @@ p <- ggplot(data = pcaData) +
   guides(
     color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
   ) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+  labs(x = pcaLabels_[1], y = pcaLabels_[3])
 
 p
 
@@ -771,8 +778,9 @@ thyroid_stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj) %>%
-  filter(padj < 0.2)
+  arrange(pval) %>%
+  #head(10) # use for heatmap of combined vs. specific irAE features
+  filter(pval < 0.016) # use for PCA, group comparisons
 
 thyroid_stats_df
 
@@ -825,6 +833,10 @@ top_contributing_features_PC2_thyroid <- pca_contributions %>%
     arrange(desc(Dim.2)) %>%
     select(Dim.2)
 
+top_contributing_features_PC3_thyroid <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
+
 # switch colors
 pcaData$thyroid_irae <- factor(pcaData$thyroid_irae, levels = c("Thyroid irAE", "No thyroid irAE"))
                                  
@@ -875,7 +887,7 @@ thyroid_including_oor_stats_df <- adjusted_data %>%
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
   arrange(padj) %>%
-  filter(padj < 0.3)
+  filter(pval < 0.04)
 
 thyroid_including_oor_stats_df
 
@@ -978,15 +990,16 @@ skin_stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj) %>%
-  filter(padj < 0.85)
+  arrange(pval) %>%
+  #head(10) # use for heatmap of combined vs. specific irAE features
+  filter(pval < 0.15) # use for PCA, group comparisons
 
 skin_stats_df
 
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1))
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) %>% select(skin_stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1073,17 +1086,6 @@ compVar <- data.frame(PC1 = pcaData$PC1,
 res <- compareGroups(skin_irae ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
 
-# using "top" features, PC1 pops out as differential:
-
-p <- ggplot(pcaData, aes(x = skin_irae, y = PC1, color = skin_irae)) +
-  geom_boxplot() +
-  geom_jitter(width = 0.2, alpha = 0.6) +
-  labs(y = "PC1", x = "")
-
-p
-
-ggsave("../figures/baseline_pc1_boxplot_skin_irae_groups_top_features_batch_regressed_out.png", plot = p, width = 5, height = 3.5)
-
 ```
 
 # Results for baseline data with batch regressed out, pneumonitis specifically
@@ -1100,7 +1102,8 @@ pneumonitis_stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj)
+  arrange(pval) %>%
+  head(3) # use for heatmap of combined vs. specific irAE features
 
 pneumonitis_stats_df
 
@@ -1123,6 +1126,87 @@ p <- plot_data %>%
 p
 
 ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_pneumonitis.png", plot = p, width = 6, height = 4)
+
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
+  mutate(patient_id_simple = row_number())
+
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) %>% select(pneumonitis_stats_df$sort)
+
+#dim(wide_baseline_flow_num_data_confounders_regressed_out)
+
+pca = prcomp(as.data.frame((na.omit(wide_baseline_flow_num_data_confounders_regressed_out)), center=TRUE, scale=FALSE))
+
+var = get_pca_var(pca)
+
+#head(var$coord)
+
+pca_contributions = as.data.frame((var$contrib))
+
+sumPCA = summary(pca)
+
+#summary(pca)
+
+pca_variance = as.data.frame(t(sumPCA$importance))
+pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
+
+pcaScores = as.data.frame(pca$x) %>%
+  mutate(patient_id_simple = row_number())
+
+pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
+
+pcaData = merge(wide_baseline_flow_metadata_confounders_regressed_out, pcaScores, by = "patient_id_simple")
+
+pcas = list()
+pcas[["fullData"]] = pcaData
+
+pcaLabels = list()
+pcaLabels[["fullData"]] = pcaLabels_
+
+pcaCorrelations = list()
+
+limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
+
+# find features contributing most to variation
+
+top_contributing_features_PC1_pneumonitis <- pca_contributions %>%
+    arrange(desc(Dim.1)) %>%
+    select(Dim.1)
+
+top_contributing_features_PC2_pneumonitis <- pca_contributions %>%
+    arrange(desc(Dim.2)) %>%
+    select(Dim.2)
+
+top_contributing_features_PC3_pneumonitis <- pca_contributions %>%
+    arrange(desc(Dim.3)) %>%
+    select(Dim.3)
+
+p <- ggplot(data = pcaData) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = pneumonitis_irae), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC2, color = pneumonitis_irae), size = 1, linetype = 2) +
+  labs(color = "") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),  # Adjust legend text size
+    #legend.title = element_blank(),  # Adjust legend title size
+    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
+    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
+  ) +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+compVar <- data.frame(PC1 = pcaData$PC1,
+                      PC2 = pcaData$PC2,
+                      PC3 = pcaData$PC3,
+                      pneumonitis_irae = pcaData$pneumonitis_irae)
+res <- compareGroups(pneumonitis_irae ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
+res
 
 ```
 
@@ -1160,8 +1244,9 @@ rheumatoid_stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj) %>%
-  filter(padj < 0.2)
+  arrange(pval) %>%
+  #head(10) # use for heatmap of combined vs. specific irAE features
+  filter(pval < 0.02) # use for PCA, group comparisons
 
 rheumatoid_stats_df
 
@@ -1261,26 +1346,26 @@ res
 
 all_features <- unique(c(
   rownames(top_contributing_features_PC1_thyroid),
-  rownames(top_contributing_features_PC1_general),
+  rownames(top_contributing_features_PC1),
   rownames(top_contributing_features_PC1_skin),
   rownames(top_contributing_features_PC1_pneumonitis),
   rownames(top_contributing_features_PC1_rheumatoid_irae),
   rownames(top_contributing_features_PC2_thyroid),
-  rownames(top_contributing_features_PC2_general),
+  rownames(top_contributing_features_PC2),
   rownames(top_contributing_features_PC2_skin),
   rownames(top_contributing_features_PC2_pneumonitis),
   rownames(top_contributing_features_PC2_rheumatoid_irae),
   rownames(top_contributing_features_PC3_thyroid),
-  rownames(top_contributing_features_PC3_general),
+  rownames(top_contributing_features_PC3),
   rownames(top_contributing_features_PC3_skin),
   rownames(top_contributing_features_PC3_pneumonitis),
   rownames(top_contributing_features_PC3_rheumatoid_irae)
   ))
 
 merged_data <- data.frame(
-  PC1_general = top_contributing_features_PC1_general$Dim.1[match(all_features, rownames(top_contributing_features_PC1_general))],
-  PC2_general = top_contributing_features_PC2_general$Dim.2[match(all_features, rownames(top_contributing_features_PC2_general))],
-  PC3_general = top_contributing_features_PC3_general$Dim.3[match(all_features, rownames(top_contributing_features_PC3_general))],
+  PC1_combined = top_contributing_features_PC1$Dim.1[match(all_features, rownames(top_contributing_features_PC1))],
+  PC2_combined = top_contributing_features_PC2$Dim.2[match(all_features, rownames(top_contributing_features_PC2))],
+  PC3_combined = top_contributing_features_PC3$Dim.3[match(all_features, rownames(top_contributing_features_PC3))],
 
   PC1_skin = top_contributing_features_PC1_skin$Dim.1[match(all_features, rownames(top_contributing_features_PC1_skin))],
   PC2_skin = top_contributing_features_PC2_skin$Dim.2[match(all_features, rownames(top_contributing_features_PC2_skin))],
@@ -1314,16 +1399,16 @@ rownames(merged_data) <- gsub("\\.", " ", rownames(merged_data))
 
 # Create a dataframe for column annotations (for irAE types and PC number)
 column_annotations <- data.frame(
-  irAE_type = c(rep("general", 3), rep("skin", 3), rep("thyroid", 3), rep("pneumonitis", 3), rep("rheumatoid", 3)),
+  irAE_type = c(rep("combined", 3), rep("skin", 3), rep("thyroid", 3), rep("pneumonitis", 3), rep("rheumatoid", 3)),
   PC = rep(1:3, 5)  # Each type has PC1, PC2, and PC3
 )
 
 column_annotations$irAE_type <- factor(column_annotations$irAE_type, 
-                                       levels = c("general", "skin", "thyroid", "pneumonitis", "rheumatoid"))
+                                       levels = c("combined", "skin", "thyroid", "pneumonitis", "rheumatoid"))
 
 # Define colors for column annotations
 annotation_colors <- list(
-  irAE_type = c("general" = "black", "skin" = "red", "thyroid" = "blue", "pneumonitis" = "green", "rheumatoid" = "pink"),
+  irAE_type = c("combined" = "black", "skin" = "red", "thyroid" = "blue", "pneumonitis" = "green", "rheumatoid" = "pink"),
   PC = c("1" = "#440154FF", "2" = "#21908CFF", "3" = "#FDE725FF")
 )
 
@@ -1337,21 +1422,28 @@ col_anno <- HeatmapAnnotation(
   col = annotation_colors
 )
 
+# p < 0.1
 highlight_columns <- c(
-  # For general, PC1
-  "PC1_general", 
+  # For general, PCs 1/3
+  "PC1_combined", 
+  "PC3_combined",
   
-  # For thyroid, PC1 and PC3
-  "PC1_thyroid", "PC3_thyroid", 
+  # For thyroid, PCs 1-2
+  "PC1_thyroid",
+  "PC2_thyroid",
   
-  # For skin, PC1 and PC2
-  "PC1_skin", "PC2_skin", 
+  # For skin, PCs 1-2
+  "PC1_skin", 
+  "PC2_skin", 
   
-  # For pneumonitis, PC3
-  "PC3_pneumonitis", 
+  # For pneumonitis, PCs 1-2
+  "PC1_pneumonitis", 
+  "PC2_pneumonitis", 
   
-  # For rheumatoid, all three PCs
-  "PC1_rheumatoid", "PC2_rheumatoid", "PC3_rheumatoid"
+  # For rheumatoid, PCs 1-3
+  "PC1_rheumatoid",
+  "PC2_rheumatoid",
+  "PC3_rheumatoid"
 )
 
 # Create the heatmap with annotations for both the irAE type and PC number
@@ -1365,7 +1457,7 @@ p <- Heatmap(merged_data,
         top_annotation = col_anno,
         heatmap_legend_param = list(title = "Contribution (%)"),
         # Add box annotations around significant columns
-        column_split = ifelse(colnames(merged_data) %in% highlight_columns, "p < 0.05", "p > 0.05"),  # Separate highlighted columns
+        column_split = ifelse(colnames(merged_data) %in% highlight_columns, "p < 0.1", "p > 0.1"),  # Separate highlighted columns
         show_row_names = TRUE)
 
 # Save the heatmap to a PDF file
