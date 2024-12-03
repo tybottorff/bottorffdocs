@@ -72,9 +72,9 @@ adjusted_data
 ```{r}
 
 model_data <- adjusted_data %>%
-  filter(cleaned_visit_info %in% c("1", "2", "3"),
+  filter(cleaned_visit_info %in% c("1", "2", "3", "irAE", "irAE F/U"),
          group %in% c("non-irAE", "irAE/SAE")) %>%
-  mutate(cleaned_visit_info = factor(cleaned_visit_info, levels = c("1", "2", "3")),
+  mutate(cleaned_visit_info = factor(cleaned_visit_info, levels = c("1", "2", "3", "irAE", "irAE F/U")),
          group = factor(group, levels = c("non-irAE", "irAE/SAE")),
          ctcae_grade = if_else(is.na(ctcae_grade), "0", as.character(ctcae_grade)),
          ctcae_grade = factor(ctcae_grade, levels = c("0", "1", "2", "3")),
@@ -149,15 +149,15 @@ significant_pvals <- all_pvals %>%
 
 significant_pvals
 
-# combined irAE: group effect (SCM of Tconv Tcells, padj = 0.015) and interaction effects (CD56bright of NK cells, EM of CD8s, SCM of Tconv)
+# combined irAE: interaction effects (SCM of Tconv Tcells, CD56bright of NK cells, EM of CD8s)
 
-# if looking at pneumonitis instead of combined: some treatment effects and 1 group effect (swMem of Bcells padj = 0.003)
+# if looking at pneumonitis instead of combined: no results
 
-# for skin, some treatment effects and 1 interaction (group-visit 3 for CD56bright of NK cells, padj = 0.036)
+# for skin, some treatment effects and 1 interaction (group-visit 3 for CD56bright of NK cells, padj = 0.048)
 
 # for thyroid, ssome treatment effects, group effects, and interactions, strongest interactions seem to be CD11c+ of Bcells (group-visit2), CM of CD8 Tcells (group-visit3), CCR6+ of NN CD8s (group-visit3), EMRA of CD8s (group-visit3), CD4 of Tcells (group-visit3)
 
-# for rheumatoid, interaction (group-visit3) effects for DN of Tcells (padj = 0.021) and CRTH2+ of NN Tconv Tcells (padj = 0.015)
+# for rheumatoid, interaction (group-visit3) effects for DN of Tcells (padj = 0.04) and CRTH2+ of NN Tconv Tcells (padj = 0.015)
 
 ```
 
