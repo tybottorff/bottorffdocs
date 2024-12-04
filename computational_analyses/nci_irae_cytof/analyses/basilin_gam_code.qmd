@@ -1,0 +1,240 @@
+---
+title: "Generalized Additive Models"
+format: 
+  html:
+    code-overflow: wrap
+editor: visual
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: inline
+author: "Basilin Benson, bbenson@benaroyaresearch.org"
+date: "version `r format(Sys.time(),'%B %d, %Y')`"
+output: 
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, message=FALSE, warning=FALSE,echo=FALSE}
+##Data and figures
+library(tidyverse)
+library(BIGpicture)
+library(RNAetc)
+library(ggdendro)
+library(UpSetR)
+#Addtl figure customization
+library(patchwork)
+library(ggrepel)
+library(scales)
+#Correlation
+library(psych)
+library(corrplot)
+library(cowplot)
+#Linear modeling
+library(limma)
+library(kimma)
+library(UpSetR)
+#Rmd
+library(kableExtra)
+library(gginnards)
+#rrvgo
+library(rrvgo)
+library(mgcv)
+library(lme4)
+
+
+`%notin%` <- Negate(`%in%`)
+select <- dplyr::select
+rename <- dplyr::rename
+filter <- dplyr::filter
+distinct <- dplyr::distinct
+mutate <- dplyr::mutate
+
+
+stim_col_vec <- c("Control"="black","48hr" = "steelblue2","96hr" = "goldenrod3","7Day"="darkolivegreen","10Day"="darkred","No_Treatment" = "#E69F00","IL-13" = "#0072B2","No_Treatment_No_Infection" = "#CC79A7","IL-13_RV16" = "#fc4e2a","No_Treatment_RV16"="aquamarine","T2_High" = "darkred","T2_Low"="black","Severe_EX" = "darkred","No_Severe_EX"="black")
+```
+
+```{r echo=FALSE}
+set.seed(4389)
+```
+
+# What are Generalized Additive Models?
+
+-   Generalized Additive Models (GAMs) are an extension of Generalized Linear Models (GLMs) in such a way that predictor variables can be modeled non-parametrically in addition to linear and polynomial terms for other predictors. Therefore, GAMs are useful when the relationship between the variables are expected to be of a more complex form, not easily fitted by standard linear or non-linear models.
+
+-   In GAM models, the relationship between the response and predictor variables is assumed to be non-linear, and a smoothing function is used to model this relationship. This function is often a spline or a kernel function, which allows for flexibility in the shape of the relationship.
+
+-   Mathematically speaking, GAM is an additive modeling technique where the impact of the predictive variables is captured through smooth functions : ![](https://multithreaded.stitchfix.com/assets/images/blog/fig1.svg)
+
+The formula is written as:
+
+$$ g(E(Y))=α+s1(x1)+...+sp(xp) $$
+
+where Y is the dependent variable (i.e., what we are trying to predict), E(Y) denotes the expected value, and g(Y) denotes the link function that links the expected value to the predictor variables x1,...,xp
+
+The terms s1(x1),...,sp(xp) denote smooth, nonparametric functions
+
+# Why GAM?
+
+-   One of the key advantages of GAM models is that they can identify complex and non-linear relationships between variables, without making strong assumptions about the underlying data distribution. This makes them useful for analyzing data that may not follow a normal distribution or that may have non-linear relationships between variables.
+
+Looking at an example:
+
+The data frame named mcycle, contains measurement of acceleration of a crash-test dummy head during a motorcycle crash. It contains measurements of acceleration (g) in the accel column and time (milliseconds) in the times column
+
+```{r}
+
+mcycle <- MASS::mcycle
+
+# Examine the mcycle data frame
+head(mcycle)
+ggplot(mcycle,aes(x=times,y=accel)) + geom_point() + theme_classic()
+
+
+# Fit a linear model
+lm_mod <- lm(accel ~ times, data = mcycle)
+summary(lm_mod)
+# Visualize the model
+ggplot(mcycle,aes(x=times,y=accel)) + geom_point() + geom_smooth(method = "lm") + theme_classic()
+```
+
+Now lets fit a non-linear model to the same mcycle data using the gam() function from the mgcv package
+
+```{r}
+
+gam_mod <- gam(accel ~ s(times), data = mcycle)
+
+# get summary of the GAM model
+summary(gam_mod)
+# Plot the results
+plot(gam_mod, residuals = TRUE, pch = 1)
+```
+
+# ALI Culture project
+
+Here we are going to try to fit a linear model for IFN alpha gene expression over time(Control(time 0),48hr,96hr,7 Day and 10 Day)
+
+## Data
+
+```{r echo=FALSE}
+
+dat_GAM <- read_csv("../raw_data/basilin_gam_data.csv")
+
+head(dat_GAM %>% select(mean_expression,time,exacerbation))
+
+## We need to have an ordered factor for exacerbation as well. Will explain this later as to why
+# Also factor donor or else we will get an error
+dat_GAM <- dat_GAM %>% mutate(exacerbation_ord = factor(exacerbation,levels=c("No_Severe_EX", "Severe_EX"),ordered=TRUE)) %>% mutate(donorId = factor(donorId))
+```
+
+### Questions 1:
+
+-   Is a linear model the right fit for this data?
+
+Fitting a linear model
+
+```{r}
+
+lm_exace<- lmerTest::lmer(mean_expression~time+(1|donorId),data = dat_GAM)
+summary(lm_exace)
+
+
+ggplot(data = dat_GAM ,aes(x = time ,y=mean_expression)) + geom_point() +
+       geom_smooth(method = "lm",se=TRUE) + theme_classic() 
+
+# ggplot(data = dat_GAM %>% mutate(d_t = paste(donorId,treatment,sep = "_")),aes(x = timePoint ,y=mean_expression)) + geom_point(aes(color=exacerbation)) +
+#      geom_line(aes(group=d_t,color=exacerbation),linetype= 2) + geom_smooth(aes(group=exacerbation,color=exacerbation),method = "lm",formula = y ~ x,se=FALSE,linewidth=2) + theme_classic() + scale_color_manual(values = stim_col_vec)
+
+```
+
+Instead we want to fit a non linear line
+
+```{r}
+ggplot(data = dat_GAM ,aes(x = time ,y=mean_expression)) + geom_point() +
+       geom_smooth(method = "gam",formula = y ~ s(x, k = 5),se=TRUE,linewidth=2) + theme_classic() 
+```
+
+Making a GAM model
+
+Formula: `mean expression ~ s(time)`
+
+```{r}
+model_gam_time <- gam(mean_expression ~ s(time,k=5,bs="cr")  ,
+              data = dat_GAM, method = 'REML')
+summary(model_gam_time)
+plot(model_gam_time,residuals = TRUE, pch = 1)
+```
+
+### Interpretation of the model
+
+First box shows It shows the coefficients for the linear terms in the model, their values, errors, test statistics, and p-values. Asterisks next to the p-values indicate statistical significance.
+
+The second Box explains the smooth term. This is because each smooth has several coefficients - one for each basis function. Instead, the first column reads edf, which stands for effective degrees of freedom. This value represents the complexity of the smooth. An edf of 1 is equivalent to a straight line. An edf of 2 is equivalent to a quadratic curve, and so on, with higher edfs describing more wiggly curves.
+
+```{r}
+summary(model_gam_time)
+# Coeffients of smooth term
+coef(model_gam_time)
+```
+
+### Question 2:
+
+-   What is the effect of History of exacerbation? #Before running the code
+
+#### Time + Exacerbation
+
+Formula: `mean expression ~ exacerbation + s(time)`
+
+```{r}
+model_gam_time_exacerbation <- gam(mean_expression ~ exacerbation + s(time,k=5,bs="cr")  ,
+              data = dat_GAM, method = 'REML')
+summary(model_gam_time_exacerbation)
+plot(model_gam_time_exacerbation,residuals = TRUE, pch = 1)
+
+```
+
+## Here we want to look at a non linear interaction between time and exacerbation
+
+#### Time\*Exacerbation
+
+#### Here we need the factored and ordered exacerbation variable because if we do not we cant get a true interaction effect for time and exacerbation
+
+```{r}
+model_gam_time_exacerbation_interaction <- gam(mean_expression ~ exacerbation + s(time,k=5,bs="cr") + s(time,k=5,bs="cr",by=exacerbation_ord) ,
+              data = dat_GAM, method = 'REML')
+summary(model_gam_time_exacerbation_interaction)
+plot(model_gam_time_exacerbation_interaction,residuals = TRUE, pch = 1)
+```
+
+#### Check the model
+
+```{r}
+# We need some checks to make sure that we have well-fit models
+gam.check(model_gam_time_exacerbation_interaction)
+#Here, small p-values indicate that residuals are not randomly distributed. This often means there are not enough basis functions. 
+
+#On the top-left is a Q-Q plot, which compares the model residuals to a normal distribution. A well-fit model's residuals will be close to a straight line. On bottom left is a histogram of residuals. We would expect this to have a symmetrical bell shape. On top-right is a plot of residual values. These should be evenly distributed around zero. Finally, on the bottom-right is plot of response against fitted values. A perfect model would form a straight line.
+```
+
+## Add a random effect for donor in the model
+
+#### Time\*Exacerbation
+
+```{r}
+model_gam_time_exacerbation_interaction_donor <- gam(mean_expression ~ exacerbation + s(time,k=5,bs="cr") + s(time,k=5,bs="cr",by=exacerbation_ord) +s(donorId,bs="re"),
+              data = dat_GAM, method = 'REML')
+summary(model_gam_time_exacerbation_interaction_donor)
+plot(model_gam_time_exacerbation_interaction_donor,residuals = TRUE, pch = 1)
+```
+
+Plot in ggplot to verify the result
+
+```{r}
+dat_GAM %>% mutate(timePoint = factor(timePoint,levels=c("Control","48hr","96hr","7Day","10Day"))) %>% ggplot(aes(x = timePoint,y = mean_expression,color = exacerbation)) + geom_point() +
+  geom_smooth(aes(group = exacerbation),method = "gam",formula = y ~ s(x,k=5,bs="cr"),se=TRUE) + theme_classic()
+
+```

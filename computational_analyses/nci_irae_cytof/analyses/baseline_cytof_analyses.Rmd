@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+library(kableExtra)
 library(beeswarm)
 library(Matrix)
 library(ggplot2)
@@ -269,74 +270,6 @@ logitNorm <- function(v){
 
 ```
 
-# Look at DP (feature lost in regressing out covars) at baseline
-
-```{r}
-
-plot_data <- flow_data %>%
-  # subset for baseline info
-  filter(cleaned_visit_info == "baseline") %>%
-  dplyr::filter(sort == "DP of Tcells") %>%
-  # logit transform, Z-score across patients
-  mutate(freq = scale(logitNorm(freq)))
-
-p <- plot_data %>%
-  ggplot(aes(x = group, y = freq, fill = group)) +
-  geom_boxplot(outlier.shape = NA) +
-  #facet_wrap(~ sort, ncol = 3) +
-  geom_jitter(color = "grey", size = 0.5) +
-  labs(x = "", y = "DP of Tcells freq (logit-\ntransformed %\nof parent, Z-scored)") +
-  scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
-  theme(axis.text.x = element_blank(),
-        strip.text = element_text(size = 8))
-
-p
-
-```
-
-# Look at a feature pre/post batch correction
-
-```{r}
-
-plot_data <- flow_data %>%
-  # logit transform, Z-score across patients
-  group_by(sort) %>%
-  mutate(freq = scale(logitNorm(freq))) %>%
-  ungroup() %>%
-  filter(sort %in% c("SCM of Tconv Tcells" ,"CD38hiCD127neg of NN CD8 Tcells", "EM of CD8 Tcells", "intermediate of monocytes"),
-         cleaned_visit_info == "baseline")
-
-p <- plot_data %>%
-  ggplot(aes(x = group, y = freq, fill = group)) +
-  geom_boxplot(outlier.shape = NA) +
-  facet_wrap(~ sort, ncol = 2) +
-  geom_jitter(color = "grey", size = 0.5) +
-  labs(x = "", y = "Freq (logit-transformed\n% of parent, Z-scaled)") +
-  scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
-  theme(axis.text.x = element_blank(),
-        strip.text = element_text(size = 8))
-
-p
-
-plot_data <- adjusted_data %>%
-  pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info, cancer_type, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, pneumonitis_irae_including_effusion, gastro_irae), names_to = "sort", values_to = "freq") %>%
-  filter(sort %in% c("SCM.of.Tconv.Tcells" ,"CD38hiCD127neg.of.NN.CD8.Tcells", "EM.of.CD8.Tcells", "intermediate.of.monocytes"),
-         cleaned_visit_info == "baseline")
-
-p <- plot_data %>%
-  ggplot(aes(x = group, y = freq, fill = group)) +
-  geom_boxplot(outlier.shape = NA) +
-  facet_wrap(~ sort, ncol = 2) +
-  geom_jitter(color = "grey", size = 0.5) +
-  labs(x = "", y = "Freq (residuals from LM)") +
-  scale_fill_manual(values = c("Healthy_Control" = "purple", "AID_Patient" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
-  theme(axis.text.x = element_blank(),
-        strip.text = element_text(size = 8))
-
-p
-
-```
-
 # Compare how cancer patients' features frequencies correlatations differ in each batch
  - these look different, i.e. batch effects
 
@@ -590,10 +523,6 @@ metadata_cols <- lmer_df[, 1:16]
 feature_cols <- lmer_df[, 17:ncol(lmer_df)] %>%
   mutate(across(where(is.numeric), ~ scale(.)))
 
-# remove 26/71 features with NAs
-na_count_per_feature <- colSums(is.na(feature_cols))
-feature_cols_filtered <- feature_cols[, na_count_per_feature == 0]
-
 # Function to regress out confounders (batch) for each feature
 regress_out_confounders <- function(freq, batch, patient_id) {
   # Build the linear model and get residuals
@@ -601,12 +530,20 @@ regress_out_confounders <- function(freq, batch, patient_id) {
   residuals(model)
 }
 
-adjusted_features <- as.data.frame(lapply(feature_cols_filtered, 
-                                          regress_out_confounders, 
-                                          batch = lmer_df$Batch,
-                                          patient_id = lmer_df$patient_id))
+adjusted_data <- (lapply(feature_cols,
+                         regress_out_confounders,
+                         batch = lmer_df$Batch,
+                         patient_id = lmer_df$patient_id))
 
-adjusted_data <- cbind(metadata_cols, adjusted_features)
+for (col in colnames(lmer_df[, 17:ncol(lmer_df)])) {
+  not_missing_index <- !is.na(lmer_df[[col]])
+  # replace only non-NA values from original data
+  lmer_df[[col]][not_missing_index] <- adjusted_data[[col]]
+}
+
+adjusted_data <- lmer_df
+
+adjusted_data
 
 write.csv(adjusted_data, "../saved_data/batch_effect_removed_data.csv")
 
@@ -692,6 +629,10 @@ ggsave("../figures/baseline_pca_color_by_batch_batch_regressed_out.png", plot = 
 adjusted_data <- adjusted_data %>%
   filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE"))
 
+# show features with > 5% NAs, remove them when doing PCA
+na_counts <- colSums(is.na(adjusted_data[, 17:ncol(adjusted_data)]))
+na_ridden_features <- names(na_counts[na_counts > 0.05*nrow(adjusted_data)])
+
 ```
 
 # Baseline data with batch regressed out, test combined irAE yes vs. no
@@ -708,31 +649,16 @@ stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(pval) %>%
-  #head(10) # use for heatmap of combined vs. specific irAE features
-  filter(pval < 0.13) # use for PCA, group comparisons
+  arrange(padj) %>%
+  filter(pval < 0.1)
 
 stats_df
-
-plot_data <- adjusted_data %>% select(group, SCM.of.Tconv.Tcells) %>%
-  pivot_longer(cols = c(SCM.of.Tconv.Tcells), names_to = "sort", values_to = "freq")
-
-p <- plot_data %>%
-  ggplot(aes(x = group, y = freq, fill = group)) +
-  geom_boxplot(outlier.shape = NA) +
-  geom_jitter(color = "black", size = 0.5) +
-  labs(x = "", y = "SCM of Tconv\nTcells (residuals)") +
-  theme(axis.text.x = element_blank(),
-        strip.text = element_text(size = 8))
-
-p
-
-ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_combined.png", plot = p, width = 6, height = 4)
 
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) #%>% select(stats_df$sort)
+# instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(stats_df$sort, na_ridden_features))
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -785,8 +711,8 @@ top_contributing_features_PC3 <- pca_contributions %>%
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC3, color = group), size = 2, alpha = 0.8) + 
-  stat_ellipse(aes(x = PC1, y = PC3, color = group), size = 1, linetype = 2) +
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
   theme(
@@ -799,7 +725,7 @@ p <- ggplot(data = pcaData) +
   guides(
     color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
   ) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[3])
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
 
 p
 
@@ -811,6 +737,18 @@ compVar <- data.frame(PC1 = pcaData$PC1,
                       group = pcaData$group)
 res <- compareGroups(group ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
+
+# make pretty PCA contribution tables
+styled_table <- pca_contributions %>%
+  rename(PC1 = Dim.1, PC2 = Dim.2, PC3 = Dim.3) %>%
+  mutate(PC1 = round(PC1, 3), PC2 = round(PC2, 3), PC3 = round(PC3, 3)) %>%
+  kable("html") %>%
+  kable_styling(full_width = FALSE, # Adjust width if needed
+                bootstrap_options = c("striped", "hover", "condensed", "responsive"), # Add styling options
+                position = "left")  # Align table to the left
+
+html_file <- "../figures/combined_irae_pca_contributions_table.html"
+save_kable(styled_table, file = html_file)
 
 ```
 
@@ -830,14 +768,15 @@ thyroid_stats_df <- adjusted_data %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
   arrange(pval) %>%
   #head(10) # use for heatmap of combined vs. specific irAE features
-  filter(pval < 0.016) # use for PCA, group comparisons
+  filter(pval < 0.02) # use for PCA, group comparisons
 
 thyroid_stats_df
 
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) %>% select(thyroid_stats_df$sort)
+# instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(thyroid_stats_df$sort, na_ridden_features))
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -920,6 +859,18 @@ compVar <- data.frame(PC1 = pcaData$PC1,
 res <- compareGroups(thyroid_irae ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
 
+# make pretty PCA contribution tables
+styled_table <- pca_contributions %>%
+  rename(PC1 = Dim.1, PC2 = Dim.2, PC3 = Dim.3) %>%
+  mutate(PC1 = round(PC1, 3), PC2 = round(PC2, 3), PC3 = round(PC3, 3)) %>%
+  kable("html") %>%
+  kable_styling(full_width = FALSE, # Adjust width if needed
+                bootstrap_options = c("striped", "hover", "condensed", "responsive"), # Add styling options
+                position = "left")  # Align table to the left
+
+html_file <- "../figures/thyroid_irae_pca_contributions_table.html"
+save_kable(styled_table, file = html_file)
+
 ```
 
 # Plot PCA results for baseline data with batch regressed out, thyroid irAEs (including OOR) specifically
@@ -944,7 +895,8 @@ thyroid_including_oor_stats_df
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) %>% select(thyroid_including_oor_stats_df$sort)
+# instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(thyroid_including_oor_stats_df$sort, na_ridden_features))
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1042,14 +994,15 @@ skin_stats_df <- adjusted_data %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
   arrange(pval) %>%
   #head(10) # use for heatmap of combined vs. specific irAE features
-  filter(pval < 0.15) # use for PCA, group comparisons
+  filter(pval < 0.1) # use for PCA, group comparisons
 
 skin_stats_df
 
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) %>% select(skin_stats_df$sort)
+# instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(skin_stats_df$sort, na_ridden_features))
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1136,6 +1089,18 @@ compVar <- data.frame(PC1 = pcaData$PC1,
 res <- compareGroups(skin_irae ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
 
+# make pretty PCA contribution tables
+styled_table <- pca_contributions %>%
+  rename(PC1 = Dim.1, PC2 = Dim.2, PC3 = Dim.3) %>%
+  mutate(PC1 = round(PC1, 3), PC2 = round(PC2, 3), PC3 = round(PC3, 3)) %>%
+  kable("html") %>%
+  kable_styling(full_width = FALSE, # Adjust width if needed
+                bootstrap_options = c("striped", "hover", "condensed", "responsive"), # Add styling options
+                position = "left")  # Align table to the left
+
+html_file <- "../figures/skin_irae_pca_contributions_table.html"
+save_kable(styled_table, file = html_file)
+
 ```
 
 # Results for baseline data with batch regressed out, pneumonitis specifically
@@ -1152,7 +1117,7 @@ pneumonitis_stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(pval) %>%
+  arrange(padj) %>%
   head(3) # use for heatmap of combined vs. specific irAE features
 
 pneumonitis_stats_df
@@ -1162,25 +1127,27 @@ adjusted_data$pneumonitis_irae <- factor(
   levels = c("Pneumonitis", "No pneumonitis")
 )
 
-plot_data <- adjusted_data %>% select(pneumonitis_irae, CD56bright.of.NKcells) %>%
-  pivot_longer(cols = c(CD56bright.of.NKcells), names_to = "sort", values_to = "freq")
+plot_data <- adjusted_data %>% select(pneumonitis_irae, `CD56bright of NKcells`, `PD1pos of NKcells`) %>%
+  pivot_longer(cols = c(`CD56bright of NKcells`, `PD1pos of NKcells`), names_to = "sort", values_to = "freq")
 
 p <- plot_data %>%
   ggplot(aes(x = pneumonitis_irae, y = freq, fill = pneumonitis_irae)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(color = "black", size = 0.5) +
-  labs(x = "", y = "CD56bright of NK\ncells (residuals)", fill = "Pneumonitis group") +
+  facet_wrap(~ sort) +
+  labs(x = "", y = "Residuals", fill = "Pneumonitis group") +
   theme(axis.text.x = element_blank(),
         strip.text = element_text(size = 8))
 
 p
 
-ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_pneumonitis.png", plot = p, width = 6, height = 4)
+ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_pneumonitis.png", plot = p, width = 9, height = 4)
 
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) %>% select(pneumonitis_stats_df$sort)
+# instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(pneumonitis_stats_df$sort, na_ridden_features))
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1303,7 +1270,8 @@ rheumatoid_stats_df
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(where(~ sum(is.na(.)) <= 1)) %>% select(rheumatoid_stats_df$sort)
+# instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(rheumatoid_stats_df$sort, na_ridden_features))
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1384,6 +1352,18 @@ compVar <- data.frame(PC1 = pcaData$PC1,
                       rheumatoid_irae = pcaData$rheumatoid_irae)
 res <- compareGroups(rheumatoid_irae ~ PC1 + PC2 + PC3, data = compVar, p.corrected = TRUE, method = 1)
 res
+
+# make pretty PCA contribution tables
+styled_table <- pca_contributions %>%
+  rename(PC1 = Dim.1, PC2 = Dim.2, PC3 = Dim.3) %>%
+  mutate(PC1 = round(PC1, 3), PC2 = round(PC2, 3), PC3 = round(PC3, 3)) %>%
+  kable("html") %>%
+  kable_styling(full_width = FALSE, # Adjust width if needed
+                bootstrap_options = c("striped", "hover", "condensed", "responsive"), # Add styling options
+                position = "left")  # Align table to the left
+
+html_file <- "../figures/rheumatoid_irae_pca_contributions_table.html"
+save_kable(styled_table, file = html_file)
 
 ```
 
@@ -1472,11 +1452,11 @@ col_anno <- HeatmapAnnotation(
   col = annotation_colors
 )
 
-# p < 0.1
+# p < 0.05
 highlight_columns <- c(
-  # For general, PCs 1/3
+  # For general, PCs 1-2
   "PC1_combined", 
-  "PC3_combined",
+  "PC2_combined",
   
   # For thyroid, PCs 1-2
   "PC1_thyroid",
@@ -1486,10 +1466,9 @@ highlight_columns <- c(
   "PC1_skin", 
   "PC2_skin", 
   
-  # For pneumonitis, PCs 1-2
+  # For pneumonitis, PCs 1
   "PC1_pneumonitis", 
-  "PC2_pneumonitis", 
-  
+
   # For rheumatoid, PCs 1-3
   "PC1_rheumatoid",
   "PC2_rheumatoid",
@@ -1507,7 +1486,7 @@ p <- Heatmap(merged_data,
         top_annotation = col_anno,
         heatmap_legend_param = list(title = "Contribution (%)"),
         # Add box annotations around significant columns
-        column_split = ifelse(colnames(merged_data) %in% highlight_columns, "p < 0.1", "p > 0.1"),  # Separate highlighted columns
+        column_split = ifelse(colnames(merged_data) %in% highlight_columns, "p < 0.05", "p > 0.05"),  # Separate highlighted columns
         show_row_names = TRUE)
 
 # Save the heatmap to a PDF file
@@ -1640,11 +1619,11 @@ ggplot(volcano_df, aes(x = abs_diff, y = neg_log10_padj)) +
 # features of interest from literature
 # DN of Bcells"                    "CD8 of Tcells"                   "CD38hiCD127neg of NN CD8 Tcells"
 
-plot_data <- adjusted_data %>% select(group, DN.of.Bcells, CD8.of.Tcells, CD38hiCD127neg.of.NN.CD8.Tcells) %>%
-  pivot_longer(cols = c(DN.of.Bcells, CD8.of.Tcells, CD38hiCD127neg.of.NN.CD8.Tcells), names_to = "sort", values_to = "freq") %>%
+plot_data <- adjusted_data %>% select(group, DN.of.Bcells, CD8.of.Tcells, `CD38hiCD127neg of NN CD8 Tcells`) %>%
+  pivot_longer(cols = c(DN.of.Bcells, CD8.of.Tcells, `CD38hiCD127neg of NN CD8 Tcells`), names_to = "sort", values_to = "freq") %>%
   mutate(sort = case_when(
     sort == "CD8.of.Tcells" ~ "CD8 of Tcells",
-    sort == "CD38hiCD127neg.of.NN.CD8.Tcells" ~ "CD38hiCD127-\nof NN CD8s",
+    sort == "`CD38hiCD127neg of NN CD8 Tcells`" ~ "CD38hiCD127-\nof NN CD8s",
     sort == "DN.of.Bcells" ~ "DN of Bcells"
   ))
 
