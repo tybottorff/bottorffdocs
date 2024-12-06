@@ -805,6 +805,86 @@ save_kable(styled_table, file = html_file)
 
 ```
 
+# Instead of top 4 features for combined irAE, iteratively choose a random set of 4 features (to get at that I'm overfitting to dataset's noise here)
+ - using 75k random sets of size 4, see ~similarly significant results as when choosing top 4 arbitrarily ~1.2% of the time...
+
+```{r}
+
+num_iterations <- 1000  # Number of random subsets
+num_features <- 4       # Number of features in each subset
+results <- list()       # To store results from each iteration
+
+# Random Sampling and PCA Loop
+set.seed(123)  # For reproducibility
+for (i in 1:num_iterations) {
+  # Randomly sample features
+  sampled_features <- sample(colnames(adjusted_data[, 17:ncol(adjusted_data)]), num_features)
+  
+  # Subset data and handle NAs
+  pca_data <- adjusted_data %>%
+    select(all_of(sampled_features)) %>%
+    mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+  
+  # Perform PCA
+  pca <- prcomp(pca_data, center = TRUE, scale. = TRUE)
+  pca_scores <- as.data.frame(pca$x)
+  pca_scores$group <- adjusted_data$group
+  
+  # Test for differences between groups on PCA axes
+  pc1_pval <- if (shapiro.test(pca_scores$PC1)$p.value > 0.05) {
+    t.test(PC1 ~ group, data = pca_scores)$p.value
+  } else {
+    wilcox.test(PC1 ~ group, data = pca_scores)$p.value
+  }
+  
+  pc2_pval <- if (shapiro.test(pca_scores$PC2)$p.value > 0.05) {
+    t.test(PC2 ~ group, data = pca_scores)$p.value
+  } else {
+    wilcox.test(PC2 ~ group, data = pca_scores)$p.value
+  }
+  
+  pc3_pval <- if (shapiro.test(pca_scores$PC3)$p.value > 0.05) {
+    t.test(PC3 ~ group, data = pca_scores)$p.value
+  } else {
+    wilcox.test(PC3 ~ group, data = pca_scores)$p.value
+  }
+  
+  # Record results
+  results[[i]] <- list(
+    features = sampled_features,
+    pc1_pval = pc1_pval,
+    pc2_pval = pc2_pval,
+    pc3_pval = pc3_pval
+  )
+}
+
+# Summarize Results
+results_df <- bind_rows(lapply(results, function(x) {
+  data.frame(
+    features = paste(x$features, collapse = ", "),
+    PC1_pval = x$pc1_pval,
+    PC2_pval = x$pc2_pval,
+    PC3_pval = x$pc3_pval
+  )
+}))
+
+# Filter for significant results
+significant_results <- results_df %>%
+  filter(PC1_pval < 0.05 & PC2_pval < 0.05 | PC1_pval < 0.05 & PC3_pval < 0.05 | PC2_pval < 0.05 & PC3_pval < 0.05)
+
+significant_results
+
+print(nrow(significant_results)/num_iterations*100)
+
+feature_counts <- significant_results %>%
+  separate_rows(features, sep = ", ") %>%
+  count(features, sort = TRUE) %>%
+  mutate(n = n/(4*num_iterations) * 100)
+
+feature_counts
+
+```
+
 # Plot PCA results for baseline data with batch regressed out, thyroid irAEs specifically
 
 ```{r}
