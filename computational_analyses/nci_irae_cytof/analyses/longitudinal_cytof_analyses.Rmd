@@ -90,7 +90,7 @@ fit_gam <- function(data) {
   tryCatch(
     {
       # not using s() for visit as it's not numeric really it's categorical (i.e. visits 2/3 not always at same time from baseline for each patient? or are they?)
-      model <- gam(freq ~ thyroid_irae * cleaned_visit_info + s(patient_id, bs = "re"),
+      model <- gam(freq ~ pneumonitis_irae * cleaned_visit_info + s(patient_id, bs = "re"),
                    data = data, method = 'REML')
       list(summary = summary(model), plot = model)
     },
@@ -142,16 +142,12 @@ all_pvals <- all_pvals %>%
 # focus away from intercept results, and just treatment effects, so focus on group/group-treatment interaction results
 significant_pvals <- all_pvals %>%
   mutate(sort = gsub("\\.", " ", sort)) %>%
-  filter(padj < 0.05) %>%
   select(sort, term, padj) %>%
-  # filter for visits 2-3/group interactions
+  # filter for visits 2-3/group interactions, significant ones
   filter(grepl(":", term),
-         !grepl("infoirAE", term)) %>%
-  arrange(padj) %>%
-  # just take top ones for many thyroid group-visit interaction results
-  #head(10)
-  filter(padj < 0.05) %>%
-  arrange(sort)
+         !grepl("infoirAE", term),
+         padj < 0.05) %>%
+  arrange(padj)
 
 significant_pvals
 

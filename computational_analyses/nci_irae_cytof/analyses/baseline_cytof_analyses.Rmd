@@ -635,6 +635,57 @@ na_ridden_features <- names(na_counts[na_counts > 0.05*nrow(adjusted_data)])
 
 ```
 
+# Look at ratio of activation markers to IRs
+
+```{r}
+
+# tried CD4/8 together and see result but don't see if CD4/8 separately...
+
+# only looks like able to do this for T cells
+activation_features <- c("ICOSpos of Tfh Tconv Tcells", "CXCR3pos of NN Tconv Tcells", 
+                         "CXCR3posCCR6pos of NN Tconv Tcells", "GrzmBpos of NN CD8 Tcells", 
+                         "CD38hiCD127neg of NN CD8 Tcells")
+
+ir_features <- c("PD1pos of gd Tcells", "PD1pos of DN Tcells", "PD1pos of CM Treg Tcells", 
+                 "PD1pos of EM Treg Tcells", "PD1pos of CM CD8 Tcells", 
+                 "PD1pos of EM CD8 Tcells", "PD1pos of EMRA CD8 Tcells", 
+                 "PD1posCD27neg of EMRA CD8 Tcells", "KLRG1posTIGITpos of EM Tconv Tcells", 
+                 "KLRG1posTIGITpos of NN CD8 Tcells")
+
+t_cell_activation_ir_df <- adjusted_data %>%
+  pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info, cancer_type, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, pneumonitis_irae_including_effusion, gastro_irae), names_to = "sort", values_to = "value") %>%
+  filter(sort %in% c(activation_features, ir_features)) %>%
+  mutate(feature_type = ifelse(sort %in% activation_features, "Activation", "IR")) %>%
+  group_by(patient_id, group, cleaned_visit_info, feature_type) %>%
+  summarize(avg_value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(names_from = feature_type, values_from = avg_value) %>%
+  mutate(ratio = Activation / IR)
+
+t_cell_activation_ir_df
+
+ggplot(t_cell_activation_ir_df, aes(x = group, y = ratio, fill = group)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.7) +
+  labs(x = "", y = "T cell activation:IR ratio", fill = "irAE group")
+
+# Test for normality
+shapiro_test <- t_cell_activation_ir_df %>%
+  group_by(group) %>%
+  summarize(p_value = shapiro.test(ratio)$p.value)
+
+# Decide on test based on normality results
+if (all(shapiro_test$p_value > 0.05)) {
+  # Both groups are normal, use t-test
+  stats_result <- t.test(ratio ~ group, data = t_cell_activation_ir_df)
+} else {
+  # At least one group is non-normal, use Wilcoxon test
+  stats_result <- wilcox.test(ratio ~ group, data = t_cell_activation_ir_df)
+}
+
+stats_result$p.value
+
+```
+
 # Baseline data with batch regressed out, test combined irAE yes vs. no
 
 ```{r}
@@ -649,8 +700,9 @@ stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj) %>%
-  filter(pval < 0.1)
+  arrange(pval) %>%
+  filter(!(sort %in% na_ridden_features)) %>%
+  head(4)
 
 stats_df
 
@@ -658,7 +710,7 @@ wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %
   mutate(patient_id_simple = row_number())
 
 # instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(stats_df$sort, na_ridden_features))
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -711,8 +763,8 @@ top_contributing_features_PC3 <- pca_contributions %>%
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
-  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
+  geom_point(aes(x = PC1, y = PC3, color = group), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC3, color = group), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
   theme(
@@ -725,7 +777,7 @@ p <- ggplot(data = pcaData) +
   guides(
     color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
   ) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+  labs(x = pcaLabels_[1], y = pcaLabels_[3])
 
 p
 
@@ -742,6 +794,7 @@ res
 styled_table <- pca_contributions %>%
   rename(PC1 = Dim.1, PC2 = Dim.2, PC3 = Dim.3) %>%
   mutate(PC1 = round(PC1, 3), PC2 = round(PC2, 3), PC3 = round(PC3, 3)) %>%
+  select(PC1, PC3) %>%
   kable("html") %>%
   kable_styling(full_width = FALSE, # Adjust width if needed
                 bootstrap_options = c("striped", "hover", "condensed", "responsive"), # Add styling options
@@ -767,8 +820,8 @@ thyroid_stats_df <- adjusted_data %>%
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
   arrange(pval) %>%
-  #head(10) # use for heatmap of combined vs. specific irAE features
-  filter(pval < 0.02) # use for PCA, group comparisons
+  filter(!(sort %in% na_ridden_features)) %>%
+  head(4)
 
 thyroid_stats_df
 
@@ -776,7 +829,7 @@ wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %
   mutate(patient_id_simple = row_number())
 
 # instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(thyroid_stats_df$sort, na_ridden_features))
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(thyroid_stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -887,8 +940,9 @@ thyroid_including_oor_stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj) %>%
-  filter(pval < 0.04)
+  arrange(pval) %>%
+  filter(!(sort %in% na_ridden_features)) %>%
+  head(4)
 
 thyroid_including_oor_stats_df
 
@@ -896,7 +950,7 @@ wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %
   mutate(patient_id_simple = row_number())
 
 # instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(thyroid_including_oor_stats_df$sort, na_ridden_features))
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(thyroid_including_oor_stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -993,8 +1047,8 @@ skin_stats_df <- adjusted_data %>%
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
   arrange(pval) %>%
-  #head(10) # use for heatmap of combined vs. specific irAE features
-  filter(pval < 0.1) # use for PCA, group comparisons
+  filter(!(sort %in% na_ridden_features)) %>%
+  head(4)
 
 skin_stats_df
 
@@ -1002,7 +1056,7 @@ wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %
   mutate(patient_id_simple = row_number())
 
 # instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(skin_stats_df$sort, na_ridden_features))
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(skin_stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1058,8 +1112,8 @@ pcaData$skin_irae <- factor(pcaData$skin_irae, levels = c("Skin irAE", "No skin 
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC3, color = skin_irae), size = 2, alpha = 0.8) + 
-  stat_ellipse(aes(x = PC1, y = PC3, color = skin_irae), size = 1, linetype = 2) +
+  geom_point(aes(x = PC1, y = PC2, color = skin_irae), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC2, color = skin_irae), size = 1, linetype = 2) +
   #scale_color_manual(values = c("HC" = "purple", "AID" = "blue", "non-irAE" = "black", "irAE/SAE" = "red")) +
   #scale_color_gradient2(low = "blue", mid = "grey", high = "red", midpoint = median(pcaData$age, na.rm = TRUE), limits = c(min(pcaData$age), max(pcaData$age))) +  # Blue-White-Red gradient with median age as white
   #xlim(-limits[1], limits[1]) +
@@ -1076,7 +1130,7 @@ p <- ggplot(data = pcaData) +
   guides(
     color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
   ) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[3])
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
 
 p
 
@@ -1117,8 +1171,9 @@ pneumonitis_stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj) %>%
-  head(3) # use for heatmap of combined vs. specific irAE features
+  arrange(pval) %>%
+  filter(!(sort %in% na_ridden_features)) %>%
+  head(4)
 
 pneumonitis_stats_df
 
@@ -1137,17 +1192,19 @@ p <- plot_data %>%
   facet_wrap(~ sort) +
   labs(x = "", y = "Residuals", fill = "Pneumonitis group") +
   theme(axis.text.x = element_blank(),
-        strip.text = element_text(size = 8))
+        strip.text = element_text(size = 12))
 
 p
 
 ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_pneumonitis.png", plot = p, width = 9, height = 4)
 
+```
+
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
 
 # instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(pneumonitis_stats_df$sort, na_ridden_features))
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(pneumonitis_stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1241,7 +1298,9 @@ pneumonitis_including_effusion_stats_df <- adjusted_data %>%
     .groups = "drop"
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
-  arrange(padj)
+  arrange(pval) %>%
+  filter(!(sort %in% na_ridden_features)) %>%
+  head(4)
 
 pneumonitis_including_effusion_stats_df
 
@@ -1262,8 +1321,8 @@ rheumatoid_stats_df <- adjusted_data %>%
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
   arrange(pval) %>%
-  #head(10) # use for heatmap of combined vs. specific irAE features
-  filter(pval < 0.02) # use for PCA, group comparisons
+  filter(!(sort %in% na_ridden_features)) %>%
+  head(4)
 
 rheumatoid_stats_df
 
@@ -1271,7 +1330,7 @@ wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %
   mutate(patient_id_simple = row_number())
 
 # instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(setdiff(rheumatoid_stats_df$sort, na_ridden_features))
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(rheumatoid_stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -1326,8 +1385,8 @@ pcaData$rheumatoid_irae <- factor(pcaData$rheumatoid_irae, levels = c("Rheumatoi
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = rheumatoid_irae), size = 2, alpha = 0.8) + 
-  stat_ellipse(aes(x = PC1, y = PC2, color = rheumatoid_irae), size = 1, linetype = 2) +
+  geom_point(aes(x = PC1, y = PC3, color = rheumatoid_irae), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC3, color = rheumatoid_irae), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
   theme(
@@ -1340,7 +1399,7 @@ p <- ggplot(data = pcaData) +
   guides(
     color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
   ) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+  labs(x = pcaLabels_[1], y = pcaLabels_[3])
 
 p
 
@@ -1357,6 +1416,7 @@ res
 styled_table <- pca_contributions %>%
   rename(PC1 = Dim.1, PC2 = Dim.2, PC3 = Dim.3) %>%
   mutate(PC1 = round(PC1, 3), PC2 = round(PC2, 3), PC3 = round(PC3, 3)) %>%
+  select(PC1, PC3) %>%
   kable("html") %>%
   kable_styling(full_width = FALSE, # Adjust width if needed
                 bootstrap_options = c("striped", "hover", "condensed", "responsive"), # Add styling options
@@ -1416,21 +1476,47 @@ merged_data <- data.frame(
 
 rownames(merged_data) <- all_features
 
-# Replace any NA values with 0
-#merged_data[is.na(merged_data)] <- 0
+# p < 0.05
+highlight_columns <- c(
+  # For general, PCs 1/3
+  "PC1_combined", 
+  "PC3_combined",
+  
+  # For thyroid, PCs 1-2
+  "PC1_thyroid",
+  "PC2_thyroid",
+  
+  # For skin, PCs 1-2
+  "PC1_skin", 
+  "PC2_skin", 
+  
+  # For pneumonitis, PCs 1-3
+  "PC1_pneumonitis", 
+  "PC2_pneumonitis", 
+  "PC3_pneumonitis", 
+  
+  # For rheumatoid, PCs 1/3
+  "PC1_rheumatoid",
+  "PC3_rheumatoid"
+)
 
-merged_data <- merged_data %>%
+filtered_data <- merged_data[, colnames(merged_data) %in% highlight_columns, drop = FALSE]
+
+# Replace any NA values with 0
+#filtered_data[is.na(filtered_data)] <- 0
+
+filtered_data <- filtered_data %>%
   mutate(MaxValue = apply(., 1, function(x) max(x, na.rm = TRUE))) %>%  # Compute the max value per row, ignoring NA values
   arrange(desc(MaxValue)) %>%   # Order rows by the max value in descending order
   select(-MaxValue)  # Remove the temporary MaxValue column
 
 # Clean up feature names (replace dots with spaces for clarity)
-rownames(merged_data) <- gsub("\\.", " ", rownames(merged_data))
+rownames(filtered_data) <- gsub("\\.", " ", rownames(filtered_data))
 
-# Create a dataframe for column annotations (for irAE types and PC number)
+# Extract irAE_type and PC number from column names
 column_annotations <- data.frame(
-  irAE_type = c(rep("combined", 3), rep("skin", 3), rep("thyroid", 3), rep("pneumonitis", 3), rep("rheumatoid", 3)),
-  PC = rep(1:3, 5)  # Each type has PC1, PC2, and PC3
+  irAE_type = sub("^[^_]+_", "", colnames(filtered_data)),  # Extract everything after the underscore
+  PC = sub("PC", "", sub("_.*", "", colnames(filtered_data)))  # Extract only the number part before the underscore
 )
 
 column_annotations$irAE_type <- factor(column_annotations$irAE_type, 
@@ -1442,8 +1528,8 @@ annotation_colors <- list(
   PC = c("1" = "#440154FF", "2" = "#21908CFF", "3" = "#FDE725FF")
 )
 
-# Ensure column annotations are in the correct order for merged_data
-rownames(column_annotations) <- colnames(merged_data)
+# Ensure column annotations are in the correct order for filtered_data
+rownames(column_annotations) <- colnames(filtered_data)
 
 # Create HeatmapAnnotation for columns with color annotations
 col_anno <- HeatmapAnnotation(
@@ -1452,31 +1538,14 @@ col_anno <- HeatmapAnnotation(
   col = annotation_colors
 )
 
-# p < 0.05
-highlight_columns <- c(
-  # For general, PCs 1-2
-  "PC1_combined", 
-  "PC2_combined",
-  
-  # For thyroid, PCs 1-2
-  "PC1_thyroid",
-  "PC2_thyroid",
-  
-  # For skin, PCs 1-2
-  "PC1_skin", 
-  "PC2_skin", 
-  
-  # For pneumonitis, PCs 1
-  "PC1_pneumonitis", 
+specific_features <- c("naive of Bcells", "swMem of Bcells", "PD1pos of NKcells", "plasmablasts of Bcells", "CCR4pos of NN Tconv Tcells", "CD4 of Tcells")
 
-  # For rheumatoid, PCs 1-3
-  "PC1_rheumatoid",
-  "PC2_rheumatoid",
-  "PC3_rheumatoid"
-)
+row_split <- ifelse(rownames(filtered_data) %in% specific_features, 
+                    "irAE-type-specific", 
+                    "Non-specific")
 
 # Create the heatmap with annotations for both the irAE type and PC number
-p <- Heatmap(merged_data, 
+p <- Heatmap(filtered_data, 
         name = "Contribution (%)", 
         row_names_gp = gpar(fontsize = 10),
         column_names_gp = gpar(fontsize = 10),
@@ -1485,8 +1554,8 @@ p <- Heatmap(merged_data,
         show_column_names = FALSE, 
         top_annotation = col_anno,
         heatmap_legend_param = list(title = "Contribution (%)"),
-        # Add box annotations around significant columns
-        column_split = ifelse(colnames(merged_data) %in% highlight_columns, "p < 0.05", "p > 0.05"),  # Separate highlighted columns
+        # split rows based on irAE-type-specific or not
+        row_split = row_split,
         show_row_names = TRUE)
 
 # Save the heatmap to a PDF file
