@@ -1,9 +1,10 @@
 # High priority P576/AbATE/TN10 TODOs:
  - **paper writing: what do we need new experiments/analyses (on current data) wise? what can we combine P576 with? draft main figs (what we have and also what we could have...), what does Josh have that we could add in? could consider just going as is for a brief communications style journal paper... think about how to combine with Josh's manuscript**
- - **MT SNVs low vs. high freq + R vs. NR at the same time (have done separately before)**
+ - just dive into Basilin's code to be able to dig into scRNA/TCR stuff: use of TCRs to corroborate MT SNV-implied lineage, expect diversity of TCR repertoire to decrease with differentiation
+ - ATAC figure: move F to C? to bridge projects, or to new project bridging fig? MT SNVs: D) check if R/NR different at any var freq, revisit sharing upset plot, try null again to see over/under represented, donors as replicates to test model... F) share 2nd model to emphasize these are potential models
+ - heatmap version of ADT markers' accessibilities in AbATE
+ - scRNAseq figure: clean up subpanel B heatmap (Josh sent data in email), gain functional insights from CD127 DEGs, but not GO....?, look at CD127+ gene set expression in R/NR over visits in Kirsten's P348-2
  - **try custom background for GSEA, try new code/function like here**
- - **MT SNVs from scRNAseq (mitoclone)**
- - **CD127 degs from Josh's public data (CD8+TIGIT-CD127+ vs. CD8+CD127-?)**
  - what's the role of location... all PBMCs but literature describes term Tex as tissue-resident/in peripheral tissue and (some) prog Tex in lymphoid tissue (not as worried here as multiple prog Tex pops some lymphoid some peripheral apparently...), maybe DP CD57+ in blood here heading to peripheral tissue or moving back out idk...
  - high cytotoxicity marker expression could also just mean antigen experience (according to some paper I read)), but Peter doesn't see logic in this...
  - IL7R leads to JAK/STAT so that weak result is expected
@@ -26,17 +27,13 @@
 
 # High priority NCI TODOs:
  - make BRI GitHub
- - **look into public datasets: apply PC1 signatures of mixed features onto public datasets, trickiness will be in finding datasets with same features (Alice W. for help on translating specific features)**
- - **try out IMPACD w/ Stephan help: https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR-Manual-Gating.html to learn transformations, gating... then can try actual IMPACD out https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/Gating.Rmd**
- - **GAMs: ask Holly if visits 2/3 were same time from baseline for all patients, in that case may want to switch to s(visit_info) to deal with it as real numeric...? longitudinal work: do model check to make sure they're good!re-do GAMs using CTCAE grade-based severity (just put grade 0 for no irAE), look at early changes differentiating irAE vs. no irAE. check for correlations b/w CTCAE grade and adjused freqs not just at baseline**
- - regress out age for any comparisons with substantially different age distributions (like T1D vs. RA)
+ - make baseline module of size s n times, how many times significantly separated in PCA?
+ - play around with cutoff for when throwing out features due to NAs for PCA (currently 5%)
+IMPACD: also try other part of gate tree as root? not the nongrans but whatever it was, deal w/ batch effects same way as before
+ - look for more public data to test our results in, already emailed Dr. Yarchoan, focus on finding dataset with similar cohort (cancer/irAE types)
  - look at ratio of IRs to activation markers
+ - regress out age for any comparisons with substantially different age distributions (like T1D vs. RA)
  - try plotting % change from baseline for longitudinal visits rather than absolute % or transformed values?
- - look for distinct immunotypes at baseline and then seeing if there are group enrichments?
- - AID vs. irAE group over ICI PCA: quantify shift in high dimensional PCA-space per patient from baseline to last visit (moving to AID centroid?)
- - investigate effect of time from first cancer treatment (`Previous Cancer Treatment Year(s)`) to first ICI infusion (``Cancer Therapy Agent Start Date`), dates are messy though and inconsistent so lower priority
- - create a box subfolder with these kinds of follow up figs that I haven't yet presented, then can email group sharing that figs are in box? if making progress before next meeting
- - normalize by time to irAE onset from ICI start? low priority because dates are messy/inconsistent
 
 # Key notes
 ## Professional
