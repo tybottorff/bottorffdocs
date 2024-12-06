@@ -3420,6 +3420,16 @@
 # Transcription factor Ikzf1 associates with Foxp3 to repress gene expression in Treg cells and limit autoimmunity and anti-tumor immunity
  - IkE5-deficient Tregs express genes otherwise repressed by Foxp3 upon TCR stimulation (like *Ifng*), Treg-specific IkE5 deletion causes IFNγ overproduction (destabilizes Foxp3 expression and impairs Treg suppressive function leading to autoimmunity and anti-tumor immunity)
  - mechanism: Foxp3-Ikzf1-Ikzf3 complex competes with coactivators (like p300) for binding to target gene loci via chromatin remodeling, so Ikzf1 association with Foxp3 is essential for gene repressive function of Foxp3
+# Transcriptomic analysis of human IL-7 receptor alphalow and high effector memory CD8<sup>+</sup> T cells reveals an age-associated signature linked to influenza vaccine response in older adults
+## Abstract
+ - PBMC transcriptomic profiling
+ - 231 aging signature genes of IL-7Ralpha low EM CD8s corresponded to 15% of age-associated genes (231/1497) reported by meta-analysis on human PBMCs from 15k people having high correlation with chronological age
+ - aging signature genes targets of TFs like MYC, SATB1, BATF (in list of 231 genes)
+## Introduction
+ - altered proportion of naive to memory CD8s during aging (more memory that are CD27<sup>-</sup>CD28<sup>-</sup>CCR7<sup>-</sup>CD57<sup>+</sup>, less naive with aging), they call CD57 a replication senescence marker here...
+ - previously reported that IL7Ralpha<sup>low</sup> EM CD8s are more cytotoxic and pro-inflammatory, cytotoxic part making sense (connecting with AbATE cytotoxicity gradient)
+## Results
+ - 774 DEGs between IL-7Ralpha<sup>low</sup> and high EM CD8s: see NK cell-mediated toxicity up in the low subset (consistent with AbATE cytotoxicity gradient)
 # Transcriptomic profiling of human effector and regulatory T cell subsets identifies predictive population signatures
  - Tregs less transcriptionally diverse than Th cells, likely reflects dominant role of Foxp3 on Treg transcriptome
  - most Tregs develop in thymus upon encountering self-antigen, some Tregs may also develop at barrier sites upon encountering harmless environmental antigens (like skin/intestinal microbiome components)
