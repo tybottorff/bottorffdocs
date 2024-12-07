@@ -27,7 +27,11 @@
 
 # High priority NCI TODOs:
  - make BRI GitHub
- - make baseline module of size s n times, how many times significantly separated in PCA?
+ - use random forest classifiers as an alternative to the feature module/PCA approach here
+ - use data from internal controls in each batch to inform/assist in batch correction (especially as batch 7, fig below, shows more skewing pre-batch correction and is the one batch with no representation from both irAE groups), goal here is to reduce removal of biological signal that may be happening currently
+ - use time since baseline rather than visit designation for the longitudinal analyses
+ - try grouping various specific irAEs together for analyses (like skin/pneumonitis, thyroid/rheumatoid…)
+ - add time to irAE in cohort metadata plot
  - play around with cutoff for when throwing out features due to NAs for PCA (currently 5%)
 IMPACD: also try other part of gate tree as root? not the nongrans but whatever it was, deal w/ batch effects same way as before
  - look for more public data to test our results in, already emailed Dr. Yarchoan, focus on finding dataset with similar cohort (cancer/irAE types)
@@ -68,6 +72,7 @@ IMPACD: also try other part of gate tree as root? not the nongrans but whatever 
  - AbATE is 6 month timepoint, peak response is 3 months
  - maybe teplizumab hits all sorts in R and not all sorts in NR, but then would expect higher MT SNV counts in R vs. NR which we don't really see
 ## Computational
+ - box is mountable, ask IT if help needed
  - camelCase not snake_case
  - **draw ellipses around clusters/groups for all PCAs/UMAPs**
  - **limma > DESeq2 for less false positives, for non-simple models I should move out of Seurat/Diffbind (take normalized data) and into limma separately**
