@@ -57,6 +57,15 @@ theme_set(
 ```{r}
 
 flow_data <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
+  # deal with multiple dates in a column
+  mutate(
+    # Handle cases where the infusion date might not be in a standard format
+    `Infusion date` = case_when(
+      grepl(",", `Infusion date`) ~ sapply(strsplit(`Infusion date`, ","), function(x) x[1]), # Take the first date if there are multiple
+      TRUE ~ `Infusion date`  # Keep the date as is if there's only one
+    ),
+    # Convert to Date format using lubridate or as.Date (handle potential non-standard date formats)
+    `Infusion date` = as.numeric(`Infusion date`)) %>%
   # CTCAE Grade (Highest) is the column for (ir)AE grade
   rename(patient_id = `Subject ID`, ctcae_grade = `CTCAE Grade (Highest)`, group = `General irAE Classification`, cancer_type = `Primary Cancer Type`, age = `Age at Draw`, thyroid_cat = `Thyroid Category (JB)`, data_source = `Data Source`, ici_drug = `Immune Checkpoint Inhibitor`) %>%
   mutate(`Infusion date` = as.Date(as.numeric(`Infusion date`), origin = "1899-12-30"),
@@ -125,7 +134,14 @@ flow_data <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
   ) %>%
   dplyr::filter(freq > 0) %>%
   # get rid of technically variable features
-  dplyr::filter(!(sort %in% c("granulocytes of live", "PD1pos of DN Bcells", "PD1pos of naive Bcells", "PD1pos of swMem Bcells", "PD1pos of unswMem Bcells", "basophils of nonGrans", "EMRA of Tconv Tcells", "CXCR6pos of NN CD8 Tcells", "CXCR6posGrzmBpos of NN CD8 Tcells")))
+  dplyr::filter(!(sort %in% c("granulocytes of live", "PD1pos of DN Bcells", "PD1pos of naive Bcells", "PD1pos of swMem Bcells", "PD1pos of unswMem Bcells", "basophils of nonGrans", "EMRA of Tconv Tcells", "CXCR6pos of NN CD8 Tcells", "CXCR6posGrzmBpos of NN CD8 Tcells"))) %>%
+  # manually fix a few days_to_irae values that were wonky (besides negative ones that are ignored nicely)
+  mutate(days_to_irae = case_when(
+    patient_id == "LinsleyLab017509" ~ 42,
+    patient_id == "LinsleyLab479010" ~ 70,
+    patient_id == "LinsleyLab722615" ~ 50,
+    TRUE ~ days_to_irae
+  ))
     
 # only 2 patients with serious (grade > 2) irAEs
 
@@ -138,6 +154,8 @@ flow_data
 ```{r}
 
 cohort_metadata_long <- flow_data %>%
+  # fix thyroid test dates as irAE dates for no irAE group
+  mutate(days_to_irae = if_else(group == "non-irAE", NA, days_to_irae)) %>%
   # subset for cancer patients
   filter(group %in% c("non-irAE", "irAE/SAE")) %>%
   # ignore pivoted freq/longitudinal info, just get 1 metadata row/patient
@@ -154,11 +172,10 @@ cohort_metadata_long <- flow_data %>%
     irae_ex = case_when(
       grepl("rash|itch|skin|dermatitis|Pruritis|Pruritus", irae_ex, ignore.case = TRUE) ~ "Skin",
       grepl("Thyroid", irae_ex, ignore.case = TRUE) ~ "Thyroid",
-      grepl("Arthritis", irae_ex, ignore.case = TRUE) ~ "Arthritis",
+      grepl("Arthritis|Arthalgia|Arthralgia", irae_ex, ignore.case = TRUE) ~ "Rheumatoid",
       grepl("Encephalitis", irae_ex, ignore.case = TRUE) ~ "Encephalitis",
       grepl("Pericardial/Pleural effusion", irae_ex, ignore.case = TRUE) ~ "Pericardial/pleural effusion",
       grepl("edema", irae_ex, ignore.case = TRUE) ~ "Edema",
-      grepl("Arthalgia|Arthralgia", irae_ex, ignore.case = TRUE) ~ "Arthralgia",
       grepl("Fatigue", irae_ex, ignore.case = TRUE) ~ "Fatigue",      
       grepl("esophagitis", irae_ex, ignore.case = TRUE) ~ "Esophagitis",
       grepl("pneumonitis", irae_ex, ignore.case = TRUE) ~ "Pneumonitis",
@@ -179,7 +196,7 @@ cohort_metadata_long <- flow_data %>%
   slice(1) %>%
   ungroup() %>%
   # gather variables into long format for plotting
-  pivot_longer(cols = c(cancer_type, irae_ex, ctcae_grade, data_source, ici_drug),
+  pivot_longer(cols = c(cancer_type, irae_ex, ctcae_grade, data_source, ici_drug, days_to_irae),
                names_to = "variable", values_to = "value") %>%
   dplyr::filter(!(is.na(value))) %>%
   mutate(variable = case_when(
@@ -188,25 +205,38 @@ cohort_metadata_long <- flow_data %>%
     variable == "ctcae_grade" ~ "CTCAE\ngrade",
     variable == "data_source" ~ "Data\nsource",
     variable == "ici_drug" ~ "ICI\ndrug",
+    variable == "days_to_irae" ~ "Days\nto irAE",
     TRUE ~ variable
+  ))
+
+cohort_metadata_long <- cohort_metadata_long %>%
+  mutate(value = case_when(
+    #variable == "Cancer\ntype" ~ factor(value, levels = c("Type1", "Type2", "Type3")),  # Replace with actual cancer types
+    #variable == "Data\nsource" ~ factor(value, levels = c("Source1", "Source2")),  # Replace with actual data sources
+    #variable == "ICI\ndrug" ~ factor(value, levels = c("Drug1", "Drug2", "Drug3")),  # Replace with actual ICI drugs
+    #variable == "irAE\ntype" ~ factor(value, levels = c("Skin", "Thyroid", "Arthritis", "Encephalitis", "Fatigue", "Edema", "Nausea", "AKI")),  # Replace with actual irAE types
+    variable == "Days\nto irAE" ~ factor(value, levels = sort(unique(as.numeric(value)))),  # Keep numeric sorted for 'Days to irAE'
+    #variable == "CTCAE\ngrade" ~ factor(value, levels = c("Grade1", "Grade2", "Grade3", "Grade4")),  # Replace with actual CTCAE grades
+    TRUE ~ factor(value)  # Default case for other variables
   ))
 
 cohort_metadata_long$variable <- factor(
   cohort_metadata_long$variable, 
-  levels = c("Data\nsource", "Cancer\ntype", "ICI\ndrug", "irAE\ntype", "CTCAE\ngrade")
+  levels = c("Data\nsource", "Cancer\ntype", "ICI\ndrug", "irAE\ntype", "CTCAE\ngrade", "Days\nto irAE")
 )
 
-p <- ggplot(cohort_metadata_long, aes(x = patient_id, y = value)) +
-  geom_point(aes(color = group), size = 2) +
+p <- ggplot(cohort_metadata_long %>% filter(variable != "Data\nsource"), aes(x = patient_id, y = value)) +
+  geom_point(aes(color = group), size = 1.25) +
   facet_grid(variable ~ group, scales = "free", space = "free_y") +
   labs(x = "Patient ID", y = "") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6),
+  theme(axis.text.x = element_blank(),
         strip.text = element_text(size = 10),
-        legend.text = element_text(size = 12))
+        legend.text = element_text(size = 12),
+        axis.text.y = element_text(size = 11))
 
 p
 
-ggsave("../figures/metadata.png", p, width = 10, height = 9)
+ggsave("../figures/metadata.png", p, width = 7, height = 9)
 
 ```
 
