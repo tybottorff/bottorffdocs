@@ -32,6 +32,8 @@ library(purrr)
 library(compareGroups)
 library(reshape2)
 library(limma)
+library(pyRforest)
+library(reticulate)
 
 ```
 
@@ -622,8 +624,6 @@ pcaCorrelations = list()
 
 limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 
-# shuffle points to see if center cluster actually batch-9
-set.seed(1)
 pcaData <- pcaData[sample(nrow(pcaData)), ]
 
 p <- ggplot(data = pcaData) +
@@ -740,7 +740,8 @@ wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %
   mutate(patient_id_simple = row_number())
 
 # instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(stats_df$sort)
+# instead of using stats df-way of selecting top features, take them from random forest analysis: SCM of Tconv Tcells, DN of Tcells, EM of CD8s, Tcells of nonGrans
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(`SCM of Tconv Tcells`, `DN of Tcells`, `EM of CD8 Tcells`)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -793,8 +794,8 @@ top_contributing_features_PC3 <- pca_contributions %>%
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 1, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC3, color = group), size = 2, alpha = 0.8) + 
-  stat_ellipse(aes(x = PC1, y = PC3, color = group), size = 1, linetype = 2) +
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
   theme(
@@ -807,7 +808,7 @@ p <- ggplot(data = pcaData) +
   guides(
     color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
   ) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[3])
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
 
 p
 
@@ -824,7 +825,7 @@ res
 styled_table <- pca_contributions %>%
   rename(PC1 = Dim.1, PC2 = Dim.2, PC3 = Dim.3) %>%
   mutate(PC1 = round(PC1, 3), PC2 = round(PC2, 3), PC3 = round(PC3, 3)) %>%
-  select(PC1, PC3) %>%
+  select(PC1, PC2) %>%
   kable("html") %>%
   kable_styling(full_width = FALSE, # Adjust width if needed
                 bootstrap_options = c("striped", "hover", "condensed", "responsive"), # Add styling options
@@ -1307,8 +1308,6 @@ p <- plot_data %>%
 p
 
 ggsave("../figures/batch_regressed_out_residuals_by_feature_hit_pneumonitis.png", plot = p, width = 9, height = 4)
-
-```
 
 wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %>%
   mutate(patient_id_simple = row_number())
@@ -2035,5 +2034,360 @@ ggplot(predicted_scores_with_metadata_long, aes(x = immunotype, y = score, color
   geom_boxplot(alpha = 0.5, outlier.shape = NA) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) +
   labs(x = "", y = "Predicted score based\non HC/AID data")
+
+```
+
+# Try random forest models instead of module approach, setup input data, preprocess
+
+```{r}
+
+# terminal
+# conda activate pyRforest-conda
+
+#reticulate::use_condaenv("pyRforest-conda", conda = '/Users/tybottorff/miniconda3/bin/conda', required = TRUE)
+
+# data needs to be in list of 4 tibbles
+# training, validation, and test tibbles (splits of data)
+# each with columns: identifier (unique identifier for each row, sample/patient_id), target (non-continuous outcome/target to be predicted but coded as a numeric like 0 or 1 for yes/no group, so combined irAE group yes vs. no), rest of columns are just each feature and then values for those columns are freqs
+
+# 4th tibble is identifier, target, and a new and target_categorical which is the pretty name for numerical target values
+
+# split data ~ 60-80% training, rest split validation/testing
+
+forest_df <- adjusted_data %>%
+  rename(identifier = patient_id) %>%
+  mutate(target = case_when(
+           group == "non-irAE" ~ 0,
+           group == "irAE/SAE" ~ 1
+         )) %>%
+  # deal with NAs with simple method first (impute with mean when < 5% values are NA, otherwise remove feature)
+  select(-c(ctcae_grade, group, cancer_type, cleaned_visit_info, Batch, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, thyroid_irae, skin_irae, pneumonitis_irae, pneumonitis_irae_including_effusion, gastro_irae, rheumatoid_irae, na_ridden_features)) %>%
+  select(identifier, target, everything()) %>%
+  mutate(across(-c(identifier, target), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+# split data
+set.seed(123)
+total_rows <- nrow(forest_df)
+
+train_index <- sample(1:total_rows, size = 0.6 * total_rows)
+remaining <- setdiff(1:total_rows, train_index)
+val_index <- sample(remaining, size = 0.5 * length(remaining))  # 50% of remaining for validation
+test_index <- setdiff(remaining, val_index)
+
+training_df <- forest_df[train_index, ]
+validation_df <- forest_df[val_index, ]
+test_df <- forest_df[test_index, ]
+
+target_categories <- forest_df %>%
+  select(identifier, target) %>%
+  mutate(target_categorical = case_when(
+    target == 0 ~ "non-irAE",
+    target == 1 ~ "irAE/SAE"
+  ))
+  
+# create input object
+cytof_data_for_forest <- list(
+training_data = as_tibble(training_df),
+validation_data = as_tibble(validation_df),
+testing_data = as_tibble(test_df),
+target_categories = as_tibble(target_categories)
+)
+
+# preprocess data
+processed_training_data <- pyRforest::create_feature_matrix(
+dataset = cytof_data_for_forest$training_data,
+set_type = "training"
+)
+processed_validation_data <- pyRforest::create_feature_matrix(
+dataset = cytof_data_for_forest$validation_data,
+set_type = "validation"
+)
+processed_testing_data <- pyRforest::create_feature_matrix(
+dataset = cytof_data_for_forest$testing_data,
+set_type = "testing"
+)
+
+```
+
+# Model tuning, fit/evaluate
+
+```{r}
+
+# edit some params manually given initial concerns of overfitting (test performance < training performance)
+# maybe max_depth was too large (15), and min_samples_leaf too small (10), Ls here mean R integer?
+custom_parameter_grid <- list(
+  bootstrap = list(TRUE),
+  class_weight = list(NULL),
+  max_depth = list(5L, 20L, NULL),
+  n_estimators = as.integer(seq(10, 90, 10)),
+  max_features = list("sqrt", 0.2),
+  criterion = list("gini"),
+  warm_start = list(FALSE),
+  min_samples_leaf = list(1, 50L),
+  min_samples_split = list(2L, 200L)
+)
+
+# model tuning
+# hyperparam tuning, training classifier
+tuning_results <- pyRforest::tune_and_train_rf_model_grid(
+X = processed_training_data$X_training_mat,
+y = processed_training_data$y_training_vector,
+cv_folds = 5,
+scoring = 'roc_auc', #use 'roc_auc_ovr' for multiclass targets
+seed = 123,
+param_grid = NULL,
+n_jobs = 1,
+n_cores =-2
+)
+
+print(tuning_results$bayes_search$best_params_)
+print(tuning_results$bayes_search$best_score_)
+best_params<-tuning_results$best_params
+
+best_params
+
+```
+```{r}
+
+
+# fit/evaluate model
+
+fitting_results <- pyRforest::fit_and_evaluate_rf(
+best_params = tuning_results$best_params,
+X_train = processed_training_data$X_training_mat,
+y_train = processed_training_data$y_training_vector,
+X_val = processed_validation_data$X_validation_mat,
+y_val = processed_validation_data$y_validation_vector)
+
+print(fitting_results)
+
+fitting_results_testing <- pyRforest::fit_and_evaluate_rf(
+best_params = tuning_results$best_params,
+X_train = processed_training_data$X_training_mat,
+y_train = processed_training_data$y_training_vector,
+X_val = processed_testing_data$X_testing_mat,
+y_val = processed_testing_data$y_testing_vector
+)
+
+print(fitting_results_testing)
+
+```
+
+# Permute model, get feature importances, stats
+
+```{r}
+
+# permute model, get feature importances
+
+feat_importances <- pyRforest::calculate_feature_importances(
+model = fitting_results$model,
+X_train = processed_training_data$X_training_mat,
+y_train = processed_training_data$y_training_vector,
+n_permutations = 1000
+)
+
+print(feat_importances$top_features)
+
+# get stats for important features
+# quantiles of permuted feature importance scores
+quantile_data <- pyRforest::calculate_quantiles(
+truevalues = feat_importances$true_importances,
+permutedvalues = feat_importances$permuted_importances,
+alpha = 0.05
+)
+
+# pvals for feature set
+pvalue_set <- pyRforest::calculate_full_set_pvalue(
+permutedvalues = feat_importances$permuted_importances,
+quantiledata = quantile_data
+)
+
+# pvals for each rank
+
+pvalues_ranks <- pyRforest::calculate_ranked_based_pvalues(
+truevalues = feat_importances$true_importances,
+permutedvalues = feat_importances$permuted_importances,
+alpha = 0.05
+)
+print(pvalues_ranks)
+
+fiplot_full <- pyRforest::generate_fi_rank_plot(
+permutedvalues = feat_importances$permuted_importances,
+quantiledata = quantile_data,
+xlimitmin = 1,
+xlimitmax = 10,
+ylimitmin=-5,
+ylimitmax = 0,
+labelhorizontaladjust =-0.05,
+labelverticaladjust = 1.5,
+focusedView = FALSE,
+logOn = TRUE
+)
+
+print(fiplot_full)
+
+```
+
+# Re-do but now for thyroid irAE comparison
+
+```{r}
+
+forest_df <- adjusted_data %>%
+  rename(identifier = patient_id) %>%
+  mutate(target = case_when(
+           thyroid_irae == "No thyroid irAE" ~ 0,
+           group == "Thyroid irAE" ~ 1
+         )) %>%
+  # deal with NAs with simple method first (impute with mean when < 5% values are NA, otherwise remove feature)
+  select(-c(ctcae_grade, group, cancer_type, cleaned_visit_info, Batch, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, thyroid_irae, skin_irae, pneumonitis_irae, pneumonitis_irae_including_effusion, gastro_irae, rheumatoid_irae, na_ridden_features)) %>%
+  select(identifier, target, everything()) %>%
+  mutate(across(-c(identifier, target), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+# split data
+set.seed(123)
+total_rows <- nrow(forest_df)
+
+train_index <- sample(1:total_rows, size = 0.6 * total_rows)
+remaining <- setdiff(1:total_rows, train_index)
+val_index <- sample(remaining, size = 0.5 * length(remaining))  # 50% of remaining for validation
+test_index <- setdiff(remaining, val_index)
+
+training_df <- forest_df[train_index, ]
+validation_df <- forest_df[val_index, ]
+test_df <- forest_df[test_index, ]
+
+target_categories <- forest_df %>%
+  select(identifier, target) %>%
+  mutate(target_categorical = case_when(
+    target == 0 ~ "No thyroid irAE",
+    target == 1 ~ "Thyroid irAE"
+  ))
+  
+# create input object
+cytof_data_for_forest <- list(
+training_data = as_tibble(training_df),
+validation_data = as_tibble(validation_df),
+testing_data = as_tibble(test_df),
+target_categories = as_tibble(target_categories)
+)
+
+# preprocess data
+processed_training_data <- pyRforest::create_feature_matrix(
+dataset = cytof_data_for_forest$training_data,
+set_type = "training"
+)
+processed_validation_data <- pyRforest::create_feature_matrix(
+dataset = cytof_data_for_forest$validation_data,
+set_type = "validation"
+)
+processed_testing_data <- pyRforest::create_feature_matrix(
+dataset = cytof_data_for_forest$testing_data,
+set_type = "testing"
+)
+
+# Model tuning, fit/evaluate
+
+# edit some params manually given initial concerns of overfitting (test performance < training performance)
+# maybe max_depth was too large (15), and min_samples_leaf too small (10), Ls here mean R integer?
+custom_parameter_grid <- list(
+  bootstrap = list(TRUE),
+  class_weight = list(NULL),
+  max_depth = list(5L, 20L, NULL),
+  n_estimators = as.integer(seq(10, 90, 10)),
+  max_features = list("sqrt", 0.2),
+  criterion = list("gini"),
+  warm_start = list(FALSE),
+  min_samples_leaf = list(1, 50L),
+  min_samples_split = list(2L, 200L)
+)
+
+# model tuning
+# hyperparam tuning, training classifier
+tuning_results <- pyRforest::tune_and_train_rf_model_grid(
+X = processed_training_data$X_training_mat,
+y = processed_training_data$y_training_vector,
+cv_folds = 5,
+scoring = 'roc_auc', #use 'roc_auc_ovr' for multiclass targets
+seed = 123,
+param_grid = NULL,
+n_jobs = 1,
+n_cores =-2
+)
+
+print(tuning_results$bayes_search$best_params_)
+print(tuning_results$bayes_search$best_score_)
+best_params<-tuning_results$best_params
+
+best_params
+
+# fit/evaluate model
+
+fitting_results <- pyRforest::fit_and_evaluate_rf(
+best_params = tuning_results$best_params,
+X_train = processed_training_data$X_training_mat,
+y_train = processed_training_data$y_training_vector,
+X_val = processed_validation_data$X_validation_mat,
+y_val = processed_validation_data$y_validation_vector)
+
+print(fitting_results)
+
+fitting_results_testing <- pyRforest::fit_and_evaluate_rf(
+best_params = tuning_results$best_params,
+X_train = processed_training_data$X_training_mat,
+y_train = processed_training_data$y_training_vector,
+X_val = processed_testing_data$X_testing_mat,
+y_val = processed_testing_data$y_testing_vector
+)
+
+print(fitting_results_testing)
+
+# Permute model, get feature importances, stats
+
+feat_importances <- pyRforest::calculate_feature_importances(
+model = fitting_results$model,
+X_train = processed_training_data$X_training_mat,
+y_train = processed_training_data$y_training_vector,
+n_permutations = 1000
+)
+
+print(feat_importances$top_features)
+
+# get stats for important features
+# quantiles of permuted feature importance scores
+quantile_data <- pyRforest::calculate_quantiles(
+truevalues = feat_importances$true_importances,
+permutedvalues = feat_importances$permuted_importances,
+alpha = 0.05
+)
+
+# pvals for feature set
+pvalue_set <- pyRforest::calculate_full_set_pvalue(
+permutedvalues = feat_importances$permuted_importances,
+quantiledata = quantile_data
+)
+
+# pvals for each rank
+
+pvalues_ranks <- pyRforest::calculate_ranked_based_pvalues(
+truevalues = feat_importances$true_importances,
+permutedvalues = feat_importances$permuted_importances,
+alpha = 0.05
+)
+print(pvalues_ranks)
+
+fiplot_full <- pyRforest::generate_fi_rank_plot(
+permutedvalues = feat_importances$permuted_importances,
+quantiledata = quantile_data,
+xlimitmin = 1,
+xlimitmax = 10,
+ylimitmin=-5,
+ylimitmax = 0,
+labelhorizontaladjust =-0.05,
+labelverticaladjust = 1.5,
+focusedView = FALSE,
+logOn = TRUE
+)
+
+print(fiplot_full)
 
 ```
