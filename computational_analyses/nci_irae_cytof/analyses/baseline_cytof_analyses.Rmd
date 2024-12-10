@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+library(ggbreak)
+library(cowplot)
 library(kableExtra)
 library(beeswarm)
 library(Matrix)
@@ -159,7 +161,7 @@ cohort_metadata_long <- flow_data %>%
   # fix thyroid test dates as irAE dates for no irAE group
   mutate(days_to_irae = if_else(group == "non-irAE", NA, days_to_irae)) %>%
   # subset for cancer patients
-  filter(group %in% c("non-irAE", "irAE/SAE")) %>%
+  dplyr::filter(group %in% c("non-irAE", "irAE/SAE")) %>%
   # ignore pivoted freq/longitudinal info, just get 1 metadata row/patient
   group_by(patient_id) %>%
   slice(1) %>%
@@ -227,7 +229,12 @@ cohort_metadata_long$variable <- factor(
   levels = c("Data\nsource", "Cancer\ntype", "ICI\ndrug", "irAE\ntype", "CTCAE\ngrade", "Days\nto irAE")
 )
 
-p <- ggplot(cohort_metadata_long %>% filter(variable != "Data\nsource"), aes(x = patient_id, y = value)) +
+# just split into 2 plots with issues with some numeric and some character
+
+cohort_metadata_long_char <- cohort_metadata_long %>%
+  dplyr::filter(variable != "Days\nto irAE")
+
+p <- ggplot(cohort_metadata_long_char %>% dplyr::filter(!(variable %in% c("Data\nsource"))), aes(x = patient_id, y = value)) +
   geom_point(aes(color = group), size = 1.25) +
   facet_grid(variable ~ group, scales = "free", space = "free_y") +
   labs(x = "Patient ID", y = "") +
@@ -238,7 +245,47 @@ p <- ggplot(cohort_metadata_long %>% filter(variable != "Data\nsource"), aes(x =
 
 p
 
-ggsave("../figures/metadata.png", p, width = 7, height = 9)
+ggsave("../figures/metadata_char.svg", p, width = 7, height = 6)
+
+cohort_metadata_long_num <- cohort_metadata_long %>%
+  dplyr::filter(variable == "Days\nto irAE") %>%
+  mutate(value = as.numeric(as.character(value))) %>%
+  select(patient_id, group, variable, value)
+
+missing_rows <- data.frame(
+  patient_id = c("236490", "575762"),
+  group = c("irAE/SAE", "irAE/SAE"),
+  variable = "Days\nto irAE",
+  value = NA
+)
+
+cohort_metadata_long_num <- rbind(cohort_metadata_long_num, missing_rows)
+
+# create dummy no irAE group data
+dummy_rows <- data.frame(
+  patient_id = 1:24,
+  value = NA,
+  group = "non-irAE",
+  variable = "Days\nto irAE"
+)
+cohort_metadata_long_num_dummy <- rbind(cohort_metadata_long_num, dummy_rows)
+
+p <- ggplot(cohort_metadata_long_num_dummy, aes(x = patient_id, y = log2(value))) +
+  geom_point(aes(color = group), size = 1.25) +
+  facet_grid(variable ~ group, scales = "free", space = "free_y") +
+  labs(x = "Patient ID", y = "") +
+  scale_y_continuous(
+    breaks = log2(c(1, 2, 4, 8, 16, 32, 64, 128, 256, 512)), # Custom breaks
+    labels = c(1, 2, 4, 8, 16, 32, 64, 128, 256, 512)        # Labels as original values
+  ) +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(size = 10),
+        legend.text = element_text(size = 12),
+        axis.text.y = element_text(size = 11))
+
+p
+
+ggsave("../figures/metadata_num.svg", p, width = 5.5, height = 2)
 
 ```
 
@@ -547,7 +594,7 @@ lmer_df <- flow_data %>%
   select(-c(parent_population, parent_parent_population, irae_ex, ici_drug, data_source)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
   mutate(Batch = as.factor(Batch)) %>%
-  filter(!(is.na(patient_id)))
+  dplyr::filter(!(is.na(patient_id)))
 
 lmer_df
 
@@ -657,7 +704,7 @@ ggsave("../figures/baseline_pca_color_by_batch_batch_regressed_out.png", plot = 
 ```{r}
 
 adjusted_data <- adjusted_data %>%
-  filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE"))
+  dplyr::filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE"))
 
 # show features with > 5% NAs, remove them when doing PCA
 na_counts <- colSums(is.na(adjusted_data[, 17:ncol(adjusted_data)]))
@@ -731,7 +778,7 @@ stats_df <- adjusted_data %>%
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
   arrange(pval) %>%
-  filter(!(sort %in% na_ridden_features)) %>%
+  dplyr::filter(!(sort %in% na_ridden_features)) %>%
   head(4)
 
 stats_df
