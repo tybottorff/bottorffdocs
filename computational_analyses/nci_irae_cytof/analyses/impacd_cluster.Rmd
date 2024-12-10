@@ -38,7 +38,11 @@ editor_options:
 
 ```{r}
 
-baseDir = "/nfs/bioinformatics/workspace/tbottorff/nci_irae"
+# local work
+baseDir = "~/mounts/workspace/tbottorff/nci_irae"
+
+# cluster work
+#baseDir = "/nfs/bioinformatics/workspace/tbottorff/nci_irae"
 dataDir = file.path(baseDir,'saved_data')
 plotsDir = file.path(baseDir,'figures')
 fcsDir = file.path(baseDir, "raw_data/all_fcs_files")
