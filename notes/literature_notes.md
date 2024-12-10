@@ -387,6 +387,11 @@
  - **decreased Ki67 CD8s associated with irAE, this is unlike most other proliferation literature I've read...**
 # Biomarkers for immune checkpoint inhibitor-mediated tumor response and adverse events
  - **irAE incidence does depend on tumor type, melanoma has higher frequency of skin and gastrointestinal irAEs but lower frequency of pneumonia compared to NSCLC patients, dermatitis, arthritis, and myalgia more common in melanoma patients than renal cell carcinoma patients, pneumonitis and dyspnea less common in melanoma**
+# Biophysically interpretable inference of cell types from multimodal sequencing data
+ - meK-means (mechanistic K-means) to integrate modalities through unifying model of transcription (cluster cells with nascent and mature mRNA measurements)
+ - different methods (like scATAC vs. scRNA) will produce different cell clusters even from same samples, so which method to choose?
+ - prior integration approaches have not used model of gene expression
+ - demonstrate meK-means use on unspliced (U) and spliced (S) mRNA counts
 # Blocking IL-17A enhances tumor response to anti-PD-1 immunotherapy in microsatellite stable colorectal cancer
  - IL-17A leads to pro-TME, increases PD-L1 expression
  - *PD-L1* mRNA levels associated with CD8 T cell infiltration and better prognosis
