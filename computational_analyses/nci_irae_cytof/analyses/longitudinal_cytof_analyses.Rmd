@@ -63,8 +63,8 @@ adjusted_data <- read.csv("../saved_data/batch_effect_removed_data.csv") %>%
   pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info, cancer_type, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, pneumonitis_irae_including_effusion, gastro_irae), names_to = "sort", values_to = "freq") %>%
   mutate(cleaned_visit_info = if_else(cleaned_visit_info == "baseline", "1", cleaned_visit_info)) %>%
   # remove PD1+ sorts (messed up likely with anti-PD1 ICI)
-  filter(!grepl("PD1pos", sort)) %>%
-  filter(cleaned_visit_info %in% c("1", "2", "3", "irAE", "irAE F/U"),
+  dplyr::filter(!grepl("PD1pos", sort)) %>%
+  dplyr::filter(cleaned_visit_info %in% c("1", "2", "3", "irAE", "irAE F/U"),
          group %in% c("non-irAE", "irAE/SAE"))
 
 adjusted_data
@@ -73,7 +73,7 @@ adjusted_data
 
 days_from_baseline_metadata <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
   rename(patient_id = `Subject ID`) %>%
-  filter(!(`Visit Descriptor` %in% c("AID_Patient", "Healthy_Control"))) %>%
+  dplyr::filter(!(`Visit Descriptor` %in% c("AID_Patient", "Healthy_Control"))) %>%
   mutate(draw_date = as.Date(as.numeric(`Draw Date`))) %>%
   select(patient_id, `Visit Descriptor`, draw_date) %>%
   group_by(patient_id) %>%
@@ -227,7 +227,7 @@ significant_pvals_comparison
 ```{r}
 
 plot_data <- adjusted_data %>%
-  filter(group %in% c("non-irAE", "irAE/SAE"),
+  dplyr::filter(group %in% c("non-irAE", "irAE/SAE"),
          cleaned_visit_info != "Other") %>%
   mutate(cleaned_visit_info = factor(cleaned_visit_info, levels = c("1", "2", "3", "irAE", "irAE F/U")),
          group = factor(group, levels = c("irAE/SAE", "non-irAE")),
@@ -247,17 +247,21 @@ plot_data <- adjusted_data %>%
 # [11] "DN.of.Bcells"              "naive.of.Bcells"           "naive.of.CD8.Tcells"       "SCM.of.Tconv.Tcells"       "EMRA.of.CD8.Tcells"       
 # [16] "plasmablasts.of.Bcells" 
 
-#p <- plot_data %>% filter(sort %in% c("")) %>% ggplot(aes(x = days_from_baseline, y = freq, color = thyroid_irae)) +
-#  geom_point(alpha = 0.75) +
-#  geom_smooth(aes(group = thyroid_irae),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
-#  facet_wrap(~ sort, ncol = 6) +
-#  labs(x = "Days from baseline", y = "Residuals", color = "Thyroid group") +
-#  theme(strip.text = element_text(size = 9),
-#        axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+# just plot Bcell ones as this may be related to https://pmc.ncbi.nlm.nih.gov/articles/PMC5785243/
 
-#p
+p <- plot_data %>% dplyr::filter(sort %in% c("Bcells of nonGrans", "plasmablasts of Bcells")) %>% ggplot(aes(x = days_from_baseline, y = freq, color = thyroid_irae)) +
+  geom_point(alpha = 0.75) +
+  geom_smooth(aes(group = thyroid_irae),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
+  facet_wrap(~ sort, ncol = 2) +
+  labs(x = "Days from baseline", y = "Residuals", color = "Thyroid group") +
+  theme(strip.text = element_text(size = 9),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
-#ggsave("../figures/gam_results_thyroid_interactions.png", p, width = 14, height = 8)
+p
+
+ggsave("../figures/gam_results_thyroid.png", p, width = 8, height = 4)
+
+```
 
 # combined irAE interaction effects padj < 0.01
 # EM.of.CD8.Tcells	, CD56bright.of.NKcells	
