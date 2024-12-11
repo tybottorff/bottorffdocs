@@ -54,22 +54,11 @@ theme_set(
 
 ```
 
-# Read in batch-effect removed data
+# Bring in actual days from baseline metadata
 
 ```{r}
 
-adjusted_data <- read.csv("../saved_data/batch_effect_removed_data.csv") %>%
-  select(-X) %>%
-  pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info, cancer_type, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, pneumonitis_irae_including_effusion, gastro_irae), names_to = "sort", values_to = "freq") %>%
-  mutate(cleaned_visit_info = if_else(cleaned_visit_info == "baseline", "1", cleaned_visit_info)) %>%
-  # remove PD1+ sorts (messed up likely with anti-PD1 ICI)
-  dplyr::filter(!grepl("PD1pos", sort)) %>%
-  dplyr::filter(cleaned_visit_info %in% c("1", "2", "3", "irAE", "irAE F/U"),
-         group %in% c("non-irAE", "irAE/SAE"))
-
-adjusted_data
-
-# join with metadata that's "easier" to just re-extract
+# "easier" to just re-extract
 
 days_from_baseline_metadata <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
   rename(patient_id = `Subject ID`) %>%
@@ -90,7 +79,160 @@ days_from_baseline_metadata <- read_excel("../raw_data/2024_10_17_flow_data.xlsx
           TRUE ~ "Other")) %>%
   select(patient_id, cleaned_visit_info, days_from_baseline)
 
+days_from_baseline_metadata
+
+```
+
+# Read in batch-effect removed data
+ - filter for non-HC data
+
+```{r}
+
+adjusted_data <- read.csv("../saved_data/batch_effect_removed_data.csv") %>%
+  select(-X) %>%
+  mutate(cleaned_visit_info = if_else(cleaned_visit_info == "baseline", "1", cleaned_visit_info)) %>%
+  # remove PD1+ sorts (messed up likely with anti-PD1 ICI)
+  dplyr::select(-matches("PD1")) %>%
+  dplyr::filter(cleaned_visit_info %in% c("1", "2", "3", "irAE", "irAE F/U"),
+         group != "Healthy_Control") %>%
+  left_join(days_from_baseline_metadata, by = c("patient_id", "cleaned_visit_info")) %>%
+  # fix issue of 0 importing as NA
+  mutate(days_from_baseline = if_else(is.na(days_from_baseline), 0, days_from_baseline)) %>%
+  # reorder columns to keep all metadata in front
+  select(1:16, ncol(adjusted_data), 17:(ncol(adjusted_data) - 1))
+
+adjusted_data
+
+# show features with > 5% NAs, remove them when doing PCA, otherwise replace with mean
+na_counts <- colSums(is.na(adjusted_data[, 18:ncol(adjusted_data)]))
+na_ridden_features <- names(na_counts[na_counts > 0.05*nrow(adjusted_data)])
+
+```
+
+# Look at how immmunotypes shift over time in cancer irAE/no irAE groups vs. AID
+
+```{r}
+
+# run PCA on all AID + all cancer data
+
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:17] %>%
+  mutate(patient_id_simple = row_number(),
+         # clean up AID group name
+         group = case_when(
+           group == "AID_Patient" ~ "AID",
+           TRUE ~ group
+         ))
+
+# instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 18:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+pca = prcomp(as.data.frame((na.omit(wide_baseline_flow_num_data_confounders_regressed_out)), center=TRUE, scale=FALSE))
+
+var = get_pca_var(pca)
+
+sumPCA = summary(pca)
+
+pca_variance = as.data.frame(t(sumPCA$importance))
+pca_variance$pc = factor(row.names(pca_variance), levels = row.names(pca_variance))
+
+pcaScores = as.data.frame(pca$x) %>%
+  mutate(patient_id_simple = row_number())
+
+pcaLabels_ = paste0("PC", 1:ncol(pcaScores), " (", round(100*pca_variance$`Proportion of Variance`, 2), "%)")
+
+pcaData = merge(wide_baseline_flow_metadata_confounders_regressed_out, pcaScores, by = "patient_id_simple")
+
+# first will compute centroids in high dim PCA space of baseline groups
+baseline_centroids <- pcaData %>%
+  filter(days_from_baseline == 0) %>%
+  group_by(group) %>%
+  summarize(across(starts_with("PC"), mean, .names = "centroid_{.col}"), .groups = "drop")
+
+# get centroids out
+aid_centroid <- as.numeric(baseline_centroids %>% filter(group == "AID") %>% select(starts_with("centroid")))
+irae_centroid <- as.numeric(baseline_centroids %>% filter(group == "irAE/SAE") %>% select(starts_with("centroid")))
+no_irae_centroid <- as.numeric(baseline_centroids %>% filter(group == "non-irAE") %>% select(starts_with("centroid")))
+
+# define function to calculate projection of point (longitudinal immunotype) onto line between 2 centroids (AID and irAE/no irAE)
+# point is a vector of PCA coordinates
+# centroid1 is starting centroid (cancer baseline one), centroid2 is ending one (AID)
+project_to_line <- function(point, centroid1, centroid2) {
+  v <- centroid2 - centroid1        # Vector between centroids, same num dimensions as centroids (51 here)
+  w <- point - centroid1            # Vector from centroid1 to the point (how far and in what direction point is from centroid1)
+  projection <- sum(w * v) / sum(v * v)  # Scalar projection
+  # sum(w*v) is dot product (component of w in direction of v)
+  # ~dropping perpendicular from point onto line between centroids, scalar projection informs where point's dropped perpendicular is along that line
+  projection
+}
+
+projection_df <- pcaData %>%
+  filter(group %in% c("irAE/SAE", "non-irAE")) %>%
+  rowwise() %>%
+  mutate(
+    projection = project_to_line(
+      c_across(PC1:PC51),
+      centroid2 = aid_centroid,
+      centroid1 = case_when(
+        group == "irAE/SAE" ~ irae_centroid,
+        group == "non-irAE" ~ no_irae_centroid,
+      )
+    )
+  ) %>%
+  ungroup()
+
+# just plot baseline samples on PCA of all samples (to show centroids very close...)
+
+p <- ggplot(data = pcaData %>% filter(days_from_baseline == 0)) +
+  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
+  labs(color = "") +
+  theme_bw() +
+  scale_color_manual(values = c("AID" = "grey", "irAE/SAE" = "#f8766d", "non-irAE" = "#00bfc4")) +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),  # Adjust legend text size
+    #legend.title = element_blank(),  # Adjust legend title size
+    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
+    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
+  ) +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+ggsave("../figures/aid_cancer_baseline_pca.png", p, width = 3, height = 4)
+
+p <- ggplot(projection_df, aes(x = days_from_baseline, y = projection, color = group, group = patient_id)) +
+  geom_point(alpha = 0.5) +  # Adds points for each data observation
+  geom_smooth(
+    method = "loess",  # You can change to "lm" for linear regression or other methods
+    aes(group = group),  # Grouping by the irAE group for separate smoothing lines
+    alpha = 0.3,  # Transparency for the confidence interval
+    se = TRUE  # Show the confidence interval
+  ) +
+  labs(
+    x = "Days from baseline",
+    y = "Projection onto cancer\n(group-specific)-AID line"
+  )
+
+p
+
+ggsave("../figures/cancer_aid_projection.png", p, width = 6, height = 4)
+
+```
+
+# Filter for cancer data to use for GAMs
+
+```{r}
+
 adjusted_data <- adjusted_data %>%
+  # filter for cancer patients
+  filter(group %in% c("non-irAE", "irAE/SAE")) %>%
+  pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info, cancer_type, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, pneumonitis_irae_including_effusion, gastro_irae), names_to = "sort", values_to = "freq") %>%
   left_join(days_from_baseline_metadata, by = c("patient_id", "cleaned_visit_info")) %>%
   # fix issue of 0 importing as NA
   mutate(days_from_baseline = if_else(is.na(days_from_baseline), 0, days_from_baseline))
