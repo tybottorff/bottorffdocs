@@ -921,25 +921,25 @@ for (i in 1:num_iterations) {
   # Perform PCA
   pca <- prcomp(pca_data, center = TRUE, scale. = TRUE)
   pca_scores <- as.data.frame(pca$x)
-  pca_scores$group <- adjusted_data$group
+  pca_scores$skin_irae <- adjusted_data$skin_irae
   
   # Test for differences between groups on PCA axes
   pc1_pval <- if (shapiro.test(pca_scores$PC1)$p.value > 0.05) {
-    t.test(PC1 ~ group, data = pca_scores)$p.value
+    t.test(PC1 ~ skin_irae, data = pca_scores)$p.value
   } else {
-    wilcox.test(PC1 ~ group, data = pca_scores)$p.value
+    wilcox.test(PC1 ~ skin_irae, data = pca_scores)$p.value
   }
   
   pc2_pval <- if (shapiro.test(pca_scores$PC2)$p.value > 0.05) {
-    t.test(PC2 ~ group, data = pca_scores)$p.value
+    t.test(PC2 ~ skin_irae, data = pca_scores)$p.value
   } else {
-    wilcox.test(PC2 ~ group, data = pca_scores)$p.value
+    wilcox.test(PC2 ~ skin_irae, data = pca_scores)$p.value
   }
   
   pc3_pval <- if (shapiro.test(pca_scores$PC3)$p.value > 0.05) {
-    t.test(PC3 ~ group, data = pca_scores)$p.value
+    t.test(PC3 ~ skin_irae, data = pca_scores)$p.value
   } else {
-    wilcox.test(PC3 ~ group, data = pca_scores)$p.value
+    wilcox.test(PC3 ~ skin_irae, data = pca_scores)$p.value
   }
   
   # Record results
@@ -961,9 +961,21 @@ results_df <- bind_rows(lapply(results, function(x) {
   )
 }))
 
+# combined: 1 < 0.01 --> p < 0.05 here for monte carlo
+# skin just 1 < 0.05 --> p > 0.05 here for monte carlo (if using random forest module, if using top 4 by pval arranging then p < 0.01...)
+# pneumonitis 2/3 < 0.001 and other < 0.01 --> p < 0.01 here for monte carlo (not surprising given 2 features statistically significant at baseline, so module works great really only if likely having these 2)
+# rheumatoid 2 < 0.01 --> p < 0.01
+# thyroid 1 < 0.001 and 1 < 0.05 --> p < 0.01 as well
+
 # Filter for significant results
 significant_results <- results_df %>%
-  filter(PC1_pval < 0.01 | PC2_pval < 0.01 | PC3_pval < 0.01)
+  #filter(PC1_pval < 0.01 | PC2_pval < 0.01 | PC3_pval < 0.01)
+  filter((PC1_pval < 0.05) + (PC2_pval < 0.05) + (PC3_pval < 0.05) >= 2)
+  #filter(
+  #  (PC1_pval < 0.001 & (PC2_pval < 0.05 | PC3_pval < 0.05)) |
+  #  (PC2_pval < 0.001 & (PC1_pval < 0.05 | PC3_pval < 0.05)) |
+  #  (PC3_pval < 0.001 & (PC1_pval < 0.05 | PC2_pval < 0.05))
+  #)
 
 significant_results
 
@@ -1220,8 +1232,8 @@ skin_stats_df <- adjusted_data %>%
   ) %>%
   mutate(padj = p.adjust(pval, method = "BH")) %>%
   arrange(pval) %>%
-  filter(!(sort %in% na_ridden_features))
-  #head(4)
+  filter(!(sort %in% na_ridden_features)) %>%
+  head(4)
 
 skin_stats_df
 
