@@ -453,9 +453,9 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 # find features contributing most to variation
 
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = Batch), size = 2, alpha = 0.8) + 
+  geom_point(aes(x = PC1, y = PC2, color = Batch), size = 2, alpha = 0.25) + 
   stat_ellipse(aes(x = PC1, y = PC2, color = Batch), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
@@ -674,9 +674,9 @@ limits = c(max(abs(pcaData$PC1)), max(abs(pcaData$PC2)))
 pcaData <- pcaData[sample(nrow(pcaData)), ]
 
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = Batch), size = 2, alpha = 0.8) + 
+  geom_point(aes(x = PC1, y = PC2, color = Batch), size = 2, alpha = 0.25) + 
   stat_ellipse(aes(x = PC1, y = PC2, color = Batch), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
@@ -854,7 +854,7 @@ top_contributing_features_PC3 <- pca_contributions %>%
     select(Dim.3)
 
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
   stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
@@ -990,6 +990,26 @@ feature_counts
 
 ```
 
+# Plot distribution of pvals for monte carlo sims
+
+```{r}
+
+monte_carlo_results_df <- pivot_longer(results_df, cols = starts_with("PC"), names_to = "PC", values_to = "pval") %>%
+  mutate(PC = sub("_pval", "", PC))
+
+# Plot the histogram faceted by PC
+p <- ggplot(monte_carlo_results_df, aes(x = pval)) +
+  geom_histogram(bins = 100, fill = "steelblue", color = "black") +
+  geom_vline(xintercept = 0.05, color = "red", linetype = "dashed") +
+  facet_wrap(~PC, ncol = 1) +
+  labs(x = "P value", y = "Random module count")
+
+p
+
+ggsave("../figures/monte_carlo_sims.png", p, width = 5, height = 10)
+
+```
+
 # Plot PCA results for baseline data with batch regressed out, thyroid irAEs specifically
 
 ```{r}
@@ -1068,7 +1088,7 @@ top_contributing_features_PC3_thyroid <- pca_contributions %>%
 pcaData$thyroid_irae <- factor(pcaData$thyroid_irae, levels = c("Thyroid irAE", "No thyroid irAE"))
                                  
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = thyroid_irae), size = 2, alpha = 0.8) + 
   stat_ellipse(aes(x = PC1, y = PC2, color = thyroid_irae), size = 1, linetype = 2) +
@@ -1186,7 +1206,7 @@ top_contributing_features_PC3_thyroid_with_oor <- pca_contributions %>%
     select(Dim.3)
 
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC3, color = thyroid_irae_including_oor), size = 2, alpha = 0.8) + 
   stat_ellipse(aes(x = PC1, y = PC3, color = thyroid_irae_including_oor), size = 1, linetype = 2) +
@@ -1296,7 +1316,7 @@ top_contributing_features_PC3_skin <- pca_contributions %>%
 pcaData$skin_irae <- factor(pcaData$skin_irae, levels = c("Skin irAE", "No skin irAE"))
 
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC3, color = skin_irae), size = 2, alpha = 0.8) + 
   stat_ellipse(aes(x = PC1, y = PC3, color = skin_irae), size = 1, linetype = 2) +
@@ -1440,7 +1460,7 @@ top_contributing_features_PC3_pneumonitis <- pca_contributions %>%
     select(Dim.3)
 
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = pneumonitis_irae), size = 2, alpha = 0.8) + 
   stat_ellipse(aes(x = PC1, y = PC2, color = pneumonitis_irae), size = 1, linetype = 2) +
@@ -1568,7 +1588,7 @@ top_contributing_features_PC3_rheumatoid_irae <- pca_contributions %>%
 pcaData$rheumatoid_irae <- factor(pcaData$rheumatoid_irae, levels = c("Rheumatoid irAE", "No rheumatoid irAE"))
 
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC3, color = rheumatoid_irae), size = 2, alpha = 0.8) + 
   stat_ellipse(aes(x = PC1, y = PC3, color = rheumatoid_irae), size = 1, linetype = 2) +
@@ -1691,7 +1711,7 @@ filtered_data <- merged_data[, colnames(merged_data) %in% highlight_columns, dro
 filtered_data <- filtered_data %>%
   mutate(MaxValue = apply(., 1, function(x) max(x, na.rm = TRUE))) %>%  # Compute the max value per row, ignoring NA values
   arrange(desc(MaxValue)) %>%   # Order rows by the max value in descending order
-  select(-MaxValue)  # Remove the temporary MaxValue column
+  select(-MaxValue) # Remove the temporary MaxValue column
 
 # Clean up feature names (replace dots with spaces for clarity)
 rownames(filtered_data) <- gsub("\\.", " ", rownames(filtered_data))
@@ -1724,8 +1744,8 @@ col_anno <- HeatmapAnnotation(
 specific_features <- c("naive of Bcells", "swMem of Bcells", "PD1pos of NKcells", "plasmablasts of Bcells", "CCR4pos of NN Tconv Tcells", "CD4 of Tcells")
 
 row_split <- ifelse(rownames(filtered_data) %in% specific_features, 
-                    "irAE-type-specific", 
-                    "Non-specific")
+                    "irAE-type-\nspecific", 
+                    "General")
 
 # Create the heatmap with annotations for both the irAE type and PC number
 p <- Heatmap(filtered_data, 
@@ -1736,13 +1756,14 @@ p <- Heatmap(filtered_data,
         cluster_columns = FALSE,
         show_column_names = FALSE, 
         top_annotation = col_anno,
-        heatmap_legend_param = list(title = "Contribution (%)"),
+        heatmap_legend_param = list(title = "PC weights (%)"),
         # split rows based on irAE-type-specific or not
         row_split = row_split,
-        show_row_names = TRUE)
+        show_row_names = TRUE,
+        column_title = "irAE group comparisons for PCs that showed group separation")
 
 # Save the heatmap to a PDF file
-pdf(file = "../figures/irae_types_contributing_features_highlighted.pdf", width = 10, height = 8)  # Adjust width and height as needed
+pdf(file = "../figures/irae_types_contributing_features_highlighted.pdf", width = 10, height = 5)  # Adjust width and height as needed
 draw(p)  # Render the heatmap
 dev.off()  # Close the PDF device
 
@@ -1803,7 +1824,7 @@ kmeans_result <- kmeans(pcaData[, c("PC1", "PC2", "PC3")], centers = 10, nstart 
 pcaData$cluster <- factor(kmeans_result$cluster)
 
 p <- ggplot(data = pcaData) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = cluster), size = 2, alpha = 0.8) +  # Color by cluster
   labs(color = "Cluster") +
