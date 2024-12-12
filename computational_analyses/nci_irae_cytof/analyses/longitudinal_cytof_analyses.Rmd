@@ -97,11 +97,11 @@ adjusted_data <- read.csv("../saved_data/batch_effect_removed_data.csv") %>%
          group != "Healthy_Control") %>%
   left_join(days_from_baseline_metadata, by = c("patient_id", "cleaned_visit_info")) %>%
   # fix issue of 0 importing as NA
-  mutate(days_from_baseline = if_else(is.na(days_from_baseline), 0, days_from_baseline)) %>%
+  mutate(days_from_baseline = if_else(is.na(days_from_baseline), 0, days_from_baseline))
+
+adjusted_data <- adjusted_data %>%
   # reorder columns to keep all metadata in front
   select(1:16, ncol(adjusted_data), 17:(ncol(adjusted_data) - 1))
-
-adjusted_data
 
 # show features with > 5% NAs, remove them when doing PCA, otherwise replace with mean
 na_counts <- colSums(is.na(adjusted_data[, 18:ncol(adjusted_data)]))
@@ -110,7 +110,8 @@ na_ridden_features <- names(na_counts[na_counts > 0.05*nrow(adjusted_data)])
 ```
 
 # Look at how immmunotypes shift over time in cancer irAE/no irAE groups vs. AID
-
+ - using PCA first, this doesn't feel as right but is useful for presentation figs
+ 
 ```{r}
 
 # run PCA on all AID + all cancer data
@@ -183,13 +184,13 @@ projection_df <- pcaData %>%
 # just plot baseline samples on PCA of all samples (to show centroids very close...)
 
 p <- ggplot(data = pcaData %>% filter(days_from_baseline == 0)) +
-  geom_hline(yintercept = 1, linetype = 2, color = "grey") +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
   stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
-  scale_color_manual(values = c("AID" = "grey", "irAE/SAE" = "#f8766d", "non-irAE" = "#00bfc4")) +
+  scale_color_manual(values = c("AID" = "black", "irAE/SAE" = "#f8766d", "non-irAE" = "#00bfc4")) +
   theme(
     legend.position = "bottom", 
     legend.text = element_text(size = 7),  # Adjust legend text size
@@ -206,8 +207,105 @@ p
 
 ggsave("../figures/aid_cancer_baseline_pca.png", p, width = 3, height = 4)
 
+# just show 1 longitudinal point and centroids for projection analysis (non-irAE group for this patient)
+no_irae_centroid_df <- data.frame(PC1 = no_irae_centroid[1], PC2 = no_irae_centroid[2], label = "non-irAE centroid (baseline)")
+aid_centroid_df <- data.frame(PC1 = aid_centroid[1], PC2 = aid_centroid[2], label = "AID centroid")
+
+p <- ggplot(data = pcaData %>% filter(patient_id == "LinsleyLab163195" & days_from_baseline != 0)) +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
+  geom_text(aes(x = PC1, y = PC2, color = group, label = "Longitudinal point"), size = 3, vjust = -1, hjust = -0.15) +
+  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
+  # Add centroids as points
+  geom_point(data = no_irae_centroid_df, aes(x = PC1, y = PC2), color = "#00bfc4", size = 3) +
+  geom_point(data = aid_centroid_df, aes(x = PC1, y = PC2), color = "black", size = 3) +
+  # Add centroid labels
+  geom_text(data = no_irae_centroid_df, aes(x = PC1, y = PC2, label = label), 
+            vjust = 2, color = "#00bfc4", size = 3) +
+  geom_text(data = aid_centroid_df, aes(x = PC1, y = PC2, label = label), 
+            vjust = -1, color = "black", size = 3) +
+  labs(color = "") +
+  theme_bw() +
+  scale_color_manual(values = c("AID" = "black", "irAE/SAE" = "#f8766d", "non-irAE" = "#00bfc4")) +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),  # Adjust legend text size
+    #legend.title = element_blank(),  # Adjust legend title size
+    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
+    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
+  ) +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+ggsave("../figures/aid_cancer_baseline_pca_example_point.svg", p, width = 3, height = 4)
+
+```
+
+# Look at how immmunotypes shift over time in cancer irAE/no irAE groups vs. AID
+ - not using PCA, using original data (this feels better)
+
+```{r}
+
+wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:17] %>%
+  mutate(patient_id_simple = row_number(),
+         # clean up AID group name
+         group = case_when(
+           group == "AID_Patient" ~ "AID",
+           TRUE ~ group
+         ))
+
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 18:ncol(adjusted_data)] %>%
+  select(-na_ridden_features) %>%
+  mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+baseline_centroids <- wide_baseline_flow_num_data_confounders_regressed_out %>%
+  bind_cols(wide_baseline_flow_metadata_confounders_regressed_out) %>%
+  filter(days_from_baseline == 0) %>%
+  group_by(group) %>%
+  summarize(across(colnames(wide_baseline_flow_num_data_confounders_regressed_out), mean, .names = "centroid_{.col}"), .groups = "drop")
+
+baseline_centroids
+
+aid_centroid <- as.numeric(baseline_centroids %>% filter(group == "AID") %>% select(starts_with("centroid")))
+irae_centroid <- as.numeric(baseline_centroids %>% filter(group == "irAE/SAE") %>% select(starts_with("centroid")))
+no_irae_centroid <- as.numeric(baseline_centroids %>% filter(group == "non-irAE") %>% select(starts_with("centroid")))
+
+# Define function to calculate projection in the original space (no PCA)
+project_to_line <- function(point, centroid1, centroid2) {
+  v <- centroid2 - centroid1        # Vector between centroids
+  w <- point - centroid1            # Vector from centroid1 to the point
+  projection <- sum(w * v) / sum(v * v)  # Scalar projection
+  projection
+}
+
+projection_df <- wide_baseline_flow_num_data_confounders_regressed_out %>%
+  bind_cols(wide_baseline_flow_metadata_confounders_regressed_out) %>%
+  filter(group %in% c("irAE/SAE", "non-irAE")) %>%
+  rowwise() %>%
+  mutate(
+    projection = project_to_line(
+      c_across(colnames(wide_baseline_flow_num_data_confounders_regressed_out)),
+      centroid2 = aid_centroid,
+      centroid1 = case_when(
+        group == "irAE/SAE" ~ irae_centroid,
+        group == "non-irAE" ~ no_irae_centroid,
+      )
+    )
+  ) %>%
+  ungroup()
+
+# for sense of scale, calculate centroid-centroid distances
+#sqrt(sum((aid_centroid - irae_centroid)^2))
+#sqrt(sum((aid_centroid - no_irae_centroid)^2))
+
 p <- ggplot(projection_df, aes(x = days_from_baseline, y = projection, color = group, group = patient_id)) +
   geom_point(alpha = 0.5) +  # Adds points for each data observation
+  geom_hline(yintercept = 0.65, linetype = "dashed", color = "black", size = 1) + # about where 2 baseline centroid-AID centroid distances are
   geom_smooth(
     method = "loess",  # You can change to "lm" for linear regression or other methods
     aes(group = group),  # Grouping by the irAE group for separate smoothing lines
@@ -222,6 +320,30 @@ p <- ggplot(projection_df, aes(x = days_from_baseline, y = projection, color = g
 p
 
 ggsave("../figures/cancer_aid_projection.png", p, width = 6, height = 4)
+
+# do stats
+
+projection_df <- projection_df %>% 
+  mutate(group = factor(group, levels = c("non-irAE", "irAE/SAE")),
+         patient_id = factor(patient_id)) # Adjust levels as needed
+
+# Fit the GAM model with interaction between group and time
+model_interaction <- gam(projection ~ group + 
+                           s(days_from_baseline, k = 5, bs = "cr", by = group) + 
+                           s(patient_id, bs = "re"),
+                         data = projection_df, method = 'REML')
+
+# Fit the GAM model without the interaction (common smooth for both groups)
+model_no_interaction <- gam(projection ~ group + 
+                              s(days_from_baseline, k = 5, bs = "cr") + 
+                              s(patient_id, bs = "re"),
+                            data = projection_df, method = 'REML')
+
+# Compare the models to see if the slopes of how groups differ from baseline is different between the two groups
+comparison <- anova(model_no_interaction, model_interaction, test = "Chisq")
+
+# Results
+comparison
 
 ```
 
