@@ -349,6 +349,33 @@ logitNorm <- function(v){
 
 ```
 
+# Plot how data looks for a specific subset pre/post logit
+
+```{r}
+
+specific_subset <- flow_data %>%
+  filter(sort %in% c("CD8 of Tcells", "pDC of nonGrans", "CM of CD8 Tcells")) %>%
+  mutate(logit_freq = logitNorm(freq)) %>%
+  mutate(logit_freq = scale(logit_freq))
+
+flow_data_long <- specific_subset %>%
+  select(sort, freq, logit_freq) %>%
+  pivot_longer(cols = c(freq, logit_freq), names_to = "measure", values_to = "value")
+
+custom_labels <- c(freq = "% of parent", logit_freq = "Transformed %\nof parent")
+
+p <- ggplot(flow_data_long, aes(x = value)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  facet_grid(sort ~ measure, scales = "free", labeller = labeller(measure = custom_labels)) +
+  labs(x = "Value", y = "Count") +
+  theme(strip.text = element_text(size = 8))
+
+p
+
+ggsave("../figures/pre_post_transform_data.png", p, width = 4, height = 5)
+
+```
+
 # Compare how cancer patients' features frequencies correlatations differ in each batch
  - these look different, i.e. batch effects
 
@@ -1002,7 +1029,7 @@ p <- ggplot(monte_carlo_results_df, aes(x = pval)) +
   geom_histogram(bins = 100, fill = "steelblue", color = "black") +
   geom_vline(xintercept = 0.05, color = "red", linetype = "dashed") +
   facet_wrap(~PC, ncol = 1) +
-  labs(x = "P value", y = "Random module count")
+  labs(x = "P value from testing for\ndifference between irAE groups", y = "Random module count")
 
 p
 
@@ -2140,7 +2167,7 @@ ggplot(predicted_scores_with_metadata_long, aes(x = immunotype, y = score, color
 # source ~/.bash_profile
 # conda activate pyRforest-conda
 
-#reticulate::use_condaenv("pyRforest-conda", conda = '/Users/tybottorff/miniconda3/bin/conda', required = TRUE)
+reticulate::use_condaenv("pyRforest-conda", conda = '/Users/tybottorff/miniconda3/bin/conda', required = TRUE)
 
 # data needs to be in list of 4 tibbles
 # training, validation, and test tibbles (splits of data)
@@ -2317,6 +2344,21 @@ logOn = TRUE
 )
 
 print(fiplot_full)
+
+```
+
+# Bar plot of feature importances for combined irAE distinction
+
+```{r}
+
+ggplot(feat_importances$top_features %>% head(10), aes(x = reorder(feature, feature_importance), y = feature_importance)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  coord_flip() +
+  labs(x = "Subset", y = "Feature Importance") +
+  theme(
+    axis.text.y = element_text(size = 10),
+    axis.text.x = element_text(size = 12)
+  )
 
 ```
 
