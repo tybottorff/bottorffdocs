@@ -207,16 +207,16 @@ p
 
 ggsave("../figures/aid_cancer_baseline_pca.png", p, width = 3, height = 4)
 
-# just show 1 longitudinal point and centroids for projection analysis (non-irAE group for this patient)
-no_irae_centroid_df <- data.frame(PC1 = no_irae_centroid[1], PC2 = no_irae_centroid[2], label = "non-irAE centroid (baseline)")
+# just show 1 longitudinal point and centroids for projection analysis
+no_irae_centroid_df <- data.frame(PC1 = no_irae_centroid[1], PC2 = no_irae_centroid[2], label = "baseline non-irAE\ncentroid")
+irae_centroid_df <- data.frame(PC1 = irae_centroid[1], PC2 = irae_centroid[2], label = "baseline irAE\ncentroid")
 aid_centroid_df <- data.frame(PC1 = aid_centroid[1], PC2 = aid_centroid[2], label = "AID centroid")
 
 p <- ggplot(data = pcaData %>% filter(patient_id == "LinsleyLab163195" & days_from_baseline != 0)) +
   geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
   geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
-  geom_text(aes(x = PC1, y = PC2, color = group, label = "Longitudinal point"), size = 3, vjust = -1, hjust = -0.15) +
-  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
+  geom_text(aes(x = PC1, y = PC2, color = group, label = "Non-baseline\nsample"), size = 3, vjust = -1, hjust = -0.15) +
   # Add centroids as points
   geom_point(data = no_irae_centroid_df, aes(x = PC1, y = PC2), color = "#00bfc4", size = 3) +
   geom_point(data = aid_centroid_df, aes(x = PC1, y = PC2), color = "black", size = 3) +
@@ -242,7 +242,39 @@ p <- ggplot(data = pcaData %>% filter(patient_id == "LinsleyLab163195" & days_fr
 
 p
 
-ggsave("../figures/aid_cancer_baseline_pca_example_point.svg", p, width = 3, height = 4)
+ggsave("../figures/aid_no_irae_cancer_baseline_pca_example_point.svg", p, width = 3, height = 4)
+
+p <- ggplot(data = pcaData %>% filter(patient_id == "LinsleyLab875525" & days_from_baseline == 70)) +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey") +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey") +
+  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
+  geom_text(aes(x = PC1, y = PC2, color = group, label = "Non-baseline\nsample"), size = 3, vjust = 1, hjust = -0.15) +
+  # Add centroids as points
+  geom_point(data = irae_centroid_df, aes(x = PC1, y = PC2), color = "#f8766d", size = 3) +
+  geom_point(data = aid_centroid_df, aes(x = PC1, y = PC2), color = "black", size = 3) +
+  # Add centroid labels
+  geom_text(data = irae_centroid_df, aes(x = PC1, y = PC2, label = label), 
+            vjust = -1, color = "#f8766d", size = 3) +
+  geom_text(data = aid_centroid_df, aes(x = PC1, y = PC2, label = label), 
+            vjust = -1, hjust = -0.5, color = "black", size = 3) +
+  labs(color = "") +
+  theme_bw() +
+  scale_color_manual(values = c("AID" = "black", "irAE/SAE" = "#f8766d", "non-irAE" = "#00bfc4")) +
+  theme(
+    legend.position = "bottom", 
+    legend.text = element_text(size = 7),  # Adjust legend text size
+    #legend.title = element_blank(),  # Adjust legend title size
+    legend.spacing.y = unit(0.1, 'cm'),    # Reduce vertical spacing
+    legend.spacing.x = unit(0.3, 'cm')     # Reduce horizontal spacing
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
+  ) +
+  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+
+p
+
+ggsave("../figures/aid_irae_cancer_baseline_pca_example_point.svg", p, width = 3, height = 4)
 
 ```
 
@@ -525,8 +557,6 @@ p
 
 ggsave("../figures/gam_results_thyroid.png", p, width = 8, height = 4)
 
-```
-
 # combined irAE interaction effects padj < 0.01
 # EM.of.CD8.Tcells	, CD56bright.of.NKcells	
 # padj < 0.05
@@ -571,5 +601,47 @@ p <- plot_data %>% filter(sort %in% c("swMem of Bcells", "pDC of nonGrans")) %>%
 p
 
 ggsave("../figures/gam_results_pneumonitis.png", p, width = 11, height = 4)
+
+```
+
+# Plot CD56bright of NK result across all (facet for different) irAE group comparions
+
+```{r}
+
+plot_df_combined_irae <- plot_data %>% select(patient_id, group, days_from_baseline, sort, freq) %>% mutate(comparison = "group", status = group) %>% filter(sort == "CD56bright of NKcells")
+plot_df_thyroid_irae <- plot_data %>% select(patient_id, thyroid_irae, days_from_baseline, sort, freq) %>% mutate(comparison = "thyroid_irae", status = thyroid_irae) %>% filter(sort == "CD56bright of NKcells")
+plot_df_skin_irae <- plot_data %>% select(patient_id, skin_irae, days_from_baseline, sort, freq) %>% mutate(comparison = "skin_irae", status = skin_irae) %>% filter(sort == "CD56bright of NKcells")
+plot_df_pneumonitis_irae <- plot_data %>% select(patient_id, pneumonitis_irae, days_from_baseline, sort, freq) %>% mutate(comparison = "pneumonitis_irae", status = pneumonitis_irae) %>% filter(sort == "CD56bright of NKcells")
+plot_df_rheumatoid_irae <- plot_data %>% select(patient_id, rheumatoid_irae, days_from_baseline, sort, freq) %>% mutate(comparison = "rheumatoid_irae", status = rheumatoid_irae) %>% filter(sort == "CD56bright of NKcells")
+
+plot_df_combined <- bind_rows(plot_df_combined_irae, plot_df_thyroid_irae, plot_df_skin_irae, plot_df_pneumonitis_irae, plot_df_rheumatoid_irae)
+
+plot_df_combined <- plot_df_combined %>%
+  mutate(status_color = case_when(
+    status %in% c("irAE/SAE", "Thyroid irAE", "Skin irAE", "Pneumonitis", "Rheumatoid irAE") ~ "irAE",
+    status %in% c("non-irAE", "No skin irAE", "No thyroid irAE", "No pneumonitis", "No rheumatoid irAE") ~ "non-irAE",
+    TRUE ~ as.character(status)  # For any other status, leave it as is
+  ))
+
+facet_labels <- c(
+  group = "Combined irAE",
+  thyroid_irae = "Thyroid irAE",
+  skin_irae = "Skin irAE",
+  pneumonitis_irae = "Pneumonitis",
+  rheumatoid_irae = "Rheumatoid irAE"
+)
+
+p <- ggplot(plot_df_combined, aes(x = days_from_baseline, y = freq, color = status_color)) +
+  geom_point(alpha = 0.75) +
+  geom_smooth(aes(group = status_color), method = "gam", formula = y ~ s(x, k = 3, bs = "cr"), se = TRUE) +
+  facet_wrap(~ comparison, ncol = 5, labeller = labeller(comparison = facet_labels)) +
+  scale_color_manual(values = c("irAE" = "#f8766d", "non-irAE" = "#00bfc4")) +
+  labs(x = "Days from baseline", y = "CD56bright of NK\ncells (residuals)", color = "") +
+  theme(strip.text = element_text(size = 13),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+p
+
+ggsave("../figures/cd56bright_for_all_group_comparisons_longitudinal.png", width = 15, height = 4)
 
 ```
