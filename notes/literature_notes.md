@@ -417,13 +417,13 @@
 # CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cells accumulate in tumors of anti-PD-1-responder lung cancer patients and are tumor-reactive lymphocytes enriched with Tc17
  - accumulation of CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cells in human lung tumors associated with good prognosis
  - CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cell density increases in ICB with responders only
+# CD103<sup>+</sup> tumor-resident CD8<sup>+</sup> T cells are associated with improved survival in immunotherapy-naive melanoma patients and expand significantly during anti-PD-1 treatment
+ - supporting evidence for strong literature conclusion of ICB inducing expansion of (CD8) T cells
 # CD28/PD1 co-expression: dual impact on CD8<sup>+</sup> T cells in peripheral blood and tumor tissue, and its significance in NSCLC patients' survival and ICB response
 ## Background
  - exhaustion is now recognized to have a dynamic progression from a long-lived "pre-exhausted stem-like progenitor" (more responsive likely to re-invigoration by ICB) to a "terminally exhausted" state
  - **CD28 is a prerequisite for optimal T cell re-invigoration following PD1 blockade, CD28 primary target downstream of PD1-mediated inhibitory signaling**
  - **main finding: signatures of heterogeneous tumor infiltrating TRM and “pre-exhausted” long-lived effector-memory CD8<sup>+</sup> T cells were associated with better ICB response only in the presence of CD28**
-# CD103<sup>+</sup> tumor-resident CD8<sup>+</sup> T cells are associated with improved survival in immunotherapy-naive melanoma patients and expand significantly during anti-PD-1 treatment
- - supporting evidence for strong literature conclusion of ICB inducing expansion of (CD8) T cells
 # CD4<sup>+</sup>CD25<sup>+</sup>CD127<sup>high</sup> cell frequency predicts disease progression in type 1 diabetes
  - patients with highest frequency of CD4<sup>+</sup>CD25<sup>+</sup>CD127<sup>high</sup> cells at diagnosis had longest partial remissions (common after diagnosis), **not sure how this connects to CD127 associating with worse outcome in non-naive CD8s...**
  - **also see higher probability of response to antiinflammatory drug alefacept in T1DAL with more CD127<sup>high</sup> cells... I think CD4s still here though**
@@ -453,6 +453,30 @@
  - CD49a<sup>-</sup> CD8 Trms produce IL-17
 # CD4 T cells and toxicity from immune checkpoint blockade
  - review of a paper I've read
+# CD56<sup>bright</sup> natural killer cells are present in human lymph nodes and are activated by T cell-derived IL-2: a potential link between adaptive and innate immunity
+ - CD56<sup>bright</sup> NK cells constitutively express IL-2R, produces immunoregulatory cytokines (like IFN-gamma in response to IL2)
+# CD56<sup>bright</sup> natural killer cells preferentially kill proliferating CD4<sup>+</sup> T cells
+ - CD56<sup>bright</sup> and CD56<sup>dim</sup> NKs have similar killer efficiency against activated CD4<sup>+</sup> conventional T cells and Tregs, but CD56<sup>bright</sup> NKs killer target proliferating T cells
+ - **they hypothesize that CD56<sup>bright</sup> NKs have immunoregulatory role through elimination of proliferating autoreactive CD4 Tconv T cells that have escaped Treg suppression**
+# CD56<sup>bright</sup> NK cells exhibit potent antitumor responses following IL-15 priming
+ - classically, CD56<sup>bright</sup> NKs thought to be involved in immunomodulation and CD56<sup>dim</sup> NKs thought to mediate anti-tumor responses
+ - here, they show that brief IL-15 priming enhances anti-tumor response of CD56<sup>bright</sup> NKs
+# CD56<sup>bright</sup> natural killer (NK) cells: an important NK cell subset
+ - CD56<sup>bright</sup> NK cells are minority (of NK) in blood but majority in secondary lymphoid tissue
+ - abundant cytokine producers, weakly cytotoxic until activation
+ - probable immediate precursors of CD56<sup>dim</sup> NKs
+ - CD56 is an adhesion molecule mediating homotypic adhesion
+ - most CD56<sup>bright</sup> are CD16<sup>-</sup> but some are CD16<sup>dim</sup>
+ - lack KIRs but express NKG2A/CD94 (IR)
+ - express CD117 (hematopoietic stem cell marker) and high affinity IL-2R
+ - proliferate in response to IL-2 (very sensitive) and IL-21
+ - also express IL1RI, IL18R
+ - express CCR7, CXCR3
+ - express CD2, CD11c, CD44, CD49e, CD54, CD62L (adhesion molecules)
+ - lacks CD57, CD160
+ - expresses CD55, CD59 (regulatory proteins)
+ - HLA-DR<sup>+</sup>
+ - less cytotoxic than CD56<sup>dim></sup> NKs but produce more cytokines (IFN-gamma in response to IL-12/IL-18, TNF-alpha, GM-CSF, IL-10, IL-13)
 # CD8<sup>+</sup> CD103<sup>+</sup> PD1<sup>+</sup> TIM3<sup>+</sup> T cells in glioblastoma microenvironment correlate with prognosis
  - Trm cells
 # CD8<sup>+</sup> lymphocyte infiltration is a specific feature of colitis induced by immune checkpoint inhibitors
@@ -554,6 +578,8 @@
  - CAR T cells (chimeric antigen receptor T cells): extracellular ligand recognition domain (single chain variable fragment, ScFv) fused to signaling domain of CD3z, intracellular costimulatory molecule (CD28, 4-1BB, ICOS, CD40, or CD27)
 # Chromatin accessibility profiling by ATAC-seq
  - success of ATAC-seq library generation determined by enrichment of transposase insertions in accessible chromatin (signal:background, **most important QC metric, can test with TSS enrichment score as TSSs known to be accessible**), unique fragments number (library complexity), ratio of reads mapping to nuclear genome versus those mapping to mitochondrial genome (undesired), and fragment size distribution
+# Circulating CD56<sup>bright</sup> NK cells inversely correlate with survival of melanoma patients
+ - abundance of CD56<sup>bright</sup> NKs negatively correlates with patient survival 
 # Circulating pre-treatment T cell repertoire as a predictive biomarker in advanced or metastatic non-small-cell lung cancer patients treated with pembrolizumab alone or in combination with chemotherapy
  - association between reduced number of unique clones and clinical benefit for pembrolizumab, but for pembrolizumab with chemotherapy see opposite effect
  - reduced number of pre-treatment unique clones could mean enrichment for tumor-specific T cells (good response to treatment)
@@ -1369,6 +1395,12 @@
  - as previously seen
 ### Negative selection against many peptides results in TCR sequences with peptide contact residues enriched in weakly interacting amino acids
  - when there are many peptides in thymus, CDR3s of TCRs enriched in amino acids that interact weakly with other amino acids, strong interactions in the case where there are few peptides in thymus
+# Human CD56<sup>bright</sup> NK cells: an update
+ - CD56<sup>bright</sup> can become cytotoxic upon activation
+ - CD56<sup>bright</sup> predominate (vs. CD56<sup>dim</sup>) in secondary lymphoid tissue
+ - NK cells are considered pathogenic in RA
+ - CD56<sup>bright</sup> CD62L<sup>+</sup> in periphery and negative in tissue
+ - **CD56<sup>bright</sup> NKs increased in synovial fluid of RA patients and cutaneous lesions of psoriasis patients**
 # Human leukocyte antigen genotype association with the development of immune-related adverse events in patients with non-small cell lung cancer treated with single agent immunotherapy
  - **homozygosity at >= 1 HLA-I locus associated with reduced irAE risk, perhaps due to less diverse peptide presentation i.e. less self-peptides presented**
  - HLA-A3 supertype (incuding various similar HLA-A alleles) associated with increased irAE risk
@@ -2219,6 +2251,9 @@
  - NKs are part of the innate immune system but are similar to cytotoxic T cells, they lack antigen specificity and are usually short-lived (< 10 days), so their exhaustion is likely less important
  - there are long-lived, somewhat antigen-specific NKs with memory recall though
  - B cell exhaustion: weaker antibody response (inhibited normal function)
+# NK cells CD56<sup>bright</sup> and CD56<sup>dim</sup> subset cytokine loss and exhaustion is associated with impaired survival in melanoma
+ - NKs are innate immune cells with many similarities with T cells, however their activation is based on integration of signals recognizing PAMPs (pathogen-associated molecular patterns)
+ - newly diagnosed melanoma patients have NKs shifted towards CD56<sup>bright</sup> but dysfunctional cytotoxic phenotype
 # Nonlinear dynamics of multi-omics profiles during human aging
  - nonlinear important here given acceleration of mortality risk after specific time points
  - methods ideas for NCI irAE longitudinal data
@@ -3260,6 +3295,8 @@
  - deleting Trib1 shifts Tex towards intermediate state (CX3CR1<sup>+</sup>) with enrichment of KLR<sup>+</sup> CD8s via clonal expansion, augmented PD-L1 blockade to improve viral clearance by expanding KLR CD8 population
 # The relationship between hydrophobicity and drug-protein binding in human serum albumin: a quartz crystal microbalance study
  - positive correlation between drug hydrophobicity and binding strength to human serum albumin, **perhaps in contrast to hypothesis of increased crossreactivity from more hydrophobic TCRs, assuming increased crossreactivity means lower strength binding for each or a lower possible maximum...**
+# The role of CD56<sup>bright</sup> NK cells in neurodegenerative disorders
+ - CD56<sup>bright</sup> NK cells are potent cytokine secretors, more immunomodulatory, less terminally differentiated than more cytotoxic CD56<sup>dim</sup> counterparts
 # The role of immune checkpoints in antitumor response: a potential antitumor immunotherapy
  - tumor cells primarily employ altered expression of HLA to avoid immune recognition and antitumor immune response (induced by strong immune pressure of CTLs leadin g to development of tumor variants with deregulated expression of classical and non-classical HLA-I molecules to evade immune system)
  - IL-2 and IL-2R expressed by T cells following dual signal activation (pMHC-TCR and CD80/86 on APC with CD28 on T cell) to regulate clonal expansion
