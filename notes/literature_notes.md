@@ -188,7 +188,7 @@
 ## Highlights
  - association between irAEs and clinical benefit across all solid tumors regardless of ICI type
 ## Abstract
- - grade 3 or higher irAEs (severe irAEs) resulted in better objective response rate but worse overall survival
+ - **grade 3 or higher irAEs (severe irAEs) resulted in better objective response rate but worse overall survival**
 ## Introduction
  - ICIs can unleash T cells with subsequent production of pro-inflammatory cytokines like interferon γ, TNF, can result in excessive off-tumor inflammation and autoimmunity
 # Association between immune-related adverse events and efficacy and changes in the relative eosinophil count among patients with advanced urothelial carcinoma treated by pembrolizumab
@@ -404,6 +404,9 @@
  - IL-7 may provide early activating signals for T cells, so reduced IL-7 signaling promotes IR expression
 # Broad TCR repertoire and diverse structural solutions for recognition of an immunodominant CD8<sup>+</sup> T cell epitope
  - many distinct TCRs recognizing HLA-A2-M1 (pMHC) here, solution to specifically recognizing a relatively featureless peptide antigen
+# Cancer and treatment specific incidence rates of immune-related adverse events reduced by immune checkpoint inhibitors: a systematic review
+ - neurological irAEs are rare
+ - combination ICI produces more frequent and more severe irAEs
 # Cancer immunotherapy based on mutation-speciifc CD4<sup>+</sup> T cells in a patient with epithelial cancer
  - find TILs from patient with metastatic cholangiocarcinoma had CD4<sup>+</sup> T<sub>H</sub>1 cells recognizing mutation in ERBB2IP expressed by cancer (neoantigen)
 # Canonical correlation analysis for multi-omics: application to cross-cohort analysis
@@ -1572,6 +1575,7 @@
  - see more antitumor response in irAE group compared to non-irAE group, irAE associated with progression-free survival but not with overall survival
 # Immune-related adverse events as potential surrogates of immune checkpoint inhibitors' efficacy: a systematic review and meta-analysis of randomized studies
  - **low strength correlation between ICI therapy effects and overall/specific irAE rates (< 1/3 of variability in anti-tumor response from ICI explained by variability in irAE incidence from ICI), seems less robust here than what I thought from other studies**
+ - **this is one of few/only randomized clinical trials asking the question about association between irAE development and response to ICI (previous evidence that I was more familiar with was observational studies and even then association was only observed sometimes)**
 # Immune-related adverse events in checkpoint blockade: observations from human tissue and therapeutic considerations
  - dysregulated cytokines (IFNγ and TNF) in irAE tissue
  - high T cell infiltration in irAE tissue
@@ -1776,7 +1780,7 @@
 ### Patients who developed vitiligo during immunotherapy have a diverse frequency of circulating immune cells
  - 12 ICB responder patients
  - reduction of circulating CD8-mucosal associated invariant T (MAIT), T helper (Th)-17, and T-reg cells associated with vitiligo onset
- - reduction in natural killer (NK) CD56<sup>bright</sup> cell frequency was detected during treatment in both patient groups, suggesting an association with a positive clinical response
+ - reduction in natural killer (NK) CD56<sup>bright</sup> cell frequency was detected during treatment in both patient groups **(those developing AND those not developing vitiligo, so not very consistent with NCI irAE project model as here it seems like an ICI effect not an ICI-irAE-group effect)**, suggesting an association with a positive clinical response
  - reduction in frequency of PD-1 expressing CD3<sup>+</sup>, CD4<sup>+</sup>, CD8<sup>+</sup>, Th1, Th1/17 cells in all patients, moreso for those not developing vitiligo
 ### T cells infiltrating immunotherapy-induced vitiligo share V(D)J rearrangements with T cells infiltrating metastasis lesions and primary melanomas
  - TRB CD3 sequencing on vitiligo biopsies, also do TCR-seq on PBMCs
