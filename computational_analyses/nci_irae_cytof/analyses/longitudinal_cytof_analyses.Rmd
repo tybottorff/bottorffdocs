@@ -623,6 +623,16 @@ plot_df_combined <- plot_df_combined %>%
     TRUE ~ as.character(status)  # For any other status, leave it as is
   ))
 
+# set facet order
+plot_df_combined <- plot_df_combined %>%
+  mutate(comparison = factor(comparison, levels = c(
+    "group", 
+    "skin_irae", 
+    "pneumonitis_irae", 
+    "rheumatoid_irae", 
+    "thyroid_irae"
+  )))
+
 facet_labels <- c(
   group = "Combined irAE",
   thyroid_irae = "Thyroid irAE",
