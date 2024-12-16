@@ -1730,17 +1730,27 @@ highlight_columns <- c(
   "PC3_rheumatoid"
 )
 
-filtered_data <- merged_data[, colnames(merged_data) %in% highlight_columns, drop = FALSE]
+filtered_data <- merged_data[, colnames(merged_data) %in% highlight_columns, drop = FALSE] %>%
+  # get rid of subsets that are always very low weighted in PCs
+  filter(if_any(everything(), ~ . > 10))
 
-# Replace any NA values with 0
-#filtered_data[is.na(filtered_data)] <- 0
+# Reorder columns: combined, skin, rheumatoid, thyroid, pneumonitis
+desired_order <- c(
+  "PC2_combined",
+  "PC3_skin",
+  "PC1_rheumatoid", "PC3_rheumatoid",
+  "PC1_thyroid", "PC2_thyroid",
+  "PC1_pneumonitis", "PC2_pneumonitis", "PC3_pneumonitis"
+)
+
+filtered_data <- filtered_data[, desired_order, drop = FALSE]
 
 filtered_data <- filtered_data %>%
   mutate(MaxValue = apply(., 1, function(x) max(x, na.rm = TRUE))) %>%  # Compute the max value per row, ignoring NA values
   arrange(desc(MaxValue)) %>%   # Order rows by the max value in descending order
   select(-MaxValue) # Remove the temporary MaxValue column
 
-# Clean up feature names (replace dots with spaces for clarity)
+# Clean up feature names (replace dots with spaces)
 rownames(filtered_data) <- gsub("\\.", " ", rownames(filtered_data))
 
 # Extract irAE_type and PC number from column names
@@ -1750,11 +1760,11 @@ column_annotations <- data.frame(
 )
 
 column_annotations$irAE_type <- factor(column_annotations$irAE_type, 
-                                       levels = c("combined", "skin", "thyroid", "pneumonitis", "rheumatoid"))
+                                       levels = c("combined", "skin", "rheumatoid", "thyroid", "pneumonitis"))
 
 # Define colors for column annotations
 annotation_colors <- list(
-  irAE_type = c("combined" = "black", "skin" = "red", "thyroid" = "blue", "pneumonitis" = "green", "rheumatoid" = "pink"),
+  irAE_type = c("combined" = "black", "skin" = "red", "rheumatoid" = "pink", "thyroid" = "blue", "pneumonitis" = "green"),
   PC = c("1" = "#440154FF", "2" = "#21908CFF", "3" = "#FDE725FF")
 )
 
@@ -1768,11 +1778,15 @@ col_anno <- HeatmapAnnotation(
   col = annotation_colors
 )
 
-specific_features <- c("naive of Bcells", "swMem of Bcells", "PD1pos of NKcells", "plasmablasts of Bcells", "CCR4pos of NN Tconv Tcells", "CD4 of Tcells")
+specific_features <- c("naive of Bcells", "swMem of Bcells", "PD1pos of NKcells", "plasmablasts of Bcells", "CCR4pos of NN Tconv Tcells", "CD4 of Tcells", "gd of Tcells", "naive of Treg Tcells")
 
 row_split <- ifelse(rownames(filtered_data) %in% specific_features, 
                     "irAE-type-\nspecific", 
                     "General")
+
+# split cols as well
+column_split <- factor(c(rep("SCM of Tconv Tcells important", 4), rep("CD56bright of NKcells important", ncol(filtered_data) - 4)),
+                       levels = c("SCM of Tconv Tcells important", "CD56bright of NKcells important"))
 
 # Create the heatmap with annotations for both the irAE type and PC number
 p <- Heatmap(filtered_data, 
@@ -1786,8 +1800,9 @@ p <- Heatmap(filtered_data,
         heatmap_legend_param = list(title = "PC weights (%)"),
         # split rows based on irAE-type-specific or not
         row_split = row_split,
+        column_split = column_split,
         show_row_names = TRUE,
-        column_title = "irAE group comparisons for PCs that showed group separation")
+        column_title = "Subsets in modules for PCs that show irAE group separation")
 
 # Save the heatmap to a PDF file
 pdf(file = "../figures/irae_types_contributing_features_highlighted.pdf", width = 10, height = 5)  # Adjust width and height as needed
