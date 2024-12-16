@@ -2,10 +2,11 @@
 1. prepare Josh asks for 12/18 BLoCK meeting and 12/20 manuscript update
 2. Work off of Basilin code: https://github.com/BenaroyaResearch/bbenson_P348-4_CD127_study and cleaned data files: https://bri.app.box.com/folder/252653634612?s=p41fdszbkpzxp03ljnrratv17dmi3j1c
 3. top priority: re-try ADT-clustering at higher number of clusters (> 9, Josh recommended param of 1 rather than 0.2, 0.5, or 0.7) to hopefully split TIGIT-CD127+ cluster into 2 where 1 is "super-bad", share heatmap with Josh to identify super-bad cluster, then get DEGs of that vs. others, then re-try that in Kirsten's data
-4. scRNAseq figure
+4. check what ADT markers Kevin Harold's recent scRNAseq/TCRseq paper used for totalseq (CITEseq?): https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse271063. .tar file at /Users/tybottorff/git/P576-1_Long_Linsley_ITN_ATAC/saved_data/GSE271063_RAW.tar
+5. scRNAseq figure
  - gene expr heatmap: columns as clusters, rows as genes, split rows by gene set (cytotoxicity, differentiation, proliferation, stemness, progenitor/effector Tex)
  - VP of cluster 2 vs. all other DEGs, colored by gene set(s) of interest, showing specific hits of interest (like ADT markers)
-5. lineage figure
+6. lineage figure
  - RNAseq UMAP
  - pseudotime (naive cluster 6 as root), expression of gene sets over pseudotime, psueodtime values by cluster
  - RNA velocity
@@ -15,15 +16,15 @@
  - telomerase gene set
  - revisit MT SNV sharing analyses (Upset plot), try null to compare against for over/under-representation, donors as replicates
  - re-share both models with Josh for him to include both
-6. MAIT angle
+7. MAIT angle
  - check TCR data to see by cluster if MAITs (invariant α-chain (TRAV1-2-TRAJ33/12/20)) enriched in TIGIT-CD127+ cluster
  - MAIT gene set
  - did Basilin remove MAITs?
-7. Fix P348 vs. P384 designation everywhere
-8. Check out Josh's box
-9. check overlap between RNAseq/AbATE DEGs/DARs with age-associated genes
-10. read about cell state vs. population: https://pmc.ncbi.nlm.nih.gov/articles/PMC4579334/
-11. testing CD127 gene set in Sam's BRI dataset, work from .rds file in box https://bri.app.box.com/folder/297230421497, share results w/ Sam too
+8. Fix P348 vs. P384 designation everywhere
+9. Check out Josh's box
+10. check overlap between RNAseq/AbATE DEGs/DARs with age-associated genes
+11. read about cell state vs. population: https://pmc.ncbi.nlm.nih.gov/articles/PMC4579334/
+12. testing CD127 gene set in Sam's BRI dataset, work from .rds file in box https://bri.app.box.com/folder/297230421497, share results w/ Sam too
 
 # Other TODOs
  - try custom background for GSEA
