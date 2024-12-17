@@ -557,7 +557,7 @@ topTable(efit, coef="irae_comparison", n=Inf)
 # skin irAEs: several hits with padj < 0.1
 # padj < 0.01 CD11c+ of Bcells (this had padj just over 0.05 with limma::removeBatchEffects), Bcells of nongrans, Tcells of nongrans
 # padj < 0.05: NKcells of nongrans, CXCR3+ of NN Tconv Tcells, CXCR3+CCR6+ of NN Tconv Tcells, naive of Treg Tcells, CCR4+ of NN CD8 Tcells
-# padj < 0.05 & see these also with limma:removeBatchEffects & stats after that on adjusted data: CM of Tconv Tcells, DN of Bcells, CM of CD8 Tcells
+# padj < 0.05 & see these also with limma::removeBatchEffects & stats after that on adjusted data: CM of Tconv Tcells, DN of Bcells, CM of CD8 Tcells
 
 # thyroid irAEs: no features w/ padj < 0.1
 # pneumonitis: no features w/ padj < 0.1
@@ -607,7 +607,17 @@ adjusted_data <- adjusted_data %>%
   # although using all data to remove batch effect, will be focusing on baseline cancer data for now
   filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE"))
 
-adjusted_data
+adjusted_data %>%
+  pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info), names_to = "sort", values_to = "value") %>%
+  group_by(sort) %>%
+  summarize(
+    Test_Type = if(all(shapiro.test(value[skin_irae == "No skin irAE"])$p.value > 0.05,
+                       shapiro.test(value[skin_irae == "Skin irAE"])$p.value > 0.05)) "t-test" else "Wilcoxon",
+    pval = if(Test_Type == "t-test") t.test(value ~ skin_irae)$p.value else wilcox.test(value ~ skin_irae)$p.value,
+    .groups = "drop"
+  ) %>%
+  mutate(padj = p.adjust(pval, method = "BH")) %>%
+  arrange(pval)
 
 ```
 
@@ -830,7 +840,7 @@ wide_baseline_flow_metadata_confounders_regressed_out <- adjusted_data[, 1:16] %
 
 # instead of filtering for no NA, remove features in na_ridden_features list and impute rest of NAs
 # instead of using stats df-way of selecting top features, take them from random forest analysis: SCM of Tconv Tcells, DN of Tcells, EM of CD8s, Tcells of nonGrans
-wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(`SCM of Tconv Tcells`, `DN of Tcells`, `EM of CD8 Tcells`, `Tcells of nonGrans`)
+wide_baseline_flow_num_data_confounders_regressed_out <- adjusted_data[, 17:ncol(adjusted_data)] %>% select(-na_ridden_features) %>% mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% select(stats_df$sort)
 
 #dim(wide_baseline_flow_num_data_confounders_regressed_out)
 
@@ -883,8 +893,8 @@ top_contributing_features_PC3 <- pca_contributions %>%
 p <- ggplot(data = pcaData) +
   geom_hline(yintercept = 0, linetype = 2, color = "grey") +
   geom_vline(xintercept = 0, linetype = 2, color = "grey") +
-  geom_point(aes(x = PC1, y = PC2, color = group), size = 2, alpha = 0.8) + 
-  stat_ellipse(aes(x = PC1, y = PC2, color = group), size = 1, linetype = 2) +
+  geom_point(aes(x = PC1, y = PC3, color = group), size = 2, alpha = 0.8) + 
+  stat_ellipse(aes(x = PC1, y = PC3, color = group), size = 1, linetype = 2) +
   labs(color = "") +
   theme_bw() +
   theme(
@@ -897,7 +907,7 @@ p <- ggplot(data = pcaData) +
   guides(
     color = guide_legend(nrow = 2, byrow = TRUE),  # Use 2 rows for color legend
   ) +
-  labs(x = pcaLabels_[1], y = pcaLabels_[2])
+  labs(x = pcaLabels_[1], y = pcaLabels_[3])
 
 p
 
@@ -914,7 +924,7 @@ res
 styled_table <- pca_contributions %>%
   rename(PC1 = Dim.1, PC2 = Dim.2, PC3 = Dim.3) %>%
   mutate(PC1 = round(PC1, 3), PC2 = round(PC2, 3), PC3 = round(PC3, 3)) %>%
-  select(PC2) %>%
+  select(PC1, PC3) %>%
   kable("html") %>%
   kable_styling(full_width = FALSE, # Adjust width if needed
                 bootstrap_options = c("striped", "hover", "condensed", "responsive"), # Add styling options
@@ -922,6 +932,8 @@ styled_table <- pca_contributions %>%
 
 html_file <- "../figures/combined_irae_pca_contributions_table.html"
 save_kable(styled_table, file = html_file)
+
+# PC1 0.04, PC3 0.003
 
 ```
 
@@ -948,25 +960,25 @@ for (i in 1:num_iterations) {
   # Perform PCA
   pca <- prcomp(pca_data, center = TRUE, scale. = TRUE)
   pca_scores <- as.data.frame(pca$x)
-  pca_scores$skin_irae <- adjusted_data$skin_irae
+  pca_scores$group <- adjusted_data$group
   
   # Test for differences between groups on PCA axes
   pc1_pval <- if (shapiro.test(pca_scores$PC1)$p.value > 0.05) {
-    t.test(PC1 ~ skin_irae, data = pca_scores)$p.value
+    t.test(PC1 ~ group, data = pca_scores)$p.value
   } else {
-    wilcox.test(PC1 ~ skin_irae, data = pca_scores)$p.value
+    wilcox.test(PC1 ~ group, data = pca_scores)$p.value
   }
   
   pc2_pval <- if (shapiro.test(pca_scores$PC2)$p.value > 0.05) {
-    t.test(PC2 ~ skin_irae, data = pca_scores)$p.value
+    t.test(PC2 ~ group, data = pca_scores)$p.value
   } else {
-    wilcox.test(PC2 ~ skin_irae, data = pca_scores)$p.value
+    wilcox.test(PC2 ~ group, data = pca_scores)$p.value
   }
   
   pc3_pval <- if (shapiro.test(pca_scores$PC3)$p.value > 0.05) {
-    t.test(PC3 ~ skin_irae, data = pca_scores)$p.value
+    t.test(PC3 ~ group, data = pca_scores)$p.value
   } else {
-    wilcox.test(PC3 ~ skin_irae, data = pca_scores)$p.value
+    wilcox.test(PC3 ~ group, data = pca_scores)$p.value
   }
   
   # Record results
@@ -989,20 +1001,22 @@ results_df <- bind_rows(lapply(results, function(x) {
 }))
 
 # combined: 1 < 0.01 --> p < 0.05 here for monte carlo
-# skin just 1 < 0.05 --> p > 0.05 here for monte carlo (if using random forest module, if using top 4 by pval arranging then p < 0.01...)
+# skin just 1 < 0.05 --> p < 0.01
 # pneumonitis 2/3 < 0.001 and other < 0.01 --> p < 0.01 here for monte carlo (not surprising given 2 features statistically significant at baseline, so module works great really only if likely having these 2)
 # rheumatoid 2 < 0.01 --> p < 0.01
 # thyroid 1 < 0.001 and 1 < 0.05 --> p < 0.01 as well
 
+
+# so at least 1 < 0.05 and at least 1 < 0.01
 # Filter for significant results
 significant_results <- results_df %>%
   #filter(PC1_pval < 0.01 | PC2_pval < 0.01 | PC3_pval < 0.01)
-  filter((PC1_pval < 0.05) + (PC2_pval < 0.05) + (PC3_pval < 0.05) >= 2)
-  #filter(
-  #  (PC1_pval < 0.001 & (PC2_pval < 0.05 | PC3_pval < 0.05)) |
-  #  (PC2_pval < 0.001 & (PC1_pval < 0.05 | PC3_pval < 0.05)) |
-  #  (PC3_pval < 0.001 & (PC1_pval < 0.05 | PC2_pval < 0.05))
-  #)
+  #filter((PC1_pval < 0.05) + (PC2_pval < 0.05) + (PC3_pval < 0.05) >= 2)
+  filter(
+    (PC1_pval < 0.01 & (PC2_pval < 0.05 | PC3_pval < 0.05)) |
+    (PC2_pval < 0.01 & (PC1_pval < 0.05 | PC3_pval < 0.05)) |
+    (PC3_pval < 0.01 & (PC1_pval < 0.05 | PC2_pval < 0.05))
+  )
 
 significant_results
 
@@ -1424,7 +1438,7 @@ p <- plot_data %>%
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(color = "black", size = 0.5) +
   facet_wrap(~ sort) +
-  labs(x = "", y = "Residuals", fill = "Pneumonitis group") +
+  labs(x = "", y = "Batch-adjusted,\nnormalized frequency", fill = "Pneumonitis group") +
   theme(axis.text.x = element_blank(),
         strip.text = element_text(size = 12))
 
@@ -1710,8 +1724,9 @@ rownames(merged_data) <- all_features
 
 # p < 0.05
 highlight_columns <- c(
-  # For general, PC2
-  "PC2_combined", 
+  # For general, PCs1/3
+  "PC1_combined", 
+  "PC3_combined",
 
   # For thyroid, PCs 1-2
   "PC1_thyroid",
@@ -1736,7 +1751,8 @@ filtered_data <- merged_data[, colnames(merged_data) %in% highlight_columns, dro
 
 # Reorder columns: combined, skin, rheumatoid, thyroid, pneumonitis
 desired_order <- c(
-  "PC2_combined",
+  "PC1_combined",
+  "PC3_combined",
   "PC3_skin",
   "PC1_rheumatoid", "PC3_rheumatoid",
   "PC1_thyroid", "PC2_thyroid",
@@ -1778,15 +1794,15 @@ col_anno <- HeatmapAnnotation(
   col = annotation_colors
 )
 
-specific_features <- c("naive of Bcells", "swMem of Bcells", "PD1pos of NKcells", "plasmablasts of Bcells", "CCR4pos of NN Tconv Tcells", "CD4 of Tcells", "gd of Tcells", "naive of Treg Tcells")
+specific_features <- c("naive of Bcells", "swMem of Bcells", "PD1pos of NKcells", "plasmablasts of Bcells", "CCR4pos of NN Tconv Tcells", "CD4 of Tcells", "gd of Tcells", "Tcells of nonGrans")
 
 row_split <- ifelse(rownames(filtered_data) %in% specific_features, 
                     "irAE-type-\nspecific", 
                     "General")
 
 # split cols as well
-column_split <- factor(c(rep("SCM of Tconv Tcells important", 4), rep("CD56bright of NKcells important", ncol(filtered_data) - 4)),
-                       levels = c("SCM of Tconv Tcells important", "CD56bright of NKcells important"))
+#column_split <- factor(c(rep("SCM of Tconv Tcells important", 5), rep("CD56bright of NKcells important", ncol(filtered_data) - 5)),
+#                       levels = c("SCM of Tconv Tcells important", "CD56bright of NKcells important"))
 
 # Create the heatmap with annotations for both the irAE type and PC number
 p <- Heatmap(filtered_data, 
@@ -1800,7 +1816,7 @@ p <- Heatmap(filtered_data,
         heatmap_legend_param = list(title = "PC weights (%)"),
         # split rows based on irAE-type-specific or not
         row_split = row_split,
-        column_split = column_split,
+        #column_split = column_split,
         show_row_names = TRUE,
         column_title = "Subsets in modules for PCs that show irAE group separation")
 
@@ -1893,37 +1909,52 @@ irae_group <- df %>% dplyr::filter(group == "irAE/SAE")
 no_irae_group <- df %>% dplyr::filter(group == "non-irAE")
 
 non_feature_cols <- c("patient_id", "group", "specific_group", "irae_ex", "Batch", 
-                      "age", "ctcae_grade", "thyroid_irae", "thyroid_irae_including_oor", "skin_irae", "days_to_irae", "thyroid_cat")
+                      "age", "ctcae_grade", "thyroid_irae", "thyroid_irae_including_oor", "skin_irae", "days_to_irae", "thyroid_cat", "cancer_type", "cleaned_visit_info", "pneumonitis_irae", "rheumatoid_irae", "gastro_irae", "pneumonitis_irae_including_effusion")
 feature_columns <- setdiff(colnames(df), non_feature_cols)
 
-# Calculate mean residuals for each feature
-irae_means <- (irae_group %>% select(all_of(feature_columns)) %>% summarise_all(mean))
-no_irae_means <- no_irae_group %>% select(all_of(feature_columns)) %>% summarise_all(mean)
+# Calculate mean residuals for each feature to use for FC
+irae_means <- (irae_group %>% select(all_of(feature_columns)) %>% summarise_all(mean, na.rm = TRUE))
+no_irae_means <- no_irae_group %>% select(all_of(feature_columns)) %>% summarise_all(mean, na.rm = TRUE)
 
-abs_diff <- (as.numeric(irae_means) - as.numeric(no_irae_means))
-#log2_fc <- sign(fc) * log2(abs(fc))
+log2_fc <- log2(as.numeric(irae_means) / as.numeric(no_irae_means))
 
 pvals <- sapply(feature_columns, function(feature) {
-  wilcox.test(irae_group[[feature]], no_irae_group[[feature]])$p.value
+  ir_values <- na.omit(irae_group[[feature]])
+  no_ir_values <- na.omit(no_irae_group[[feature]])
+  
+  # Check for normality using Shapiro-Wilk test
+  ir_normal <- shapiro.test(ir_values)$p.value > 0.05
+  no_ir_normal <- shapiro.test(no_ir_values)$p.value > 0.05
+
+  # Use t.test if both groups are normally distributed, otherwise use wilcox.test
+  if (ir_normal && no_ir_normal) {
+    t.test(ir_values, no_ir_values)$p.value
+  } else {
+    wilcox.test(ir_values, no_ir_values)$p.value
+  }
 })
 
 padj <- p.adjust(pvals, method = "BH")
 
 volcano_df <- data.frame(
   feature = feature_columns,
-  abs_diff = abs_diff,
+  log2_fc = log2_fc,
+  pval = pvals,
   padj = padj,
   neg_log10_padj = -log10(padj)
 )
 
-ggplot(volcano_df, aes(x = abs_diff, y = neg_log10_padj)) +
-  geom_point(aes(color = padj < 0.1)) +
-  theme_minimal() +
-  labs(x = "irAE/SAE vs. no irAE (absolute difference in mean of residuals)", y = "-log10(padj)") +
+p <- ggplot(volcano_df, aes(x = log2_fc, y = neg_log10_padj)) +
+  geom_point(aes(shape = padj < 0.1), color = "black") +
+  labs(x = "Log2 fold change", y = "-log10 adjusted p value") +
   geom_vline(xintercept = 0, linetype = "dashed") + # Vertical line at 0 fold change +
   geom_hline(yintercept = -log10(0.1), linetype = "dashed") + # horizontal line at sig threshold
-  geom_text_repel(data = subset(volcano_df, padj < 0.35), 
-                  aes(label = feature), size = 3, box.padding = 0.5, max.overlaps = 10)
+  geom_text_repel(data = subset(volcano_df, pval < 0.125), 
+                  aes(label = feature), size = 3, box.padding = 0.5, force = 3, max.overlaps = 10, nudge_y = 0.05)
+
+p
+
+ggsave("../figures/baseline_combined_irae_vp.png", width = 6, height = 4)
 
 ```
 
