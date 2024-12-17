@@ -1,7 +1,6 @@
 # High priority TODOs
 1. prepare Josh asks for 12/18 BLoCK meeting and 12/20 manuscript update
 2. Work off of Basilin code: https://github.com/BenaroyaResearch/bbenson_P348-4_CD127_study and cleaned data files: https://bri.app.box.com/folder/252653634612?s=p41fdszbkpzxp03ljnrratv17dmi3j1c
-3. top priority: re-try ADT-clustering at higher number of clusters (> 9, Josh recommended param of 1 rather than 0.2, 0.5, or 0.7) to hopefully split TIGIT-CD127+ cluster into 2 where 1 is "super-bad", share heatmap with Josh to identify super-bad cluster, then get DEGs of that vs. others, then re-try that in Kirsten's data
 4. check what ADT markers Kevin Harold's recent scRNAseq/TCRseq paper used for totalseq (CITEseq?): https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse271063. .tar file at /Users/tybottorff/git/P576-1_Long_Linsley_ITN_ATAC/saved_data/GSE271063_RAW.tar
 5. scRNAseq figure
  - gene expr heatmap: columns as clusters, rows as genes, split rows by gene set (cytotoxicity, differentiation, proliferation, stemness, progenitor/effector Tex)
