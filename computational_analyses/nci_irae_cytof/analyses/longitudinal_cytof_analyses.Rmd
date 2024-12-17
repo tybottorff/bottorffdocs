@@ -361,6 +361,7 @@ projection_df <- projection_df %>%
 
 # Fit the GAM model with interaction between group and time
 model_interaction <- gam(projection ~ group + 
+                           s(days_from_baseline, k = 5, bs = "cr") + 
                            s(days_from_baseline, k = 5, bs = "cr", by = group) + 
                            s(patient_id, bs = "re"),
                          data = projection_df, method = 'REML')
@@ -417,13 +418,14 @@ fit_gam <- function(data) {
       # inspired by https://stats.stackexchange.com/questions/576499/how-to-compare-two-time-series-with-a-gam
       
       # Model with interaction between irAE group and time from baseline (separate smooths for each group)
-      model_interaction <- gam(freq ~ rheumatoid_irae + 
-                                 s(days_from_baseline, k = 5, bs = "cr", by = rheumatoid_irae) + 
+      model_interaction <- gam(freq ~ pneumonitis_irae + 
+                                 s(days_from_baseline, k = 5, bs = "cr") + 
+                                 s(days_from_baseline, k = 5, bs = "cr", by = pneumonitis_irae) + 
                                  s(patient_id, bs = "re"),
                                data = data, method = 'REML')
       
       # Model without interaction between irAE group and time from baseline (common smooth for both groups)
-      model_no_interaction <- gam(freq ~ rheumatoid_irae + 
+      model_no_interaction <- gam(freq ~ pneumonitis_irae + 
                                     s(days_from_baseline, k = 5, bs = "cr") + 
                                     s(patient_id, bs = "re"),
                                   data = data, method = 'REML')
@@ -452,12 +454,12 @@ gam_results <- map(data_by_sort, fit_gam)
 ```{r}
 
 gam_data <- model_data %>%
-  filter(sort == "EMRA.of.CD8.Tcells")
+  filter(sort == "CD56bright.of.NKcells")
 
 model <- gam(freq ~ group + s(days_from_baseline, k = 5, bs = "cr") + s(days_from_baseline, k = 5, bs = "cr", by = group) + s(patient_id, bs = "re"),
                    data = gam_data, method = 'REML')
 
-#gam.check(model)
+gam.check(model)
 
 summary(model)
 # looks well-fit (residuals ~straight line on QQ plot), histogram of residuals is normal
@@ -497,24 +499,13 @@ significant_pvals_comparison <- all_pvals_comparison %>%
 
 significant_pvals_comparison
 
-# combined irAE interaction effects padj < 0.01
-# EM.of.CD8.Tcells	, CD56bright.of.NKcells	
-# padj < 0.05
-# CM.of.Tconv.Tcells	, CM.of.CD8.Tcells	, SCM.of.Tconv.Tcells	, naive.of.Treg.Tcells	
+# just focusing on CD56bright of NK after fixing typo in GAM (Naresh pointed out at WIP practice talk)
 
-# skin: padj < 0.05, CD56bright.of.NKcells	, CXCR3pos.of.NN.CD8.Tcells	
-
-# pneumon: swMem.of.Bcells	padj < 10e-3 and pDC.of.nonGrans	 padj < 0.05
-
-# thyroid: a ton
-# padj < 0.01, CCR4pos.of.NN.CD8.Tcells	, CD4.of.Tcells	, CM.of.CD8.Tcells	
-# padj < 0.05
-# [1] "Bcells.of.nonGrans"        "CD8.of.Tcells"             "MAIT.of.NN.CD8.Tcells"     "GrzmBpos.of.NN.CD8.Tcells" "CD11cpos.of.Bcells"       
-# [6] "DP.of.Tcells"              "EM.of.CD8.Tcells"          "EMRA.of.Treg.Tcells"       "NKcells.of.nonGrans"       "swMem.of.Bcells"          
-# [11] "DN.of.Bcells"              "naive.of.Bcells"           "naive.of.CD8.Tcells"       "SCM.of.Tconv.Tcells"       "EMRA.of.CD8.Tcells"       
-# [16] "plasmablasts.of.Bcells" 
-
+# combined has other results besides CD56bright of NK
+# skin only has CD56bright of NK
 # rheumatoid: NONE
+# thyroid: stuff but no CD56bright of NK
+# pneumonitis: 2 results but no CD56bright of NK
 
 ```
 
@@ -536,13 +527,6 @@ plot_data <- adjusted_data %>%
     mutate(sort = gsub("\\.", " ", sort))
 
 # for thyroid
-# padj < 0.01, CCR4pos.of.NN.CD8.Tcells	, CD4.of.Tcells	, CM.of.CD8.Tcells	
-# padj < 0.05
-# [1] "Bcells.of.nonGrans"        "CD8.of.Tcells"             "MAIT.of.NN.CD8.Tcells"     "GrzmBpos.of.NN.CD8.Tcells" "CD11cpos.of.Bcells"       
-# [6] "DP.of.Tcells"              "EM.of.CD8.Tcells"          "EMRA.of.Treg.Tcells"       "NKcells.of.nonGrans"       "swMem.of.Bcells"          
-# [11] "DN.of.Bcells"              "naive.of.Bcells"           "naive.of.CD8.Tcells"       "SCM.of.Tconv.Tcells"       "EMRA.of.CD8.Tcells"       
-# [16] "plasmablasts.of.Bcells" 
-
 # just plot Bcell ones as this may be related to https://pmc.ncbi.nlm.nih.gov/articles/PMC5785243/
 
 p <- plot_data %>% dplyr::filter(sort %in% c("Bcells of nonGrans", "plasmablasts of Bcells")) %>% ggplot(aes(x = days_from_baseline, y = freq, color = thyroid_irae)) +
@@ -557,10 +541,7 @@ p
 
 ggsave("../figures/gam_results_thyroid.png", p, width = 8, height = 4)
 
-# combined irAE interaction effects padj < 0.01
-# EM.of.CD8.Tcells	, CD56bright.of.NKcells	
-# padj < 0.05
-# CM.of.Tconv.Tcells	, CM.of.CD8.Tcells	, SCM.of.Tconv.Tcells	, naive.of.Treg.Tcells	
+# combined irAE
 
 p <- plot_data %>% filter(sort %in% c("CD56bright of NKcells", "EM of CD8 Tcells", "SCM of Tconv Tcells", "naive of Treg Tcells")) %>% ggplot(aes(x = days_from_baseline, y = freq, color = group)) +
   geom_point(alpha = 0.75) +
@@ -574,9 +555,9 @@ p
 
 ggsave("../figures/gam_results_combined_irae.png", p, width = 8, height = 8)
 
-# skin: padj < 0.05, CD56bright.of.NKcells	, CXCR3pos.of.NN.CD8.Tcells	
+# skin: padj < 0.05
 
-p <- plot_data %>% filter(sort %in% c("CD56bright of NKcells", "CXCR3pos of NN CD8 Tcells")) %>% ggplot(aes(x = days_from_baseline, y = freq, color = skin_irae)) +
+p <- plot_data %>% filter(sort %in% c("CD56bright of NKcells")) %>% ggplot(aes(x = days_from_baseline, y = freq, color = skin_irae)) +
   geom_point(alpha = 0.75) +
   geom_smooth(aes(group = skin_irae),method = "gam",formula = y ~ s(x,k=3,bs="cr"),se=TRUE) +
   facet_wrap(~ sort, ncol = 2) +
@@ -588,7 +569,7 @@ p
 
 ggsave("../figures/gam_results_skin.png", p, width = 11, height = 4)
 
-# pneumon: swMem.of.Bcells	padj < 10e-3 and pDC.of.nonGrans	 padj < 0.05
+# pneumon
 
 p <- plot_data %>% filter(sort %in% c("swMem of Bcells", "pDC of nonGrans")) %>% ggplot(aes(x = days_from_baseline, y = freq, color = pneumonitis_irae)) +
   geom_point(alpha = 0.75) +
@@ -646,7 +627,7 @@ p <- ggplot(plot_df_combined, aes(x = days_from_baseline, y = freq, color = stat
   geom_smooth(aes(group = status_color), method = "gam", formula = y ~ s(x, k = 3, bs = "cr"), se = TRUE) +
   facet_wrap(~ comparison, ncol = 5, labeller = labeller(comparison = facet_labels)) +
   scale_color_manual(values = c("irAE" = "#f8766d", "non-irAE" = "#00bfc4")) +
-  labs(x = "Days from baseline", y = "CD56bright of NK\ncells (residuals)", color = "") +
+  labs(x = "Days from baseline", y = "CD56bright of NK\ncells (batch-adjusted,\nnormalized frequency)", color = "") +
   theme(strip.text = element_text(size = 13),
         axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
