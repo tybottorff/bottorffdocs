@@ -1,8 +1,7 @@
 # High priority TODOs
 1. try immunotype-shift analyses for other irAE types, also try incorporating HCs somehow, like do immunotypes move farther AWAY from HC in irAE group? could maybe also ask if immunotypes of rheumatoid-irAE patients moves closer to RA immunotype specifically...
 2. move NCI code to a github repo under BRI
-3. LDA/QDA: linear discriminant analysis, or QDA (quadratic…). for LDA could use severity for > 2 groups or could add a dummy 2nd axis
-because LDA returns clusters - 1 dimensions. dummy axis could be metadata, as long as all data has value
+3. LDA/QDA: linear discriminant analysis, or QDA (quadratic…). for LDA could use severity for > 2 groups or could add a dummy 2nd axis. because LDA returns clusters - 1 dimensions. dummy axis could be metadata, as long as all data has value
 4. modules: given monte carlo stuffs, change skin back to top 4 by pval module but only include in summary heatmap and include rheum/thyroid module stuffs just need to verbally share caveat that they lacked n to do random forest so they MAY be overfit (not that random forest immune to this... but perhaps less so)... was skin random forest module just bad AUCs? should I even include rheum/thyroid stuffs?
 5. figure out why there are NA pvals for ANOVA test for longitudinal analyses, how to reduce #?
 6. try grouping various specific irAEs together for analyses (like skin/pneumonitis, thyroid/rheumatoid…), for this maybe only look at singly-significant baseline features as the longitudinal analyses will be a little too data plentiful to wade through? could also try this for random forest (to increase n...)
