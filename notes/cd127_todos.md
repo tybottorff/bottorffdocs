@@ -1,12 +1,21 @@
 # High priority TODOs
-1. prepare Josh asks for 12/18 BLoCK meeting and 12/20 manuscript update
+1. prepare Josh asks for 12/20 manuscript update
 2. Work off of Basilin code: https://github.com/BenaroyaResearch/bbenson_P348-4_CD127_study and cleaned data files: https://bri.app.box.com/folder/252653634612?s=p41fdszbkpzxp03ljnrratv17dmi3j1c
-3. TOP PRIORITY: get DEGs of MAITs in cluster 1 vs. all other cells with TCRseq data (so pseudobulk by patient and get DEGs)
-4. check what ADT markers Kevin Harold's recent scRNAseq/TCRseq paper used for totalseq (CITEseq?): https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse271063. .tar file at /Users/tybottorff/git/P576-1_Long_Linsley_ITN_ATAC/saved_data/GSE271063_RAW.tar
-5. scRNAseq figure
+3. Kirsten's
+ - **count TIGIT-CD127+ (by RNA) cells across visits/between R/NR**
+4. need to determine if what Basilin did for filtering TCRs is necessary, or if we can just do what I used to do (Matt D. best person to ask, but otherwise get Peter's feedback in meantime...)
+5. MAITs:
+ - repeat analyses using Basilin's TCRseq filtering instead of mine
+ - also look at cluster 8 not just cluster 1
+ - at higher resolution (1.15), Josh will provide cluster numbers, compare MAIT % between them (split of cluster 1 from resolution 1.075 into 2 based on PD1 ADT), is one of these subclusters more MAIT?
+ - R/NR ATAC MAIT gene signature, like the comparison by sort by also facet/compare between R/NR
+6. scRNAseq figure
+ - replace CD127 gene set gotten using `FindMarkers` with pseudobulk DEG analysis
+ - heatmaps with cell averaged phenotypes, or feature heatmaps on UMAP
+ - still not satisfied with explanation for low variation genes in scRNAseq heatmaps
  - gene expr heatmap: columns as clusters, rows as genes, split rows by gene set (cytotoxicity, progenitor/effector Tex, MAIT)
  - VP of cluster 1 vs. all others DEGs, colored by gene set(s) of interest like cytotoxicity, progenitor/effector, MAIT, showing specific hits of interest (like ADT markers)
-6. lineage figure
+7. lineage figure
  - RNAseq UMAP
  - pseudotime (naive cluster 6 as root), expression of gene sets over pseudotime, psueodtime values by cluster
  - RNA velocity
@@ -16,11 +25,12 @@
  - telomerase gene set?
  - revisit MT SNV sharing analyses (Upset plot), try null to compare against for over/under-representation, donors as replicates
  - re-share both models with Josh for him to include both
-7. Fix P348 vs. P384 designation everywhere
-8. Check out Josh's box
-9. check overlap between RNAseq/AbATE DEGs/DARs with age-associated genes
-10. read about cell state vs. population: https://pmc.ncbi.nlm.nih.gov/articles/PMC4579334/
-11. testing CD127 gene set in Sam's BRI dataset, work from .rds file in box https://bri.app.box.com/folder/297230421497, share results w/ Sam too
+8. testing CD127 gene set in Sam's BRI dataset, work from .rds file in box https://bri.app.box.com/folder/297230421497, share results w/ Sam too
+9. check what ADT markers Kevin Harold's recent scRNAseq/TCRseq paper used for totalseq (CITEseq?): https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse271063. .tar file at /Users/tybottorff/git/P576-1_Long_Linsley_ITN_ATAC/saved_data/GSE271063_RAW.tar
+10. Fix P348 vs. P384 designation everywhere
+11. Check out Josh's box
+12. check overlap between RNAseq/AbATE DEGs/DARs with age-associated genes
+13. read about cell state vs. population: https://pmc.ncbi.nlm.nih.gov/articles/PMC4579334/
 
 # Other TODOs
  - try custom background for GSEA
