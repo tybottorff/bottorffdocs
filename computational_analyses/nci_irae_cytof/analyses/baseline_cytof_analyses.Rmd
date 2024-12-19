@@ -627,6 +627,8 @@ adjusted_data %>%
 ```{r}
 
 lmer_df <- flow_data %>%
+  # temporarily filter for baseline data to compare methods of dealing with batch effects
+  #dplyr::filter(cleaned_visit_info == "baseline", group %in% c("non-irAE", "irAE/SAE")) %>%
   mutate(freq = logitNorm(freq)) %>%
   select(-c(parent_population, parent_parent_population, irae_ex, ici_drug, data_source)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
