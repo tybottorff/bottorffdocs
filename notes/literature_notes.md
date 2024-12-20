@@ -1564,6 +1564,15 @@
  - stimulatory (CD25, CD28, 4-1BB, ICOS, OX40) and inhibitory (PD-1, CTLA-4, PD-L1, CD39, TIGIT) checkpoints coexpressed by intratumoral CD4<sup>+</sup> FoxP3<sup>+</sup> T cells
  - FoxP3<sup>+</sup> CD4<sup>+</sup> T cells highly clonal, high inhibitory checkpoint expression
  - **perhaps other ICBs fail because they aren't inhibiting Tregs?**
+# Immune checkpoint therapy for solid tumors: clinical dilemas and future trends
+ - ICBs targeting CTLA-4, PD-1, PD-L1, LAG-3 have been approved in clinical applications for treatment of solid tumors (solid likely because these have localized, immunosuppressive TMEs, expressing PD-L1 for example, that are more susceptible to therapies reinvigorating TILs)
+ - particularly effective in patients with melanoma and NSCLC
+ - ICBs have been approved as early as 2011, have since gradually moved from 2nd/3rd line drugs to 1st line ones
+ - as of late 2022, 9 drugs targeting 4 immune checkpoints (CTLA-4, PD-1, PD-L1, LAG-3) have been approved
+ - there's also recent interest in targeting other co-inhibitory receptors like TIGIT, TIM-3, IDO, CD39, NKG2A, SIRP alpha (antagonizing), as well as activating co-stimulatory receptors like ICOS, GITR, OX40, 4-1BB, TLRs
+ - PD-1 inducibly expressed on most immune cells, like PD-1 expressed on T cells following TCR signaling
+ - PD-1 upregulated on CD8s following chronic virus infection
+ - tumor gene mutations associated with ICB response: high tumor mutational burden has been used to predict ICB response (higher TMB means more potential neoantigens)
 # Immune dysfunction revealed by digital spatial profiling of immuno-oncology markers in progressive states of renal cell carcinoma and in brain metastases
  - lower immune checkpoint inhibitor (TIM-3, CTLA-4), cytolytic (GZMA, GZMB), and T cell activation (CD25) protein expression in metastases compared with primary tumors
  - metastases macrophages less M1-like, inflammatory markers (HLA-DR, CD127)
@@ -1908,6 +1917,9 @@
  - RNA splicing machinery correlated with tumor-infiltrating Treg cell signatures
  - spliceosome component USP39 maintains Treg cell function via CTLA-4
  - lactate modulates Foxp3-dependent RNA-splicing-mediated CTLA-4 expression
+# LAG-3 and PD-1 synergize on CD8<sup>+</sup> T cells to drive T cell exhaustion and hinder autocrine IFN-gamma-dependent anti-tumor immunity
+ - PD-1/LAG-3 deficient CD8s promote enhanced tumor clearance and survival (PD1/LAG3 deletion increases interferon-responsive gene expression and IFN-gamma release)
+ - PD-1/LAG-3 deficient CD8s transcriptionally distinct, broad TCR clonality and enrichment of effector-like and interferon-responsive genes
 # Landscape of stimulation-responsive chromatin across diverse human immune cells
  - previous literature: ~90% of GWAS hits for contributors to autoimmunity risk lie in non-coding regions (presumably act by altering gene regulation)
 # Learning predictive signatures of HLA type from T-cell repertoires
@@ -2441,6 +2453,13 @@
  - TCRs from T cells that recognize the same pMHC epitope often share conserved sequence features, perhaps able to predict model epitope specificity
  - here, they study CD8<sup>+</sup> TCRs in mice and humans to study these conserved features as well as features differentiating them
  - **takehome: each epitope-specific repertoire studied had a clustered group of receptors with core sequence similarities plus a dispersed set of diverse "outlier" sequences, so some similar but some different sort of unhelpful**
+# Rational combination of cancer therapies with PD1 axis blockade
+ - anti TIGIT/LAG3/CTLA4 to reinvigorate effector T cell responses (inhibit multiple checkpoints)
+ - CD137/OX40 agonists (increased co-stimulation) and cytokine stimulations to activate T cells
+ - vaccines to increase priming of T cells (vaccinate with tumor antigen)
+ - CAR T cells to increase T cell numbers
+ - stategies to increase immune infiltration: anti-TGF beta, anti-IL1 beta
+ - deplete/repolarize Tregs
 # Reassessing human MHC-I genetic diversity in T cell studies
  - underrepresentation of MHCI alleles associated with Asian, Australian, African descent
  - A*02 is most studied allele
