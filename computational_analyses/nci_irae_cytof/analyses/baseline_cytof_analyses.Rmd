@@ -354,9 +354,13 @@ logitNorm <- function(v){
 ```{r}
 
 specific_subset <- flow_data %>%
-  filter(sort %in% c("CD8 of Tcells", "pDC of nonGrans", "CM of CD8 Tcells")) %>%
+  filter(sort %in% c("CD56bright of NKcells", "SCM of Tconv Tcells", "PD1pos of NKcells")) %>%
   mutate(logit_freq = logitNorm(freq)) %>%
-  mutate(logit_freq = scale(logit_freq))
+  group_by(sort) %>%
+  mutate(logit_freq = scale(logit_freq)) %>%
+  ungroup()
+
+specific_subset
 
 flow_data_long <- specific_subset %>%
   select(sort, freq, logit_freq) %>%
@@ -372,7 +376,7 @@ p <- ggplot(flow_data_long, aes(x = value)) +
 
 p
 
-ggsave("../figures/pre_post_transform_data.png", p, width = 4, height = 5)
+ggsave("../figures/pre_post_transform_data.png", p, width = 4, height = 5.25)
 
 ```
 
@@ -510,7 +514,7 @@ ggsave("../figures/baseline_pca_color_by_batch_batch_not_regressed_out.png", plo
 
 limma_df <- flow_data %>%
   # subet for baseline data
-  filter(cleaned_visit_info == "baseline") %>%
+  #filter(cleaned_visit_info == "baseline") %>%
   mutate(freq = logitNorm(freq)) %>%
   select(-c(parent_population, parent_parent_population, irae_ex, ici_drug, data_source)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
@@ -519,49 +523,34 @@ limma_df <- flow_data %>%
 limma_df
 
 # Convert group and Batch to factors
-# using group as just skin_irae yes/no since that's the 1 contrast where I see results
-limma_df$group <- factor(limma_df$skin_irae)
+limma_df$group <- factor(limma_df$group)
 limma_df$Batch <- factor(limma_df$Batch)
 
-# Create the design matrix with the formula and contrasts argument
-design <- model.matrix(~0 + group + Batch, data = limma_df)
+mm_lme <- model.matrix(~ group + Batch + (1|patient_id),
+                       data=limma_df$`pDC of nonGrans`)
 
-colnames(design) <- gsub("group", "", colnames(design))
-# make colnames work, replace special chars with _
-colnames(design) <- gsub("\\s|/|-", "_", colnames(design))
+# Block by donor
+consensus.corr <- duplicateCorrelation(
+  object = limma_df$freq, 
+  design = mm_lme,
+  block = limma_df$patient_id)
 
-# Step 2: Contrast matrix for group comparisons
-contrasts <- makeContrasts(
-   irae_comparison = `Skin_irAE` - `No_skin_irAE`,
-   levels = colnames(design)
-)
+# View average correlation
+consensus.corr$consensus.correlation
+## [1] 0.357227
+# Fit limma model
+fit_lme <- lmFit(object = limma_df$freq, 
+                 design = mm_lme,
+                 block = limma_df$patient_id,
+                 correlation = consensus.corr$consensus.correlation)
 
-# transpose
-transposed_num_data <- limma_df[, 17:ncol(limma_df)] %>% t()
+# Estimate P-values
+efit_lme <- eBayes(fit = fit_lme)
 
-# Step 4: Linear modeling
-# block batch here is redundant I think with design above, but keeping
-corfit <- duplicateCorrelation(transposed_num_data, design, block=limma_df$Batch)
-fit <- lmFit(transposed_num_data, design, block=limma_df$Batch, correlation=corfit$consensus)
-
-# Step 5: Apply contrasts and compute statistics
-fit2 <- contrasts.fit(fit, contrasts)
-efit <- eBayes(fit2)
-
-# results
-topTable(efit, coef="irae_comparison", n=Inf)
-
-# using this method...
-# combined irAEs: no features w/ padj < 0.1
-
-# skin irAEs: several hits with padj < 0.1
-# padj < 0.01 CD11c+ of Bcells (this had padj just over 0.05 with limma::removeBatchEffects), Bcells of nongrans, Tcells of nongrans
-# padj < 0.05: NKcells of nongrans, CXCR3+ of NN Tconv Tcells, CXCR3+CCR6+ of NN Tconv Tcells, naive of Treg Tcells, CCR4+ of NN CD8 Tcells
-# padj < 0.05 & see these also with limma::removeBatchEffects & stats after that on adjusted data: CM of Tconv Tcells, DN of Bcells, CM of CD8 Tcells
-
-# thyroid irAEs: no features w/ padj < 0.1
-# pneumonitis: no features w/ padj < 0.1
-# rheumatoid irAE: no features w/ padj < 0.1
+# Summarize significant subsets
+# This extracts limma results into the same format as kimma results
+limma_lme <- extract_lmFit(design = mm_lme,
+                             fit = efit_lme)
 
 ```
 
