@@ -1,10 +1,12 @@
 # High priority TODOs
+Jane's Q: why would NK cells migrate to tissues with anti-PDI therapy? Alice W's point that it may be that CD56bright freq constant in periphery and CD56dim increasing (is that inconsistent with that 1 literature report of CD56bright? was it CD56bright NK or CD56bright of NK?). We can differentiate between these with different parent population comparators? or with IMPACD somehow?
+
 SEE RECENT NARESH SLACK DM
 
 1. YES SHOULD BE ABLE TO USE KIMMA TO LOOK FOR SUBSET DIFFERENCES WITH BATCH AS COVARIATE
 2. ALSO SHOULD BE ABLE TO JUST USE GAMS ON TRANSFORMED, SCALED FREQS using batch as covariate here as well. given some NA pvals for ANOVA, just switch to using interaction GAM model (only 1) as long as factors are ordered pvals will inform slope differences
 3. for using repeated samples, moreso useful to just look in PCA space visually that they (hopefully) cluster more even when across batches?
-4. use PVCA to estimate % variance explained by all technical factors, then use all > a certain cutoff as covariates above
+4. use PVCA to estimate % variance explained by all technical factors, then use all > a certain cutoff as covariates above, can also test age here, and primary cancer type... stuff like that too
 5. repeat analyses with yes pneumonitis vs. no irAE instead of yes/no pneumonitis (and other irAE types), or at least color other irAEs on no pneumonitis baseline subset results
 6. test if head/neck patients were treated differently (like steroid/radiotherapy?) to ask why they had no irAEs
 7. caveat to CD56bright trafficking model: it may be that CD56bright freq stays same but CD56dim increases in periphery... won't know until IMPACD I don't think (changing parent for comparison)
@@ -21,4 +23,3 @@ look for more public data to test our results in, already emailed Dr. Yarchoan, 
 17. look for more public data to test our results in, already emailed Dr. Yarchoan, focus on finding dataset with similar cohort (cancer/irAE types)
 18. look at ratio of IRs to activation markers
 19. regress out age for any comparisons with substantially different age distributions (like T1D vs. RA)
-20. try plotting % change from baseline for longitudinal visits rather than absolute % or transformed values?
