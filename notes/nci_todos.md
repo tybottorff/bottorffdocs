@@ -1,7 +1,7 @@
 # High priority TODOs
 Jane's Q: why would NK cells migrate to tissues with anti-PDI therapy? Alice W's point that it may be that CD56bright freq constant in periphery and CD56dim increasing (is that inconsistent with that 1 literature report of CD56bright? was it CD56bright NK or CD56bright of NK?). We can differentiate between these with different parent population comparators? or with IMPACD somehow?
 
-SEE RECENT NARESH SLACK DM
+SEE RECENT NARESH SLACK DM, after responding to his points, move NCI code to a github repo under BRI
 1. YES SHOULD BE ABLE TO USE KIMMA TO LOOK FOR SUBSET DIFFERENCES WITH BATCH AS COVARIATE
 2. ALSO SHOULD BE ABLE TO JUST USE GAMS ON TRANSFORMED, SCALED FREQS using batch as covariate here as well. given some NA pvals for ANOVA, just switch to using interaction GAM model (only 1) as long as factors are ordered pvals will inform slope differences
 3. for using repeated samples, moreso useful to just look in PCA space visually that they (hopefully) cluster more even when across batches?
@@ -14,7 +14,6 @@ SEE RECENT NARESH SLACK DM
 9. try immunotype-shift analyses for other irAE types, also try incorporating HCs somehow, like do immunotypes move farther AWAY from HC in irAE group? could maybe also ask if immunotypes of rheumatoid-irAE patients moves closer to RA immunotype specifically... for this I think still do need to use batch-adjusted data
 
 10. revisit using heatmaps to show data at baseline with reduced subset-space rather than PCA, expect better column (patient) clustering group separation with reduced subset choices
-11. move NCI code to a github repo under BRI
 12. try grouping various specific irAEs together for analyses (like skin/pneumonitis, thyroid/rheumatoid…), for this maybe only look at singly-significant baseline features as the longitudinal analyses will be a little too data plentiful to wade through? could also try this for random forest (to increase n...)
 13. investigate NK of non-granulocytes’ longitudinal changes given results from CD56bright and PD1+ of NKs
 14. IMPACD: also try other part of gate tree as root? not the nongrans but whatever it was. deal w/ batch effects same way as before
