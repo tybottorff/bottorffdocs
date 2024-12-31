@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+library(kimma)
 library(ggbreak)
 library(cowplot)
 library(kableExtra)
@@ -71,7 +72,7 @@ flow_data <- read_excel("../raw_data/2024_10_17_flow_data.xlsx") %>%
     # Convert to Date format using lubridate or as.Date (handle potential non-standard date formats)
     `Infusion date` = as.numeric(`Infusion date`)) %>%
   # CTCAE Grade (Highest) is the column for (ir)AE grade
-  rename(patient_id = `Subject ID`, ctcae_grade = `CTCAE Grade (Highest)`, group = `General irAE Classification`, cancer_type = `Primary Cancer Type`, age = `Age at Draw`, thyroid_cat = `Thyroid Category (JB)`, data_source = `Data Source`, ici_drug = `Immune Checkpoint Inhibitor`) %>%
+  rename(patient_id = `Subject ID`, ctcae_grade = `CTCAE Grade (Highest)`, group = `General irAE Classification`, cancer_type = `Primary Cancer Type`, age = `Age at Draw`, thyroid_cat = `Thyroid Category (JB)`, data_source = `Data Source`, ici_drug = `Immune Checkpoint Inhibitor`, race = Race, sex = `Sex/Gender`) %>%
   mutate(`Infusion date` = as.Date(as.numeric(`Infusion date`), origin = "1899-12-30"),
          `First irAE Onset or Thyroid Test Date` = as.Date(as.numeric(`First irAE Onset or Thyroid Test Date`), origin = "1899-12-30"),
          days_to_irae = as.numeric(difftime(`First irAE Onset or Thyroid Test Date`, `Infusion date`, units = "days")),
@@ -430,15 +431,15 @@ for (i in seq_along(heatmap_plots)) {
 
 pca_df <- flow_data %>%
   mutate(freq = logitNorm(freq)) %>%
-  select(-c(parent_population, parent_parent_population, irae_ex, ici_drug, data_source)) %>%
+  select(-c(parent_population, parent_parent_population, irae_ex, data_source)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
   mutate(Batch = as.factor(Batch),
          patient_id = as.factor(patient_id))
 
-wide_baseline_flow_metadata <- pca_df[, 1:16] %>%
+wide_baseline_flow_metadata <- pca_df[, 1:17] %>%
   mutate(patient_id_simple = row_number())
 
-wide_baseline_flow_num_data <- (pca_df)[, 17:ncol(pca_df)] %>%
+wide_baseline_flow_num_data <- (pca_df)[, 18:ncol(pca_df)] %>%
   # Z-score normalize across samples for each feature
   mutate(across(where(is.numeric), ~ scale(.)))
 
@@ -505,6 +506,46 @@ p <- ggplot(data = pcaData) +
 p
 
 ggsave("../figures/baseline_pca_color_by_batch_batch_not_regressed_out.png", plot = p, width = 3, height = 3.5)
+
+```
+
+# Estimate variation contribution from biological & technical sources
+
+```{r}
+
+#wide_baseline_flow_num_data_transposed <- wide_baseline_flow_num_data %>% t()
+
+VarCorr <- lme4::VarCorr
+
+fit <- pvca::PVCA(counts = as.matrix(wide_baseline_flow_num_data_transposed), 
+                  meta = wide_baseline_flow_metadata %>% select(patient_id, group, cleaned_visit_info, Batch, age, cancer_type), 
+                  inter = FALSE, 
+                  threshold = 0.6)
+
+pvca_barplot_data <- data.frame(explained = as.vector(fit),
+                                effect    = names(fit)) %>%
+  arrange(explained) %>%
+  mutate(effect = factor(effect, levels = effect))
+
+pvca_barplot <- ggplot(data    = pvca_barplot_data,
+                       mapping = aes(x = effect, y = explained)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = signif(explained, digits = 3)),
+            nudge_y   = 0.01,
+            size      = 3,
+            hjust = 0.1) +
+  labs(x = NULL, y = "Proportion of the variance explained") + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0,
+                                   vjust = 1,
+                                   hjust = 1),
+        text = element_text(size=12)) +
+  coord_flip(ylim = c(0, 0.7))
+
+pvca_barplot
+
+# so cancer type and batch are both important covariates to consider in subsequent analyses
+# checked race and sex as well, low %s (< 5%) so ok to ignore I think
 
 ```
 
@@ -610,6 +651,53 @@ adjusted_data %>%
 
 ```
 
+# Try kimma instead as recommended by Naresh
+
+```{r}
+
+kimma_df <- flow_data %>%
+  mutate(freq = logitNorm(freq)) %>%
+  select(-c(parent_population, parent_parent_population, irae_ex, data_source)) %>%
+  pivot_wider(names_from = sort, values_from = freq) %>%
+  mutate(
+    group = factor(group, levels = c("non-irAE", "irAE/SAE", "Healthy_Control", "AID_Patient")),  # Keep all groups as factors
+    Batch = as.factor(Batch),
+    skin_irae = as.factor(skin_irae),
+    pneumonitis_irae = as.factor(pneumonitis_irae),
+    rheumatoid_irae = as.factor(rheumatoid_irae),
+    thyroid_irae = as.factor(thyroid_irae),
+    patient_id = as.factor(patient_id),
+    cancer_type = as.factor(cancer_type)) %>%
+  mutate(libid = paste(patient_id, cleaned_visit_info, sep = "_")) %>%
+  mutate(across(where(is.numeric), ~ scale(.)))
+
+# reorder cols to have all sorts last
+kimma_df <- kimma_df[, c(ncol(kimma_df), 1:(ncol(kimma_df)-1))]
+
+model_formula <- "~ group:cleaned_visit_info + Batch + cancer_type + (1|patient_id)"
+
+expr_df <- kimma_df[, 19:ncol(kimma_df)] %>% t()
+
+colnames(expr_df) <- kimma_df$libid
+
+kimma_results <- kmFit(
+  counts = expr_df, meta = kimma_df[, 1:18],
+  model = model_formula,
+  libraryID = "libid",
+  run_lme = TRUE,
+  run_contrast = TRUE,
+  contrast_var = c("group:cleaned_visit_info"),
+  patientID = "patient_id"
+)
+
+kimma_results$lme.contrast %>%
+  # look for just baseline irAE vs. non-irAE differences
+  filter(contrast_ref == "(non-irAE baseline)" & contrast_lvl == "(irAE/SAE baseline)" | contrast_lvl == "(non-irAE baseline)" & contrast_ref == "(irAE/SAE baseline)") %>%
+  arrange(FDR)
+
+```
+
+
 # Try another approach (lmer of all data with batch as fixed effect, patient_id as fixed effect)
  - this feels best, using most data to regress out batch effects, will just use this adjusted_data downstream
 
@@ -621,25 +709,30 @@ lmer_df <- flow_data %>%
   mutate(freq = logitNorm(freq)) %>%
   select(-c(parent_population, parent_parent_population, irae_ex, ici_drug, data_source)) %>%
   pivot_wider(names_from = sort, values_from = freq) %>%
-  mutate(Batch = as.factor(Batch)) %>%
+  mutate(Batch = as.factor(Batch),
+         cancer_type = if_else(is.na(cancer_type), "none", cancer_type),
+         cancer_type = as.factor(cancer_type)) %>%
   dplyr::filter(!(is.na(patient_id)))
 
 lmer_df
+
+write.csv(lmer_df, "../saved_data/transformed_data.csv")
 
 metadata_cols <- lmer_df[, 1:16]
 feature_cols <- lmer_df[, 17:ncol(lmer_df)] %>%
   mutate(across(where(is.numeric), ~ scale(.)))
 
 # Function to regress out confounders (batch) for each feature
-regress_out_confounders <- function(freq, batch, patient_id) {
+regress_out_confounders <- function(freq, batch, cancer_type, patient_id) {
   # Build the linear model and get residuals
-  model <- lmer(freq ~ batch + (1|patient_id))
+  model <- lmer(freq ~ batch + cancer_type + (1|patient_id))
   residuals(model)
 }
 
 adjusted_data <- (lapply(feature_cols,
                          regress_out_confounders,
                          batch = lmer_df$Batch,
+                         cancer_type = lmer_df$cancer_type,
                          patient_id = lmer_df$patient_id))
 
 for (col in colnames(lmer_df[, 17:ncol(lmer_df)])) {
