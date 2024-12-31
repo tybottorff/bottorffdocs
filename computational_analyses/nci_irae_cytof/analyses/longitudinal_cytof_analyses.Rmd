@@ -107,11 +107,12 @@ adjusted_data <- adjusted_data %>%
 na_counts <- colSums(is.na(adjusted_data[, 18:ncol(adjusted_data)]))
 na_ridden_features <- names(na_counts[na_counts > 0.05*nrow(adjusted_data)])
 
+adjusted_data
+
 ```
 
 # Look at how immmunotypes shift over time in cancer irAE/no irAE groups vs. AID
- - using PCA first, this doesn't feel as right but is useful for presentation figs
- 
+
 ```{r}
 
 # run PCA on all AID + all cancer data
@@ -381,16 +382,33 @@ comparison
 ```
 
 # Filter for cancer data to use for GAMs
+ - use transformed data (and then use Batch and cancer_type as covariates in GAMs) rather than residuals ("corrected data")
 
 ```{r}
 
-adjusted_data <- adjusted_data %>%
+adjusted_data <- read.csv("../saved_data/transformed_data.csv") %>%
+  select(-X) %>%
+  mutate(cleaned_visit_info = if_else(cleaned_visit_info == "baseline", "1", cleaned_visit_info)) %>%
+  # remove PD1+ sorts (messed up likely with anti-PD1 ICI)
+  dplyr::select(-matches("PD1")) %>%
+  dplyr::filter(cleaned_visit_info %in% c("1", "2", "3", "irAE", "irAE F/U"),
+         group != "Healthy_Control") %>%
   # filter for cancer patients
   filter(group %in% c("non-irAE", "irAE/SAE")) %>%
   pivot_longer(cols = -c(patient_id, group, skin_irae, thyroid_irae, pneumonitis_irae, rheumatoid_irae, ctcae_grade, Batch, cleaned_visit_info, cancer_type, age, days_to_irae, thyroid_cat, thyroid_irae_including_oor, pneumonitis_irae_including_effusion, gastro_irae), names_to = "sort", values_to = "freq") %>%
   left_join(days_from_baseline_metadata, by = c("patient_id", "cleaned_visit_info")) %>%
   # fix issue of 0 importing as NA
   mutate(days_from_baseline = if_else(is.na(days_from_baseline), 0, days_from_baseline))
+
+adjusted_data <- adjusted_data %>%
+  # reorder columns to keep all metadata in front
+  select(1:16, ncol(adjusted_data), 17:(ncol(adjusted_data) - 1))
+
+# show features with > 5% NAs, remove them when doing PCA, otherwise replace with mean
+na_counts <- colSums(is.na(adjusted_data[, 18:ncol(adjusted_data)]))
+na_ridden_features <- names(na_counts[na_counts > 0.05*nrow(adjusted_data)])
+
+adjusted_data
 
 ```
 
@@ -418,14 +436,14 @@ fit_gam <- function(data) {
       # inspired by https://stats.stackexchange.com/questions/576499/how-to-compare-two-time-series-with-a-gam
       
       # Model with interaction between irAE group and time from baseline (separate smooths for each group)
-      model_interaction <- gam(freq ~ pneumonitis_irae + 
+      model_interaction <- gam(freq ~ group + Batch + cancer_type + # include covariates
                                  s(days_from_baseline, k = 5, bs = "cr") + 
-                                 s(days_from_baseline, k = 5, bs = "cr", by = pneumonitis_irae) + 
+                                 s(days_from_baseline, k = 5, bs = "cr", by = group) + 
                                  s(patient_id, bs = "re"),
                                data = data, method = 'REML')
       
       # Model without interaction between irAE group and time from baseline (common smooth for both groups)
-      model_no_interaction <- gam(freq ~ pneumonitis_irae + 
+      model_no_interaction <- gam(freq ~ group + Batch + cancer_type + # include covariates
                                     s(days_from_baseline, k = 5, bs = "cr") + 
                                     s(patient_id, bs = "re"),
                                   data = data, method = 'REML')
@@ -499,13 +517,13 @@ significant_pvals_comparison <- all_pvals_comparison %>%
 
 significant_pvals_comparison
 
-# just focusing on CD56bright of NK after fixing typo in GAM (Naresh pointed out at WIP practice talk)
+# just focusing on CD56bright of NK for WIP
 
-# combined has other results besides CD56bright of NK
+# combined has 2 other results besides CD56bright of NK
 # skin only has CD56bright of NK
 # rheumatoid: NONE
 # thyroid: stuff but no CD56bright of NK
-# pneumonitis: 2 results but no CD56bright of NK
+# pneumonitis: none
 
 ```
 
