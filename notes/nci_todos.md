@@ -1,8 +1,9 @@
 # TODOs
 1. **Jane's Q why would NK cells migrate to tissues with anti-PDI therapy? Alice W's point that it may be that CD56bright freq constant in periphery and CD56dim increasing (is that inconsistent with that 1 literature report of CD56bright? was it CD56bright NK or CD56bright of NK?). We can differentiate between these with different parent population comparators? or with IMPACD somehow?**
-2. **try immunotype-shift analyses for other irAE types, also try incorporating HCs somehow, like do immunotypes move farther AWAY from HC in irAE group? could maybe also ask if immunotypes of rheumatoid-irAE patients moves closer to RA immunotype specifically... for this I think still do need to use batch-adjusted data**
-3. **with new use of GAMs on transformed data, check for differences, especially anything besides CD56bright thats common across multiple irAE types, otherwise just focus on combined irAE stuff for next presentation**
-4. IMPACD whenever Alice provides single parameter gates: also try other part of gate tree as root? not the nongrans but whatever it was. deal w/ batch effects same way as before
+2. **IMPACD whenever Alice provides single parameter gates: also try other part of gate tree as root? not the nongrans but whatever it was. deal w/ batch effects same way as before**
+
+3. **try immunotype-shift analyses for other irAE types, also try incorporating HCs somehow, like do immunotypes move farther AWAY from HC in irAE group? could maybe also ask if immunotypes of rheumatoid-irAE patients moves closer to RA immunotype specifically... for this I think still do need to use batch-adjusted data**
+4. **with new use of GAMs on transformed data, check for differences, especially anything besides CD56bright thats common across multiple irAE types, otherwise just focus on combined irAE stuff for next presentation**
 
 5. repeat analyses with yes pneumonitis vs. no irAE instead of yes/no pneumonitis (and other irAE types), or at least color other irAEs on no pneumonitis baseline subset results
 6. test if head/neck patients were treated differently (like steroid/radiotherapy?) to ask why they had no irAEs
