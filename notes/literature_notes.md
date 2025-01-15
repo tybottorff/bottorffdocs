@@ -827,6 +827,10 @@
 # Development of TCRB CDR3 length repertoire of human T lymphocytes
  - previous literature: CDR3s of CD4 thymocytes become shorter during thymic development, i.e. thymocytes with longer CDR3s are more likely to be deleted
  -repertoire distribution patterns depend on use of the BV gene; BV‐dependent patterns were shaped during thymic selections and maintained in the peripheral blood
+# Dictionary of immune responses to cytokines at single-cell resolution
+ - > 17 cell types x 86 cytokines scRNAseq immune dictionary in mouse lymph nodes *in vivo*
+ - most cytokines induce cell-type-specific responses (different responses in different cell types)
+ - IL-7 induces large response in all lymphoid cell types here (B, T, subtypes of T, NK)
 # Different associations between organ-specific immune-related adverse event and survival in non-small cell lung cancer patients treated with programmed death-1 inhibitors-based combination therapy
  - NSCLC PD-1 blockade plus chemotherapy patients have longer progression free survival (but not necessarily overall survival) with irAEs
  - skin irAE associated with better prognosis, pneumonitis severe irAE and high steroid compromise survival
