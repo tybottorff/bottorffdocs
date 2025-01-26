@@ -1,9 +1,13 @@
 # TODOs
 1. **IMPACD: also try other part of gate tree as root? not the nongrans but whatever it was. deal w/ batch effects same way as before**
+CD57+ focus (from paper Alice L. shared: "Differential roles of human CD4+ and CD8+ regulatory T cells in controlling self-reactive immune responses")
+to do lvl 2-3... not sure how to proceed from those single param gates (Alice W. made it sound like I have all I need... so ask Stephan EARLY TO NOT BE HELD BACK TOO LONG BY THIS)
+made it to saving single param counts (/Users/tybottorff/git/NCI_irae_cytof/saved_data/lvl_1_counts.Rdata)
+next, link .fcs file names to SAMPLE ID values in .xlsx metadata from Holly
+then can compare single param counts by group for each (even w/out lvl 2/3 this is something to show Peter Thursday), account for batch effects same as before
 
-2. **try immunotype-shift analyses for other irAE types, also try incorporating HCs somehow, like do immunotypes move farther AWAY from HC in irAE group? could maybe also ask if immunotypes of rheumatoid-irAE patients moves closer to RA immunotype specifically... for this I think still do need to use batch-adjusted data**
-3. **with new use of GAMs on transformed data, check for differences, especially anything besides CD56bright thats common across multiple irAE types, otherwise just focus on combined irAE stuff for next presentation**
-
+2. try immunotype-shift analyses for other irAE types, also try incorporating HCs somehow, like do immunotypes move farther AWAY from HC in irAE group? could maybe also ask if immunotypes of rheumatoid-irAE patients moves closer to RA immunotype specifically... for this I think still do need to use batch-adjusted data
+3. with new use of GAMs on transformed data, check for differences, especially anything besides CD56bright thats common across multiple irAE types, otherwise just focus on combined irAE stuff for next presentation
 4. repeat analyses with yes pneumonitis vs. no irAE instead of yes/no pneumonitis (and other irAE types), or at least color other irAEs on no pneumonitis baseline subset results
 5. test if head/neck patients were treated differently (like steroid/radiotherapy?) to ask why they had no irAEs
 6. try grouping various specific irAEs together for analyses (like skin/pneumonitis, thyroid/rheumatoid…), for this maybe only look at singly-significant baseline features as the longitudinal analyses will be a little too data plentiful to wade through? could also try this for random forest (to increase n...)
