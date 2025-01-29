@@ -11,7 +11,6 @@
  - More broadly, IL7 responsiveness at baseline may be a predictor of teplizumab response and an important target to modulate to improve clinical outcome.
 
 # TODOs
-0. **In Kevan Herald's data, does higher MAIT/IL7 gene set expr associate with shorter T1D-free intervals (KM plots)?**
 1. Read about IL7R/HIV: https://onlinelibrary.wiley.com/doi/10.1002/jmv.29214
 2. P348-2, P348-4
  - for heatmaps, switch to complex heatmap for anno of t1d/hc, donor...
