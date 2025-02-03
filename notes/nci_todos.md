@@ -2,7 +2,7 @@
 1. **IMPACD**
  - choose interesting subsets and relevant gates for them
  - deal w/ batch effects as before
- - include batches 10-14 (https://bri.box.com/s/5isze8tw6fxpl0zatqb0g4rvrm1k21b3) into IMPACD and % parent freq comparison analyses (some are DS not NCI, need metadata)
+ - include batches 10-14 (https://bri.box.com/s/5isze8tw6fxpl0zatqb0g4rvrm1k21b3) into IMPACD and % parent freq comparison analyses (some are DS not NCI)
 
 2. **propose follow-up scRNA/TCRseq experiment for NCI cancer samples? DS too?**
 
