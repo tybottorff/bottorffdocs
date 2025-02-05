@@ -834,6 +834,10 @@
 # Different associations between organ-specific immune-related adverse event and survival in non-small cell lung cancer patients treated with programmed death-1 inhibitors-based combination therapy
  - NSCLC PD-1 blockade plus chemotherapy patients have longer progression free survival (but not necessarily overall survival) with irAEs
  - skin irAE associated with better prognosis, pneumonitis severe irAE and high steroid compromise survival
+# Differential expression of CCR7 defines two distinct subsets of human memory CD4<sup>+</sup>CD25<sup>+</sup> Tregs
+ - identification of memory Treg compartments counterparts of conventional CM/EM T cells
+ - CM/EM Tregs exert comparable *ex vivo* suppressor functions, but EM Treg population is more prominent among Tregs as compared to conventional T cells
+ - in full-term cord blood, majority of Tregs are naive, whereas most CD4 TIL Tregs are memory 
 # Differential impact of genetic deletion of TIGIT or PD-1 on melanoma-specific T-lymphocytes
  - perhaps KO of these IRs could help prevent irAEs in case of adoptive transfer of tumor-specific T cells? **this seems backwards to me...**
  - cell cycle genes downregulated in PD-1 KO, these genes' expression preserved in TIGIT KO
@@ -845,6 +849,12 @@
  - anti-PD-1<sup>+</sup> LAG-3 associated with CD4<sup>+</sup> T cells expressing CXCF4, TNFSF8, IL21R accumulating
 # Differentiation and homeostasis of effector Treg cells are regulated by inositol polyphosphates modulating Ca<sup>2+</sup> influx
  - subclass of Tregs express Foxp3, activated Foxp3<sup>+</sup> Tregs differentiate into effector Treg (eTreg) cells to maintain peripheral immune homeostasis and tolerance
+# Different proliferative potential and migratory characteristics of human CD4 regulatory T cells that express either CD45RA or CD45RO
+ - ~80% of Tregs are CD45RO<sup>+</sup>
+ - proportion of CD45RA<sup>+</sup> Tregs decreases with age, that of CD45RO<sup>+</sup> Tregs increases
+ - CD45RO<sup>+</sup> Tregs highly proliferative compared to CD45RA<sup>+</sup> counterparts
+ - conversion of CD45RA Tregs to CD45RO expression after activation
+ - CD45RA<sup>+</sup> Tregs preferentially located in bone marrow (associated with increases CXCR4 expression), CD45RO<sup>+</sup> Tregs preferentially located in skin (increased expression of CLA and CCR4)
 # Directional integration and pathway enrichemnt analysis for multi-omics data
  - prioritize genes/pathways that change consistently across datasets (as expected to do, like positive correlation for central dogma and negative with DNA methylation or KO/OE experiments vs. control), penalize those with inconsistent directionality
 # Dissecting the tumor microenvironment in response to immune checkpoint inhibitors via single cell and spatial transcriptomics
@@ -1047,6 +1057,11 @@
 # Effects of thymic selection of the T cell repertoire on HLA-class I associated control of HIV infection
  - HLA-B57 allele enriched in those with restricted HIV replication without therapy
  - **HLA-B57 restricted T cells are more crossreactive to mutants of target epitopes, this HLA allele also associated with autoimmunity**
+# Effector memory-type regulatory T cells display phenotypic and functional instability
+ - Tregs compete for IL-2 via elevated CD25 expression to decrease numbers/function of conventional T cells (drivers of inflammation)
+ - CD127 expression inversely correlates with FoxP3 expression, so Tregs defined as CD25<sup>+</sup>CD127<sup>low</sup>
+ - FoxP3 also transiently upregulated in non-regulatory CD25<sup>-</sup> CD4s
+ - in extreme inflammation, Tregs become unstable, lose FoxP3 expression, convert to effector T cells
 # Egress of resident memory T cells from tissue with neoadjuvant immunotherapy: implications for systemic anti-tumor immunity
  - Trms express adhesion molecules and embed within tissues
  - **Trm promotion in tumors sequesters tumor-specific T cells out of circulation, this can limit systemic antitumor immunity**
@@ -2469,6 +2484,8 @@
  - A*02 is most studied allele
 # Rechallenge of immune checkpoint inhibitors in a case with adverse events inducing myasthenia gravis
  - ICI-induced myasthenia gravis (MG) irAE associated with germline variant in *SLC22A5* in thymoma case
+# Regulatory T cell memory
+ - memory regulatory T cells defined by CD25<sup>high</sup>CD27<sup>high</sup>CD45RO<sup>high</sup>CD45RA<sup>low</sup>CCR7<sup>low</sup>FOXP3<sup>high</sup>L-selectin<sup>low</sup>CTLA4<sup>high</sup>CD127<sup>low</sup>ICOS<sup>high</sup>BCL-2<sup>high</sup>Ki67<sup>low</sup>CD44<sup>high</sup>
 # Regulatory T cell-specific epigenomic region variants are a key determinant of susceptibility to common autoimmune diseases
  - SNPs associated with autoimmunity enriched in CpG demethylated regions in naive Tregs, less enriched in activation-induced demethylated regions in Tconv/Tregs
 # Regulatory T cells suppress CD4<sup>+</sup> effector T cell activation by controlling protein synthesis
@@ -3320,6 +3337,8 @@
  - another caveat: < 1% of non-synonymous single nucleotide variants in expressed genes result in detectable CD4/CD8 positive T cell reactivity in tumor-infiltrating leukocytes, **would any be predicted in periphery?**, **frameshift mutations much more likely to lead to neoantigens**
 # The pseudokinase Trib1 regulates the transition of exhausted T cells to a KLR<sup>+</sup> CD8<sup>+</sup> effector state and its deletion improves checkpoint blockade
  - deleting Trib1 shifts Tex towards intermediate state (CX3CR1<sup>+</sup>) with enrichment of KLR<sup>+</sup> CD8s via clonal expansion, augmented PD-L1 blockade to improve viral clearance by expanding KLR CD8 population
+# The regulatory T cell memory phenotype: what we know
+ - CM Tregs OE CTLA4, ICOS, HLA-DR?
 # The relationship between hydrophobicity and drug-protein binding in human serum albumin: a quartz crystal microbalance study
  - positive correlation between drug hydrophobicity and binding strength to human serum albumin, **perhaps in contrast to hypothesis of increased crossreactivity from more hydrophobic TCRs, assuming increased crossreactivity means lower strength binding for each or a lower possible maximum...**
 # The role of CD56<sup>bright</sup> NK cells in neurodegenerative disorders
