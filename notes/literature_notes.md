@@ -415,6 +415,12 @@
 # Cardiac myosin-specific autoimmune T cells contribute to immune-checkpoint-inhibitor-associated myocarditis
  - cardiac myosin-specific autoreactive T cells drive pathogenesis of PD-1 inhibitor-induced myocarditis in mice
  - PD-1 expressing cardiac myosin-specific autoimmune T cells are present in heart during naive conditions
+# CCR4<sup>+</sup> memory CD4<sup>+</sup> T lymphocytes are increased in peripheral blood and lesional skin from patients with atopic dermatitis
+ - Th1 express CXCR3 and secrete IFNgamma, Th2 express CCR4 and secrete IL4
+ - predominance of CCR4<sup>+</sup> cells in periphery of atopic dermatitis patients (CCR4 important in migration of Th2 cells from blood into lesional skin)
+# CCR4 is an upregulated chemokine receptor of peripheral blood memory CD4<sup>+</sup> T cells in Crohn's disease
+ - several chemokine receptors are selectively expressed on T cell surfaces depending on polarization
+ - CCR4 expression on memory T cells lower in UC than in Crohn's/HC, CCR4 expression on memory CD4s higher in Crohn's than in UC/HC
 # CD103 and CD39 coexpression identifies neoantigen-specific cytotoxic T cells in colorectal cancers with low mutational burden
  - CD39 may mean exhausted/dysfunctional but not yet determined
 # CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cells accumulate in tumors of anti-PD-1-responder lung cancer patients and are tumor-reactive lymphocytes enriched with Tc17
@@ -1609,6 +1615,9 @@
  - high T cell infiltration in irAE tissue
  - **PD-1 blockade more CD8 effect, CD4 effect more for CTLA-4 blockade**
  - CD8<sup>+</sup>CXCR3<sup>+</sup> T cells elevated in gastrointestinal, dermatological, and musculoskeletal irAEs
+# Immune-related adverse events in individuals with solid tumors on immunotherapy associate with Th17 and Th2 signatures
+ - early changes in CD4 cytokine signatures and expansions of Th17 and Th2 EM populations associated with irAEs
+ - baseline cytokines were not predictive for irAEs
 # Immune-related adverse events in various organs caused by checkpoint inhibitors
 ## Abstract
  - PD-1 receptor on T and B cells, binds PD-L1/2 ligands
@@ -1668,6 +1677,7 @@
  - early increase in CXCL9/CXCL10/CXCL11 and interferon-γ (IFN-γ) 1 to 2 weeks after the start of therapy are likely indicators of heightened risk of developing irAEs
  - an early expansion of Ki-67<sup>+</sup> regulatory T cells and Ki-67<sup>+</sup> CD8<sup>+</sup> T cells is also likely to be associated with increased risk of irAEs
 ## Results
+ - among CD4s, high CCR4 expression on CD103<sup>+</sup> CD4s and Ki-67<sup>+</sup> Tregs
 ### The presence of ICI-induced irAEs correlated with improved patient survival
  - irAEs more frequent in treatment responders in both melanoma and NSCLC
 ### A potential biomarker profile to predict the development of ICI-irAEs in patients with cancer
@@ -1911,6 +1921,9 @@
  - increased baseline levels of CD4<sup>+</sup> T cells, lower baseline Treg levels may increase colitis irAE risk
  - increased T cell diversity may increase irAE risk (increased expansion of > 55 CD8<sup>+</sup> clones)
  - HLA-DR4 associated with increased T1D irAE risk
+# Ipilimumab reshapes T cell memory subsets in melanoma patients with clinical response
+ - early increase of central/effector subsets on ipilumumab in patietns with response, whereas % SCM decreased gradually despite stable counts and proliferation (so they are differentiating)
+ - expansion of CXCR3, CCR6, CCR4 positive T cells from week 0 to week 6
 # Is autoimmunity the Achilles' heel of cancer immunotherapy
  - hypophysitis most common endocrine irAE after CTLA-4 blockade, rarely observed with PD-1 blockade
 # Islet-autoreactive CD4<sup>+</sup> T cells are linked with response to alefacept in type 1 diabetes
@@ -1982,6 +1995,19 @@
  - methods
 # Location, location, location: tissue resident memory T cells in mice and humans
  - Trm markers: CD69 +/- CD103, many accessory markers (CD101, CD49a, PD-1, CXCR6, CLA, CCR8)
+# Low-avidity T cells drive endogenous tumor immunity in mice and humans
+## Abstract
+ - **low-avidity (strength) T cells are sole mediators of cancer control in mice, solely responsible to checkpoint blockade in mice/humans**
+ - **high-avidity T cells are ineffective and immune-suppressive due to their higher exhaustion status**
+ - **CD8s with identical TCRs have variation in avidities, additional layer of regulation of activity, turns out to be from factors like CD8A expression**
+## Main
+ - **affinity of TCR for peptide is not only contributor to avidity (strength of TCR-pMHCI interaction), also number of TCRs on T cell, number of pMHC-I complexes on cancer cells, number of coreceptors on T cells**
+ - there has been contradictory results prior, that high-avidity and/or low-avidity TCRs are more/equally effective, that high-avidity responses risk autoimmunity more, in experiments of monoclonal T cell populations adoptively transferred into mice/humans
+ - in a given clonotype, cells with higher *CD8A* (but not *CD8B*) or higher *TRAC* (TCR alpha chain) expression had higher avidity, the latter of which is consistent with **more TCR molecules associating with higher avidity**
+ - only low-avidity T cells respond to checkpoint blockade, more resistant to exhaustion
+ - high-avidity CD8 TILs in human cancers are more exhausted
+ - responders to PD-1 blockade had higher proportions of low-avidity CD8 TILs and lower proportions of high-avidity CD8 TILs than NR
+ - high-avidity T cells expressed higher levels of PDL1, TGFbeta, CD39, and HIF1A (PDL1 and TGFbeta are features of Tregs, and exhausted CD8s have been previously shown to possess transcriptional features of CD4 Tregs and suppress T cell proliferation, and CD39 shown before to be needed in exhausted T cells for immunosuppression)
 # Low-dose ipilimumab plus nivolumab combined with IL-2 and hyperthermia in cancer patients with advanced disease: exploratory findings of a case series of 131 stage IV cancers - a retrospective study of a single institution
  - hypothesis: reduce irAEs with hyperthermia to increase numbers of effector lymphocytes
  - irAEs similar to an auto-graft vs. host disease reactions following allogenic bone marrow transplantation
@@ -2633,6 +2659,8 @@
  - Runx3 deficiency limits clonal expansion and impairs upregulation of cytotoxic molecules in T<sub>EFF</sub> cells, these cells aberrantly upregulate genes characteristic of T<sub>FH</sub> cells (like *Bcl6*, *Tcf7*, and *CXCR5*)
 # Safety, outcomes and T cell characteristics in patients with relapsed or refractory MDS or CMML treated with atezolizumab in combination with guadecitabine
  - hypothesis: resistance to hypomethylating agents (HMAs) in patients with myelodysplastic syndrome (MDS) and chronic myelomonocytic leukemia (CMML) overcome by combining PD-L1 blockade with HMA
+# Safety, recommended dose, efficacy and immune correlates for nintedanib in combination with pembrolizumab in patients with advanced cancers
+ - patients with clinical benefit had increases in peripheral CCR4<sup>+</sup>CXCR3<sup>+</sup>CXCR5<sup>-</sup> memory CD4s over therapy
 # scRNAseq defines dynamic T cell subsets in longitudinal colon and peripheral blood samples in immune checkpoint inhibitor-induced colitis
  - n = 1 but has PBMC and colon scRNA/TCR data...
  - colon Trm, also circulating T cells, driving inflammation in colon
@@ -3238,6 +3266,8 @@
  - **shorter CDR3β, less added N nucleotides within CDR3 β with aging**
  - **increase in publicness of CD4 but not CD8 naive T cell repertoires with aging**
  - **increased clonality with aging, as expected with clonal expansion over time**
+# The current and future of biomarkers of immune related adverse events (irAE)
+ - irAE mechanisms: systemic impact of proinflammatory cytokines produced during ICI, loss of T cell tolerance, crossreactivity of T cells, autoantibody-mediated tissue damage, dysbiosis (gut microbiome), direct off-target effects (i.e. CTLA-4 expressed in pituitary stromal cells)
 # The current state and future of T cell exhaustion research
  - loss of effector function with Tex characterized by loss of IL-2, TNFα, IFNγ production
  - **EOMES important for memory formation**
