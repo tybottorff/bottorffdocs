@@ -1,14 +1,20 @@
 # TODOs
 1. **IMPACD**
- - choose interesting subsets and relevant gates for them
- - deal w/ batch effects as before
- - include batches 10-14 (https://bri.box.com/s/5isze8tw6fxpl0zatqb0g4rvrm1k21b3) into IMPACD and % parent freq comparison analyses (some are DS not NCI)
-
-2. **propose follow-up scRNA/TCRseq experiment for NCI cancer samples? DS too?**
-
+ - debug
+a) https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/gating_flow_T_cells.Rmd#L199
+b) double check that single gs does give expected correlated counts for subset & modifier (separate), as a gs issue would make sense...
+c) next idea would be something off with transformations... 
+d) then maybe retry just batches 1-9 or 10-14 or something
+ - ask Alice W. to manually gate top hits to verify
+ - fix TCF7 gate
+ - read about top hits biology, propose follow-up exp related to results
+ - estimate % var explained by covars to make sure batch/cancer type both good to use here
+ - implement longitudinal version of analyses, like AID immunotype shift? anti-control immunotype shift?
+ - follow up on strongest hits w/ depth of 3?
+ - add CD4, CD8 to T cell node list to do QC on single-param on top of root
+ - make % parent hierarchical from pop_counts for batches 10-14 to include in old analyses (will need to use IMPACD gates to recreate all the pops Alice W. made)
+2. manual gating: adjust for confounder of survival (more likely to experience irAE if alive longer)
 3. try immunotype-shift analyses for other irAE types, also try incorporating HCs somehow, like do immunotypes move farther AWAY from HC in irAE group? could maybe also ask if immunotypes of rheumatoid-irAE patients moves closer to RA immunotype specifically... for this I think still do need to use batch-adjusted data
-4. with new use of GAMs on transformed data, check for differences, especially anything besides CD56bright thats common across multiple irAE types, otherwise just focus on combined irAE stuff for next presentation
-5. repeat analyses with yes pneumonitis vs. no irAE instead of yes/no pneumonitis (and other irAE types), or at least color other irAEs on no pneumonitis baseline subset results
 6. test if head/neck patients were treated differently (like steroid/radiotherapy?) to ask why they had no irAEs
 7. try grouping various specific irAEs together for analyses (like skin/pneumonitis, thyroid/rheumatoid…), for this maybe only look at singly-significant baseline features as the longitudinal analyses will be a little too data plentiful to wade through? could also try this for random forest (to increase n...)
 
