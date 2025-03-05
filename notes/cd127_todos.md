@@ -11,6 +11,7 @@
  - More broadly, IL7 responsiveness at baseline may be a predictor of teplizumab response and an important target to modulate to improve clinical outcome.
 
 # TODOs
+0. **Use QR (12 month) instead of R/NR in AbATE WB RNAseq (module testing)**
 1. make modules of coexpressed genes that vary b/w R/NR and/or over time points (Matt L. code) in BRI scRNAseq datasets. if this can be done, great and try and infer meaning from genes in modules. can also apply to KH scRNAseq to make KM plots w/ these modules
 2. Read about IL7R/HIV: https://onlinelibrary.wiley.com/doi/10.1002/jmv.29214
 3. P348-2, P348-4

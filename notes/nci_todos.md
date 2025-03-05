@@ -1,4 +1,20 @@
 # TODOs
+0. 2/27/25 SI ideas
+ - response
+group response types to binary, or at least remove stable disease and just look progressive vs. partial response
+continuous progression using dates?
+ - AID
+age effect, just use oldest of AID cohort for analysis (exclude T1D)
+are irAE group just closer to AID at baseline?
+ - survival
+KM plots stratify by top/bot for baseline cell freqs
+ - cluster by cell instead of patient, i.e. like how SoundLife did it?
+ - longitudinal
+align to time of irAE rather than baseline
+ - next steps
+focus on less patients but dive deeper (sc) with lots of barcoding and focusing on a couple of subsets (sorting), and at this point make sure to be aware of available samples (Sylvia?)
+could get new AID samples (like skin/thyroid ones to compare to skin/thyroid irAEs)
+ - ask Stephan how/if he looked at matlab vs. R IMPACD validation
 1. **IMPACD**
  - debug
 a) https://github.com/BenaroyaResearch/Khor_covidvax_response_IMPACD/blob/main/gating_flow_T_cells.Rmd#L199
