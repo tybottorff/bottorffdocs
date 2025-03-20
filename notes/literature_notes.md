@@ -235,6 +235,9 @@
 # ATAC-seq normalization method can significantly affect differential accessibility analysis and interpretation
  - takehome: should use multiple normalization methods to compare results
  - differentially accessible regions are tricky to call because of variability in transposition reaction efficiency, among other reasons
+# ATF4 drives regulatory T cell functional specification in homeostasis and obesity
+ - effector Tregs expressing ATF4 enriched in livers of obese mice
+ - ATF4 drives effector Treg transcriptional program, ATF4-expressing Tregs promote development of obesity-induced liver fibrosis
 # Attention network for predicting T cell receptor-peptide binding can associate attention with interpretable protein structural properties
  - machine learning model based on modified version of Transformer, source-target attention neural network
 # Attenuated effector T cells are linked to control of chronic HBV infection
@@ -699,6 +702,8 @@
 # Consensus disease definitions for neurologic immune-related adverse events of immune checkpoint inhibitors
  - neurologic irAE indicence rate: 1-12%
  - CNS (meningitis, encephalitis, demyelinating syndrome, vasculitis) and PNS (neuropathy, NMJ disorders, myopathy)
+# Continuous expression of TOX safeguards exhauasted CD8 T cell epigenetic fate
+ - TOX initiates Tex epigenetic programming, and here they demonstrate that TOX also also continually preserves Tex fate
 # Contrasting autoimmune and treatment effects reveals baseline set points of immune toxicity following checkpoint inhibitor treatment
  - variations between patients in baseline (pre-treatment) immune statuses may explain why some develop irAEs and some don't, for example perhaps some have "hits" in certain regulatory pathways that are sufficient to cause irAEs with ICB (less buffering in self-tolerance)
  - PBMCs from patients with thymic cancer before/after ICB (after at time of irAE or at equivalent time in those with no irAEs)
@@ -3223,6 +3228,8 @@
  - patients with lower CD127 expression at 3 and 18 months had longer median time to diagnosis with stage 3 T1D
  - lower CD127 expression associated with slower disease progression
  - enhanced expression of exhaustion genes in effector/memory CD8s with teplizumab
+# T follicular helper cells: linking cancer immunotherapy and immune-related adverse events
+ - presence of Tfh in tumor correlates with better outcome (perhaps not inconsistent with lower peripheral levels correlating with better outcome!)
 # TGF-β cytokine signaling promotes CD8<sup>+</sup> T cell development and low-affinity CD4<sup>+</sup> T cell homeostasis by regulation of interleukin-7 receptor-α expression
  - IL-7Rα induced upon T cell positive selection
  - **TGF-β signaling promotes IL-7Rα expression and CD8 differentiation**
@@ -3288,6 +3295,12 @@
  - PD1 can increase expression of transcription factors like BATF to counteract T cell activation transcriptional program
  - PDL1 can also bind CD80
  - after T cell activation, if antigen is cleared, memory T cells form and PD1 expression levels decrease (PD1 expression remains high if antigen persists and T cell exhaustion can develop)
+# The endogenous antigen-specific CD8<sup>+</sup> T cell repertoire is composed of unbiased and biased clonotypes with differential fate commitments
+ - of hundreds of clonotypes responding to a single antigen (OVA), majority are biased towards memory or effector fates, biases dominate other environmental cues
+ - bifurcation of differential fates at early effector stage
+ - memory-biased clonotypes retain fate preference more than effector-biased ones (can switch to memory)
+ - challenges current progressive model of CD8 T cell differentiation that links stronger/prolonged TCR stimulation to more terminal differentiation
+ - they propose an expanded differentiation model in which naive biased clonotypes differentiate into early effector that give rise to terminal effector/memory precursor (depending on TCR bias), and other unbiased clonotypes integrate TCR/environmental cues to adopt fate
 # The Erk2 MAPK regulates CD8 T cell proliferation and survival
  - Erk1 dispensable for activation, Erk2 required for CD8 proliferation in absence of costimulation
 # The frequency of CD4<sup>+</sup> and CD8<sup>+</sup> circulating T stem cell memory in type 1 diabetes
@@ -3538,14 +3551,14 @@
 # Transcription factor Ikzf1 associates with Foxp3 to repress gene expression in Treg cells and limit autoimmunity and anti-tumor immunity
  - IkE5-deficient Tregs express genes otherwise repressed by Foxp3 upon TCR stimulation (like *Ifng*), Treg-specific IkE5 deletion causes IFNγ overproduction (destabilizes Foxp3 expression and impairs Treg suppressive function leading to autoimmunity and anti-tumor immunity)
  - mechanism: Foxp3-Ikzf1-Ikzf3 complex competes with coactivators (like p300) for binding to target gene loci via chromatin remodeling, so Ikzf1 association with Foxp3 is essential for gene repressive function of Foxp3
-# Transcriptomic analysis of human IL-7 receptor alphalow and high effector memory CD8<sup>+</sup> T cells reveals an age-associated signature linked to influenza vaccine response in older adults
+# Transcriptomic analysis of human IL-7 receptor alpha<sup>low</sup> and <sup>high</sup> effector memory CD8<sup>+</sup> T cells reveals an age-associated signature linked to influenza vaccine response in older adults
 ## Abstract
  - PBMC transcriptomic profiling
  - 231 aging signature genes of IL-7Ralpha low EM CD8s corresponded to 15% of age-associated genes (231/1497) reported by meta-analysis on human PBMCs from 15k people having high correlation with chronological age
  - aging signature genes targets of TFs like MYC, SATB1, BATF (in list of 231 genes)
 ## Introduction
- - altered proportion of naive to memory CD8s during aging (more memory that are CD27<sup>-</sup>CD28<sup>-</sup>CCR7<sup>-</sup>CD57<sup>+</sup>, less naive with aging), they call CD57 a replication senescence marker here...
- - previously reported that IL7Ralpha<sup>low</sup> EM CD8s are more cytotoxic and pro-inflammatory, cytotoxic part making sense (connecting with AbATE cytotoxicity gradient)
+ - altered proportion of naive to memory CD8s during aging (more memory that are CD27<sup>-</sup>CD28<sup>-</sup>CCR7<sup>-</sup>CD57<sup>+</sup>, less naive with aging), they call CD57 a replication senescence marker here
+ - previously reported that IL7Ralpha<sup>low</sup> EM CD8s are more cytotoxic and pro-inflammatory, cytotoxic part making sense (consistent with AbATE cytotoxicity gradient)
 ## Results
  - 774 DEGs between IL-7Ralpha<sup>low</sup> and high EM CD8s: see NK cell-mediated toxicity up in the low subset (consistent with AbATE cytotoxicity gradient)
 # Transcriptomic profiling of human effector and regulatory T cell subsets identifies predictive population signatures
