@@ -663,6 +663,11 @@
  - expansion didn't derive from pre-existing TIL clones but rather from novel clonotypes not previously observed in the same tumor (clonal replacement)
  - pre-existing tumor-specific T cells may have limited reinvigoration capacity due to chronic activation/exhaustion (epigenetic remodeling); the T cell response to checkpoint blockade derives from a distinct repertoire of T cell clones that may have just recently entered the tumor
  - **novel T cell clones could derive from lymphoid organs or rare unexpanded clones within TME/tumor periphery that weren't exhausted**
+# Collaboration between interleukin-7 and -15 enables adaptation of tissue-resident and circulating memory CD8 T cells to cytokine deficiency
+ - tissue-resident and circulating memory CD8s slowly decline after IL-7Ralpha loss (modest effect on persistence via reduced basal proliferation)
+ - IL-7Ralpha is required for normal self-renewal of memory CD8s, but IL-7Ralpha-deficient memory CD8s are capable of antigen-driven proliferatation
+ - loss of both IL-7 and IL-15 causes profound defect across memory CD8 subsets (loss of IL-15 signaling imposes heightened IL-7Ralpha dependence on memory CD8s)
+ - IL-7Ralpha elevated in absence of IL-15 signaling
 # Colon immune-related adverse events: anti-CTLA-4 and anti-PD-1 blockade induce distinct immunopathological entities
  - **PD-1 blockade colitis seems more CD8 T, CTLA-4 blockade colitis seems more CD4 T (lamina propria)**
  - no differences in mucosal Tregs between ICB drugs and IBD
@@ -2855,6 +2860,11 @@
  - ICI-induced inflammatory arthritis has been reported
  - corticosteroids can treat mild irAEs, TNFα inhibitors reserved for severe cases (prolonged TNFα inhibitor use can negatively impact antitumor effect of ICI)
  - here, they try instead to use the anti IL6 receptor antibody (FDA approved to treat RA) for ICI-induced arthritis
+# Suppression of IL7Rα transcription by IL-7 and other prosurvival cytokines
+ - mechanism for maximizing IL-7-dependent T cell survival
+ - naive T cells compete for IL-7 (limiting amounts of it), IL-7 required for naive T cells to survive
+ - CD127 transcription suppressed in response to IL-7 (and other prosurvival cytokines like IL-2, IL-4, IL-6, IL-15), perhaps so that T cells that received cytokine-mediated survival signals do not compete with unsignaled T cells for remaining IL-7
+ - CD127 transcriptional repression in CD8s via GFI1, not the case with CD4s
 # Systematically administered low-affinity HER2 CAR T cells mediate antitumor efficacy without toxicity
  - disadvantage of high-affinity CARs for targets like HER2 expressed on normal tissues, low-affinity HER2 CARs can safely regress tumors
 # Systematic analyses on the horse-shoe-like effect in PCA plots of scRNA-seq data
