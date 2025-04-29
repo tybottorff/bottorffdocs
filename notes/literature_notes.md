@@ -58,6 +58,14 @@
  - main targets of recipient immune response against allograft are donor MHC antigens on allogenic tissue
  - recognition of mismatched MHC antigens leads to allograft rejection
  - allorecognition can occur directly and/or indirectly: directly refers to recognition of intact donor MHC molecules on donor cells (APC)s, indirectly refers to presentation of processed antigens by recipient APCs to recipient T cells
+# Altered CD161<sup>bright</sup> CD8 Mucosal Associated Invariant T (MAIT)-like cell dynamics and increased differentiation states among juvenille type 1 diabetics
+ - MAIT cell proportions increase with age in HCs but not in long-standing T1Ds
+ - CD27<sup>-</sup> MAIT subset increased in T1Ds, moreso for younger T1Ds
+ - MAITs express high levels of CD127
+# Altered IL-7Rα expression with aging and the potential implications of IL-7 therapy on CD8 T cell immune responses
+ - focus on CD8 EM
+ - subjects > 65 years of age had more CD127<sup>low</sup> EM CD8s (largely antigen-experienced CD27<sup>-</sup>CD28<sup>-</sup>, senescent CD57<sup>+</sup>, and perforin<sup>high</sup>), leading to decreased STAT5 phosphorylation and survival responses to IL-7 compared to subjects < 40 years of age
+ - young subjects had diverse repertoire of CD127<sup>high</sup> EM CD8s
 # Altered interactions between circulating and tissue-resident CD8 T cells with the colonic mucosa define colitis associated with immune checkpoint inhibitors
  - paired colon mucosal biopsy and blood from 13 patients with ICB colitis, 8 healthy controls, 8 with ICB no colitis
  - RNA, TCR, among other data!
@@ -377,6 +385,9 @@
  - scATACseq: co-existence of naive and effector-associated epigenetic programs in individual β cell-specific CD8s
 # Beyond T cell toxicity - intrathecal chemokine CXCL13 indicating B cell involvement in immune-related adverse events following checkpoint inhibition: a two-case series and literature review
  - intrathecal CXCL13 (potential biomarker of B cell involvement) elevation in two patients with neurological irAEs, also had altered CD4:CD8 ratios in blood
+# Biological functions and therapeutic applications of human mucosal-associated invariant T cells
+ - **MAITs recognize microbial metabolites presented by MHC-related protein 1 (MR1)**
+ - T-bet (MAIT1 subset) or RORgammat (MAIT17 subset)
 # Biomarkers of checkpoint inhibitor induced immune-related adverse events - a comprehensive review
  - blood-based, immunogenetic and microbial biomarkers predicting irAEs prior to and during ICI therapy
  - no single biomarker has proven to be sufficiently predictive for irAE development
@@ -1015,6 +1026,10 @@
  - enhanced macrophage abundance and TNF signaling in on-treatment tumors and organs developing irAEs
  - increased circulating TNF protein in plasma/serum of irAE patients but not ICI responders
  - Th17 abundance didn't change in irAE group, nor was Th17 identified in CD4<sup>+</sup> T cells in tumors
+# DNA methylation regulates the differential expression of CXCR1 on human IL-7Rα<sup>low</sup> and <sup>high</sup> effector memory CD8 T cells with distinct migratory capacities to fractalkine
+ - CD127<sup>low</sup> EM CD8s had increased CXCR1 expression and decreased DNA methylation in *CXCR1* gene promoter
+# Down-regulation of IL-7Rα expression in human T cells via DNA methylation
+ - CD127<sup>high</sup> CD8s had decreased methylation in gene promoter compared to CD127<sup>low</sup> CD8s
 # Dual targeting of CTLA-4 and CD47 on Treg cells promotes immunity against solid tumors
  - Treg infiltration into tumors correlates with poor prognosis (prior literature), which makes sense **and doesn't track with higher Tregs in irAE tissue which I don't understand**
  - they hypothesize here that **irAEs are likely due to blocking effect of anti-CTLA-4 on peripheral Tregs (higher CTLA-4 expression than effector T cells)**
