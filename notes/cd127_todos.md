@@ -15,3 +15,12 @@
 6. clean up code especially given upcoming publication
  - fix P348 (correct) vs. P384 (wrong) designation everywhere
  - was regressing out R/NR but didnt really work with diffbind or maybe it did but was working off counts later so it didn't matter
+
+re-analyze DEGs from P348-4 using limma/kimma?
+re-analyze P576 ATAC?
+using IGV browser, peak calling looks like it could be optimized...
+retry with edited macs command
+--nomodel arg!!
+macs3 not 2
+-p 1e-4 or 1e-6
+--SPMR flag
