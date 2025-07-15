@@ -276,3 +276,118 @@ cat("Slope (m):", m, "\n")
 cat("Intercept (b):", b, "\n")
 
 ```
+
+# Calculate more pgen scores for Peter/Shubam (2025 summer)
+
+```{r}
+
+input_tcrs <- read.csv("../raw_data/shubham_vdjdb_tcrs.tsv", sep = "\t")
+
+stitchr_alpha_data <- input_tcrs %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3) %>%
+  mutate(TRAC = NA,
+         TRBV = NA,
+         TRBJ = NA,
+         TRB_CDR3 = NA,
+         TRBC = NA,
+         TRA_leader = NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC, TRA_leader, TRB_leader, Linker, Link_order, TRA_5_prime_seq, TRA_3_prime_seq, TRB_5_prime_seq, TRB_3_prime_seq)
+
+stitchr_alpha_data
+
+write.table(stitchr_alpha_data, file = "../saved_data/tcrseq_tra_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+stitchr_beta_data <- input_tcrs %>%
+  select(TCR_name, TRBV, TRBJ, TRB_CDR3) %>%
+  mutate(TRBC = NA,
+         TRAV = NA,
+         TRAJ = NA,
+         TRA_CDR3 = NA,
+         TRAC = NA,
+         TRA_leader = NA,
+         TRB_leader = NA,
+         Linker = NA,
+         Link_order = NA,
+         TRA_5_prime_seq = NA,
+         TRA_3_prime_seq = NA,
+         TRB_5_prime_seq = NA,
+         TRB_3_prime_seq = NA) %>%
+  select(TCR_name, TRAV, TRAJ, TRA_CDR3, TRBV, TRBJ, TRB_CDR3, TRAC, TRBC, TRA_leader, TRB_leader, Linker, Link_order, TRA_5_prime_seq, TRA_3_prime_seq, TRB_5_prime_seq, TRB_3_prime_seq)
+
+stitchr_beta_data
+
+write.table(stitchr_beta_data, file = "../saved_data/tcrseq_trb_for_stitchr.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
+
+# terminal commands
+# thimble -i tcrseq_tra_for_stitchr.tsv -o stitchr_tra_out.tsv
+# thimble -i tcrseq_trb_for_stitchr.tsv -o stitchr_trb_out.tsv
+
+```
+
+# Read in stitchr output
+
+```{r}
+
+stitchr_alpha_output <- read.delim("../saved_data/stitchr_tra_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_beta_output <- read.delim("../saved_data/stitchr_trb_out.tsv", header = TRUE, sep = "\t")
+
+stitchr_output <- stitchr_alpha_output %>%
+  full_join(stitchr_beta_output, by = colnames(stitchr_alpha_output)) %>%
+  filter(!(grepl("Cannot stitch", Warnings.Errors)))
+
+# this has duplicate rows for each TCR (one with TRA info, other with TRB's)
+
+stitchr_output
+
+# there are some errors, but they're rather rare (few thousand out of ~40k TCRs)
+
+```
+
+# Prep IGoR input
+
+```{r}
+
+stitchr_output_alpha_df <- stitchr_output %>%
+  filter(!(is.na(TRA_nt)),
+         nchar(TRA_nt) > 1)
+
+stitchr_output_alpha_df
+
+write.csv(stitchr_output_alpha_df, file = "../saved_data/igor_alpha_input.csv", row.names = FALSE)
+
+stitchr_output_beta_df <- stitchr_output %>%
+  filter(!(is.na(TRB_nt)),
+         nchar(TRB_nt) > 1)
+
+stitchr_output_beta_df
+
+write.csv(stitchr_output_beta_df, file = "../saved_data/igor_beta_input.csv", row.names = FALSE)
+
+```
+
+# Read in IGoR output
+
+```{r}
+
+igor_alpha <- read.csv("../saved_data/igor_output_alpha.csv") %>%
+  rename(TRA_pgen = pgen) %>%
+  select(TCR_name, TRA_pgen)
+
+igor_combined <- read.csv("../saved_data/igor_output_beta.csv") %>%
+  rename(TRB_pgen = pgen) %>%
+  select(TCR_name, TRB_pgen) %>%
+  full_join(igor_alpha)
+
+igor_combined
+
+write.csv(igor_combined, file = "../saved_data/igor_output_combined.csv", row.names = FALSE)
+
+```
