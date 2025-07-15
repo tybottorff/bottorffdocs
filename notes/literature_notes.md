@@ -2,6 +2,9 @@
  - TIGIT KLRG1 coexpression may define peripheral exhausted cells
  - lower levels of EOMES transcription modules and TIGIT<sup>+</sup> KLRG1<sup>+</sup> frequency associated wiht RA HLA risk alleles
  - TIGIT<sup>+</sup> KLRG1<sup>+</sup> frequency increased in RA HLA risk but not non-risk subjects treated with CTLA4 Ig
+# Aberrant immune regulation and enrichment of stem-like CD8 T cells in the pancreatic lymph node during type 1 diabetes development
+ - stem-like memory CD8 T cells (CD45RA<sup>+</sup>CD27<sup>+</sup>CD28<sup>+</sup>CCR7<sup>+</sup>CXCR3<sup>+</sup>) enriched in pancreatic lymph nodes of T1D patients
+ - naive T cells in pancreatic LNs of T1Ds show inflammatory cytokine gene signature and terminal differentiation (*BCL6*, *BCL3*), effector CD8s express progenitor Tex marker *BCL2*
 # Abnormal T cell frequencies, including cytomegalovirus-associated expansions, distinguish seroconverted subjects at risk for type 1 diabetes
  - reduced frequency of MAIT cells in seroconverted (for T1D autoantibodies?) subjects
  - seroconverted subjects also had decreased frequencies of CCR4-expressing CD4s
@@ -1341,6 +1344,12 @@
  - evidence for shared antigen mechanism: high levels of muscle-specific antigens (desmin and troponin) in both patient tumors
 # Functionally specialized human CD4<sup>+</sup> T cell subsets express physiochemically distinct TCRs
  - **CDR3s of effector/memory Tregs had most hydrophobic and strongly interacting residues which might promote crossreactivity, recapitulated features in naive Tregs suggesting lineage fate predetermined by selection events in thymus, also short CDR3s which might limit crossreactivity**
+# Functional memory T cells are derived from exhausted clones and expanded by checkpoint blockade
+ - preprint
+ - chronic Tcm are a clonally distinct lineage of Tex derived from progenitor Tex, persist long-term in absence of Ag, clonally expand with rechallenge
+ - anti-PD-L1 ICB after chronic infection preferentially expands clones that form Tcm after clearance
+ - takeaway: chronically stimulated T cells form *bona fide* functional memory T cells through differentiation pathway analogous to that of acutely stimulated T cells
+ - majority of Tex-derived cells maintain epigenetic "scars" of Tex and are unable to respond to rechallenge, but a (relatively small) subset of progenitor Tex clones are able to avoid this epigenetic fate and lead to chronic Tcm
 # Hallmarks of CD8 T cell dysfunction are established within hours of tumor antigen encounter prior to cell division
  - despite robust proliferation/activation, tumor-specific T cells had effector impairment even before cell division and acquired epigenetic changes associated with later dysfunction/exhaustion
  - continued antigen/tumore exposure drives progressive epigenetic remodeling, "imprinting" dysfunctional state
@@ -1979,6 +1988,10 @@
  - PD-1/LAG-3 deficient CD8s transcriptionally distinct, broad TCR clonality and enrichment of effector-like and interferon-responsive genes
 # Landscape of stimulation-responsive chromatin across diverse human immune cells
  - previous literature: ~90% of GWAS hits for contributors to autoimmunity risk lie in non-coding regions (presumably act by altering gene regulation)
+# Latent EBV enhances the efficacy of anti-CD3 mAb in type 1 diabetes
+ - EBV-seropositive individuals have more Tregs and partially exhausted CD8s (TIGI<sup>+</sup>KLRG1<sup>+</sup>)
+ - downregulation of NFkB and T cell activation pathways after treatment in EBV-seropositive patients, TCR and mTOR signaling reduced in CD8s specific for beta cell antigens
+ - effects of EBV not likely result of direct viral infection of cells (EBV not latent in T cells)
 # Learning predictive signatures of HLA type from T-cell repertoires
  - trained model to predict HLA type based on TCR repertoire
  - different HLA types have different TCR repertoire features (CDR3 length, V gene usage...)
@@ -2496,6 +2509,9 @@
  - COVID-19 pathology/mortality related to overactive immune response, so perhaps surprising for ICI (augmenting immune response) to help with COVID-19
 # Prior viral infection primes cross-reactive CD8<sup>+</sup> T cells that respond to mouse heart allografts
  - rejection after transplant due to viral-specific T cells that crossreact to alloantigen
+# Progenitor exhausted T cells contribute to the formation of immunological memory
+ - chronic Tcm (~Tex, subset of Tex) look like Tcm (made in acute infection setting) phenotypically
+ - chronic Tcm clones arise from clones biased towards progenitor Tex phenotype (TCF1, PD1 expressing), progenitor Tex respond to anti-PD-L1
 # Progenitor-like exhausted SPRY1<sup>+</sup> CD8<sup>+</sup> T cells potentiate responsiveness to neoadjuvant PD-1 blockade in esophageal squamous cell carcinoma
  - scRNAseq
  - SPRY1<sup>+</sup> CD8s correlate with ICB response as expected of progenitor Tex
