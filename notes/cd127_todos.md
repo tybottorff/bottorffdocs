@@ -1,26 +1,29 @@
 # TODOs
-1. **Use QR (12 month) instead of R/NR in AbATE WB RNAseq (module testing)**
-2. make modules of coexpressed genes that vary b/w R/NR and/or over time points (Matt L. code) in BRI scRNAseq datasets. if this can be done, great and try and infer meaning from genes in modules. can also apply to KH scRNAseq to make KM plots w/ these modules
-3. Read about IL7R/HIV: https://onlinelibrary.wiley.com/doi/10.1002/jmv.29214
-4. P348-2, P348-4
- - for heatmaps, switch to complex heatmap for anno of t1d/hc, donor...
- - P348-4: Jaccard heatmaps: remove 1/2 of heatmaps (redundant)
- - P348-4 ADT cluster heatmap, label cell subsets w/ descriptive biological labels rather than/in addition to cluster #s
-5. AbATE
- - **retry ATAC MT SNV analysis with mgatk now with fix? https://github.com/caleblareau/mgatk/issues/94**
- - **re-do cytotox ATAC heatmap to fix row cluster given manual removal of nonexh CD127**
- - **if keeping PCA re-do to remove non-exh**
- - ZBT TF, KLRB1 for gene coverage plots for 5 sorts
- - fix heatmaps not having correct column order for R/NR
-6. clean up code especially given upcoming publication
- - fix P348 (correct) vs. P384 (wrong) designation everywhere
- - was regressing out R/NR but didnt really work with diffbind or maybe it did but was working off counts later so it didn't matter
-
-re-analyze DEGs from P348-4 using limma/kimma?
-re-analyze P576 ATAC?
-using IGV browser, peak calling looks like it could be optimized...
-retry with edited macs command
---nomodel arg!!
-macs3 not 2
--p 1e-4 or 1e-6
---SPMR flag
+1. flow data analysis (other markers relating to response not IKM?)
+2. move MT SNV Supp C to new main 7, and add back in the 5th sort (non-exh 127+) with stats and make a schematic (that explains common i.e. lineage variant vs. rare variant one appeared recently) and cut all just show rare/common!
+3. look into sound life project data: is IKM cluster 1 profile stable between young/old immunotypes, is it stable pre/post flu vaccination? P462 is the dataset to look into (base expr no stim), use .rds alex sent over for metadata, use apird to get data (counts)
+4. write paper
+ - intro
+cite 91 here for CD8s driving T1D due to abundance in pancreas? https://www.biorxiv.org/content/10.1101/2025.05.23.655848v1.full.pdf
+reduce text to only what's needed to understand Q (move some of IL-7 discussion paragraph back to intro?)
+ - results
+try to wrap non-exh back into MT var fig (if its easy to explain in results), OR AT VERY LEAST put it in supplemental (non-exh pop highly enriched for IKM)
+edit text with CD127 +/- Tex scRNAseq VP moved back to main fig along with MT var plot (figs updated, just not text too yet)
+ - discussion
+order bullets in order of figs
+add recapitulation of Tex findings to first paragraph of discussion
+between results summary and speculation, also section in discussion on if others have seen this pop before (if not, just say that), and if they haven't can discuss literature on single markers (like 127+, KLRG1+. TIGIT-...), in mice/humans different it seems
+pop has features of maits/conventionals (so not surprising we see sharing), then pop on maits, to ask if they solely drive nonresponse (appears to be no), MAIT literature here, then into fig 5 pop TF stuffs
+add in point to discussion that CD127 Tex may derive from progenitor Tex
+outline discussion so we know what literature to collect and so she knows our interpretation
+then into mechanism
+then into therapeutics/what to do about it
+be a little opaque about theraptucis, discussion is more for biology/discussion (therapeutics is future step)
+mechanism section: IL-7 alone doesnt explain (KM fig), but in combo with...
+model: anti-CD3 may influence differentiation (direct effect), frame in context of data (like we found .... 1 interpretation is that in vivo.... or 1 possibility is that...), no way to directly test... in vitro cultures (we tried but...)
+indirect: maybe they're changing environment (Secreting stuff) that.... changes basic mileau... (dont talk about too much or else they'll ask us to measure secretions), 2 sentences at end of direct paragraph for indirect hypothesis
+why should we care about non-response, answer is heterogeneity in repsonse and wantning all to respond
+more nuance/talk about early/late and cell states, call MT var analysis is new use (therapeutic setting)
+discussion: why we didnt see similar TN10 results in AbATE FOr IKM-nonresponse
+make KMs look like Josh's using his code
+for new citations, just add as PMID
