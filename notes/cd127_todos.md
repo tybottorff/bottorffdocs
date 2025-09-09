@@ -1,8 +1,7 @@
 # TODOs
-1. flow data analysis (other markers relating to response not IKM?)
-2. move MT SNV Supp C to new main 7, and add back in the 5th sort (non-exh 127+) with stats and make a schematic (that explains common i.e. lineage variant vs. rare variant one appeared recently) and cut all just show rare/common!
-3. look into sound life project data: is IKM cluster 1 profile stable between young/old immunotypes, is it stable pre/post flu vaccination? P462 is the dataset to look into (base expr no stim), use .rds alex sent over for metadata, use apird to get data (counts)
-4. write paper
+1. look into sound life project data: is IKM cluster 1 profile stable between young/old immunotypes, is it stable pre/post flu vaccination? P462 is the dataset to look into (base expr no stim), use .rds alex sent over for metadata, use apird to get data (counts)
+2. flow data analysis (other markers relating to response not IKM?)
+3. write paper
  - intro
 cite 91 here for CD8s driving T1D due to abundance in pancreas? https://www.biorxiv.org/content/10.1101/2025.05.23.655848v1.full.pdf
 reduce text to only what's needed to understand Q (move some of IL-7 discussion paragraph back to intro?)
