@@ -83,6 +83,8 @@
  - **around half of foreign pMHCs don't induce T cell response, perhaps because T cells with TCRs specific for those pMHCs are deleted in thymus (i.e. those foreign pMHCs look like self ones)**
 # A multi-omic single cell sequencing approach to develop a CD8 T cell specific gene signature for anti-PD1 response in solid tumors
  - **neither pre-treatment TCR clonality nor changes in clonality after ICB correlate with response**
+# Analysis of CD161 expression on human CD8 T cells defines a distinct functional subset with tissue-homing properties
+ - potentially implicated by others in disease/inflammation
 # Analysis of gene expression and TCR/B cell receptor profiling of immune cells in primary Sjögren's syndrome by single cell sequencing
  - primary Sjögren's syndrome (pSS): chronic autoimmune disease characterized by lymphocytic infiltration, elevated circulating autoantibodies, proinflammatory cytokines
 # Analysis of immune resistance mechanisms in TNBC: dual effects inside and outside the tumor
@@ -445,6 +447,8 @@
  - CD103<sup>+</sup> CD8<sup>+</sup> T<sub>RM</sub> cell density increases in ICB with responders only
 # CD103<sup>+</sup> tumor-resident CD8<sup>+</sup> T cells are associated with improved survival in immunotherapy-naive melanoma patients and expand significantly during anti-PD-1 treatment
  - supporting evidence for strong literature conclusion of ICB inducing expansion of (CD8) T cells
+# CD161int CD8 T cells: a novel population of highly functional, memory CD8 T cells enriched within the gut
+ - CD161+ memory CD8 T cells identified in circulation, also enriched in colon
 # CD28/PD1 co-expression: dual impact on CD8<sup>+</sup> T cells in peripheral blood and tumor tissue, and its significance in NSCLC patients' survival and ICB response
 ## Background
  - exhaustion is now recognized to have a dynamic progression from a long-lived "pre-exhausted stem-like progenitor" (more responsive likely to re-invigoration by ICB) to a "terminally exhausted" state
@@ -1687,6 +1691,8 @@
  - **PD1 gene expression along with 12 signatures tracking CD8 and CD4 T cell activation, natural killer cells, and IFN activation associated significantly with non-progressive disease and progression free survival**
 # Immune mediators as predictive biomarkers for anti-PD-1 antibody therapy in urothelial carcinoma
  - IL-6/8/12, sTNF-R1, IFNγ plasma levels can help predict prognosis and irAEs in ICI-treated patients
+# Immune profiling identifies CD161+ CD127+ CD8 T cells as a predictive biomarker for anti-PD-L1 therapy response in the SCLC-I subtype
+ - CD161+ CD127+ CD8s good in cancer, perhaps relates to being bad in AID T1D
 # Immune responses in checkpoint myocarditis across heart, blood, and tumor
 ## Abstract
  - presence of cardiac-expanded TCRs in a circulating, cycling CD8 T cell population as a novel peripheral biomarker of fatality
@@ -1817,6 +1823,8 @@
  - MiHA-specific CD8s from relapsed patients have coinhibitory expression signature vs. remission patients
 # Increased expression of TIGIT and KLRG1 correlates with impaired CD56<sup>bright</sup> NK cell immunity in HPV16-related cervical intraepithelial neoplasia
  - TIGIT and KLRG1 also expressed on NKs
+# Increased non-MAIT CD161+ CD8 T cells display pathogenic potential in chronic HBV infection
+ - CD161+ CD8s associated with inflammation in chronic HBV infection
 # Induction of neoantigen-specific cytotoxic T cells and construction of T cell receptor co-engineered T cells for ovarian cancer
 ## Abstract
  - neoantigens implicated as major target of anticancer cytotoxic T cells

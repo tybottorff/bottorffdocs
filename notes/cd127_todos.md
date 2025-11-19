@@ -1,4 +1,46 @@
 # TODOs
+
+CD127 TODOs
+schedule next meeting maybe for 10/7 if progress made otherwise ~far after dental so maybe like 10/16...
+run Josh discovR code to recolor clusters
+titles
+trim fig 1 title (like remove in T1D at risk, or maybe focus on 2 CD8 pops, ask Olivia), all fig titles < 10 words
+remove 2D
+losing thread of title (2 CD127+ pops) = Peter's main comment
+fig3 title: functional word is misleading, read papers Alice L. shared to get better word to use
+Lymph nodes fuel KLF2-dependent effector CD8+ T cell differentiation during chronic infection and checkpoint blockade
+fig4
+4E make inside circles darker
+just look at clusters 1-4 in 4F node map, 5-8 confusing (where CD127+ Tex come from is separate Q, maybe combine 5-8 into 1 blue circle?)
+remove effector from fig4 title
+4F just make all nodes same size and edge width of line is from Jaccard heatmap values
+update node graph to have curved lines for expansion w/in clusters!! need this for sure
+delete upper triangle entirely from 4G and manually arrange cluster 4 first then 1-3, 5-8
+switch 4F and 4G
+compare RNA/ADT phenotypes of CD127+ Tex - shared CD57+ Tex (more TEX?) vs. CD127+ not shared CD57+ Tex (more effector?)
+once all figs finalized, go back and remake them all high def, aligned, normalized & large enough > minimum size text/labels in Inkscape... be saving .svg files on git in manuscript/svg
+code cleanup, like Erin's (organized by fig panels)
+writing
+figure legends
+narrative outline
+results section writing
+abstract: only reference AbATE if tied to mechanism/new data; otherwise omit.
+ensure clear narrative, avoid mixed messages.
+focus on what's not in Kevin's JCI paper (MT SNV, Valerie's proliferation/TNFalpha functional, Kirsten's scRNAseq to characterize CD127+ from supp to main)
+check out Alice L.'s .pptx and .docx in Desktop for narrative/specific ideas/changes to make
+new citations as PMCID in brackets within the text
+cite review paper: The diversity of CD8+ T cell dysfunction in cancer and viral infection
+careful w/ baseline vs. change from baseline for fig1 (it's ~both)
+use IL7 signaling enrichment back in supplement to transition b/w MAIT pheno fig and Tex heterogeneity fig
+fig4: don't focus on SKIM until discussion
+less important
+fix supp KMs too: visit/module in panel title, legend includes type like teplizumab modulehi or teplizumab cluster 8 lo
+fig2: CD161+Valpha+ on CD127+/-, I think Alice's doing this not me....
+supp airline plots: make cells that are connected black and bigger size dots
+3C-E baseline timepoint in supp
+try to compare TCR linkage sharing in R/NR in Kevin Harold's data
+
+
 1. look into sound life project data: is IKM cluster 1 profile stable between young/old immunotypes, is it stable pre/post flu vaccination? P462 is the dataset to look into (base expr no stim), use .rds alex sent over for metadata, use apird to get data (counts)
 2. flow data analysis (other markers relating to response not IKM?)
 3. write paper
