@@ -1,25 +1,52 @@
+CD127 TODOs:
+analyses
+make sure/do all figs need to match use of parent vs total in fig5: skim total, tex parent
+fig5 extra panels
+CD127 SNP analysis with Alice W.'s email response: a CD127 SNP is associated with MAIT %/HIV and autoimmunity. The hypothesis is that variation in CD127 expression or cleavage (driven by the SNP) would alter both subsets in a cell type specific manner. This could be tested by asking about enrichment of this SNP in SKIMhi/CD127 Tex hi. "IL7RA single nucleotide polymorphisms are associated with the size and function of the MAIT cell population in treated HIV-1 infection" & "IL7RA genetic variants differentially affect IL-7Rα expression and alternative splicing: a role in autoimmune and infectious diseases?" --> IF NEGATIVE then maybe just common inflammatory driver? IL-12, IL-18, IL-2 augment MAIT
+Jayne Danska's microbiome Ab data due to CD161-gut connection (Science translational med: immune responses to gut bacteria associated with time to diagnosis and clinical response to T cell–directed therapy for type 1 diabetes prevention): Do SKIM levels correlate with microbe Ab levels that associate with clinical response to anti-CD3. see if our R/NR overlap with theirs essentially
+figs aesthetics
+fix .svgs that still have supp fig5 in supp fig3
+make sure all main fig fonts legible (> Arial 6-10)
+try to make things pretty (some now look messy with squished larger fonts...)
+writing
+more conversational in tone when providing the context for the results you are presenting
+non-response-associating abbreviation to use often in text
+discussion
+consider underlying factors driving partial interaction (fig 5)
+why precursors in these subjects, and are these more functional and less stable (fig 7)
+code cleanup & data availability, like Erin's (organized)
+1 script/fig with minimal libraries, making figs that are legible (no overlapping KM table text) even if not same shape as manuscript fig
+
+
+
+
+
+
+
+
+
+
 # TODOs
 
-CD127 TODOs
-schedule next meeting maybe for 10/7 if progress made otherwise ~far after dental so maybe like 10/16...
-run Josh discovR code to recolor clusters
+figures
+fig titles: all fig titles < 10 words
+writing
+ensure clear narrative, avoid mixed messages
+careful w/ baseline vs. change from baseline for fig1 (it's ~both)
+discussion
+CD127 Tex epigenetic ATAC data: pose some hypotheses?
+compare RNA/ADT phenotypes of CD127+ Tex - shared CD57+ Tex (more TEX?) vs. CD127+ not shared CD57+ Tex (more effector?)
+ask separate Q of where CD127+ Tex comes from (sc TCR)
+less important
+fix supp KMs too to match main fig KMs
+supp airline plots: make cells that are connected black and bigger size dots
+try to compare TCR linkage sharing in R/NR in Kevin Harold's data
+
 titles
 trim fig 1 title (like remove in T1D at risk, or maybe focus on 2 CD8 pops, ask Olivia), all fig titles < 10 words
-remove 2D
 losing thread of title (2 CD127+ pops) = Peter's main comment
-fig3 title: functional word is misleading, read papers Alice L. shared to get better word to use
 Lymph nodes fuel KLF2-dependent effector CD8+ T cell differentiation during chronic infection and checkpoint blockade
-fig4
-4E make inside circles darker
-just look at clusters 1-4 in 4F node map, 5-8 confusing (where CD127+ Tex come from is separate Q, maybe combine 5-8 into 1 blue circle?)
-remove effector from fig4 title
-4F just make all nodes same size and edge width of line is from Jaccard heatmap values
-update node graph to have curved lines for expansion w/in clusters!! need this for sure
-delete upper triangle entirely from 4G and manually arrange cluster 4 first then 1-3, 5-8
-switch 4F and 4G
-compare RNA/ADT phenotypes of CD127+ Tex - shared CD57+ Tex (more TEX?) vs. CD127+ not shared CD57+ Tex (more effector?)
-once all figs finalized, go back and remake them all high def, aligned, normalized & large enough > minimum size text/labels in Inkscape... be saving .svg files on git in manuscript/svg
-code cleanup, like Erin's (organized by fig panels)
+
 writing
 figure legends
 narrative outline
@@ -31,15 +58,9 @@ check out Alice L.'s .pptx and .docx in Desktop for narrative/specific ideas/cha
 new citations as PMCID in brackets within the text
 cite review paper: The diversity of CD8+ T cell dysfunction in cancer and viral infection
 careful w/ baseline vs. change from baseline for fig1 (it's ~both)
-use IL7 signaling enrichment back in supplement to transition b/w MAIT pheno fig and Tex heterogeneity fig
-fig4: don't focus on SKIM until discussion
 less important
 fix supp KMs too: visit/module in panel title, legend includes type like teplizumab modulehi or teplizumab cluster 8 lo
-fig2: CD161+Valpha+ on CD127+/-, I think Alice's doing this not me....
-supp airline plots: make cells that are connected black and bigger size dots
-3C-E baseline timepoint in supp
 try to compare TCR linkage sharing in R/NR in Kevin Harold's data
-
 
 1. look into sound life project data: is IKM cluster 1 profile stable between young/old immunotypes, is it stable pre/post flu vaccination? P462 is the dataset to look into (base expr no stim), use .rds alex sent over for metadata, use apird to get data (counts)
 2. flow data analysis (other markers relating to response not IKM?)
