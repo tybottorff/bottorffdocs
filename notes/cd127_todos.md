@@ -1,3 +1,30 @@
+CD127 TODOs
+cite all (more?) papers to date showing R/NR phenotypes with anti-CD3. Justification on CD8 is how NR relates to Tex, requiring a cellular and molecular approach, in intro/disc?
+discussion comments from Alice
+higher Tex = better outcome was confirmed - this is major for underpowered studies for R/NR analyses
+Tell me more about SKIM and CD161, and convince me it isn't all about MAIT (add ref's to support your data).
+Tell me more about CD127 Tex and their relationship to other Tex. Sometimes it helps to re-state your conclusion from a figure before describing others findings in the literature and your interpretation.
+Remind reader that timing of associations differ. Then address potential NR relationship. This is hard. I can help, but I'd like to hear your ideas to make sure they get captured.
+take home points ending with implications - how to make NR better and how to use info now to chose who to treat
+Facet labels: grey to white (have to re-do code...), when doing so, make sure nothing else in plot changes (dot labels...), lots been changed manually since... could also just manually make grey white probably....
+CD protein labels: change to gene names when possible (re-do code given facet color) but clarify in legends that using gene name for proteins
+VPs/labeling dots: only label if important/mentioned in text (re-do code given facet color)
+low priority but eventually: fig2 make KMs look like others (no square box)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 CD127 TODOs:
 analyses
 make sure/do all figs need to match use of parent vs total in fig5: skim total, tex parent
